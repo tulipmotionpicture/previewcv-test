@@ -18,7 +18,17 @@ const eslintConfig = [
       "out/**",
       "build/**",
       "next-env.d.ts",
+      "public/pdf.worker.min.js", // Exclude PDF.js worker file
     ],
+  },
+  {
+    rules: {
+      // Restore strict ESLint rules for production builds
+      "@typescript-eslint/no-explicit-any": "error",
+      "@typescript-eslint/no-unused-vars": "error",
+      "react-hooks/exhaustive-deps": "error",
+      "react/no-unescaped-entities": "error",
+    },
   },
 ];
 

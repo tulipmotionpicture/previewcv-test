@@ -1,0 +1,57 @@
+/* PDF Viewer Styles for react-pdf */
+
+.react-pdf__Page {
+  margin: 16px auto;
+  display: block;
+}
+
+/* Continuous view spacing */
+.react-pdf__Page + .react-pdf__Page {
+  margin-top: 24px;
+}
+
+.react-pdf__Page__canvas {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  border-radius: 8px;
+  max-width: 100%;
+  height: auto;
+}
+
+.react-pdf__Document {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+.react-pdf__Page__textContent {
+  display: none !important;
+}
+
+.react-pdf__Page__annotations {
+  display: none !important;
+}
+
+/* Loading state */
+.react-pdf__message {
+  padding: 20px;
+  text-align: center;
+  color: #6b7280;
+}
+
+/* Error state */
+.react-pdf__message--error {
+  color: #dc2626;
+}
+
+/* Ensure proper scaling on mobile */
+@media (max-width: 768px) {
+  .react-pdf__Page {
+    margin: 12px auto;
+    max-width: 100%;
+  }
+  
+  .react-pdf__Page + .react-pdf__Page {
+    margin-top: 16px;
+  }
+}
