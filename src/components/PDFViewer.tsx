@@ -7,8 +7,6 @@
 
 import { useState, useEffect } from 'react';
 import dynamic from 'next/dynamic';
-import Image from 'next/image';
-import config from '@/config';
 import LoadingSpinner from './LoadingSpinner';
 import '../styles/pdf-viewer.css';
 
