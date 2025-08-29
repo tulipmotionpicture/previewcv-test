@@ -12,7 +12,7 @@ interface FetchResumeOptions {
 
 export class ResumeApiService {
   private static readonly DEFAULT_TIMEOUT = 8000; // 8 seconds
-  private static readonly DEFAULT_RETRIES = 2;
+  private static readonly DEFAULT_RETRIES = 5;
 
   /**
    * Fetch resume data by permanent token

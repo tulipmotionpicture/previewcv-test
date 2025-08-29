@@ -119,8 +119,8 @@ export default function PDFViewer({
         
         const newTime = prev - 1;
         
-        // Show warning when 5 minutes (300 seconds) or less remaining
-        if (newTime <= 300 && !showExpirationWarning) {
+        // Show warning when 1 minutes (60 seconds) or less remaining
+        if (newTime <= 60 && !showExpirationWarning) {
           setShowExpirationWarning(true);
         }
         
