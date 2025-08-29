@@ -1,11 +1,28 @@
+import Image from "next/image";
+import config from "@/config";
+
 export default function Home() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-8">
       <div className="max-w-2xl mx-auto text-center">
         <div className="mb-8">
-          <h1 className="text-4xl sm:text-5xl font-bold text-gray-900 mb-4">
-            📄 PreviewCV
-          </h1>
+          {/* Logo and Title */}
+          <div className="flex items-center justify-center mb-6">
+            {config.app.logoUrl ? (
+              <Image
+                src={config.app.logoUrl}
+                alt="PreviewCV Logo"
+                width={600}
+                height={600}
+                className="w-80 h-80 object-contain"
+                priority
+              />
+            ) : (
+              <h1 className="text-4xl sm:text-5xl font-bold text-gray-900">
+                📄 PreviewCV
+              </h1>
+            )}
+          </div>
           <p className="text-xl text-gray-600 mb-6">
             Secure PDF Resume Viewer
           </p>

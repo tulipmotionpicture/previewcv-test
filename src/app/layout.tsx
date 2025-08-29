@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import config from "@/config";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -15,6 +16,10 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "PreviewCV - Resume Viewer",
   description: "Secure PDF resume viewer for shared resume links",
+  icons: {
+    icon: config.app.logoUrl || '/favicon.ico',
+    apple: config.app.logoUrl || '/favicon.ico',
+  },
 };
 
 export default function RootLayout({

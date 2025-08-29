@@ -7,6 +7,8 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
+import config from '@/config';
 
 interface ResponsiveLayoutProps {
   children: React.ReactNode;
@@ -63,9 +65,19 @@ export default function ResponsiveLayout({
                 <button
                   type="button"
                   onClick={handleLogoClick}
-                  className="text-xl sm:text-2xl font-bold text-blue-600 hover:text-blue-700 transition-colors"
+                  className="flex items-center text-xl sm:text-2xl font-bold text-blue-600 hover:text-blue-700 transition-colors"
                 >
-                  📄 PreviewCV
+                  {config.app.logoUrl ? (
+                    <Image
+                      src={config.app.logoUrl}
+                      alt="PreviewCV Logo"
+                      width={200}
+                      height={200}
+                      className="w-50 h-50 object-contain"
+                    />
+                  ) : (
+                    <span>📄 PreviewCV</span>
+                  )}
                 </button>
                 {title && (
                   <>

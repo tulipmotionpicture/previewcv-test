@@ -7,6 +7,8 @@
 
 import { useState, useEffect } from 'react';
 import dynamic from 'next/dynamic';
+import Image from 'next/image';
+import config from '@/config';
 import LoadingSpinner from './LoadingSpinner';
 import '../styles/pdf-viewer.css';
 
@@ -238,7 +240,7 @@ export default function PDFViewer({
       <div className="bg-white border-b border-gray-200 px-4 py-2 flex items-center justify-between">
         <div className="flex items-center space-x-4">
           <div className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-red-500 rounded flex items-center justify-center">
+            <div className="w-10 h-10 bg-red-500 rounded flex items-center justify-center">
               <span className="text-white text-xs font-bold">PDF</span>
             </div>
             <div>

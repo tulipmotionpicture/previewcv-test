@@ -21,6 +21,7 @@ interface Config {
   app: {
     name: string;
     nodeEnv: string;
+    logoUrl: string;
   };
 }
 
@@ -42,6 +43,7 @@ const config: Config = {
   app: {
     name: process.env.NEXT_PUBLIC_APP_NAME || 'PreviewCV',
     nodeEnv: process.env.NODE_ENV || 'development',
+    logoUrl: process.env.NEXT_PUBLIC_LOGO_URL || '',
   },
 };
 

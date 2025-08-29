@@ -1,6 +1,18 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // Configure external image domains
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'letsmakecv.b-cdn.net',
+        port: '',
+        pathname: '/assets_previewcv/**',
+      },
+    ],
+  },
+  
   webpack: (config) => {
     // Handle canvas dependency for react-pdf
     config.resolve.alias.canvas = false;
