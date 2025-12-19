@@ -81,35 +81,35 @@ export default function RecruiterDashboard() {
     return (
         <div className="min-h-screen bg-gray-50 flex">
             {/* Sidebar */}
-            <aside className="w-64 bg-gray-900 text-white min-h-screen p-6 sticky top-0 h-screen">
+            <aside className="w-64 bg-white border-r border-gray-100 text-gray-900 min-h-screen p-6 sticky top-0 h-screen shadow-sm">
                 <div className="mb-10 flex items-center justify-center">
                     <Image src={config.app.logoUrl} alt={config.app.name} width={120} height={120} className="rounded-3xl" />
                 </div>
                 <nav className="space-y-2">
                     <button
                         onClick={() => setActiveTab('jobs')}
-                        className={`w-full text-left px-4 py-3 rounded-xl transition-all ${activeTab === 'jobs' ? 'bg-indigo-600 font-bold' : 'text-gray-400 hover:bg-gray-800'}`}
+                        className={`w-full text-left px-4 py-3 rounded-xl transition-all font-black text-xs uppercase tracking-tight ${activeTab === 'jobs' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-200' : 'text-gray-400 hover:bg-gray-50'}`}
                     >
-                        📋 Manage Jobs
+                        Manage Jobs
                     </button>
                     <button
                         onClick={() => setActiveTab('ats')}
-                        className={`w-full text-left px-4 py-3 rounded-xl transition-all ${activeTab === 'ats' ? 'bg-indigo-600 font-bold' : 'text-gray-400 hover:bg-gray-800'}`}
+                        className={`w-full text-left px-4 py-3 rounded-xl transition-all font-black text-xs uppercase tracking-tight ${activeTab === 'ats' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-200' : 'text-gray-400 hover:bg-gray-50'}`}
                     >
-                        📊 Applicant Tracking
+                        Applicant Tracking
                     </button>
                     <button
                         onClick={() => setActiveTab('search')}
-                        className={`w-full text-left px-4 py-3 rounded-xl transition-all ${activeTab === 'search' ? 'bg-indigo-600 font-bold' : 'text-gray-400 hover:bg-gray-800'}`}
+                        className={`w-full text-left px-4 py-3 rounded-xl transition-all font-black text-xs uppercase tracking-tight ${activeTab === 'search' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-200' : 'text-gray-400 hover:bg-gray-50'}`}
                     >
-                        🔍 Talent Search
+                        Talent Search
                     </button>
                 </nav>
                 <div className="absolute bottom-10 left-6 right-6">
-                    <div className="p-4 bg-gray-800 rounded-2xl border border-white/5">
-                        <p className="text-xs text-gray-500 mb-1">Signed in as</p>
-                        <p className="font-bold text-sm truncate">{MOCK_USERS.recruiter.name}</p>
-                        <Link href="/" className="text-xs text-indigo-400 hover:underline mt-4 block">Sign out</Link>
+                    <div className="p-4 bg-gray-50 rounded-2xl border border-gray-100">
+                        <p className="text-[10px] text-gray-400 mb-1 font-black uppercase tracking-widest">Signed in as</p>
+                        <p className="font-bold text-sm truncate text-gray-900">{MOCK_USERS.recruiter.name}</p>
+                        <Link href="/" className="text-[10px] text-indigo-600 hover:underline mt-4 block font-black uppercase tracking-tight">Sign out</Link>
                     </div>
                 </div>
             </aside>
@@ -133,8 +133,8 @@ export default function RecruiterDashboard() {
                             {jobs.map(job => (
                                 <div key={job.id} className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm flex items-center justify-between hover:shadow-md transition-shadow">
                                     <div>
-                                        <h4 className="font-bold text-xl text-gray-900 mb-1">{job.title}</h4>
-                                        <p className="text-gray-500 text-sm flex items-center gap-2">📍 {job.location} • 💼 {job.type} • 💰 {job.salary}</p>
+                                        <h4 className="font-bold text-xl text-gray-900 mb-1 uppercase tracking-tight">{job.title}</h4>
+                                        <p className="text-gray-400 text-xs font-black uppercase tracking-tight">{job.location} • {job.type} • {job.salary}</p>
                                     </div>
                                     <div className="flex gap-3">
                                         <button
@@ -143,7 +143,7 @@ export default function RecruiterDashboard() {
                                         >
                                             {getJobApplications(job.id).length} Applications
                                         </button>
-                                        <button className="p-2 text-gray-400 hover:text-red-500">🗑️</button>
+                                        <button className="p-2 text-gray-300 hover:text-red-500 font-bold text-sm">×</button>
                                     </div>
                                 </div>
                             ))}
@@ -292,7 +292,11 @@ export default function RecruiterDashboard() {
                             {filteredCandidates.map(candidate => (
                                 <div key={candidate.id} className="bg-white p-8 rounded-[40px] border border-gray-100 shadow-sm hover:shadow-xl transition-all group">
                                     <div className="flex items-center gap-6 mb-8">
-                                        <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center text-2xl group-hover:bg-indigo-50 transition-colors">👤</div>
+                                        <div className="w-16 h-16 bg-indigo-50 rounded-full flex items-center justify-center group-hover:bg-indigo-100 transition-colors border border-indigo-100">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-8 h-8 text-indigo-600">
+                                                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
+                                            </svg>
+                                        </div>
                                         <div>
                                             <h4 className="font-bold text-xl text-gray-900 mb-1">{candidate.name}</h4>
                                             <p className="text-indigo-500 font-bold text-sm">{candidate.role}</p>
