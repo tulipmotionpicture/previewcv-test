@@ -20,10 +20,39 @@ export default function RecruiterDashboard() {
     const [isInterviewModalOpen, setIsInterviewModalOpen] = useState(false);
     const [selectedAppForInterview, setSelectedAppForInterview] = useState<string | null>(null);
 
+    // Candidate Detail Modal State
+    const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+    const [selectedCandidateId, setSelectedCandidateId] = useState<string | null>(null);
+    const [selectedApplicationId, setSelectedApplicationId] = useState<string | null>(null);
+
+    // Action Menu State
+    const [actionMenuOpen, setActionMenuOpen] = useState<string | null>(null);
+
     const handleUpdateStatus = (appId: string, newStatus: Application['status']) => {
         setApplications(prev => prev.map(app =>
             app.id === appId ? { ...app, status: newStatus } : app
         ));
+    };
+
+    const handleAcceptCandidate = (appId: string) => {
+        if (confirm('Are you sure you want to hire this candidate?')) {
+            handleUpdateStatus(appId, 'Hired');
+            setActionMenuOpen(null);
+        }
+    };
+
+    const handleRejectCandidate = (appId: string) => {
+        if (confirm('Are you sure you want to reject this candidate? This action cannot be undone.')) {
+            handleUpdateStatus(appId, 'Rejected');
+            setActionMenuOpen(null);
+        }
+    };
+
+    const handleViewDetails = (candidateId: string, appId: string) => {
+        setSelectedCandidateId(candidateId);
+        setSelectedApplicationId(appId);
+        setIsDetailModalOpen(true);
+        setActionMenuOpen(null);
     };
 
     const handleScheduleInterview = (e: React.FormEvent) => {
@@ -77,6 +106,9 @@ export default function RecruiterDashboard() {
         const statusMatch = statusFilter === 'All' || app.status === statusFilter;
         return jobMatch && statusMatch;
     });
+
+    const selectedCandidate = selectedCandidateId ? getCandidateById(selectedCandidateId) : null;
+    const selectedApplication = selectedApplicationId ? applications.find(app => app.id === selectedApplicationId) : null;
 
     return (
         <div className="min-h-screen bg-gray-50 flex">
@@ -228,34 +260,81 @@ export default function RecruiterDashboard() {
                                                             <a
                                                                 href={`/resume/view/${candidate?.resumeToken}`}
                                                                 target="_blank"
-                                                                className="px-3 py-1.5 bg-gray-100 text-gray-600 font-bold text-[10px] rounded-lg hover:bg-gray-200 transition-colors"
+                                                                rel="noopener noreferrer"
+                                                                className="px-4 py-2 bg-gray-900 text-white font-bold text-xs rounded-xl hover:bg-gray-800 transition-colors uppercase tracking-tight"
                                                             >
-                                                                View
+                                                                View Resume
                                                             </a>
-                                                            {app.status === 'Pending' && (
+                                                            <button
+                                                                onClick={() => handleViewDetails(app.candidateId, app.id)}
+                                                                className="px-4 py-2 bg-blue-600 text-white font-bold text-xs rounded-xl hover:bg-blue-700 transition-colors uppercase tracking-tight shadow-sm shadow-blue-200"
+                                                            >
+                                                                View Details
+                                                            </button>
+
+                                                            {/* Action Dropdown */}
+                                                            <div className="relative">
                                                                 <button
-                                                                    onClick={() => handleUpdateStatus(app.id, 'Shortlisted')}
-                                                                    className="px-3 py-1.5 bg-indigo-600 text-white font-bold text-[10px] rounded-lg hover:bg-indigo-700 transition-colors shadow-sm shadow-indigo-200"
+                                                                    onClick={() => setActionMenuOpen(actionMenuOpen === app.id ? null : app.id)}
+                                                                    className="px-4 py-2 bg-indigo-600 text-white font-bold text-xs rounded-xl hover:bg-indigo-700 transition-colors uppercase tracking-tight shadow-sm shadow-indigo-200"
                                                                 >
-                                                                    Shortlist
+                                                                    Actions ▼
                                                                 </button>
-                                                            )}
-                                                            {app.status === 'Shortlisted' && (
-                                                                <button
-                                                                    onClick={() => { setSelectedAppForInterview(app.id); setIsInterviewModalOpen(true); }}
-                                                                    className="px-3 py-1.5 bg-purple-600 text-white font-bold text-[10px] rounded-lg hover:bg-purple-700 transition-colors shadow-sm shadow-purple-200"
-                                                                >
-                                                                    Call Interview
-                                                                </button>
-                                                            )}
-                                                            {(app.status !== 'Declined' && app.status !== 'Hired' && app.status !== 'Rejected') && (
-                                                                <button
-                                                                    onClick={() => handleUpdateStatus(app.id, 'Declined')}
-                                                                    className="px-3 py-1.5 bg-red-50 text-red-600 font-bold text-[10px] rounded-lg hover:bg-red-100 transition-colors"
-                                                                >
-                                                                    Decline
-                                                                </button>
-                                                            )}
+
+                                                                {actionMenuOpen === app.id && (
+                                                                    <div className="absolute right-0 mt-2 w-48 bg-white rounded-2xl shadow-xl border border-gray-100 py-2 z-50">
+                                                                        {app.status === 'Pending' && (
+                                                                            <button
+                                                                                onClick={() => { handleUpdateStatus(app.id, 'Shortlisted'); setActionMenuOpen(null); }}
+                                                                                className="w-full text-left px-4 py-2.5 text-sm font-bold text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 transition-colors flex items-center gap-2"
+                                                                            >
+                                                                                <span className="text-lg">⭐</span>
+                                                                                Shortlist
+                                                                            </button>
+                                                                        )}
+
+                                                                        {(app.status === 'Pending' || app.status === 'Shortlisted') && (
+                                                                            <button
+                                                                                onClick={() => { setSelectedAppForInterview(app.id); setIsInterviewModalOpen(true); setActionMenuOpen(null); }}
+                                                                                className="w-full text-left px-4 py-2.5 text-sm font-bold text-gray-700 hover:bg-purple-50 hover:text-purple-600 transition-colors flex items-center gap-2"
+                                                                            >
+                                                                                <span className="text-lg">📅</span>
+                                                                                Schedule Interview
+                                                                            </button>
+                                                                        )}
+
+                                                                        {app.status !== 'Hired' && app.status !== 'Rejected' && (
+                                                                            <button
+                                                                                onClick={() => handleAcceptCandidate(app.id)}
+                                                                                className="w-full text-left px-4 py-2.5 text-sm font-bold text-gray-700 hover:bg-green-50 hover:text-green-600 transition-colors flex items-center gap-2"
+                                                                            >
+                                                                                <span className="text-lg">✅</span>
+                                                                                Accept / Hire
+                                                                            </button>
+                                                                        )}
+
+                                                                        {app.status !== 'Declined' && app.status !== 'Hired' && app.status !== 'Rejected' && (
+                                                                            <>
+                                                                                <div className="border-t border-gray-100 my-1"></div>
+                                                                                <button
+                                                                                    onClick={() => { handleUpdateStatus(app.id, 'Declined'); setActionMenuOpen(null); }}
+                                                                                    className="w-full text-left px-4 py-2.5 text-sm font-bold text-gray-700 hover:bg-orange-50 hover:text-orange-600 transition-colors flex items-center gap-2"
+                                                                                >
+                                                                                    <span className="text-lg">⏸️</span>
+                                                                                    Decline
+                                                                                </button>
+                                                                                <button
+                                                                                    onClick={() => handleRejectCandidate(app.id)}
+                                                                                    className="w-full text-left px-4 py-2.5 text-sm font-bold text-gray-700 hover:bg-red-50 hover:text-red-600 transition-colors flex items-center gap-2"
+                                                                                >
+                                                                                    <span className="text-lg">❌</span>
+                                                                                    Reject
+                                                                                </button>
+                                                                            </>
+                                                                        )}
+                                                                    </div>
+                                                                )}
+                                                            </div>
                                                         </div>
                                                     </td>
                                                 </tr>
@@ -361,6 +440,176 @@ export default function RecruiterDashboard() {
                                 </button>
                             </div>
                         </form>
+                    </div>
+                </div>
+            )}
+
+            {/* Candidate Detail Modal */}
+            {isDetailModalOpen && selectedCandidate && selectedApplication && (
+                <div
+                    className="fixed inset-0 bg-gray-900/60 backdrop-blur-sm z-[100] flex items-end sm:items-center justify-center p-0 sm:p-4"
+                    onClick={() => setIsDetailModalOpen(false)}
+                >
+                    <div
+                        className="bg-white rounded-t-[32px] sm:rounded-[32px] w-full sm:max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl animate-in slide-in-from-bottom sm:zoom-in-95 duration-300"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        {/* Header */}
+                        <div className="sticky top-0 bg-white border-b border-gray-100 p-6 flex items-center justify-between rounded-t-[32px]">
+                            <div>
+                                <h2 className="text-2xl font-black text-gray-900">Candidate Details</h2>
+                                <p className="text-sm text-gray-500 font-medium mt-1">Full application information</p>
+                            </div>
+                            <button
+                                onClick={() => setIsDetailModalOpen(false)}
+                                className="w-10 h-10 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors flex items-center justify-center font-black text-gray-600"
+                            >
+                                ×
+                            </button>
+                        </div>
+
+                        {/* Content */}
+                        <div className="p-6 space-y-6">
+                            {/* Candidate Info */}
+                            <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-[24px] p-6 border border-blue-100">
+                                <div className="flex items-start gap-4">
+                                    <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center text-white font-black text-2xl shadow-lg">
+                                        {selectedCandidate.name.charAt(0)}
+                                    </div>
+                                    <div className="flex-1">
+                                        <h3 className="text-xl font-black text-gray-900 mb-1">{selectedCandidate.name}</h3>
+                                        <p className="text-sm font-bold text-gray-600 mb-3">{selectedCandidate.role}</p>
+                                        <div className="space-y-1.5">
+                                            <p className="text-xs text-gray-600 flex items-center gap-2">
+                                                <span className="font-black">📧</span>
+                                                <span className="font-medium">{selectedCandidate.email}</span>
+                                            </p>
+                                            <p className="text-xs text-gray-600 flex items-center gap-2">
+                                                <span className="font-black">💼</span>
+                                                <span className="font-medium">{selectedCandidate.experience}</span>
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Skills */}
+                            <div>
+                                <h4 className="text-sm font-black text-gray-400 uppercase tracking-widest mb-3">Skills & Technologies</h4>
+                                <div className="flex flex-wrap gap-2">
+                                    {selectedCandidate.skills.map((skill, idx) => (
+                                        <span key={idx} className="px-3 py-1.5 bg-gray-100 text-gray-700 text-xs font-bold rounded-lg border border-gray-200">
+                                            {skill}
+                                        </span>
+                                    ))}
+                                </div>
+                            </div>
+
+                            {/* Application Status */}
+                            <div>
+                                <h4 className="text-sm font-black text-gray-400 uppercase tracking-widest mb-3">Application Status</h4>
+                                <div className="bg-gray-50 rounded-2xl p-4 border border-gray-100">
+                                    <div className="flex items-center justify-between mb-3">
+                                        <span className="text-sm font-bold text-gray-600">Current Status:</span>
+                                        <span className={`px-3 py-1 rounded-full text-xs font-black uppercase ${selectedApplication.status === 'Hired' ? 'bg-green-100 text-green-600' :
+                                            selectedApplication.status === 'Declined' || selectedApplication.status === 'Rejected' ? 'bg-red-100 text-red-600' :
+                                                selectedApplication.status === 'Shortlisted' ? 'bg-indigo-100 text-indigo-600' :
+                                                    selectedApplication.status === 'Interview Scheduled' ? 'bg-purple-100 text-purple-600' :
+                                                        'bg-blue-100 text-blue-600'
+                                            }`}>
+                                            {selectedApplication.status}
+                                        </span>
+                                    </div>
+                                    <div className="flex items-center justify-between">
+                                        <span className="text-sm font-bold text-gray-600">Applied For:</span>
+                                        <span className="text-sm font-black text-gray-900">
+                                            {jobs.find(j => j.id === selectedApplication.jobId)?.title}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Quick Actions */}
+                            <div>
+                                <h4 className="text-sm font-black text-gray-400 uppercase tracking-widest mb-3">Quick Actions</h4>
+                                <div className="grid grid-cols-2 gap-3">
+                                    <a
+                                        href={`/resume/view/${selectedCandidate.resumeToken}`}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="px-4 py-3 bg-gray-900 text-white font-bold text-sm rounded-xl hover:bg-gray-800 transition-colors text-center uppercase tracking-tight"
+                                    >
+                                        📄 View Resume
+                                    </a>
+
+                                    {selectedApplication.status === 'Pending' && (
+                                        <button
+                                            onClick={() => { handleUpdateStatus(selectedApplication.id, 'Shortlisted'); setIsDetailModalOpen(false); }}
+                                            className="px-4 py-3 bg-indigo-600 text-white font-bold text-sm rounded-xl hover:bg-indigo-700 transition-colors uppercase tracking-tight"
+                                        >
+                                            ⭐ Shortlist
+                                        </button>
+                                    )}
+
+                                    {(selectedApplication.status === 'Pending' || selectedApplication.status === 'Shortlisted') && (
+                                        <button
+                                            onClick={() => { setSelectedAppForInterview(selectedApplication.id); setIsInterviewModalOpen(true); setIsDetailModalOpen(false); }}
+                                            className="px-4 py-3 bg-purple-600 text-white font-bold text-sm rounded-xl hover:bg-purple-700 transition-colors uppercase tracking-tight"
+                                        >
+                                            📅 Schedule Interview
+                                        </button>
+                                    )}
+
+                                    {selectedApplication.status !== 'Hired' && selectedApplication.status !== 'Rejected' && (
+                                        <button
+                                            onClick={() => { handleAcceptCandidate(selectedApplication.id); setIsDetailModalOpen(false); }}
+                                            className="px-4 py-3 bg-green-600 text-white font-bold text-sm rounded-xl hover:bg-green-700 transition-colors uppercase tracking-tight"
+                                        >
+                                            ✅ Accept / Hire
+                                        </button>
+                                    )}
+
+                                    {selectedApplication.status !== 'Declined' && selectedApplication.status !== 'Hired' && selectedApplication.status !== 'Rejected' && (
+                                        <>
+                                            <button
+                                                onClick={() => { handleUpdateStatus(selectedApplication.id, 'Declined'); setIsDetailModalOpen(false); }}
+                                                className="px-4 py-3 bg-orange-100 text-orange-600 font-bold text-sm rounded-xl hover:bg-orange-200 transition-colors uppercase tracking-tight"
+                                            >
+                                                ⏸️ Decline
+                                            </button>
+                                            <button
+                                                onClick={() => { handleRejectCandidate(selectedApplication.id); setIsDetailModalOpen(false); }}
+                                                className="px-4 py-3 bg-red-100 text-red-600 font-bold text-sm rounded-xl hover:bg-red-200 transition-colors uppercase tracking-tight"
+                                            >
+                                                ❌ Reject
+                                            </button>
+                                        </>
+                                    )}
+                                </div>
+                            </div>
+
+                            {/* Notes Section */}
+                            <div>
+                                <h4 className="text-sm font-black text-gray-400 uppercase tracking-widest mb-3">Recruiter Notes</h4>
+                                <textarea
+                                    placeholder="Add private notes about this candidate..."
+                                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none hover:bg-gray-100 transition-all min-h-[100px] text-sm font-medium"
+                                />
+                                <button className="mt-2 px-4 py-2 bg-blue-600 text-white font-bold text-xs rounded-lg hover:bg-blue-700 transition-colors uppercase tracking-tight">
+                                    Save Notes
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Footer */}
+                        <div className="sticky bottom-0 bg-gray-50 border-t border-gray-100 p-6 rounded-b-[32px]">
+                            <button
+                                onClick={() => setIsDetailModalOpen(false)}
+                                className="w-full py-3 bg-gray-900 text-white font-black rounded-xl hover:bg-gray-800 transition-all uppercase tracking-tight"
+                            >
+                                Close
+                            </button>
+                        </div>
                     </div>
                 </div>
             )}
