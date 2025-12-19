@@ -37,12 +37,12 @@ export default function RecruiterLanding() {
 
                 <div className="max-w-7xl mx-auto flex flex-col lg:flex-row items-center gap-20">
                     <div className="flex-1 text-center lg:text-left">
-                        <div className="inline-block px-4 py-2 bg-indigo-50 text-indigo-600 text-[10px] font-black uppercase tracking-[0.2em] rounded-full mb-8">Recruitment OS</div>
+                        <div className="inline-block px-4 py-2 bg-indigo-50 text-indigo-600 text-[10px] font-black uppercase tracking-[0.2em] rounded-full mb-8">Recruitment Platform</div>
                         <h1 className="text-5xl lg:text-8xl font-black mb-10 leading-[0.9] tracking-tighter text-gray-900 uppercase">
                             Hire Smarter, <br /> Not <span className="text-indigo-600 italic">Harder.</span>
                         </h1>
                         <p className="text-xl text-gray-500 font-medium mb-12 max-w-xl leading-relaxed mx-auto lg:mx-0">
-                            Find, track, and engage with top-tier talent effortlessly. Preview candidate profiles with live resumes and automated ATS integration.
+                            Find and engage with top-tier talent effortlessly. Preview live candidate resumes from LetsMakeCV and manage your hiring pipeline in one place.
                         </p>
 
                         <div className="flex flex-wrap justify-center lg:justify-start gap-4 mb-16">
@@ -188,8 +188,8 @@ export default function RecruiterLanding() {
                                 <div className="w-14 h-14 bg-blue-50 text-indigo-600 rounded-2xl flex items-center justify-center mb-8 shadow-inner">
                                     <ChartBarIcon />
                                 </div>
-                                <h4 className="font-black mb-4 uppercase tracking-tighter leading-none">ATS Pro</h4>
-                                <p className="text-sm text-gray-400 font-medium leading-relaxed uppercase tracking-tight">Track candidate lifecycle from application to offer.</p>
+                                <h4 className="font-black mb-4 uppercase tracking-tighter leading-none">Application Manager</h4>
+                                <p className="text-sm text-gray-400 font-medium leading-relaxed uppercase tracking-tight">Review and organize candidate applications efficiently.</p>
                             </div>
                         </div>
                     </div>

@@ -39,7 +39,7 @@ export default function CandidateLanding() {
                                 <span className="text-blue-600 italic">Work.</span>
                             </h1>
                             <p className="text-xl text-gray-500 mb-12 max-w-xl leading-relaxed font-medium">
-                                Connect your professional profile from <span className="font-bold text-gray-900 underline decoration-blue-500 underline-offset-4">LetsMakeCV</span> and apply to premium roles with a single click.
+                                Already have a resume on <span className="font-bold text-gray-900 underline decoration-blue-500 underline-offset-4">LetsMakeCV</span>? Share it with recruiters using your unique PreviewCV link. Same login, seamless experience.
                             </p>
 
                             <div className="flex flex-wrap gap-4">
@@ -118,12 +118,186 @@ export default function CandidateLanding() {
                 </div>
             </section>
 
+            {/* Value Proposition Grid */}
+            <section className="py-32 bg-white border-b border-gray-100">
+                <div className="max-w-7xl mx-auto px-8">
+                    <div className="text-center mb-20">
+                        <h2 className="text-5xl lg:text-6xl font-black text-gray-900 mb-6 tracking-tighter uppercase">Why Candidates <span className="italic text-blue-600">Love Us</span></h2>
+                        <p className="text-xl text-gray-500 max-w-3xl mx-auto font-medium">Everything you need to stand out in your job search</p>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        {/* Value 1 */}
+                        <div className="bg-gradient-to-br from-blue-50 to-white p-10 rounded-[40px] border border-blue-100 hover:shadow-xl transition-all">
+                            <div className="w-14 h-14 bg-blue-600 text-white rounded-2xl flex items-center justify-center mb-6">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-7 h-7">
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M7.217 10.907a2.25 2.25 0 1 0 0 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186 9.566-5.314m-9.566 7.5 9.566 5.314m0 0a2.25 2.25 0 1 0 3.935 2.186 2.25 2.25 0 0 0-3.935-2.186Zm0-12.814a2.25 2.25 0 1 0 3.933-2.185 2.25 2.25 0 0 0-3.933 2.185Z" />
+                                </svg>
+                            </div>
+                            <h3 className="text-2xl font-black text-gray-900 mb-4 uppercase tracking-tight">Share Anywhere</h3>
+                            <p className="text-gray-600 font-medium leading-relaxed mb-6">Add your PreviewCV link to email signatures, LinkedIn profiles, job applications, and networking messages. One link works everywhere.</p>
+                            <div className="flex flex-wrap gap-2">
+                                <span className="px-3 py-1 bg-white border border-blue-100 text-blue-700 text-xs font-black rounded-lg uppercase">Email</span>
+                                <span className="px-3 py-1 bg-white border border-blue-100 text-blue-700 text-xs font-black rounded-lg uppercase">LinkedIn</span>
+                                <span className="px-3 py-1 bg-white border border-blue-100 text-blue-700 text-xs font-black rounded-lg uppercase">Portfolio</span>
+                            </div>
+                        </div>
+
+                        {/* Value 2 */}
+                        <div className="bg-gradient-to-br from-indigo-50 to-white p-10 rounded-[40px] border border-indigo-100 hover:shadow-xl transition-all">
+                            <div className="w-14 h-14 bg-indigo-600 text-white rounded-2xl flex items-center justify-center mb-6">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-7 h-7">
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
+                                </svg>
+                            </div>
+                            <h3 className="text-2xl font-black text-gray-900 mb-4 uppercase tracking-tight">Always Current</h3>
+                            <p className="text-gray-600 font-medium leading-relaxed mb-6">Update your resume once on LetsMakeCV and your PreviewCV link reflects changes instantly. No more sending updated versions to everyone.</p>
+                            <div className="flex items-center gap-2 text-sm font-bold text-indigo-600">
+                                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                </svg>
+                                <span className="uppercase tracking-tight">Real-time sync</span>
+                            </div>
+                        </div>
+
+                        {/* Value 3 */}
+                        <div className="bg-gradient-to-br from-blue-50 to-white p-10 rounded-[40px] border border-blue-100 hover:shadow-xl transition-all">
+                            <div className="w-14 h-14 bg-blue-600 text-white rounded-2xl flex items-center justify-center mb-6">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-7 h-7">
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 3v11.25A2.25 2.25 0 0 0 6 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0 1 18 16.5h-2.25m-7.5 0h7.5m-7.5 0-1 3m8.5-3 1 3m0 0 .5 1.5m-.5-1.5h-9.5m0 0-.5 1.5m.75-9 3-3 2.148 2.148A12.061 12.061 0 0 1 16.5 7.605" />
+                                </svg>
+                            </div>
+                            <h3 className="text-2xl font-black text-gray-900 mb-4 uppercase tracking-tight">Track Engagement</h3>
+                            <p className="text-gray-600 font-medium leading-relaxed mb-6">See who viewed your resume, when they viewed it, and how long they spent. Understand recruiter interest and follow up strategically.</p>
+                            <div className="flex items-center gap-2 text-sm font-bold text-blue-600">
+                                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                                </svg>
+                                <span className="uppercase tracking-tight">View analytics</span>
+                            </div>
+                        </div>
+
+                        {/* Value 4 */}
+                        <div className="bg-gradient-to-br from-indigo-50 to-white p-10 rounded-[40px] border border-indigo-100 hover:shadow-xl transition-all">
+                            <div className="w-14 h-14 bg-indigo-600 text-white rounded-2xl flex items-center justify-center mb-6">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-7 h-7">
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 0 1-1.043 3.296 3.745 3.745 0 0 1-3.296 1.043A3.745 3.745 0 0 1 12 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 0 1-3.296-1.043 3.745 3.745 0 0 1-1.043-3.296A3.745 3.745 0 0 1 3 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 0 1 1.043-3.296 3.746 3.746 0 0 1 3.296-1.043A3.746 3.746 0 0 1 12 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 0 1 3.296 1.043 3.746 3.746 0 0 1 1.043 3.296A3.745 3.745 0 0 1 21 12Z" />
+                                </svg>
+                            </div>
+                            <h3 className="text-2xl font-black text-gray-900 mb-4 uppercase tracking-tight">Professional Presentation</h3>
+                            <p className="text-gray-600 font-medium leading-relaxed mb-6">Beautiful, mobile-optimized viewing experience. Your resume looks perfect on any device, making a great first impression every time.</p>
+                            <div className="flex items-center gap-2 text-sm font-bold text-indigo-600">
+                                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                                </svg>
+                                <span className="uppercase tracking-tight">Mobile-ready</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* PDF vs PreviewCV Comparison */}
+            <section className="py-32 bg-gray-50 border-b border-gray-100">
+                <div className="max-w-5xl mx-auto px-8">
+                    <div className="text-center mb-20">
+                        <h2 className="text-5xl lg:text-6xl font-black text-gray-900 mb-6 tracking-tighter uppercase">PDF vs <span className="italic text-blue-600">PreviewCV</span></h2>
+                        <p className="text-xl text-gray-500 font-medium">See why thousands are making the switch</p>
+                    </div>
+
+                    <div className="bg-white rounded-[40px] border border-gray-100 overflow-hidden shadow-xl">
+                        <div className="grid grid-cols-3 gap-px bg-gray-100">
+                            {/* Header */}
+                            <div className="bg-white p-6"></div>
+                            <div className="bg-gray-50 p-6 text-center">
+                                <p className="text-sm font-black text-gray-400 uppercase tracking-widest">PDF Attachment</p>
+                            </div>
+                            <div className="bg-gradient-to-br from-blue-50 to-indigo-50 p-6 text-center">
+                                <p className="text-sm font-black text-blue-600 uppercase tracking-widest">PreviewCV Link</p>
+                            </div>
+
+                            {/* Row 1 */}
+                            <div className="bg-white p-6">
+                                <p className="font-black text-gray-900 uppercase text-sm tracking-tight">Easy to Share</p>
+                            </div>
+                            <div className="bg-white p-6 text-center">
+                                <span className="text-2xl">❌</span>
+                            </div>
+                            <div className="bg-white p-6 text-center">
+                                <span className="text-2xl">✅</span>
+                            </div>
+
+                            {/* Row 2 */}
+                            <div className="bg-white p-6">
+                                <p className="font-black text-gray-900 uppercase text-sm tracking-tight">Auto-Updates</p>
+                            </div>
+                            <div className="bg-white p-6 text-center">
+                                <span className="text-2xl">❌</span>
+                            </div>
+                            <div className="bg-white p-6 text-center">
+                                <span className="text-2xl">✅</span>
+                            </div>
+
+                            {/* Row 3 */}
+                            <div className="bg-white p-6">
+                                <p className="font-black text-gray-900 uppercase text-sm tracking-tight">Track Views</p>
+                            </div>
+                            <div className="bg-white p-6 text-center">
+                                <span className="text-2xl">❌</span>
+                            </div>
+                            <div className="bg-white p-6 text-center">
+                                <span className="text-2xl">✅</span>
+                            </div>
+
+                            {/* Row 4 */}
+                            <div className="bg-white p-6">
+                                <p className="font-black text-gray-900 uppercase text-sm tracking-tight">Mobile Optimized</p>
+                            </div>
+                            <div className="bg-white p-6 text-center">
+                                <span className="text-2xl">⚠️</span>
+                            </div>
+                            <div className="bg-white p-6 text-center">
+                                <span className="text-2xl">✅</span>
+                            </div>
+
+                            {/* Row 5 */}
+                            <div className="bg-white p-6">
+                                <p className="font-black text-gray-900 uppercase text-sm tracking-tight">Professional Look</p>
+                            </div>
+                            <div className="bg-white p-6 text-center">
+                                <span className="text-2xl">⚠️</span>
+                            </div>
+                            <div className="bg-white p-6 text-center">
+                                <span className="text-2xl">✅</span>
+                            </div>
+
+                            {/* Row 6 */}
+                            <div className="bg-white p-6">
+                                <p className="font-black text-gray-900 uppercase text-sm tracking-tight">No Downloads</p>
+                            </div>
+                            <div className="bg-white p-6 text-center">
+                                <span className="text-2xl">❌</span>
+                            </div>
+                            <div className="bg-white p-6 text-center">
+                                <span className="text-2xl">✅</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="mt-12 text-center">
+                        <Link href="/candidate/login" className="inline-flex items-center gap-2 px-10 py-5 bg-blue-600 text-white font-black rounded-2xl hover:bg-blue-700 transition-all shadow-2xl shadow-blue-200 uppercase tracking-tight">
+                            Make the Switch Today →
+                        </Link>
+                    </div>
+                </div>
+            </section>
+
             <section className="py-32 bg-white border-b border-gray-100 relative overflow-hidden">
                 <div className="max-w-4xl mx-auto px-8 relative z-10 text-center">
-                    <div className="inline-block px-4 py-2 bg-blue-50 text-blue-600 text-[10px] font-black uppercase tracking-[0.2em] rounded-full mb-8">Ecosystem Sync</div>
-                    <h2 className="text-4xl lg:text-5xl font-black text-gray-900 mb-8 leading-tight tracking-tighter uppercase">Sync seamlessly with <span className="italic">LetsMakeCV</span> and take control of your career journey.</h2>
-                    <p className="text-gray-500 text-lg font-medium mb-12">Millions of professionals use LetsMakeCV to design their careers. Now, PreviewCV helps you land the job.</p>
-                    <Link href="#" className="px-10 py-5 bg-blue-600 text-white font-black rounded-2xl hover:bg-blue-700 transition-all shadow-2xl shadow-blue-200 uppercase tracking-tighter">Build Your Resume Now</Link>
+                    <div className="inline-block px-4 py-2 bg-blue-50 text-blue-600 text-[10px] font-black uppercase tracking-[0.2em] rounded-full mb-8">Two Platforms, One Login</div>
+                    <h2 className="text-4xl lg:text-5xl font-black text-gray-900 mb-8 leading-tight tracking-tighter uppercase">Create on <span className="italic">LetsMakeCV</span>, Share on <span className="italic">PreviewCV</span></h2>
+                    <p className="text-gray-500 text-lg font-medium mb-12">Build your professional resume on LetsMakeCV, then instantly share it with recruiters using your PreviewCV link. One account works on both platforms.</p>
+                    <Link href="https://letsmakecv.com" target="_blank" className="px-10 py-5 bg-blue-600 text-white font-black rounded-2xl hover:bg-blue-700 transition-all shadow-2xl shadow-blue-200 uppercase tracking-tighter">Create Resume on LetsMakeCV →</Link>
                 </div>
                 <div className="absolute top-0 right-0 w-96 h-96 bg-blue-100/30 rounded-full blur-[120px]" />
                 <div className="absolute bottom-0 left-0 w-96 h-96 bg-indigo-100/20 rounded-full blur-[120px]" />

@@ -96,7 +96,7 @@ export default function RecruiterDashboard() {
                         onClick={() => setActiveTab('ats')}
                         className={`w-full text-left px-4 py-3 rounded-xl transition-all font-black text-xs uppercase tracking-tight ${activeTab === 'ats' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-200' : 'text-gray-400 hover:bg-gray-50'}`}
                     >
-                        Applicant Tracking
+                        Application Review
                     </button>
                     <button
                         onClick={() => setActiveTab('search')}
@@ -153,8 +153,8 @@ export default function RecruiterDashboard() {
 
                 {activeTab === 'ats' && (
                     <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-                        <h1 className="text-3xl font-black text-gray-900 mb-4">Applicant Tracking System</h1>
-                        <p className="text-gray-500 mb-10">Manage candidate pipeline for your active roles.</p>
+                        <h1 className="text-3xl font-black text-gray-900 mb-4">Application Review System</h1>
+                        <p className="text-gray-500 mb-10">Review and manage candidate applications for your active roles.</p>
 
                         <div className="flex flex-col md:flex-row gap-4 mb-8">
                             <div className="flex-1 flex gap-2 overflow-x-auto pb-2">
