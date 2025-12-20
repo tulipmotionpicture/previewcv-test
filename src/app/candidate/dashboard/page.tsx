@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
 import config from '@/config';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -13,7 +12,6 @@ import ResumeUpload from '@/components/ResumeUpload';
 import Breadcrumb from '@/components/ui/Breadcrumb';
 
 export default function CandidateDashboard() {
-    const router = useRouter();
     const { user, logout } = useAuth();
     const toast = useToast();
     const [activeTab, setActiveTab] = useState<'explore' | 'applications' | 'resumes'>('explore');

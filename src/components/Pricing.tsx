@@ -12,7 +12,7 @@ const PricingPage: React.FC<PricingPageProps> = ({ onNavigate }) => {
           Flexible plans for everyone
         </h1>
         <p className="text-xl text-gray-600">
-          Whether you're looking for a job or looking for talent, we've got you
+          Whether you&apos;re looking for a job or looking for talent, we&apos;ve got you
           covered.
         </p>
       </div>
