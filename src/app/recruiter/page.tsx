@@ -1,8 +1,9 @@
 'use client';
 
 import Link from 'next/link';
-import config from '@/config';
+
 import Image from 'next/image';
+import Header from '@/components/Header';
 
 const MagnifyingGlassIcon = () => (
     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6">
@@ -18,18 +19,15 @@ const ChartBarIcon = () => (
 
 export default function RecruiterLanding() {
     return (
-        <div className="min-h-screen bg-white text-gray-950 selection:bg-indigo-100 uppercase tracking-tight">
+        <div className="min-h-screen bg-white dark:bg-gray-950 text-gray-950 dark:text-gray-100 selection:bg-indigo-100 dark:selection:bg-indigo-900 uppercase tracking-tight transition-colors duration-300">
             {/* SaaS Nav */}
-            <nav className="h-20 flex items-center justify-between px-8 bg-white/80 backdrop-blur-xl border-b border-gray-100 sticky top-0 z-50">
-                <div className="flex items-center gap-3">
-                    <Image src={config.app.logoUrl} alt={config.app.name} width={120} height={120} className="rounded-3xl shadow-sm h-16 w-auto" />
-                </div>
-                <div className="flex items-center gap-10">
-                    <Link href="#features" className="text-sm font-black text-gray-500 hover:text-indigo-600 transition-colors uppercase tracking-widest">Features</Link>
-                    <Link href="/recruiter/signup" className="text-sm font-black text-gray-500 hover:text-indigo-600 transition-colors uppercase tracking-widest">Sign Up</Link>
-                    <Link href="/recruiter/login" className="px-6 py-3 bg-indigo-600 text-white text-sm font-black rounded-xl hover:bg-indigo-700 transition-all shadow-xl shadow-indigo-200">Login</Link>
-                </div>
-            </nav>
+            <Header 
+                links={[
+                    { label: 'Features', href: '#features' },
+                    { label: 'Sign Up', href: '/recruiter/signup' }
+                ]}
+                cta={{ label: 'Login', href: '/recruiter/login', variant: 'secondary' }}
+            />
 
             <section className="relative pt-32 pb-40 px-8 overflow-hidden">
                 {/* Background Gradients */}
@@ -39,10 +37,10 @@ export default function RecruiterLanding() {
                 <div className="max-w-7xl mx-auto flex flex-col lg:flex-row items-center gap-20">
                     <div className="flex-1 text-center lg:text-left">
                         <div className="inline-block px-4 py-2 bg-indigo-50 text-indigo-600 text-[10px] font-black uppercase tracking-[0.2em] rounded-full mb-8">Recruitment Platform</div>
-                        <h1 className="text-5xl lg:text-8xl font-black mb-10 leading-[0.9] tracking-tighter text-gray-900 uppercase">
+                        <h1 className="text-5xl lg:text-8xl font-black mb-10 leading-[0.9] tracking-tighter text-gray-900 dark:text-gray-100 uppercase">
                             Hire Smarter, <br /> Not <span className="text-indigo-600 italic">Harder.</span>
                         </h1>
-                        <p className="text-xl text-gray-500 font-medium mb-12 max-w-xl leading-relaxed mx-auto lg:mx-0">
+                        <p className="text-xl text-gray-500 dark:text-gray-400 font-medium mb-12 max-w-xl leading-relaxed mx-auto lg:mx-0">
                             Find and engage with top-tier talent effortlessly. Preview live candidate resumes from LetsMakeCV and manage your hiring pipeline in one place.
                         </p>
 
@@ -70,7 +68,7 @@ export default function RecruiterLanding() {
 
                     <div className="flex-1 relative group w-full lg:w-auto">
                         <div className="absolute -inset-4 bg-indigo-100 rounded-[60px] blur-3xl opacity-50 -z-10" />
-                        <div className="relative bg-white border border-gray-100 rounded-[48px] p-8 shadow-2xl overflow-hidden">
+                        <div className="relative bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-[48px] p-8 shadow-2xl overflow-hidden">
                             {/* Mock Recruiter Dashboard */}
                             <div className="flex items-center justify-between mb-10">
                                 <div className="w-32 h-4 bg-gray-100 rounded-full" />
@@ -99,13 +97,13 @@ export default function RecruiterLanding() {
             </section>
 
             {/* NEW: Talent Preview Teaser */}
-            <section className="py-32 px-8 bg-gray-50/50 border-y border-gray-100 relative overflow-hidden">
+            <section className="py-32 px-8 bg-gray-50/50 dark:bg-gray-900/50 border-y border-gray-100 dark:border-gray-800 relative overflow-hidden">
                 <div className="max-w-7xl mx-auto">
                     <div className="flex flex-col md:flex-row md:items-end justify-between mb-20 gap-8">
                         <div>
                             <div className="inline-block px-4 py-2 bg-indigo-100 text-indigo-700 text-[10px] font-black uppercase tracking-[0.2em] rounded-full mb-6 border border-indigo-200">Active Network</div>
-                            <h2 className="text-4xl lg:text-6xl font-black text-gray-900 tracking-tighter mb-4 italic uppercase leading-none">Direct Market Pulse</h2>
-                            <p className="text-gray-500 font-medium max-w-xl text-lg leading-relaxed">Browsing live performance data instead of static resumes. Source 10x faster with verified skill matrices.</p>
+                            <h2 className="text-4xl lg:text-6xl font-black text-gray-900 dark:text-gray-100 tracking-tighter mb-4 italic uppercase leading-none">Direct Market Pulse</h2>
+                            <p className="text-gray-500 dark:text-gray-400 font-medium max-w-xl text-lg leading-relaxed">Browsing live performance data instead of static resumes. Source 10x faster with verified skill matrices.</p>
                         </div>
                         <Link href="/recruiter/signup" className="px-10 py-5 bg-indigo-600 text-white font-black rounded-2xl hover:bg-indigo-700 transition-all shadow-2xl shadow-indigo-200">Get Started Free</Link>
                     </div>
@@ -116,14 +114,14 @@ export default function RecruiterLanding() {
                             { role: "Product Designer", exp: "7+ Years", skills: ["UX", "Figma", "Design Systems"], badges: ["Expert"], img: "/images/profile2.png" },
                             { role: "Data Scientist", exp: "4+ Years", skills: ["Python", "PyTorch", "AWS"], badges: ["Available"], img: "/images/profile3.png" }
                         ].map((can, i) => (
-                            <div key={i} className="bg-white border border-gray-200 p-8 rounded-[40px] hover:border-indigo-500/30 transition-all group shadow-sm hover:shadow-xl">
+                            <div key={i} className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 p-8 rounded-[40px] hover:border-indigo-500/30 transition-all group shadow-sm hover:shadow-xl">
                                 <div className="flex items-center gap-5 mb-8">
                                     <div className="w-16 h-16 bg-gray-100 rounded-3xl relative overflow-hidden border border-gray-200">
                                         <Image src={can.img} alt={can.role} fill className="object-cover" />
                                     </div>
                                     <div>
                                         <div className="h-4 w-24 bg-gray-100 rounded-full mb-2 blur-[3px]" />
-                                        <h4 className="font-black text-gray-900 text-lg tracking-tight uppercase leading-none">{can.role}</h4>
+                                        <h4 className="font-black text-gray-900 dark:text-gray-100 text-lg tracking-tight uppercase leading-none">{can.role}</h4>
                                     </div>
                                 </div>
 
@@ -157,7 +155,7 @@ export default function RecruiterLanding() {
                 <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-indigo-50 rounded-full blur-[150px] -z-10" />
             </section>
 
-            <section id="features" className="py-32 px-8 bg-white relative overflow-hidden">
+            <section id="features" className="py-32 px-8 bg-white dark:bg-gray-950 relative overflow-hidden">
                 <div className="max-w-7xl mx-auto">
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-32">
                         <div>
@@ -178,14 +176,14 @@ export default function RecruiterLanding() {
                             </ul>
                         </div>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
-                            <div className="p-10 bg-white border border-gray-100 rounded-[40px] shadow-sm hover:shadow-xl transition-all">
+                            <div className="p-10 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-[40px] shadow-sm hover:shadow-xl transition-all">
                                 <div className="w-14 h-14 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center mb-8 shadow-inner">
                                     <MagnifyingGlassIcon />
                                 </div>
                                 <h4 className="font-black mb-4 uppercase tracking-tighter leading-none">Global Search</h4>
                                 <p className="text-sm text-gray-400 font-medium leading-relaxed uppercase tracking-tight">Access 100k+ active job seeker profiles instantly.</p>
                             </div>
-                            <div className="p-10 bg-white border border-gray-100 rounded-[40px] shadow-sm hover:shadow-xl transition-all mt-8">
+                            <div className="p-10 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-[40px] shadow-sm hover:shadow-xl transition-all mt-8">
                                 <div className="w-14 h-14 bg-blue-50 text-indigo-600 rounded-2xl flex items-center justify-center mb-8 shadow-inner">
                                     <ChartBarIcon />
                                 </div>

@@ -24,18 +24,21 @@ export const metadata: Metadata = {
 
 import { Providers } from "@/components/Providers";
 
+import ThemeToggle from "@/components/ThemeToggle";
+
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <Providers>
           {children}
+          <ThemeToggle />
         </Providers>
       </body>
     </html>

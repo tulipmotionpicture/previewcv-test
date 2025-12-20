@@ -97,11 +97,11 @@ export default function JobDetailsClient({ job, slug }: JobDetailsClientProps) {
     };
 
     return (
-        <div className="sticky top-32 bg-white border border-gray-100 rounded-[40px] p-8 shadow-xl">
-            <h3 className="text-xl font-black text-gray-900 mb-6">Apply Now</h3>
+        <div className="sticky top-32 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-[40px] p-8 shadow-xl">
+            <h3 className="text-xl font-black text-gray-900 dark:text-gray-100 mb-6">Apply Now</h3>
 
             {applySuccess ? (
-                <div className="bg-green-50 text-green-700 p-6 rounded-3xl text-center">
+                <div className="bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-400 p-6 rounded-3xl text-center border border-green-100 dark:border-green-800">
                     <div className="text-4xl mb-4">🎉</div>
                     <p className="font-bold mb-2">Application Sent!</p>
                     <p className="text-sm">The recruiter will review your profile shortly.</p>
@@ -109,10 +109,12 @@ export default function JobDetailsClient({ job, slug }: JobDetailsClientProps) {
             ) : (
                 <form onSubmit={handleApply} className="space-y-4">
                     <div>
-                        <label className="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-1">Cover Letter (Optional)</label>
+                        <label className="block text-xs font-black uppercase tracking-widest text-gray-400 dark:text-gray-500 mb-2 ml-1">
+                            Cover Letter (Optional)
+                        </label>
                         <textarea
                             rows={4}
-                            className="w-full px-6 py-4 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-blue-600 outline-none hover:bg-gray-100 transition-all font-medium text-sm"
+                            className="w-full px-6 py-4 bg-gray-50 dark:bg-gray-800 border-none rounded-2xl focus:ring-2 focus:ring-blue-600 dark:focus:ring-blue-500 outline-none hover:bg-gray-100 dark:hover:bg-gray-700 transition-all font-medium text-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
                             placeholder="Introduce yourself..."
                             value={coverLetter}
                             onChange={e => setCoverLetter(e.target.value)}
@@ -120,10 +122,12 @@ export default function JobDetailsClient({ job, slug }: JobDetailsClientProps) {
                     </div>
 
                     <div>
-                        <label className="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-1">Resume</label>
+                        <label className="block text-xs font-black uppercase tracking-widest text-gray-400 dark:text-gray-500 mb-2 ml-1">
+                            Resume
+                        </label>
 
                         {loadingResumes ? (
-                            <div className="text-xs text-gray-400">Loading resumes...</div>
+                            <div className="text-xs text-gray-400 dark:text-gray-500">Loading resumes...</div>
                         ) : (
                             <div className="space-y-4">
                                 {/* Resume Selection */}
@@ -132,7 +136,7 @@ export default function JobDetailsClient({ job, slug }: JobDetailsClientProps) {
                                         <select
                                             value={resumeId || ''}
                                             onChange={(e) => setResumeId(Number(e.target.value))}
-                                            className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-600 outline-none text-sm"
+                                            className="w-full px-4 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-blue-600 dark:focus:ring-blue-500 outline-none text-sm text-gray-900 dark:text-gray-100"
                                         >
                                             <option value="" disabled>Select a resume</option>
                                             {pdfResumes.length > 0 && (
@@ -155,8 +159,8 @@ export default function JobDetailsClient({ job, slug }: JobDetailsClientProps) {
 
                                 {/* Upload New */}
                                 {!resumeId && (
-                                    <div className="border-t border-gray-100 pt-4">
-                                        <p className="text-xs text-gray-400 mb-2">Or upload a new one:</p>
+                                    <div className="border-t border-gray-100 dark:border-gray-800 pt-4">
+                                        <p className="text-xs text-gray-400 dark:text-gray-500 mb-2">Or upload a new one:</p>
                                         <ResumeUpload onUploadSuccess={handleResumeUploadSuccess} />
                                     </div>
                                 )}
@@ -166,7 +170,7 @@ export default function JobDetailsClient({ job, slug }: JobDetailsClientProps) {
                                         <button
                                             type="button"
                                             onClick={() => setResumeId(null)}
-                                            className="text-xs text-blue-600 hover:underline font-bold"
+                                            className="text-xs text-blue-600 dark:text-blue-400 hover:underline font-bold"
                                         >
                                             Using different resume?
                                         </button>
@@ -177,20 +181,23 @@ export default function JobDetailsClient({ job, slug }: JobDetailsClientProps) {
                     </div>
 
                     {!isAuthenticated ? (
-                        <a href={`/candidate/login?redirect=/jobs/${slug}`} className="block w-full py-4 bg-blue-600 text-white font-black rounded-2xl hover:bg-blue-700 transition-all shadow-lg text-center">
+                        <a 
+                            href={`/candidate/login?redirect=/jobs/${slug}`} 
+                            className="block w-full py-4 bg-blue-600 hover:bg-blue-700 text-white font-black rounded-2xl transition-all shadow-lg text-center"
+                        >
                             Login to Apply
                         </a>
                     ) : (
                         <button
                             type="submit"
                             disabled={applying || !resumeId}
-                            className="w-full py-4 bg-gray-900 text-white font-black rounded-2xl hover:bg-black transition-all shadow-lg disabled:opacity-70 flex items-center justify-center gap-2"
+                            className="w-full py-4 bg-gray-900 dark:bg-blue-600 text-white font-black rounded-2xl hover:bg-black dark:hover:bg-blue-700 transition-all shadow-lg disabled:opacity-70 flex items-center justify-center gap-2"
                         >
                             {applying ? 'Sending...' : 'Submit Application'}
                         </button>
                     )}
 
-                    <p className="text-center text-xs text-gray-400 mt-4">
+                    <p className="text-center text-xs text-gray-400 dark:text-gray-500 mt-4">
                         Your PreviewCV profile and resume will be shared with {job.company_name}.
                     </p>
                 </form>

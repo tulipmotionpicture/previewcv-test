@@ -188,31 +188,31 @@ export default function RecruiterDashboard() {
     });
 
     return (
-        <div className="min-h-screen bg-gray-50 flex">
+        <div className="min-h-screen bg-gray-50 dark:bg-gray-950 flex transition-colors duration-300">
             {/* Sidebar */}
-            <aside className="w-64 bg-white border-r border-gray-100 text-gray-900 min-h-screen p-6 sticky top-0 h-screen shadow-sm">
+            <aside className="w-64 bg-white dark:bg-gray-900 border-r border-gray-100 dark:border-gray-800 text-gray-900 dark:text-gray-100 min-h-screen p-6 sticky top-0 h-screen shadow-sm">
                 <div className="mb-10 flex items-center justify-center">
                     <Image src={config.app.logoUrl} alt={config.app.name} width={120} height={120} className="rounded-3xl" />
                 </div>
                 <nav className="space-y-2">
                     <button
                         onClick={() => setActiveTab('jobs')}
-                        className={`w-full text-left px-4 py-3 rounded-xl transition-all font-black text-xs uppercase tracking-tight ${activeTab === 'jobs' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-200' : 'text-gray-400 hover:bg-gray-50'}`}
+                        className={`w-full text-left px-4 py-3 rounded-xl transition-all font-black text-xs uppercase tracking-tight ${activeTab === 'jobs' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-200 dark:shadow-indigo-900/50' : 'text-gray-400 dark:text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800'}`}
                     >
                         Manage Jobs
                     </button>
                     <button
                         onClick={() => setActiveTab('ats')}
-                        className={`w-full text-left px-4 py-3 rounded-xl transition-all font-black text-xs uppercase tracking-tight ${activeTab === 'ats' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-200' : 'text-gray-400 hover:bg-gray-50'}`}
+                        className={`w-full text-left px-4 py-3 rounded-xl transition-all font-black text-xs uppercase tracking-tight ${activeTab === 'ats' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-200 dark:shadow-indigo-900/50' : 'text-gray-400 dark:text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800'}`}
                     >
                         Application Review
                     </button>
                 </nav>
                 <div className="absolute bottom-10 left-6 right-6">
-                    <div className="p-4 bg-gray-50 rounded-2xl border border-gray-100">
-                        <p className="text-[10px] text-gray-400 mb-1 font-black uppercase tracking-widest">Signed in as</p>
-                        <p className="font-bold text-sm truncate text-gray-900">{recruiter?.full_name}</p>
-                        <button onClick={logout} className="text-[10px] text-indigo-600 hover:underline mt-4 block font-black uppercase tracking-tight">Sign out</button>
+                    <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700">
+                        <p className="text-[10px] text-gray-400 dark:text-gray-500 mb-1 font-black uppercase tracking-widest">Signed in as</p>
+                        <p className="font-bold text-sm truncate text-gray-900 dark:text-gray-100">{recruiter?.full_name}</p>
+                        <button onClick={logout} className="text-[10px] text-indigo-600 dark:text-indigo-400 hover:underline mt-4 block font-black uppercase tracking-tight">Sign out</button>
                     </div>
                 </div>
             </aside>
@@ -224,29 +224,29 @@ export default function RecruiterDashboard() {
 
                 {activeTab === 'jobs' && (
                     <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-                        <h1 className="text-3xl font-black text-gray-900 mb-10">Manage Career Opportunities</h1>
+                        <h1 className="text-3xl font-black text-gray-900 dark:text-gray-100 mb-10">Manage Career Opportunities</h1>
 
-                        <section className="bg-white p-8 rounded-3xl shadow-sm border border-gray-100 mb-12">
-                            <h3 className="text-lg font-bold mb-6">Post New Opportunity</h3>
+                        <section className="bg-white dark:bg-gray-900 p-8 rounded-3xl shadow-sm border border-gray-100 dark:border-gray-800 mb-12">
+                            <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-6">Post New Opportunity</h3>
                             <form onSubmit={handleCreateJob} className="grid grid-cols-1 md:grid-cols-3 gap-6">
                                 <input
                                     value={newJobTitle}
                                     onChange={e => setNewJobTitle(e.target.value)}
                                     placeholder="Job Title"
-                                    className="px-4 py-3 bg-gray-50 border-none rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none hover:bg-gray-100 transition-colors"
+                                    className="px-4 py-3 bg-gray-50 dark:bg-gray-800 border-none rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
                                     required
                                 />
                                 <input
                                     value={newJobLocation}
                                     onChange={e => setNewJobLocation(e.target.value)}
                                     placeholder="Location (e.g. Remote)"
-                                    className="px-4 py-3 bg-gray-50 border-none rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none hover:bg-gray-100 transition-colors"
+                                    className="px-4 py-3 bg-gray-50 dark:bg-gray-800 border-none rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
                                     required
                                 />
                                 <button
                                     type="submit"
                                     disabled={creatingJob}
-                                    className="bg-gray-900 text-white font-bold rounded-xl hover:bg-gray-800 transition-all disabled:opacity-70"
+                                    className="bg-gray-900 dark:bg-indigo-600 text-white font-bold rounded-xl hover:bg-gray-800 dark:hover:bg-indigo-700 transition-all disabled:opacity-70"
                                 >
                                     {creatingJob ? 'Posting...' : 'Post Job'}
                                 </button>
@@ -257,10 +257,10 @@ export default function RecruiterDashboard() {
                             {loadingJobs ? (
                                 <div className="text-center py-10">Loading jobs...</div>
                             ) : jobs.map(job => (
-                                <div key={job.id} className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm flex items-center justify-between hover:shadow-md transition-shadow">
+                                <div key={job.id} className="bg-white dark:bg-gray-900 p-6 rounded-3xl border border-gray-100 dark:border-gray-800 shadow-sm flex items-center justify-between hover:shadow-md transition-shadow">
                                     <div>
-                                        <h4 className="font-bold text-xl text-gray-900 mb-1 uppercase tracking-tight">{job.title}</h4>
-                                        <p className="text-gray-400 text-xs font-black uppercase tracking-tight">
+                                        <h4 className="font-bold text-xl text-gray-900 dark:text-gray-100 mb-1 uppercase tracking-tight">{job.title}</h4>
+                                        <p className="text-gray-400 dark:text-gray-500 text-xs font-black uppercase tracking-tight">
                                             {job.location} • {job.job_type.replace('_', ' ')} •
                                             <span className={`ml-1 ${job.status === 'active' ? 'text-green-600' : job.status === 'closed' ? 'text-red-600' : 'text-yellow-600'}`}>
                                                 {job.status.charAt(0).toUpperCase() + job.status.slice(1)}
@@ -302,8 +302,8 @@ export default function RecruiterDashboard() {
 
                 {activeTab === 'ats' && (
                     <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-                        <h1 className="text-3xl font-black text-gray-900 mb-4">Application Review System</h1>
-                        <p className="text-gray-500 mb-10">Review and manage candidate applications for your active roles.</p>
+                        <h1 className="text-3xl font-black text-gray-900 dark:text-gray-100 mb-4">Application Review System</h1>
+                        <p className="text-gray-500 dark:text-gray-400 mb-10">Review and manage candidate applications for your active roles.</p>
 
                         <div className="flex flex-col md:flex-row gap-4 mb-8">
                             <div className="flex-1 flex gap-2 overflow-x-auto pb-2">
@@ -311,16 +311,16 @@ export default function RecruiterDashboard() {
                                     <button
                                         key={job.id}
                                         onClick={() => setSelectedJobId(job.id)}
-                                        className={`whitespace-nowrap px-4 py-2 rounded-full text-xs font-bold ${selectedJobId === job.id ? 'bg-gray-900 text-white' : 'bg-gray-200 text-gray-600 hover:bg-gray-300'}`}
+                                        className={`whitespace-nowrap px-4 py-2 rounded-full text-xs font-bold ${selectedJobId === job.id ? 'bg-gray-900 dark:bg-indigo-600 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'}`}
                                     >
                                         {job.title}
                                     </button>
                                 ))}
                             </div>
                             <div className="flex items-center gap-2">
-                                <span className="text-xs font-bold text-gray-400 uppercase">Filter Status:</span>
+                                <span className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase">Filter Status:</span>
                                 <select
-                                    className="bg-white border border-gray-200 rounded-lg px-3 py-1.5 text-xs font-bold outline-none cursor-pointer hover:border-indigo-300 transition-colors"
+                                    className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-1.5 text-xs font-bold outline-none cursor-pointer hover:border-indigo-300 dark:hover:border-indigo-600 transition-colors text-gray-900 dark:text-gray-100"
                                     value={statusFilter}
                                     onChange={(e) => setStatusFilter(e.target.value)}
                                 >
@@ -336,31 +336,31 @@ export default function RecruiterDashboard() {
                             </div>
                         </div>
 
-                        <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
+                        <div className="bg-white dark:bg-gray-900 rounded-3xl shadow-sm border border-gray-100 dark:border-gray-800 overflow-hidden">
                             <div className="overflow-x-auto">
                                 <table className="w-full text-left border-collapse">
                                     <thead>
-                                        <tr className="bg-gray-50 border-b border-gray-100">
-                                            <th className="px-6 py-4 text-xs font-black uppercase tracking-widest text-gray-400">Candidate</th>
-                                            <th className="px-6 py-4 text-xs font-black uppercase tracking-widest text-gray-400">Status</th>
-                                            <th className="px-6 py-4 text-xs font-black uppercase tracking-widest text-gray-400 text-right">Actions</th>
+                                        <tr className="bg-gray-50 dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700">
+                                            <th className="px-6 py-4 text-xs font-black uppercase tracking-widest text-gray-400 dark:text-gray-500">Candidate</th>
+                                            <th className="px-6 py-4 text-xs font-black uppercase tracking-widest text-gray-400 dark:text-gray-500">Status</th>
+                                            <th className="px-6 py-4 text-xs font-black uppercase tracking-widest text-gray-400 dark:text-gray-500 text-right">Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-gray-50">
                                         {loadingApps ? (
                                             <tr><td colSpan={3} className="px-6 py-10 text-center">Loading applications...</td></tr>
                                         ) : filteredApplications.map(app => (
-                                            <tr key={app.id} className="hover:bg-gray-50/50 transition-colors">
-                                                <td className="px-6 py-6 border-b border-gray-50">
-                                                    <p className="font-bold text-gray-900">{app.candidate_name}</p>
-                                                    <p className="text-[10px] text-gray-400">{app.candidate_email}</p>
+                                            <tr key={app.id} className="hover:bg-gray-50/50 dark:hover:bg-gray-800/50 transition-colors">
+                                                <td className="px-6 py-6 border-b border-gray-50 dark:border-gray-800">
+                                                    <p className="font-bold text-gray-900 dark:text-gray-100">{app.candidate_name}</p>
+                                                    <p className="text-[10px] text-gray-400 dark:text-gray-500">{app.candidate_email}</p>
                                                 </td>
-                                                <td className="px-6 py-6 border-b border-gray-50">
-                                                    <span className={`px-2 py-1 rounded-full text-[9px] font-black uppercase tracking-tighter bg-gray-100 text-gray-600`}>
+                                                <td className="px-6 py-6 border-b border-gray-50 dark:border-gray-800">
+                                                    <span className={`px-2 py-1 rounded-full text-[9px] font-black uppercase tracking-tighter bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300`}>
                                                         {app.status.replace('_', ' ')}
                                                     </span>
                                                 </td>
-                                                <td className="px-6 py-6 text-right border-b border-gray-50">
+                                                <td className="px-6 py-6 text-right border-b border-gray-50 dark:border-gray-800">
                                                     <div className="flex justify-end gap-2">
                                                         <button
                                                             onClick={() => { setSelectedApplication(app); setIsDetailModalOpen(true); setActionMenuOpen(null); }}
@@ -376,7 +376,7 @@ export default function RecruiterDashboard() {
                                                                 Actions ▼
                                                             </button>
                                                             {actionMenuOpen === app.id && (
-                                                                <div className="absolute right-0 mt-2 w-48 bg-white rounded-2xl shadow-xl border border-gray-100 py-2 z-50">
+                                                                <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-100 dark:border-gray-700 py-2 z-50">
                                                                     {app.status === 'applied' && (
                                                                         <button
                                                                             onClick={() => { handleUpdateStatus(app.id, 'under_review'); setActionMenuOpen(null); }}
@@ -419,34 +419,34 @@ export default function RecruiterDashboard() {
             {/* Candidate Detail Modal - Simply showing Application Details for now */}
             {isDetailModalOpen && selectedApplication && (
                 <div
-                    className="fixed inset-0 bg-gray-900/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4"
+                    className="fixed inset-0 bg-gray-900/60 dark:bg-black/70 backdrop-blur-sm z-[100] flex items-center justify-center p-4"
                     onClick={() => setIsDetailModalOpen(false)}
                 >
                     <div
-                        className="bg-white rounded-[32px] w-full max-w-2xl p-8 shadow-2xl animate-in zoom-in-95 duration-200"
+                        className="bg-white dark:bg-gray-900 rounded-[32px] w-full max-w-2xl p-8 shadow-2xl animate-in zoom-in-95 duration-200 border border-gray-100 dark:border-gray-800"
                         onClick={(e) => e.stopPropagation()}
                     >
-                        <h2 className="text-2xl font-black text-gray-900 mb-6">Application Details</h2>
+                        <h2 className="text-2xl font-black text-gray-900 dark:text-gray-100 mb-6">Application Details</h2>
                         <div className="space-y-4">
                             <div>
-                                <h3 className="text-sm font-black text-gray-400 uppercase">Candidate</h3>
-                                <p className="font-bold text-lg">{selectedApplication.candidate_name}</p>
-                                <p className="text-gray-500">{selectedApplication.candidate_email}</p>
+                                <h3 className="text-sm font-black text-gray-400 dark:text-gray-500 uppercase">Candidate</h3>
+                                <p className="font-bold text-lg text-gray-900 dark:text-gray-100">{selectedApplication.candidate_name}</p>
+                                <p className="text-gray-500 dark:text-gray-400">{selectedApplication.candidate_email}</p>
                             </div>
                             <div>
-                                <h3 className="text-sm font-black text-gray-400 uppercase">Cover Letter</h3>
-                                <p className="text-gray-700 whitespace-pre-line bg-gray-50 p-4 rounded-xl mt-1">
+                                <h3 className="text-sm font-black text-gray-400 dark:text-gray-500 uppercase">Cover Letter</h3>
+                                <p className="text-gray-700 dark:text-gray-300 whitespace-pre-line bg-gray-50 dark:bg-gray-800 p-4 rounded-xl mt-1 border border-gray-100 dark:border-gray-700">
                                     {selectedApplication.cover_letter || 'No cover letter provided.'}
                                 </p>
                             </div>
                             <div>
-                                <h3 className="text-sm font-black text-gray-400 uppercase">Resume</h3>
-                                <p className="text-gray-500">Resume ID: {selectedApplication.resume_id}</p>
+                                <h3 className="text-sm font-black text-gray-400 dark:text-gray-500 uppercase">Resume</h3>
+                                <p className="text-gray-500 dark:text-gray-400">Resume ID: {selectedApplication.resume_id}</p>
                                 {/* Future: Link to resume preview */}
                             </div>
                         </div>
                         <div className="mt-8 flex justify-end">
-                            <button onClick={() => setIsDetailModalOpen(false)} className="px-6 py-2 bg-gray-900 text-white font-bold rounded-xl">Close</button>
+                            <button onClick={() => setIsDetailModalOpen(false)} className="px-6 py-2 bg-gray-900 dark:bg-indigo-600 text-white font-bold rounded-xl hover:bg-gray-800 dark:hover:bg-indigo-700 transition-colors">Close</button>
                         </div>
                     </div>
                 </div>

@@ -104,21 +104,21 @@ export default function RecruiterSignup() {
     };
 
     return (
-        <div className="min-h-screen bg-white flex items-center justify-center p-6 selection:bg-indigo-100 uppercase tracking-tight">
+        <div className="min-h-screen bg-white dark:bg-gray-950 flex items-center justify-center p-6 selection:bg-indigo-100 dark:selection:bg-indigo-900 uppercase tracking-tight transition-colors duration-300">
             {/* Background Effects */}
             <div className="fixed top-0 right-0 w-[500px] h-[500px] bg-indigo-50 rounded-full blur-[120px] -z-10" />
             <div className="fixed bottom-0 left-0 w-[500px] h-[500px] bg-blue-50 rounded-full blur-[120px] -z-10" />
 
             <div className="w-full max-w-[900px] animate-in fade-in slide-in-from-bottom-4 duration-700">
                 <div className="text-center mb-12">
-                    <div className="inline-flex items-center justify-center w-40 h-40 bg-white rounded-[48px] shadow-2xl shadow-indigo-100 mb-8 border border-gray-100 overflow-hidden p-6">
+                    <div className="inline-flex items-center justify-center w-40 h-40 bg-white dark:bg-gray-900 rounded-[48px] shadow-2xl shadow-indigo-100 dark:shadow-indigo-900/20 mb-8 border border-gray-100 dark:border-gray-800 overflow-hidden p-6">
                         <Image src={config.app.logoUrl} alt={config.app.name} width={120} height={120} className="object-contain" />
                     </div>
                     <h1 className="text-3xl font-black mb-2">Join Our Recruiter Network</h1>
                     <p className="text-gray-500 font-medium lowercase first-letter:uppercase">Create your account and start hiring top talent.</p>
                 </div>
 
-                <div className="bg-white border border-gray-100 rounded-[40px] p-10 shadow-2xl shadow-indigo-500/5 relative overflow-hidden">
+                <div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-[40px] p-10 shadow-2xl shadow-indigo-500/5 dark:shadow-indigo-900/10 relative overflow-hidden">
                     <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-500 to-blue-500" />
 
                     {error && (
@@ -176,7 +176,7 @@ export default function RecruiterSignup() {
                                     type="email"
                                     name="email"
                                     required
-                                    className="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-indigo-600 outline-none hover:bg-gray-100 transition-all font-medium text-gray-900 placeholder-gray-300"
+                                    className="w-full px-6 py-4 bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl focus:ring-2 focus:ring-indigo-600 outline-none hover:bg-gray-100 dark:hover:bg-gray-700 transition-all font-medium text-gray-900 dark:text-gray-100 placeholder-gray-300 dark:placeholder-gray-500"
                                     value={formData.email}
                                     onChange={handleChange}
                                     placeholder="recruiter@company.com"

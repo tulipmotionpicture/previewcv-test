@@ -1,6 +1,6 @@
-import config from '@/config';
-import Image from 'next/image';
+
 import Link from 'next/link';
+import Header from '@/components/Header';
 
 const DocumentTextIcon = () => (
     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6">
@@ -16,16 +16,11 @@ const SparklesIcon = () => (
 
 export default function CandidateLanding() {
     return (
-        <div className="min-h-screen bg-white text-gray-950 selection:bg-teal-100">
-            <nav className="h-24 px-8 flex items-center justify-between sticky top-0 z-50 bg-white/70 backdrop-blur-2xl border-b border-gray-100">
-                <div className="flex items-center gap-3">
-                    <Image src={config.app.logoUrl} alt={config.app.name} width={120} height={120} className="rounded-3xl shadow-xl h-20 w-auto" />
-                </div>
-                <div className="flex items-center gap-8">
-                    <Link href="/jobs" className="text-sm font-bold text-gray-500 hover:text-blue-600 transition-colors uppercase tracking-tight">Browse Jobs</Link>
-                    <Link href="/candidate/login" className="px-6 py-3 bg-gray-900 text-white text-sm font-black rounded-xl hover:bg-gray-800 transition-all shadow-xl shadow-gray-200 uppercase tracking-tighter">Candidate Login</Link>
-                </div>
-            </nav>
+        <div className="min-h-screen bg-white dark:bg-gray-950 text-gray-950 dark:text-gray-100 selection:bg-teal-100 dark:selection:bg-teal-900 transition-colors duration-300">
+            <Header 
+                links={[{ label: 'Browse Jobs', href: '/jobs' }]}
+                cta={{ label: 'Candidate Login', href: '/candidate/login', variant: 'dark' }}
+            />
 
             <section className="relative pt-32 pb-48 px-8 overflow-hidden">
                 <div className="absolute top-0 left-0 w-full h-full -z-10 bg-[radial-gradient(circle_at_50%_0%,#f0f9ff_0%,#ffffff_100%)]" />
@@ -76,12 +71,12 @@ export default function CandidateLanding() {
             </section>
 
             {/* NEW: Trending Opportunities Teaser */}
-            <section className="py-32 bg-gray-50/50 border-y border-gray-100 relative overflow-hidden">
+            <section className="py-32 bg-gray-50/50 dark:bg-gray-900/50 border-y border-gray-100 dark:border-gray-800 relative overflow-hidden">
                 <div className="max-w-7xl mx-auto px-8">
                     <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">
                         <div>
-                            <h2 className="text-4xl lg:text-5xl font-black text-gray-900 tracking-tighter mb-4 italic uppercase">Trending Opportunities</h2>
-                            <p className="text-gray-500 font-medium max-w-xl text-lg">Verified roles from high-growth companies. Connect your profile to get matched instantly.</p>
+                            <h2 className="text-4xl lg:text-5xl font-black text-gray-900 dark:text-gray-100 tracking-tighter mb-4 italic uppercase">Trending Opportunities</h2>
+                            <p className="text-gray-500 dark:text-gray-400 font-medium max-w-xl text-lg">Verified roles from high-growth companies. Connect your profile to get matched instantly.</p>
                         </div>
                         <Link href="/jobs" className="px-8 py-4 bg-white border border-gray-200 text-gray-900 font-black rounded-2xl hover:border-gray-900 transition-all shadow-sm uppercase tracking-tight">Explore All Jobs</Link>
                     </div>
@@ -92,7 +87,7 @@ export default function CandidateLanding() {
                             { title: "UI/UX Designer", company: "Creative Boutique", loc: "SF / Hybrid", type: "Contract", salary: "$90k - $130k" },
                             { title: "Lead Frontend Engineer", company: "InnovateAI", loc: "New York", type: "Full-time", salary: "$150k - $200k" }
                         ].map((job, i) => (
-                            <div key={i} className="bg-white border border-gray-100 p-8 rounded-[40px] shadow-sm hover:shadow-xl transition-all group relative overflow-hidden">
+                            <div key={i} className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 p-8 rounded-[40px] shadow-sm hover:shadow-xl transition-all group relative overflow-hidden">
                                 <div className="absolute top-0 right-0 p-6 opacity-0 group-hover:opacity-100 transition-opacity text-blue-500">
                                     <SparklesIcon />
                                 </div>
@@ -100,7 +95,7 @@ export default function CandidateLanding() {
                                     <span className="px-3 py-1 bg-blue-50 text-blue-600 text-[10px] font-black uppercase tracking-widest rounded-full">{job.type}</span>
                                     <span className="text-gray-400 text-[10px] font-black uppercase tracking-widest">{job.loc}</span>
                                 </div>
-                                <h4 className="text-xl font-black text-gray-900 mb-2 group-hover:text-blue-600 transition-colors uppercase tracking-tight">{job.title}</h4>
+                                <h4 className="text-xl font-black text-gray-900 dark:text-gray-100 mb-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors uppercase tracking-tight">{job.title}</h4>
                                 <p className="text-gray-500 font-black mb-8 uppercase text-[10px] tracking-[0.2em]">{job.company}</p>
 
                                 <div className="pt-6 border-t border-gray-50 flex items-center justify-between">
@@ -119,10 +114,10 @@ export default function CandidateLanding() {
             </section>
 
             {/* Value Proposition Grid */}
-            <section className="py-32 bg-white border-b border-gray-100">
+            <section className="py-32 bg-white dark:bg-gray-950 border-b border-gray-100 dark:border-gray-800">
                 <div className="max-w-7xl mx-auto px-8">
                     <div className="text-center mb-20">
-                        <h2 className="text-5xl lg:text-6xl font-black text-gray-900 mb-6 tracking-tighter uppercase">Why Candidates <span className="italic text-blue-600">Love Us</span></h2>
+                        <h2 className="text-5xl lg:text-6xl font-black text-gray-900 dark:text-gray-100 mb-6 tracking-tighter uppercase">Why Candidates <span className="italic text-blue-600">Love Us</span></h2>
                         <p className="text-xl text-gray-500 max-w-3xl mx-auto font-medium">Everything you need to stand out in your job search</p>
                     </div>
 
@@ -134,8 +129,8 @@ export default function CandidateLanding() {
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M7.217 10.907a2.25 2.25 0 1 0 0 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186 9.566-5.314m-9.566 7.5 9.566 5.314m0 0a2.25 2.25 0 1 0 3.935 2.186 2.25 2.25 0 0 0-3.935-2.186Zm0-12.814a2.25 2.25 0 1 0 3.933-2.185 2.25 2.25 0 0 0-3.933 2.185Z" />
                                 </svg>
                             </div>
-                            <h3 className="text-2xl font-black text-gray-900 mb-4 uppercase tracking-tight">Share Anywhere</h3>
-                            <p className="text-gray-600 font-medium leading-relaxed mb-6">Add your PreviewCV link to email signatures, LinkedIn profiles, job applications, and networking messages. One link works everywhere.</p>
+                            <h3 className="text-2xl font-black text-gray-900 dark:text-gray-100 mb-4 uppercase tracking-tight">Share Anywhere</h3>
+                            <p className="text-gray-600 dark:text-gray-400 font-medium leading-relaxed mb-6">Add your PreviewCV link to email signatures, LinkedIn profiles, job applications, and networking messages. One link works everywhere.</p>
                             <div className="flex flex-wrap gap-2">
                                 <span className="px-3 py-1 bg-white border border-blue-100 text-blue-700 text-xs font-black rounded-lg uppercase">Email</span>
                                 <span className="px-3 py-1 bg-white border border-blue-100 text-blue-700 text-xs font-black rounded-lg uppercase">LinkedIn</span>
@@ -198,14 +193,14 @@ export default function CandidateLanding() {
             </section>
 
             {/* PDF vs PreviewCV Comparison */}
-            <section className="py-32 bg-gray-50 border-b border-gray-100">
+            <section className="py-32 bg-gray-50 dark:bg-gray-900/50 border-b border-gray-100 dark:border-gray-800">
                 <div className="max-w-5xl mx-auto px-8">
                     <div className="text-center mb-20">
-                        <h2 className="text-5xl lg:text-6xl font-black text-gray-900 mb-6 tracking-tighter uppercase">PDF vs <span className="italic text-blue-600">PreviewCV</span></h2>
+                        <h2 className="text-5xl lg:text-6xl font-black text-gray-900 dark:text-gray-100 mb-6 tracking-tighter uppercase">PDF vs <span className="italic text-blue-600">PreviewCV</span></h2>
                         <p className="text-xl text-gray-500 font-medium">See why thousands are making the switch</p>
                     </div>
 
-                    <div className="bg-white rounded-[40px] border border-gray-100 overflow-hidden shadow-xl">
+                    <div className="bg-white dark:bg-gray-900 rounded-[40px] border border-gray-100 dark:border-gray-800 overflow-hidden shadow-xl">
                         <div className="grid grid-cols-3 gap-px bg-gray-100">
                             {/* Header */}
                             <div className="bg-white p-6"></div>
