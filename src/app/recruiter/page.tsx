@@ -26,7 +26,8 @@ export default function RecruiterLanding() {
                 </div>
                 <div className="flex items-center gap-10">
                     <Link href="#features" className="text-sm font-black text-gray-500 hover:text-indigo-600 transition-colors uppercase tracking-widest">Features</Link>
-                    <Link href="/recruiter/login" className="px-6 py-3 bg-indigo-600 text-white text-sm font-black rounded-xl hover:bg-indigo-700 transition-all shadow-xl shadow-indigo-200">Recruiter Login</Link>
+                    <Link href="/recruiter/signup" className="text-sm font-black text-gray-500 hover:text-indigo-600 transition-colors uppercase tracking-widest">Sign Up</Link>
+                    <Link href="/recruiter/login" className="px-6 py-3 bg-indigo-600 text-white text-sm font-black rounded-xl hover:bg-indigo-700 transition-all shadow-xl shadow-indigo-200">Login</Link>
                 </div>
             </nav>
 
@@ -46,7 +47,7 @@ export default function RecruiterLanding() {
                         </p>
 
                         <div className="flex flex-wrap justify-center lg:justify-start gap-4 mb-16">
-                            <Link href="/recruiter/login" className="px-8 py-4 bg-gray-900 text-white font-black rounded-2xl hover:bg-gray-800 transition-all shadow-xl shadow-gray-200 uppercase tracking-tighter">
+                            <Link href="/recruiter/signup" className="px-8 py-4 bg-gray-900 text-white font-black rounded-2xl hover:bg-gray-800 transition-all shadow-xl shadow-gray-200 uppercase tracking-tighter">
                                 Start Hiring Now
                             </Link>
                             <a href="#demo" className="px-8 py-4 bg-white border border-gray-200 text-gray-900 font-black rounded-2xl hover:border-gray-900 transition-all uppercase tracking-tighter">
@@ -106,7 +107,7 @@ export default function RecruiterLanding() {
                             <h2 className="text-4xl lg:text-6xl font-black text-gray-900 tracking-tighter mb-4 italic uppercase leading-none">Direct Market Pulse</h2>
                             <p className="text-gray-500 font-medium max-w-xl text-lg leading-relaxed">Browsing live performance data instead of static resumes. Source 10x faster with verified skill matrices.</p>
                         </div>
-                        <Link href="/recruiter/login" className="px-10 py-5 bg-indigo-600 text-white font-black rounded-2xl hover:bg-indigo-700 transition-all shadow-2xl shadow-indigo-200">Access Full Database</Link>
+                        <Link href="/recruiter/signup" className="px-10 py-5 bg-indigo-600 text-white font-black rounded-2xl hover:bg-indigo-700 transition-all shadow-2xl shadow-indigo-200">Get Started Free</Link>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">

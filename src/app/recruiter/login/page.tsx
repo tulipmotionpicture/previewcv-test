@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { MOCK_USERS } from '@/config/mockData';
 import config from '@/config';
 import Image from 'next/image';
@@ -104,7 +105,12 @@ export default function RecruiterLogin() {
                     </form>
 
                     <div className="mt-10 pt-10 border-t border-gray-50 text-center">
-                        <p className="text-[10px] text-gray-400 font-black uppercase tracking-widest italic leading-relaxed">Restricted to authorized recruitment partners.</p>
+                        <p className="text-sm text-gray-500 font-medium normal-case">
+                            New recruiter?{' '}
+                            <Link href="/recruiter/signup" className="text-indigo-600 font-black hover:underline uppercase tracking-tight">
+                                Create Account
+                            </Link>
+                        </p>
                     </div>
                 </div>
 
