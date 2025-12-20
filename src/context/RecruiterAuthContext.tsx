@@ -10,7 +10,8 @@ interface RecruiterAuthContextType {
     loading: boolean;
     login: (email: string, password: string) => Promise<void>;
     register: (data: unknown) => Promise<void>;
-    logout: () => void;
+    logout: () => Promise<void>;
+    updateProfile: (data: Partial<Recruiter>) => Promise<void>;
     isAuthenticated: boolean;
 }
 
@@ -81,15 +82,30 @@ export function RecruiterAuthProvider({ children }: { children: ReactNode }) {
         }
     };
 
-    const logout = () => {
-        localStorage.removeItem('recruiter_access_token');
-        localStorage.removeItem('recruiter_refresh_token');
-        setRecruiter(null);
-        router.push('/recruiter/login');
+    const logout = async () => {
+        try {
+            // Call logout API to invalidate token on server
+            await api.recruiterLogout();
+        } catch (error) {
+            console.error('Logout API call failed:', error);
+            // Continue with client-side logout even if API call fails
+        } finally {
+            localStorage.removeItem('recruiter_access_token');
+            localStorage.removeItem('recruiter_refresh_token');
+            setRecruiter(null);
+            router.push('/recruiter/login');
+        }
+    };
+
+    const updateProfile = async (data: Partial<Recruiter>) => {
+        const response = await api.updateRecruiterProfile(data);
+        if (response.success && response.recruiter) {
+            setRecruiter(response.recruiter);
+        }
     };
 
     return (
-        <RecruiterAuthContext.Provider value={{ recruiter, loading, login, register, logout, isAuthenticated: !!recruiter }}>
+        <RecruiterAuthContext.Provider value={{ recruiter, loading, login, register, logout, updateProfile, isAuthenticated: !!recruiter }}>
             {children}
         </RecruiterAuthContext.Provider>
     );

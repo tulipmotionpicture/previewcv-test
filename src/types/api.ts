@@ -7,15 +7,27 @@ export interface User {
 }
 
 export interface Recruiter {
-    id: number; // Changed to number based on mock usage, verifying API guide match (guide says integer)
-    email: string; // guide says email is returned in profile
+    id: number;
+    email: string;
     username: string;
-    company_name: string;
-    full_name: string;
+    recruiter_type?: string;
+    display_name?: string;
+    full_name?: string;
+    company_name?: string;
     company_website?: string;
+    company_size?: string;
+    industry?: string;
     bio?: string;
-    is_verified?: boolean;
+    location?: string;
+    linkedin_url?: string;
     phone?: string;
+    is_verified?: boolean;
+    is_email_verified?: boolean;
+    profile_url?: string;
+    company_logo_url?: string;
+    specialization?: string;
+    years_experience?: number;
+    created_at?: string;
     last_login?: string;
 }
 

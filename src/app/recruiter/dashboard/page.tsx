@@ -6,9 +6,14 @@ import Image from 'next/image';
 import { api } from '@/lib/api';
 import { Job, Application } from '@/types/api';
 import { useRecruiterAuth } from '@/context/RecruiterAuthContext';
+import { useToast } from '@/context/ToastContext';
+import EditJobModal from '@/components/EditJobModal';
+import ConfirmDialog from '@/components/ui/ConfirmDialog';
+import Breadcrumb from '@/components/ui/Breadcrumb';
 
 export default function RecruiterDashboard() {
     const { recruiter, logout } = useRecruiterAuth();
+    const toast = useToast();
     const [activeTab, setActiveTab] = useState<'jobs' | 'ats'>('jobs');
     const [jobs, setJobs] = useState<Job[]>([]);
     const [applications, setApplications] = useState<Application[]>([]);
@@ -31,6 +36,14 @@ export default function RecruiterDashboard() {
     const [creatingJob, setCreatingJob] = useState(false);
     const [newJobTitle, setNewJobTitle] = useState('');
     const [newJobLocation, setNewJobLocation] = useState('');
+
+    // Edit Job State
+    const [editJobModalOpen, setEditJobModalOpen] = useState(false);
+    const [editingJob, setEditingJob] = useState<Job | null>(null);
+
+    // Delete Job State
+    const [deleteJobId, setDeleteJobId] = useState<number | null>(null);
+    const [deleteLoading, setDeleteLoading] = useState(false);
 
     useEffect(() => {
         // Auth check handled by context/protected route logic mostly
@@ -105,15 +118,51 @@ export default function RecruiterDashboard() {
             await fetchJobs();
             setNewJobTitle('');
             setNewJobLocation('');
-            alert('Job posted successfully!');
+            toast.success('Job posted successfully!');
         } catch (error: unknown) {
             if (error instanceof Error) {
-                alert(error.message || 'Failed to create job');
+                toast.error(error.message || 'Failed to create job');
             } else {
-                alert('Failed to create job');
+                toast.error('Failed to create job');
             }
         } finally {
             setCreatingJob(false);
+        }
+    };
+
+    const handleEditJob = (job: Job) => {
+        setEditingJob(job);
+        setEditJobModalOpen(true);
+    };
+
+    const handleSaveJob = async (jobId: number, data: Partial<Job>) => {
+        try {
+            await api.updateJob(jobId, data);
+            await fetchJobs();
+            toast.success('Job updated successfully!');
+        } catch (error) {
+            toast.error('Failed to update job');
+            throw error;
+        }
+    };
+
+    const handleDeleteJob = async () => {
+        if (!deleteJobId) return;
+
+        setDeleteLoading(true);
+        try {
+            await api.deleteJob(deleteJobId, false); // soft delete
+            await fetchJobs();
+            toast.success('Job deactivated successfully');
+            setDeleteJobId(null);
+            // If the deleted job was selected, clear selection
+            if (selectedJobId === deleteJobId) {
+                setSelectedJobId(null);
+            }
+        } catch {
+            toast.error('Failed to delete job');
+        } finally {
+            setDeleteLoading(false);
         }
     };
 
@@ -170,6 +219,9 @@ export default function RecruiterDashboard() {
 
             {/* Main Content */}
             <main className="flex-1 p-10 max-w-6xl mx-auto overflow-x-hidden">
+                {/* Breadcrumb */}
+                <Breadcrumb className="mb-6" />
+
                 {activeTab === 'jobs' && (
                     <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
                         <h1 className="text-3xl font-black text-gray-900 mb-10">Manage Career Opportunities</h1>
@@ -208,9 +260,32 @@ export default function RecruiterDashboard() {
                                 <div key={job.id} className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm flex items-center justify-between hover:shadow-md transition-shadow">
                                     <div>
                                         <h4 className="font-bold text-xl text-gray-900 mb-1 uppercase tracking-tight">{job.title}</h4>
-                                        <p className="text-gray-400 text-xs font-black uppercase tracking-tight">{job.location} • {job.job_type.replace('_', ' ')} • Active</p>
+                                        <p className="text-gray-400 text-xs font-black uppercase tracking-tight">
+                                            {job.location} • {job.job_type.replace('_', ' ')} •
+                                            <span className={`ml-1 ${job.status === 'active' ? 'text-green-600' : job.status === 'closed' ? 'text-red-600' : 'text-yellow-600'}`}>
+                                                {job.status.charAt(0).toUpperCase() + job.status.slice(1)}
+                                            </span>
+                                        </p>
                                     </div>
                                     <div className="flex gap-3">
+                                        <button
+                                            onClick={() => handleEditJob(job)}
+                                            className="px-4 py-2 bg-gray-50 text-gray-700 font-bold rounded-lg text-sm hover:bg-gray-100 transition-colors"
+                                            title="Edit Job"
+                                        >
+                                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                            </svg>
+                                        </button>
+                                        <button
+                                            onClick={() => setDeleteJobId(job.id)}
+                                            className="px-4 py-2 bg-red-50 text-red-600 font-bold rounded-lg text-sm hover:bg-red-100 transition-colors"
+                                            title="Delete Job"
+                                        >
+                                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                            </svg>
+                                        </button>
                                         <button
                                             onClick={() => { setSelectedJobId(job.id); setActiveTab('ats'); }}
                                             className="px-4 py-2 bg-indigo-50 text-indigo-600 font-bold rounded-lg text-sm hover:bg-indigo-100 transition-colors"
@@ -376,6 +451,26 @@ export default function RecruiterDashboard() {
                     </div>
                 </div>
             )}
+
+            {/* Edit Job Modal */}
+            <EditJobModal
+                isOpen={editJobModalOpen}
+                onClose={() => setEditJobModalOpen(false)}
+                onSave={handleSaveJob}
+                job={editingJob}
+            />
+
+            {/* Delete Job Confirmation */}
+            <ConfirmDialog
+                isOpen={deleteJobId !== null}
+                onClose={() => setDeleteJobId(null)}
+                onConfirm={handleDeleteJob}
+                title="Delete Job Posting"
+                message="Are you sure you want to deactivate this job posting? It will no longer be visible to candidates."
+                confirmText="Delete Job"
+                variant="danger"
+                loading={deleteLoading}
+            />
         </div>
     );
 }

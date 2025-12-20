@@ -12,12 +12,11 @@
 2. [Authentication](#authentication)
 3. [Candidate Endpoints](#candidate-endpoints)
 4. [Recruiter Endpoints](#recruiter-endpoints)
-5. [Resume Management (Candidates)](#resume-management-candidates)
-6. [PDF Resume Upload (PreviewCV-Only Candidates)](#pdf-resume-upload-previewcv-only-candidates)
-7. [Job Browsing & Application](#job-browsing--application)
-8. [Recruiter Job Management](#recruiter-job-management)
-9. [Error Handling](#error-handling)
-10. [Next.js Implementation Examples](#nextjs-implementation-examples)
+5. [PDF Resume Management (Candidates)](#pdf-resume-management-candidates)
+6. [Job Browsing & Application](#job-browsing--application)
+7. [Recruiter Job Management](#recruiter-job-management)
+8. [Error Handling](#error-handling)
+9. [Next.js Implementation Examples](#nextjs-implementation-examples)
 
 ---
 
@@ -30,7 +29,11 @@ PreviewCV.com has **two types of users**:
   - ✅ Email/Password
   - ✅ Social Login (Google, LinkedIn, etc.)
 - **Shared with LetsMakeCV**: Same user database and authentication
-- **Features**: Browse jobs, apply to jobs, track applications
+- **Features**:
+  - Upload PDF resumes directly (no builder needed)
+  - Generate permanent shareable links with QR codes
+  - Browse jobs, apply to jobs, track applications
+  - Manage profile and settings
 
 ### 2. **Recruiters** (Employers)
 - **Login Methods**:
@@ -216,28 +219,45 @@ Recruiters have a **SEPARATE authentication system** (email/password ONLY).
 {
   "email": "recruiter@techcorp.com",
   "password": "SecurePass123!",
-  "company_name": "Tech Corp",
-  "full_name": "Jane Smith",
-  "phone": "+1234567890",
-  "company_website": "https://techcorp.com",
-  "bio": "Leading tech recruitment agency"
+  "recruiter_type": "company",
+  "username": "tech-corp",
+  "company_name": "Tech Corp Inc"
 }
 ```
+
+**Optional Fields** (can be added during registration or updated later via profile):
+- **Company fields**: `company_website`, `company_size`, `industry`, `company_logo_url`
+- **Individual fields**: `full_name`, `specialization`, `years_experience`
+- **Common fields**: `bio`, `phone`, `linkedin_url`, `location`
 
 **Response**:
 ```json
 {
-  "success": true,
-  "message": "Recruiter registered successfully",
-  "recruiter": {
-    "id": 1,
-    "email": "recruiter@techcorp.com",
-    "company_name": "Tech Corp",
-    "full_name": "Jane Smith",
-    "username": "tech-corp"
-  },
   "access_token": "eyJhbGc...",
-  "refresh_token": "eyJhbGc..."
+  "refresh_token": "eyJhbGc...",
+  "token_type": "bearer",
+  "recruiter": {
+    "id": 2,
+    "username": "tech-corp",
+    "recruiter_type": "company",
+    "display_name": "Tech Corp Inc",
+    "bio": null,
+    "location": null,
+    "linkedin_url": null,
+    "is_verified": false,
+    "profile_url": "/recruiter/tech-corp",
+    "created_at": "2025-12-20T14:30:30.832804",
+    "company_name": "Tech Corp Inc",
+    "company_website": null,
+    "company_size": null,
+    "industry": null,
+    "company_logo_url": null,
+    "email": "recruiter@techcorp.com",
+    "phone": null,
+    "is_email_verified": false,
+    "last_login": null,
+    "updated_at": "2025-12-20T14:30:30.832804"
+  }
 }
 ```
 
@@ -257,17 +277,31 @@ Recruiters have a **SEPARATE authentication system** (email/password ONLY).
 **Response**:
 ```json
 {
-  "success": true,
-  "message": "Login successful",
-  "recruiter": {
-    "id": 1,
-    "email": "recruiter@techcorp.com",
-    "company_name": "Tech Corp",
-    "full_name": "Jane Smith",
-    "username": "tech-corp"
-  },
   "access_token": "eyJhbGc...",
-  "refresh_token": "eyJhbGc..."
+  "refresh_token": "eyJhbGc...",
+  "token_type": "bearer",
+  "recruiter": {
+    "id": 2,
+    "username": "tech-corp",
+    "recruiter_type": "company",
+    "display_name": "Tech Corp Inc",
+    "bio": "Leading tech recruitment company",
+    "location": "San Francisco, CA",
+    "linkedin_url": "https://linkedin.com/company/tech-corp",
+    "is_verified": false,
+    "profile_url": "/recruiter/tech-corp",
+    "created_at": "2025-12-20T14:30:30.832804",
+    "company_name": "Tech Corp Inc",
+    "company_website": "https://techcorp.com",
+    "company_size": "51-200",
+    "industry": "Technology",
+    "company_logo_url": null,
+    "email": "recruiter@techcorp.com",
+    "phone": "+1-555-1234",
+    "is_email_verified": false,
+    "last_login": "2025-12-20T14:32:25.650747",
+    "updated_at": "2025-12-20T14:32:25.473748"
+  }
 }
 ```
 
@@ -279,45 +313,86 @@ Recruiters have a **SEPARATE authentication system** (email/password ONLY).
 **Endpoint**: `GET /api/v1/recruiters/profile/me`
 **Auth**: Required (Recruiter Bearer Token)
 
-**Response**:
+**Response**: Returns full profile including private fields (email, phone, last_login)
 ```json
 {
-  "success": true,
-  "recruiter": {
-    "id": 1,
-    "email": "recruiter@techcorp.com",
-    "company_name": "Tech Corp",
-    "full_name": "Jane Smith",
-    "username": "tech-corp",
-    "phone": "+1234567890",
-    "company_website": "https://techcorp.com",
-    "bio": "Leading tech recruitment agency",
-    "is_verified": false,
-    "last_login": "2025-12-20T10:00:00"
-  }
+  "id": 2,
+  "email": "recruiter@techcorp.com",
+  "username": "tech-corp",
+  "recruiter_type": "company",
+  "display_name": "Tech Corp Inc",
+  "bio": "Leading tech recruitment company",
+  "location": "San Francisco, CA",
+  "linkedin_url": "https://linkedin.com/company/tech-corp",
+  "phone": "+1-555-1234",
+  "is_verified": false,
+  "is_email_verified": false,
+  "profile_url": "/recruiter/tech-corp",
+  "created_at": "2025-12-20T14:30:30.832804",
+  "last_login": "2025-12-20T14:32:25.650747",
+  "company_name": "Tech Corp Inc",
+  "company_website": "https://testcompany.com",
+  "company_size": "51-200",
+  "industry": "Technology",
+  "company_logo_url": null,
+  "full_name": null,
+  "specialization": null,
+  "years_experience": null
 }
 ```
 
 ---
 
-### 4. Get Public Recruiter Profile
+### 4. Update Recruiter Profile
+**Endpoint**: `PUT /api/v1/recruiters/profile/me`
+**Auth**: Required (Recruiter Bearer Token)
+
+**Request** (all fields optional):
+```json
+{
+  "bio": "Leading tech recruitment company specializing in software engineering roles",
+  "company_website": "https://techcorp.com",
+  "company_size": "51-200",
+  "industry": "Technology",
+  "location": "San Francisco, CA",
+  "linkedin_url": "https://linkedin.com/company/tech-corp",
+  "phone": "+1-555-1234",
+  "username": "new-username"
+}
+```
+
+**Response**: Returns updated profile with all fields
+
+**Note**: Username changes will update the `profile_url` automatically.
+
+---
+
+### 5. Get Public Recruiter Profile
 **Endpoint**: `GET /api/v1/recruiters/profile/{username}`
 **Auth**: Not Required (Public)
 
 **Example**: `GET /api/v1/recruiters/profile/tech-corp`
 
-**Response**:
+**Response**: Returns public profile (excludes email, phone, last_login)
 ```json
 {
-  "success": true,
-  "recruiter": {
-    "company_name": "Tech Corp",
-    "full_name": "Jane Smith",
-    "username": "tech-corp",
-    "company_website": "https://techcorp.com",
-    "bio": "Leading tech recruitment agency",
-    "is_verified": false
-  }
+  "id": 2,
+  "username": "tech-corp",
+  "recruiter_type": "company",
+  "display_name": "Tech Corp Inc",
+  "bio": "Leading tech recruitment company",
+  "location": "San Francisco, CA",
+  "linkedin_url": "https://linkedin.com/company/tech-corp",
+  "is_verified": false,
+  "profile_url": "/recruiter/tech-corp",
+  "created_at": "2025-12-20T14:30:30.832804",
+  "company_name": "Tech Corp Inc",
+  "company_website": "https://testcompany.com",
+  "company_size": "51-200",
+  "industry": "Technology",
+  "company_logo_url": null,
+  "full_name": null,
+  "specialization": null
 }
 ```
 
@@ -325,7 +400,124 @@ Recruiters have a **SEPARATE authentication system** (email/password ONLY).
 
 ---
 
-### 5. Refresh Recruiter Token
+### 6. Request Password Reset
+**Endpoint**: `POST /api/v1/recruiters/auth/password-reset/request`
+**Auth**: Not Required
+
+**Request**:
+```json
+{
+  "email": "recruiter@techcorp.com"
+}
+```
+
+**Response**:
+```json
+{
+  "message": "If the email exists, a password reset link has been sent"
+}
+```
+
+**Notes**:
+- Always returns success to prevent email enumeration
+- Reset link sent to: `{PREVIEWCV_FRONTEND_URL}/recruiter/auth/reset-password?token={token}`
+- Token expires in 1 hour
+- Email sent via ZeptoMail
+
+---
+
+### 7. Confirm Password Reset
+**Endpoint**: `POST /api/v1/recruiters/auth/password-reset/confirm`
+**Auth**: Not Required
+
+**Request**:
+```json
+{
+  "token": "reset_token_from_email",
+  "new_password": "NewSecurePass123!"
+}
+```
+
+**Success Response**:
+```json
+{
+  "message": "Password has been reset successfully"
+}
+```
+
+**Error Response** (invalid/expired token):
+```json
+{
+  "detail": "Invalid or expired reset token"
+}
+```
+
+**Notes**:
+- Token is single-use (cleared after successful reset)
+- Password must be minimum 8 characters
+- Token expires after 1 hour
+
+---
+
+### 8. Verify Email
+**Endpoint**: `POST /api/v1/recruiters/auth/verify-email`
+**Auth**: Not Required
+
+**Request**:
+```json
+{
+  "token": "verification_token_from_email"
+}
+```
+
+**Success Response**:
+```json
+{
+  "message": "Email verified successfully"
+}
+```
+
+**Error Response** (invalid token):
+```json
+{
+  "detail": "Invalid verification token"
+}
+```
+
+**Notes**:
+- Verification email sent automatically on registration
+- Verification link: `{PREVIEWCV_FRONTEND_URL}/recruiter/auth/verify-email?token={token}`
+- Token is single-use (cleared after successful verification)
+- Sets `is_email_verified` to `true`
+
+---
+
+### 9. Resend Verification Email
+**Endpoint**: `POST /api/v1/recruiters/auth/resend-verification`
+**Auth**: Not Required
+
+**Request**:
+```json
+{
+  "email": "recruiter@techcorp.com"
+}
+```
+
+**Response**:
+```json
+{
+  "message": "If the email exists and is not verified, a verification link has been sent"
+}
+```
+
+**Notes**:
+- Always returns success to prevent email enumeration
+- Generates new verification token
+- Only sends email if account exists and is not already verified
+
+---
+
+### 10. Refresh Recruiter Token
 **Endpoint**: `POST /api/v1/recruiters/auth/refresh`
 
 **Request**:
@@ -345,7 +537,7 @@ Recruiters have a **SEPARATE authentication system** (email/password ONLY).
 
 ---
 
-### 6. Logout Recruiter
+### 11. Logout Recruiter
 **Endpoint**: `POST /api/v1/recruiters/auth/logout`
 **Auth**: Required (Recruiter Bearer Token)
 
@@ -365,253 +557,18 @@ Recruiters have a **SEPARATE authentication system** (email/password ONLY).
 
 ---
 
-## � Resume Management (Candidates)
-
-### 1. List My Resumes
-**Endpoint**: `GET /api/v1/resumes/`
-**Auth**: Required (Candidate Bearer Token)
-
-**Response**:
-```json
-[
-  {
-    "id": 1,
-    "name": "Software Developer Resume",
-    "template_id": 1,
-    "language": "en",
-    "is_active": true,
-    "created_at": "2025-12-20T10:00:00",
-    "updated_at": "2025-12-20T10:00:00",
-    "template_name": "Modern Professional"
-  },
-  {
-    "id": 2,
-    "name": "Senior Engineer Resume",
-    "template_id": 2,
-    "language": "en",
-    "is_active": true,
-    "created_at": "2025-12-19T15:30:00",
-    "updated_at": "2025-12-20T09:00:00",
-    "template_name": "Classic"
-  }
-]
-```
-
----
-
-### 2. Get Resume Details
-**Endpoint**: `GET /api/v1/resumes/{resume_id}`
-**Auth**: Required (Candidate Bearer Token)
-
-**Response**:
-```json
-{
-  "id": 1,
-  "user_id": 1,
-  "template_id": 1,
-  "name": "Software Developer Resume",
-  "data_json": {
-    "personal_info": {
-      "full_name": "John Doe",
-      "email": "john@example.com",
-      "phone": "+1234567890",
-      "location": "San Francisco, CA",
-      "linkedin": "linkedin.com/in/johndoe",
-      "website": "johndoe.com",
-      "summary": "Experienced software developer..."
-    },
-    "experience": [
-      {
-        "company": "Tech Corp",
-        "position": "Senior Developer",
-        "start_date": "2020-01",
-        "end_date": null,
-        "is_current": true,
-        "location": "San Francisco, CA",
-        "description": "Leading development team...",
-        "achievements": [
-          "Increased performance by 40%",
-          "Led team of 5 developers"
-        ]
-      }
-    ],
-    "education": [
-      {
-        "institution": "Stanford University",
-        "degree": "Bachelor of Science",
-        "field_of_study": "Computer Science",
-        "start_date": "2015-09",
-        "end_date": "2019-06",
-        "gpa": "3.8",
-        "achievements": ["Dean's List", "Honors Graduate"]
-      }
-    ],
-    "skills": [
-      {
-        "name": "Python",
-        "level": "Expert",
-        "category": "Programming Languages"
-      },
-      {
-        "name": "React",
-        "level": "Advanced",
-        "category": "Frontend"
-      }
-    ],
-    "projects": [],
-    "certifications": [],
-    "languages": [],
-    "custom_sections": {}
-  },
-  "language": "en",
-  "is_active": true,
-  "pdf_url": "https://storage.example.com/resumes/1.pdf",
-  "docx_url": "https://storage.example.com/resumes/1.docx",
-  "created_at": "2025-12-20T10:00:00",
-  "updated_at": "2025-12-20T10:00:00"
-}
-```
-
----
-
-### 3. Create Resume
-**Endpoint**: `POST /api/v1/resumes/`
-**Auth**: Required (Candidate Bearer Token)
-
-**Request**:
-```json
-{
-  "name": "Software Developer Resume",
-  "template_id": 1,
-  "language": "en",
-  "data_json": {
-    "personal_info": {
-      "full_name": "John Doe",
-      "email": "john@example.com",
-      "phone": "+1234567890",
-      "location": "San Francisco, CA",
-      "summary": "Experienced software developer..."
-    },
-    "experience": [
-      {
-        "company": "Tech Corp",
-        "position": "Senior Developer",
-        "start_date": "2020-01",
-        "is_current": true,
-        "location": "San Francisco, CA",
-        "description": "Leading development team...",
-        "achievements": ["Increased performance by 40%"]
-      }
-    ],
-    "education": [],
-    "skills": [
-      {
-        "name": "Python",
-        "level": "Expert",
-        "category": "Programming Languages"
-      }
-    ],
-    "projects": [],
-    "certifications": [],
-    "languages": [],
-    "custom_sections": {}
-  }
-}
-```
-
-**Response**: Same as "Get Resume Details"
-
----
-
-### 4. Update Resume
-**Endpoint**: `PUT /api/v1/resumes/{resume_id}`
-**Auth**: Required (Candidate Bearer Token)
-
-**Request**:
-```json
-{
-  "name": "Updated Resume Name",
-  "data_json": {
-    "personal_info": {
-      "full_name": "John Doe",
-      "email": "john@example.com",
-      "summary": "Updated summary..."
-    },
-    "experience": [...],
-    "skills": [...]
-  }
-}
-```
-
-**Response**: Same as "Get Resume Details"
-
----
-
-### 5. Delete Resume
-**Endpoint**: `DELETE /api/v1/resumes/{resume_id}`
-**Auth**: Required (Candidate Bearer Token)
-
-**Response**:
-```json
-{
-  "success": true,
-  "message": "Resume deleted successfully"
-}
-```
-
----
-
-### 6. Generate Resume File (PDF/DOCX)
-**Endpoint**: `POST /api/v1/resumes/{resume_id}/generate`
-**Auth**: Required (Candidate Bearer Token)
-
-**Request**:
-```json
-{
-  "format": "pdf"
-}
-```
-
-**Response**:
-```json
-{
-  "success": true,
-  "format": "pdf",
-  "file_url": "https://storage.example.com/resumes/1.pdf",
-  "message": "Resume generated successfully"
-}
-```
-
-**Supported Formats**:
-- `pdf` - PDF format
-- `docx` - Microsoft Word format
-
----
-
-## � PDF Resume Upload (PreviewCV-Only Candidates)
+## 📄 PDF Resume Management (Candidates)
 
 ### Overview
 
-**Use Case**: Candidates who register on PreviewCV.com but **never use LetsMakeCV.com's resume builder**.
-
-These candidates can:
-- ✅ Upload existing PDF resumes directly
-- ✅ Store resumes in BunnyCDN
+PreviewCV focuses on **PDF resume uploads** for candidates who want to:
+- ✅ Upload existing PDF resumes directly (no builder needed)
+- ✅ Store resumes securely in BunnyCDN
 - ✅ Generate permanent shareable links with QR codes
 - ✅ Apply to jobs with uploaded resumes
-- ✅ Bypass the entire LetsMakeCV resume builder workflow
+- ✅ Manage multiple resume versions
 
-**Key Differences**:
-| Feature | Builder Resumes (`/api/v1/resumes/`) | Uploaded Resumes (`/api/v1/pdf-resumes/`) |
-|---------|--------------------------------------|-------------------------------------------|
-| **Source** | Created via LetsMakeCV builder | Uploaded PDF files |
-| **Template Required** | ✅ Yes (`template_id`) | ❌ No |
-| **Data JSON** | ✅ Yes (structured data) | ❌ No |
-| **File Format** | Generated (PDF/DOCX) | PDF only |
-| **Storage** | Database + BunnyCDN | BunnyCDN only |
-| **Use Case** | LetsMakeCV users | PreviewCV-only users |
-
-**Both resume types can coexist**: A user can have both builder resumes and uploaded resumes.
+**Note**: Builder resumes from LetsMakeCV.com are also accessible via `GET /api/v1/resumes/` for candidates who use both platforms, but PreviewCV does not provide creation/editing of builder resumes.
 
 ---
 
@@ -1482,25 +1439,31 @@ GET /api/v1/jobs/1
 ---
 
 ### 2. Get My Job Postings
-**Endpoint**: `GET /api/v1/recruiters/jobs/my-jobs`
+**Endpoint**: `GET /api/v1/recruiters/jobs/my-postings`
 **Auth**: Required (Recruiter Bearer Token)
+
+**Query Parameters**:
+- `is_active` (optional): Filter by active/inactive status (true/false)
+- `limit` (optional): Number of results (default: 50)
+- `offset` (optional): Pagination offset (default: 0)
 
 **Response**:
 ```json
 {
   "success": true,
+  "total": 1,
   "jobs": [
     {
-      "id": 1,
-      "slug": "senior-python-developer-at-google-mountain-view-ca-1",
-      "title": "Senior Python Developer",
-      "company_name": "Google",
-      "location": "Mountain View, CA",
+      "id": 3,
+      "title": "Senior Software Engineer",
+      "company_name": "Test Company Inc",
+      "location": "San Francisco, CA",
       "job_type": "full_time",
       "is_active": true,
-      "posted_date": "2025-12-20T09:54:11.817970",
-      "application_count": 5,
-      "view_count": 120
+      "application_count": 0,
+      "view_count": 0,
+      "posted_date": "2025-12-20T14:39:27.676888",
+      "created_at": "2025-12-20T14:39:27.672399"
     }
   ]
 }
@@ -1508,27 +1471,140 @@ GET /api/v1/jobs/1
 
 ---
 
-### 3. Get Applications for My Job
-**Endpoint**: `GET /api/v1/recruiters/jobs/{job_id}/applications`
+### 3. Get Single Job Posting Details
+**Endpoint**: `GET /api/v1/recruiters/jobs/posting/{job_id}`
+**Auth**: Required (Recruiter Bearer Token)
+
+**Response**: Returns complete job details
+```json
+{
+  "success": true,
+  "job": {
+    "id": 3,
+    "title": "Senior Software Engineer",
+    "slug": "senior-software-engineer-at-test-company-inc-san-francisco-ca-3",
+    "company_name": "Test Company Inc",
+    "location": "San Francisco, CA",
+    "job_type": "full_time",
+    "experience_level": "senior",
+    "description": "We are looking for a senior software engineer...",
+    "requirements": "5+ years of experience",
+    "responsibilities": "Lead development of new features",
+    "salary_min": 130000,
+    "salary_max": 200000,
+    "salary_currency": "USD",
+    "is_remote": true,
+    "required_skills": ["Python", "FastAPI", "PostgreSQL"],
+    "preferred_skills": [],
+    "categories": [],
+    "is_active": true,
+    "application_count": 0,
+    "view_count": 0,
+    "posted_date": "2025-12-20T14:39:27.676888",
+    "created_at": "2025-12-20T14:39:27.672399",
+    "updated_at": "2025-12-20T14:41:23.022177"
+  }
+}
+```
+
+---
+
+### 4. Update Job Posting
+**Endpoint**: `PUT /api/v1/recruiters/jobs/posting/{job_id}`
+**Auth**: Required (Recruiter Bearer Token)
+
+**Request** (all fields optional):
+```json
+{
+  "title": "Senior Software Engineer - Updated",
+  "salary_min": 140000,
+  "salary_max": 210000,
+  "responsibilities": "Lead development of new features and mentor junior developers",
+  "is_active": true
+}
+```
+
+**Response**:
+```json
+{
+  "success": true,
+  "message": "Job posting updated successfully",
+  "job": {
+    "id": 3,
+    "title": "Senior Software Engineer - Updated",
+    "slug": "senior-software-engineer-updated-at-test-company-inc-san-francisco-ca-3",
+    "company_name": "Test Company Inc",
+    "location": "San Francisco, CA",
+    "is_active": true,
+    "updated_at": "2025-12-20T14:41:23.022177"
+  }
+}
+```
+
+**Note**: Updating title, company_name, or location will regenerate the slug automatically.
+
+---
+
+### 5. Delete/Deactivate Job Posting
+**Endpoint**: `DELETE /api/v1/recruiters/jobs/posting/{job_id}`
+**Auth**: Required (Recruiter Bearer Token)
+
+**Query Parameters**:
+- `permanent` (optional): Set to `true` for hard delete (default: false = soft delete)
+
+**Response**:
+```json
+{
+  "success": true,
+  "message": "Job posting deactivated",
+  "job_id": 3
+}
+```
+
+**Note**: Soft delete (default) sets `is_active=false`. Hard delete permanently removes the job (not recommended if there are applications).
+
+---
+
+### 6. Get Dashboard Statistics
+**Endpoint**: `GET /api/v1/recruiters/jobs/dashboard/stats`
 **Auth**: Required (Recruiter Bearer Token)
 
 **Response**:
 ```json
 {
   "success": true,
-  "job_id": 1,
-  "job_title": "Senior Python Developer",
+  "total_job_postings": 1,
+  "active_job_postings": 1,
+  "total_applications": 0
+}
+```
+
+---
+
+### 7. Get Applications for Job
+**Endpoint**: `GET /api/v1/recruiters/jobs/posting/{job_id}/applications`
+**Auth**: Required (Recruiter Bearer Token)
+
+**Query Parameters**:
+- `status_filter` (optional): Filter by application status
+
+**Response**:
+```json
+{
+  "success": true,
+  "job_id": 3,
+  "job_title": "Senior Software Engineer",
+  "total_applications": 0,
   "applications": [
     {
-      "id": 456,
-      "user_id": 1,
-      "candidate_name": "John Doe",
-      "candidate_email": "candidate@example.com",
-      "resume_id": 123,
+      "id": 1,
+      "user_id": 5,
+      "resume_id": null,
+      "cover_letter_id": null,
       "status": "applied",
       "applied_at": "2025-12-20T10:30:00",
-      "cover_letter": "I am excited to apply for this position...",
-      "notes": null
+      "custom_message": "I am excited to apply for this position...",
+      "created_at": "2025-12-20T10:30:00"
     }
   ]
 }
@@ -1536,8 +1612,49 @@ GET /api/v1/jobs/1
 
 ---
 
-### 4. Update Application Status
-**Endpoint**: `PUT /api/v1/recruiters/jobs/applications/{application_id}/status`
+### 8. Get Detailed Application Information
+**Endpoint**: `GET /api/v1/recruiters/jobs/application/{application_id}`
+**Auth**: Required (Recruiter Bearer Token)
+
+**Response**: Returns complete application details with candidate information
+```json
+{
+  "success": true,
+  "application": {
+    "id": 1,
+    "status": "applied",
+    "applied_at": "2025-12-20T10:30:00",
+    "custom_message": "I am excited to apply for this position...",
+    "portfolio_items": [],
+    "created_at": "2025-12-20T10:30:00",
+    "updated_at": "2025-12-20T10:30:00"
+  },
+  "candidate": {
+    "id": 5,
+    "email": "candidate@example.com",
+    "full_name": "John Doe",
+    "created_at": "2025-12-20T09:00:00"
+  },
+  "job": {
+    "id": 3,
+    "title": "Senior Software Engineer",
+    "slug": "senior-software-engineer-at-test-company-inc-san-francisco-ca-3",
+    "company_name": "Test Company Inc",
+    "location": "San Francisco, CA"
+  },
+  "resume": {
+    "id": 123,
+    "title": "John Doe - Software Engineer",
+    "created_at": "2025-12-15T10:00:00"
+  },
+  "uploaded_resume": null
+}
+```
+
+---
+
+### 9. Update Application Status
+**Endpoint**: `PUT /api/v1/recruiters/jobs/application/{application_id}/status`
 **Auth**: Required (Recruiter Bearer Token)
 
 **Request**:
@@ -1552,23 +1669,26 @@ GET /api/v1/jobs/1
 ```json
 {
   "success": true,
-  "message": "Application status updated successfully",
+  "message": "Application status updated from applied to interview_scheduled",
   "application": {
-    "id": 456,
+    "id": 1,
+    "job_posting_id": 3,
+    "user_id": 5,
     "status": "interview_scheduled",
-    "notes": "Interview scheduled for Dec 25, 2025 at 2 PM",
     "updated_at": "2025-12-20T11:00:00"
   }
 }
 ```
 
-**Available Status Transitions**:
-- `applied` → `under_review`
-- `under_review` → `interview_scheduled` or `rejected`
-- `interview_scheduled` → `interviewed`
-- `interviewed` → `offered` or `rejected`
-- `offered` → `accepted` or `rejected`
-- Any status → `withdrawn` (by candidate)
+**Available Application Statuses**:
+- `applied` - Initial application
+- `under_review` - Recruiter is reviewing
+- `interview_scheduled` - Interview has been scheduled
+- `interviewed` - Interview completed
+- `offered` - Job offer extended
+- `accepted` - Candidate accepted offer
+- `rejected` - Application rejected
+- `withdrawn` - Candidate withdrew application
 
 ---
 

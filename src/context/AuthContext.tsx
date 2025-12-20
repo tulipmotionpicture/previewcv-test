@@ -9,7 +9,8 @@ interface AuthContextType {
     loading: boolean;
     login: (email: string, password: string) => Promise<void>;
     register: (email: string, password: string, fullName: string) => Promise<void>;
-    logout: () => void;
+    logout: () => Promise<void>;
+    updateProfile: (data: Partial<User>) => Promise<void>;
     isAuthenticated: boolean;
 }
 
@@ -71,10 +72,23 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         }
     };
 
-    const logout = () => {
-        localStorage.removeItem('access_token');
-        localStorage.removeItem('refresh_token');
-        setUser(null);
+    const logout = async () => {
+        try {
+            // Call logout API to invalidate token on server
+            await api.candidateLogout();
+        } catch (error) {
+            console.error('Logout API call failed:', error);
+            // Continue with client-side logout even if API call fails
+        } finally {
+            localStorage.removeItem('access_token');
+            localStorage.removeItem('refresh_token');
+            setUser(null);
+        }
+    };
+
+    const updateProfile = async (data: Partial<User>) => {
+        const updatedUser = await api.updateCandidateProfile(data);
+        setUser(updatedUser);
     };
 
     return (
@@ -84,6 +98,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             login,
             register,
             logout,
+            updateProfile,
             isAuthenticated: !!user
         }}>
             {children}

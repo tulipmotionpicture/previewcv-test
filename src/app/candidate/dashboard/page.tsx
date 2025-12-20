@@ -1,16 +1,21 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import config from '@/config';
 import Image from 'next/image';
 import Link from 'next/link';
 import { api } from '@/lib/api';
 import { Job, Application, PdfResume, Resume } from '@/types/api';
 import { useAuth } from '@/context/AuthContext';
+import { useToast } from '@/context/ToastContext';
 import ResumeUpload from '@/components/ResumeUpload';
+import Breadcrumb from '@/components/ui/Breadcrumb';
 
 export default function CandidateDashboard() {
+    const router = useRouter();
     const { user, logout } = useAuth();
+    const toast = useToast();
     const [activeTab, setActiveTab] = useState<'explore' | 'applications' | 'resumes'>('explore');
     const [jobs, setJobs] = useState<Job[]>([]);
     const [applications, setApplications] = useState<Application[]>([]);
@@ -29,6 +34,7 @@ export default function CandidateDashboard() {
         } else if (activeTab === 'resumes') {
             fetchResumes();
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [activeTab]);
 
     const fetchJobs = async () => {
@@ -37,9 +43,17 @@ export default function CandidateDashboard() {
             const response = await api.getJobs(new URLSearchParams({ limit: '50' }));
             if (response.items) {
                 setJobs(response.items);
+            } else {
+                setJobs([]);
             }
         } catch (error) {
             console.error('Failed to fetch jobs', error);
+            setJobs([]);
+            // Silently fail for database errors
+            const errorMsg = error instanceof Error ? error.message : 'Failed to load jobs';
+            if (!errorMsg.includes('Database service error')) {
+                toast.error(errorMsg);
+            }
         } finally {
             setLoading(false);
         }
@@ -51,9 +65,17 @@ export default function CandidateDashboard() {
             const response = await api.getMyApplications();
             if (response.success && response.applications) {
                 setApplications(response.applications);
+            } else {
+                setApplications([]);
             }
         } catch (error) {
             console.error('Failed to fetch applications', error);
+            setApplications([]);
+            // Only show toast if it's not a database error (which is expected if backend is down)
+            const errorMsg = error instanceof Error ? error.message : 'Failed to load applications';
+            if (!errorMsg.includes('Database service error')) {
+                toast.error(errorMsg);
+            }
         } finally {
             setLoading(false);
         }
@@ -72,6 +94,13 @@ export default function CandidateDashboard() {
             setBuilderResumes(builderRes || []);
         } catch (error) {
             console.error('Failed to fetch resumes', error);
+            setPdfResumes([]);
+            setBuilderResumes([]);
+            // Silently fail for database errors
+            const errorMsg = error instanceof Error ? error.message : 'Failed to load resumes';
+            if (!errorMsg.includes('Database service error')) {
+                toast.error(errorMsg);
+            }
         } finally {
             setLoading(false);
         }
@@ -129,6 +158,25 @@ export default function CandidateDashboard() {
                     </nav>
                 </div>
                 <div className="flex items-center gap-4">
+                    <button
+                        onClick={() => router.push('/candidate/resumes')}
+                        className="p-2 text-gray-400 hover:text-blue-600 transition-colors"
+                        title="My Resumes"
+                    >
+                        <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                    </button>
+                    <button
+                        onClick={() => router.push('/candidate/settings')}
+                        className="p-2 text-gray-400 hover:text-blue-600 transition-colors"
+                        title="Settings"
+                    >
+                        <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                    </button>
                     <div className="text-right">
                         <p className="text-sm font-bold text-gray-900">{user?.full_name || 'Candidate'}</p>
                         <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Job Seeker</p>
@@ -139,6 +187,9 @@ export default function CandidateDashboard() {
             </header>
 
             <main className="flex-1 p-8 max-w-6xl mx-auto w-full">
+                {/* Breadcrumb */}
+                <Breadcrumb className="mb-6" />
+
                 {activeTab === 'explore' && (
                     <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
                         <div className="mb-12">
