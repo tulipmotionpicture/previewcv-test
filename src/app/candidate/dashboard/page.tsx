@@ -5,7 +5,7 @@ import config from '@/config';
 import Image from 'next/image';
 import Link from 'next/link';
 import { api } from '@/lib/api';
-import { Job, Application } from '@/types/api';
+import { Job, Application, PdfResume, Resume } from '@/types/api';
 import { useAuth } from '@/context/AuthContext';
 import ResumeUpload from '@/components/ResumeUpload';
 
@@ -18,13 +18,16 @@ export default function CandidateDashboard() {
     const [loading, setLoading] = useState(false);
 
     // Resume state
-    const [uploadedResumeId, setUploadedResumeId] = useState<number | null>(null);
+    const [pdfResumes, setPdfResumes] = useState<PdfResume[]>([]);
+    const [builderResumes, setBuilderResumes] = useState<Resume[]>([]);
 
     useEffect(() => {
         if (activeTab === 'explore') {
             fetchJobs();
         } else if (activeTab === 'applications') {
             fetchApplications();
+        } else if (activeTab === 'resumes') {
+            fetchResumes();
         }
     }, [activeTab]);
 
@@ -56,6 +59,34 @@ export default function CandidateDashboard() {
         }
     };
 
+    const fetchResumes = async () => {
+        setLoading(true);
+        try {
+            // Fetch both types in parallel
+            const [pdfRes, builderRes] = await Promise.all([
+                api.getPdfResumes().catch(() => ({ total: 0, resumes: [] })),
+                api.getResumes().catch(() => [])
+            ]);
+
+            setPdfResumes(pdfRes.resumes || []);
+            setBuilderResumes(builderRes || []);
+        } catch (error) {
+            console.error('Failed to fetch resumes', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const deleteResume = async (id: number) => {
+        if (!confirm('Are you sure you want to delete this resume?')) return;
+        try {
+            await api.deletePdfResume(id);
+            fetchResumes(); // Refresh list
+        } catch {
+            alert('Failed to delete resume');
+        }
+    };
+
     const filteredJobs = jobs.filter(job =>
         job.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         job.company_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -63,11 +94,9 @@ export default function CandidateDashboard() {
     );
 
     const handleResumeUploadSuccess = (resumeId: number) => {
-        setUploadedResumeId(resumeId);
-        // Persist to local storage as a simple way to access it in JobDetails for now
-        // since we don't have a "getResumes" endpoint.
         localStorage.setItem('last_uploaded_resume_id', resumeId.toString());
         alert('Resume uploaded successfully!');
+        fetchResumes(); // Refresh list
     };
 
     return (
@@ -177,11 +206,6 @@ export default function CandidateDashboard() {
                                     {loading ? (
                                         <tr><td colSpan={3} className="px-6 py-10 text-center">Loading applications...</td></tr>
                                     ) : applications.map(app => {
-                                        // We might need to fetch job details for each app if not provided in application object, 
-                                        // but for now let's assume we might lack job title if not in Application response.
-                                        // The Application type has `job_id`, but not title. 
-                                        // We might need to fetch jobs or get it from elsewhere.
-                                        // For MVP, if we don't have it, we show Job ID or "Job Position".
                                         return (
                                             <tr key={app.id}>
                                                 <td className="px-6 py-6">
@@ -215,19 +239,80 @@ export default function CandidateDashboard() {
                             <p className="text-gray-500">Upload and manage your CVs for job applications.</p>
                         </div>
 
-                        <div className="bg-white p-8 rounded-3xl shadow-sm border border-gray-100 max-w-2xl">
-                            <h3 className="font-bold text-lg mb-6">Upload New Resume</h3>
-                            <ResumeUpload onUploadSuccess={handleResumeUploadSuccess} />
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                            {/* Upload Section */}
+                            <div className="bg-white p-8 rounded-3xl shadow-sm border border-gray-100 h-fit">
+                                <h3 className="font-bold text-lg mb-6">Upload New PDF Resume</h3>
+                                <ResumeUpload onUploadSuccess={handleResumeUploadSuccess} />
+                            </div>
 
-                            {uploadedResumeId && (
-                                <div className="mt-8 p-4 bg-green-50 text-green-700 rounded-xl border border-green-100 flex items-center gap-3">
-                                    <span className="text-2xl">📄</span>
-                                    <div>
-                                        <p className="font-bold">Resume Uploaded</p>
-                                        <p className="text-xs">ID: {uploadedResumeId} (Ready to use)</p>
-                                    </div>
+                            {/* Resume List */}
+                            <div className="space-y-8">
+                                {/* PDF Resumes */}
+                                <div>
+                                    <h3 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
+                                        <span className="w-2 h-2 rounded-full bg-indigo-500"></span>
+                                        Uploaded Resumes
+                                    </h3>
+                                    {loading ? (
+                                        <div className="text-gray-400 text-sm">Loading...</div>
+                                    ) : pdfResumes.length > 0 ? (
+                                        <div className="space-y-3">
+                                            {pdfResumes.map(resume => (
+                                                <div key={resume.id} className="bg-white p-4 rounded-2xl border border-gray-100 hover:shadow-md transition-shadow flex items-center justify-between">
+                                                    <div className="flex items-center gap-3">
+                                                        <div className="w-10 h-10 bg-indigo-50 text-indigo-600 rounded-xl flex items-center justify-center text-lg">📄</div>
+                                                        <div>
+                                                            <p className="font-bold text-sm text-gray-900">{resume.resume_name}</p>
+                                                            <p className="text-xs text-gray-400">{new Date(resume.created_at).toLocaleDateString()}</p>
+                                                        </div>
+                                                    </div>
+                                                    <button
+                                                        onClick={() => deleteResume(resume.id)}
+                                                        className="text-gray-300 hover:text-red-500 transition-colors p-2"
+                                                        title="Delete Resume"
+                                                    >
+                                                        ✕
+                                                    </button>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    ) : (
+                                        <div className="p-6 bg-gray-50 rounded-2xl text-center text-gray-400 text-sm">
+                                            No PDF resumes uploaded yet.
+                                        </div>
+                                    )}
                                 </div>
-                            )}
+
+                                {/* Builder Resumes */}
+                                <div>
+                                    <h3 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
+                                        <span className="w-2 h-2 rounded-full bg-pink-500"></span>
+                                        LetsMakeCV Resumes
+                                    </h3>
+                                    {loading ? (
+                                        <div className="text-gray-400 text-sm">Loading...</div>
+                                    ) : builderResumes.length > 0 ? (
+                                        <div className="space-y-3">
+                                            {builderResumes.map(resume => (
+                                                <div key={resume.id} className="bg-white p-4 rounded-2xl border border-gray-100 hover:shadow-md transition-shadow flex items-center justify-between">
+                                                    <div className="flex items-center gap-3">
+                                                        <div className="w-10 h-10 bg-pink-50 text-pink-600 rounded-xl flex items-center justify-center text-lg">📝</div>
+                                                        <div>
+                                                            <p className="font-bold text-sm text-gray-900">{resume.name}</p>
+                                                            <p className="text-xs text-gray-400">Template: {resume.template_name || 'Standard'}</p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    ) : (
+                                        <div className="p-6 bg-gray-50 rounded-2xl text-center text-gray-400 text-sm">
+                                            No resumes found from LetsMakeCV builder.
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
                         </div>
                     </div>
                 )}

@@ -6,7 +6,7 @@ import config from '@/config';
 import Image from 'next/image';
 import Link from 'next/link';
 import { api } from '@/lib/api';
-import { Job } from '@/types/api';
+import { Job, PdfResume, Resume } from '@/types/api';
 import { useAuth } from '@/context/AuthContext';
 import ResumeUpload from '@/components/ResumeUpload';
 
@@ -20,6 +20,12 @@ export default function JobDetails({ params }: { params: Promise<{ slug: string 
     const [applySuccess, setApplySuccess] = useState(false);
     const [coverLetter, setCoverLetter] = useState('');
     const [slug, setSlug] = useState<string>('');
+
+    // Resume selection state
+    const [resumeId, setResumeId] = useState<number | null>(null);
+    const [pdfResumes, setPdfResumes] = useState<PdfResume[]>([]);
+    const [builderResumes, setBuilderResumes] = useState<Resume[]>([]);
+    const [loadingResumes, setLoadingResumes] = useState(false);
 
     // Unwrap params
     useEffect(() => {
@@ -50,15 +56,38 @@ export default function JobDetails({ params }: { params: Promise<{ slug: string 
         }
     }, [slug]);
 
-    const [resumeId, setResumeId] = useState<number | null>(null);
-
     useEffect(() => {
-        // Try to pre-fill from local storage if available
-        const storedResumeId = localStorage.getItem('last_uploaded_resume_id');
-        if (storedResumeId) {
-            setResumeId(parseInt(storedResumeId, 10));
+        if (isAuthenticated) {
+            fetchResumes();
         }
-    }, []);
+    }, [isAuthenticated]);
+
+    const fetchResumes = async () => {
+        setLoadingResumes(true);
+        try {
+            const [pdfRes, builderRes] = await Promise.all([
+                api.getPdfResumes().catch(() => ({ total: 0, resumes: [] })),
+                api.getResumes().catch(() => [])
+            ]);
+            setPdfResumes(pdfRes.resumes || []);
+            setBuilderResumes(builderRes || []);
+
+            // Try to pre-fill from local storage 
+            const storedResumeId = localStorage.getItem('last_uploaded_resume_id');
+            if (storedResumeId) {
+                const id = parseInt(storedResumeId, 10);
+                // Check if it exists in either list
+                const exists = (pdfRes.resumes || []).some(r => r.id === id) || (builderRes || []).some(r => r.id === id);
+                if (exists) {
+                    setResumeId(id);
+                }
+            }
+        } catch (error) {
+            console.error('Failed to fetch resumes', error);
+        } finally {
+            setLoadingResumes(false);
+        }
+    };
 
     const handleApply = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -71,7 +100,7 @@ export default function JobDetails({ params }: { params: Promise<{ slug: string 
         if (!job) return;
 
         if (!resumeId) {
-            alert('Please upload a resume before applying.');
+            alert('Please select or upload a resume before applying.');
             return;
         }
 
@@ -96,6 +125,7 @@ export default function JobDetails({ params }: { params: Promise<{ slug: string 
     const handleResumeUploadSuccess = (id: number) => {
         setResumeId(id);
         localStorage.setItem('last_uploaded_resume_id', id.toString());
+        fetchResumes(); // Refresh list to include new upload
     };
 
     const formatCurrency = (amount: number, currency: string) => {
@@ -220,26 +250,56 @@ export default function JobDetails({ params }: { params: Promise<{ slug: string 
                                     <div>
                                         <label className="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-1">Resume</label>
 
-                                        {!resumeId ? (
-                                            <div className="mb-4">
-                                                <ResumeUpload onUploadSuccess={handleResumeUploadSuccess} />
-                                            </div>
+                                        {loadingResumes ? (
+                                            <div className="text-xs text-gray-400">Loading resumes...</div>
                                         ) : (
-                                            <div className="bg-blue-50 border border-blue-100 p-4 rounded-xl flex items-center justify-between mb-4">
-                                                <div className="flex items-center gap-3">
-                                                    <div className="w-8 h-8 bg-blue-100 text-blue-600 rounded-lg flex items-center justify-center text-sm">📄</div>
-                                                    <div>
-                                                        <p className="font-bold text-sm text-gray-900">Resume attached</p>
-                                                        <p className="text-xs text-blue-600">ID: {resumeId}</p>
+                                            <div className="space-y-4">
+                                                {/* Resume Selection */}
+                                                {(pdfResumes.length > 0 || builderResumes.length > 0) && (
+                                                    <div className="space-y-2">
+                                                        <select
+                                                            value={resumeId || ''}
+                                                            onChange={(e) => setResumeId(Number(e.target.value))}
+                                                            className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-600 outline-none text-sm"
+                                                        >
+                                                            <option value="" disabled>Select a resume</option>
+                                                            {pdfResumes.length > 0 && (
+                                                                <optgroup label="Uploaded Resumes">
+                                                                    {pdfResumes.map(r => (
+                                                                        <option key={`pdf-${r.id}`} value={r.id}>{r.resume_name}</option>
+                                                                    ))}
+                                                                </optgroup>
+                                                            )}
+                                                            {builderResumes.length > 0 && (
+                                                                <optgroup label="LetsMakeCV Resumes">
+                                                                    {builderResumes.map(r => (
+                                                                        <option key={`builder-${r.id}`} value={r.id}>{r.name}</option>
+                                                                    ))}
+                                                                </optgroup>
+                                                            )}
+                                                        </select>
                                                     </div>
-                                                </div>
-                                                <button
-                                                    type="button"
-                                                    onClick={() => setResumeId(null)}
-                                                    className="text-xs font-bold text-gray-400 hover:text-red-500 uppercase tracking-tight"
-                                                >
-                                                    Change
-                                                </button>
+                                                )}
+
+                                                {/* Upload New (always show option to upload) */}
+                                                {!resumeId && (
+                                                    <div className="border-t border-gray-100 pt-4">
+                                                        <p className="text-xs text-gray-400 mb-2">Or upload a new one:</p>
+                                                        <ResumeUpload onUploadSuccess={handleResumeUploadSuccess} />
+                                                    </div>
+                                                )}
+
+                                                {resumeId && (
+                                                    <div className="flex justify-end">
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => setResumeId(null)}
+                                                            className="text-xs text-blue-600 hover:underline font-bold"
+                                                        >
+                                                            Using different resume?
+                                                        </button>
+                                                    </div>
+                                                )}
                                             </div>
                                         )}
                                     </div>

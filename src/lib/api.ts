@@ -1,4 +1,4 @@
-import { AuthResponse, Job, Application, User, PaginatedResponse, RecruiterProfileResponse, ApiResponse } from '@/types/api';
+import { AuthResponse, Job, Application, User, PaginatedResponse, RecruiterProfileResponse, PdfResume, Resume } from '@/types/api';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://letsmakecv.tulip-software.com';
 
@@ -121,25 +121,45 @@ export class ApiClient {
         return this.request<{ success: boolean; applications: Application[] }>('/api/v1/jobs/my-applications', {}, true, false);
     }
 
-    async uploadResume(file: File): Promise<ApiResponse> {
+    async uploadResume(file: File, resumeName?: string): Promise<PdfResume> {
         const formData = new FormData();
         formData.append('file', file);
-        // Note: fetch handles Content-Type for FormData automatically, so we might need to NOT set it in getHeaders if body is FormData.
-        // But getHeaders sets it to application/json. 
-        // We should overload request or handle content-type removal.
-        // For simple fix, I'll let getHeaders set it but fetch might override or conflict.
-        // Actually, if Content-Type is set to json, FormData upload fails.
-        // I need to fix getHeaders to not set Content-Type if body is FormData? 
-        // Or handle it in request.
-        // Since I'm overwriting, I'll add logic to remove Content-Type if options.body is FormData.
+        formData.append('resume_name', resumeName || file.name);
 
-        // However, standard fetch with FormData sets the boundary. 
-        // If I force application/json, it breaks.
-        // I will modify `request` slightly to handle this.
-        return this.request<ApiResponse>('/api/v1/candidates/upload-resume', {
+        const headers = this.getHeaders(true);
+        // @ts-expect-error - we need to remove Content-Type to let browser set it with boundary
+        delete headers['Content-Type'];
+
+        const response = await fetch(`${this.baseUrl}/api/v1/pdf-resumes/upload`, {
             method: 'POST',
             body: formData,
-        }, true);
+            headers: headers as HeadersInit,
+        });
+
+        if (!response.ok) {
+            let errorMsg = 'Failed to upload resume';
+            try {
+                const error = await response.json();
+                errorMsg = error.detail || error.message || errorMsg;
+            } catch {
+                // ignore
+            }
+            throw new Error(errorMsg);
+        }
+
+        return response.json();
+    }
+
+    async getPdfResumes(): Promise<{ total: number; resumes: PdfResume[] }> {
+        return this.request<{ total: number; resumes: PdfResume[] }>('/api/v1/pdf-resumes/', {}, true);
+    }
+
+    async deletePdfResume(id: number): Promise<{ success: boolean }> {
+        return this.request<{ success: boolean }>(`/api/v1/pdf-resumes/${id}`, { method: 'DELETE' }, true);
+    }
+
+    async getResumes(): Promise<Resume[]> {
+        return this.request<Resume[]>('/api/v1/resumes/', {}, true);
     }
 
     // --- Recruiter Job Management ---

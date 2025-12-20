@@ -88,7 +88,8 @@ export default function RecruiterSignup() {
                 // store other fields in metadata or separate profile update if needed, 
                 // but based on API guide, register takes specific fields. 
                 // Guide says: { email, password, company_name, full_name, phone, company_website, bio }
-                bio: formData.recruiterType === 'individual' ? `Specialization: ${formData.specialization}, Experience: ${formData.yearsExperience}` : `Industry: ${formData.industry}, Size: ${formData.companySize}`
+                bio: formData.recruiterType === 'individual' ? `Specialization: ${formData.specialization}, Experience: ${formData.yearsExperience}` : `Industry: ${formData.industry}, Size: ${formData.companySize}`,
+                recruiter_type: formData.recruiterType
             });
             router.push('/recruiter/dashboard');
         } catch (err: unknown) {

@@ -19,6 +19,34 @@ export interface Recruiter {
     last_login?: string;
 }
 
+export interface PdfResume {
+    id: number;
+    user_id: number;
+    resume_name: string;
+    description?: string;
+    original_filename: string;
+    stored_filename: string;
+    file_size_bytes: number;
+    file_hash?: string;
+    bunny_cdn_url: string;
+    is_active: boolean;
+    is_public: boolean;
+    created_at: string;
+    updated_at: string;
+}
+
+export interface Resume {
+    id: number;
+    name: string;
+    template_id: number;
+    language: string;
+    is_active: boolean;
+    created_at: string;
+    updated_at: string;
+    template_name?: string;
+    // Add other fields as needed from guide if we need details
+}
+
 export interface Job {
     id: number;
     slug: string;

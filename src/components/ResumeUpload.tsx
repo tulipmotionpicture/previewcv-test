@@ -47,16 +47,12 @@ export default function ResumeUpload({ onUploadSuccess }: ResumeUploadProps) {
         setError(null);
 
         try {
-            const response = await api.uploadResume(file);
-            if (response.success && typeof response.resume_id === 'number') {
-                onUploadSuccess(response.resume_id);
+            // Using filename as resume_name for now. User can be prompted in a future update.
+            const response = await api.uploadResume(file, file.name);
+            if (response && response.id) {
+                onUploadSuccess(response.id);
             } else {
-                if (typeof response.resume_id === 'number') {
-                    // Some APIs might not return success: true explicitly but return ID
-                    onUploadSuccess(response.resume_id);
-                } else {
-                    setError('Upload failed: No resume ID returned.');
-                }
+                setError('Upload failed: No resume ID returned.');
             }
         } catch (err: unknown) {
             if (err instanceof Error) {
