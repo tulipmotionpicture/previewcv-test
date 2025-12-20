@@ -1,114 +1,142 @@
 'use client';
 
-import { useState } from 'react';
-import { MOCK_USERS, MOCK_JOBS, MOCK_CANDIDATES, MOCK_APPLICATIONS, Job, Candidate, Application } from '@/config/mockData';
+import { useState, useEffect } from 'react';
 import config from '@/config';
 import Image from 'next/image';
-import Link from 'next/link';
+import { api } from '@/lib/api';
+import { Job, Application } from '@/types/api';
+import { useRecruiterAuth } from '@/context/RecruiterAuthContext';
 
 export default function RecruiterDashboard() {
-    const [activeTab, setActiveTab] = useState<'jobs' | 'ats' | 'search'>('jobs');
-    const [jobs, setJobs] = useState<Job[]>(MOCK_JOBS);
-    const [candidates] = useState<Candidate[]>(MOCK_CANDIDATES);
-    const [applications, setApplications] = useState<Application[]>(MOCK_APPLICATIONS);
+    const { recruiter, logout } = useRecruiterAuth();
+    const [activeTab, setActiveTab] = useState<'jobs' | 'ats'>('jobs');
+    const [jobs, setJobs] = useState<Job[]>([]);
+    const [applications, setApplications] = useState<Application[]>([]);
 
-    const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
-    const [searchQuery, setSearchQuery] = useState('');
+    // Loading states
+    const [loadingJobs, setLoadingJobs] = useState(false);
+    const [loadingApps, setLoadingApps] = useState(false);
+
+    const [selectedJobId, setSelectedJobId] = useState<number | null>(null);
     const [statusFilter, setStatusFilter] = useState<string>('All');
 
-    // Interview Modal State
-    const [isInterviewModalOpen, setIsInterviewModalOpen] = useState(false);
-    const [selectedAppForInterview, setSelectedAppForInterview] = useState<string | null>(null);
-
-    // Candidate Detail Modal State
+    // Detail Modal State
     const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
-    const [selectedCandidateId, setSelectedCandidateId] = useState<string | null>(null);
-    const [selectedApplicationId, setSelectedApplicationId] = useState<string | null>(null);
+    const [selectedApplication, setSelectedApplication] = useState<Application | null>(null);
 
     // Action Menu State
-    const [actionMenuOpen, setActionMenuOpen] = useState<string | null>(null);
+    const [actionMenuOpen, setActionMenuOpen] = useState<number | null>(null);
 
-    const handleUpdateStatus = (appId: string, newStatus: Application['status']) => {
-        setApplications(prev => prev.map(app =>
-            app.id === appId ? { ...app, status: newStatus } : app
-        ));
-    };
+    // Create Job State
+    const [creatingJob, setCreatingJob] = useState(false);
+    const [newJobTitle, setNewJobTitle] = useState('');
+    const [newJobLocation, setNewJobLocation] = useState('');
 
-    const handleAcceptCandidate = (appId: string) => {
-        if (confirm('Are you sure you want to hire this candidate?')) {
-            handleUpdateStatus(appId, 'Hired');
-            setActionMenuOpen(null);
+    useEffect(() => {
+        // Auth check handled by context/protected route logic mostly
+        fetchJobs();
+    }, []);
+
+    useEffect(() => {
+        if (activeTab === 'ats' || selectedJobId) {
+            if (jobs.length > 0 && !selectedJobId) {
+                setSelectedJobId(jobs[0].id);
+            }
+        }
+    }, [activeTab, jobs, selectedJobId]);
+
+    useEffect(() => {
+        if (selectedJobId) {
+            fetchApplications(selectedJobId);
+        }
+    }, [selectedJobId]);
+
+    const fetchJobs = async () => {
+        setLoadingJobs(true);
+        try {
+            const response = await api.getRecruiterJobs();
+            if (response.success && response.jobs) {
+                setJobs(response.jobs);
+            }
+        } catch (error) {
+            console.error('Failed to fetch jobs:', error);
+        } finally {
+            setLoadingJobs(false);
         }
     };
 
-    const handleRejectCandidate = (appId: string) => {
-        if (confirm('Are you sure you want to reject this candidate? This action cannot be undone.')) {
-            handleUpdateStatus(appId, 'Rejected');
-            setActionMenuOpen(null);
+    const fetchApplications = async (jobId: number) => {
+        setLoadingApps(true);
+        setApplications([]); // Clear prev
+        try {
+            const response = await api.getJobApplications(jobId);
+            if (response.success && response.applications) {
+                // augment applications with correct job_id if missing (though it should be there)
+                const apps = response.applications.map(app => ({ ...app, job_id: jobId }));
+                setApplications(apps);
+            }
+        } catch (error) {
+            console.error('Failed to fetch applications:', error);
+        } finally {
+            setLoadingApps(false);
         }
     };
 
-    const handleViewDetails = (candidateId: string, appId: string) => {
-        setSelectedCandidateId(candidateId);
-        setSelectedApplicationId(appId);
-        setIsDetailModalOpen(true);
-        setActionMenuOpen(null);
-    };
-
-    const handleScheduleInterview = (e: React.FormEvent) => {
+    const handleCreateJob = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (selectedAppForInterview) {
-            handleUpdateStatus(selectedAppForInterview, 'Interview Scheduled');
-            setIsInterviewModalOpen(false);
-            setSelectedAppForInterview(null);
-            alert('Interview scheduled successfully! Invitation sent to candidate.');
+        if (!newJobTitle || !newJobLocation) return;
+
+        setCreatingJob(true);
+        try {
+            await api.createJob({
+                title: newJobTitle,
+                location: newJobLocation,
+                company_name: recruiter?.company_name || 'My Company',
+                job_type: 'full_time', // default
+                experience_level: 'mid', // default
+                description: 'Description not provided.', // default
+                requirements: 'Requirements not provided.', // default
+                responsibilities: 'Responsibilities not provided.', // default
+                salary_currency: 'USD',
+                is_remote: false,
+                required_skills: [],
+                categories: []
+            });
+            await fetchJobs();
+            setNewJobTitle('');
+            setNewJobLocation('');
+            alert('Job posted successfully!');
+        } catch (error: unknown) {
+            if (error instanceof Error) {
+                alert(error.message || 'Failed to create job');
+            } else {
+                alert('Failed to create job');
+            }
+        } finally {
+            setCreatingJob(false);
         }
     };
 
-    const handleCreateJob = (e: React.FormEvent) => {
-        e.preventDefault();
-        const form = e.target as HTMLFormElement;
-        const title = (form.elements.namedItem('title') as HTMLInputElement).value;
-        const location = (form.elements.namedItem('location') as HTMLInputElement).value;
-
-        if (title && location) {
-            const newJob: Job = {
-                id: `j${Date.now()}`,
-                title,
-                company: MOCK_USERS.recruiter.company,
-                location,
-                type: 'Full-time',
-                salary: '$100k - $140k',
-                description: 'Newly posted job.',
-                postedDate: new Date().toISOString().split('T')[0],
-            };
-            setJobs([newJob, ...jobs]);
-            form.reset();
+    const handleUpdateStatus = async (appId: number, newStatus: string) => {
+        try {
+            await api.updateApplicationStatus(appId, newStatus);
+            // Optimistic update
+            setApplications(prev => prev.map(app => app.id === appId ? { ...app, status: newStatus as Application['status'] } : app));
+            if (selectedApplication?.id === appId) {
+                setSelectedApplication(prev => prev ? { ...prev, status: newStatus as Application['status'] } : null);
+            }
+        } catch (error: unknown) {
+            if (error instanceof Error) {
+                alert(error.message || 'Failed to update status');
+            } else {
+                alert('Failed to update status');
+            }
         }
     };
-
-    const getJobApplications = (jobId: string) => {
-        return applications.filter(app => app.jobId === jobId);
-    };
-
-    const getCandidateById = (id: string) => {
-        return candidates.find(c => c.id === id);
-    };
-
-    const filteredCandidates = candidates.filter(c =>
-        c.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        c.role.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        c.skills.some(s => s.toLowerCase().includes(searchQuery.toLowerCase()))
-    );
 
     const filteredApplications = applications.filter(app => {
-        const jobMatch = !selectedJobId || app.jobId === selectedJobId;
-        const statusMatch = statusFilter === 'All' || app.status === statusFilter;
-        return jobMatch && statusMatch;
+        return statusFilter === 'All' || app.status === statusFilter.toLowerCase().replace(' ', '_');
     });
-
-    const selectedCandidate = selectedCandidateId ? getCandidateById(selectedCandidateId) : null;
-    const selectedApplication = selectedApplicationId ? applications.find(app => app.id === selectedApplicationId) : null;
 
     return (
         <div className="min-h-screen bg-gray-50 flex">
@@ -130,24 +158,18 @@ export default function RecruiterDashboard() {
                     >
                         Application Review
                     </button>
-                    <button
-                        onClick={() => setActiveTab('search')}
-                        className={`w-full text-left px-4 py-3 rounded-xl transition-all font-black text-xs uppercase tracking-tight ${activeTab === 'search' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-200' : 'text-gray-400 hover:bg-gray-50'}`}
-                    >
-                        Talent Search
-                    </button>
                 </nav>
                 <div className="absolute bottom-10 left-6 right-6">
                     <div className="p-4 bg-gray-50 rounded-2xl border border-gray-100">
                         <p className="text-[10px] text-gray-400 mb-1 font-black uppercase tracking-widest">Signed in as</p>
-                        <p className="font-bold text-sm truncate text-gray-900">{MOCK_USERS.recruiter.name}</p>
-                        <Link href="/" className="text-[10px] text-indigo-600 hover:underline mt-4 block font-black uppercase tracking-tight">Sign out</Link>
+                        <p className="font-bold text-sm truncate text-gray-900">{recruiter?.full_name}</p>
+                        <button onClick={logout} className="text-[10px] text-indigo-600 hover:underline mt-4 block font-black uppercase tracking-tight">Sign out</button>
                     </div>
                 </div>
             </aside>
 
             {/* Main Content */}
-            <main className="flex-1 p-10 max-w-6xl mx-auto">
+            <main className="flex-1 p-10 max-w-6xl mx-auto overflow-x-hidden">
                 {activeTab === 'jobs' && (
                     <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
                         <h1 className="text-3xl font-black text-gray-900 mb-10">Manage Career Opportunities</h1>
@@ -155,30 +177,50 @@ export default function RecruiterDashboard() {
                         <section className="bg-white p-8 rounded-3xl shadow-sm border border-gray-100 mb-12">
                             <h3 className="text-lg font-bold mb-6">Post New Opportunity</h3>
                             <form onSubmit={handleCreateJob} className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                                <input name="title" placeholder="Job Title" className="px-4 py-3 bg-gray-50 border-none rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none hover:bg-gray-100 transition-colors" required />
-                                <input name="location" placeholder="Location (e.g. Remote)" className="px-4 py-3 bg-gray-50 border-none rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none hover:bg-gray-100 transition-colors" required />
-                                <button type="submit" className="bg-gray-900 text-white font-bold rounded-xl hover:bg-gray-800 transition-all">Post Job</button>
+                                <input
+                                    value={newJobTitle}
+                                    onChange={e => setNewJobTitle(e.target.value)}
+                                    placeholder="Job Title"
+                                    className="px-4 py-3 bg-gray-50 border-none rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none hover:bg-gray-100 transition-colors"
+                                    required
+                                />
+                                <input
+                                    value={newJobLocation}
+                                    onChange={e => setNewJobLocation(e.target.value)}
+                                    placeholder="Location (e.g. Remote)"
+                                    className="px-4 py-3 bg-gray-50 border-none rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none hover:bg-gray-100 transition-colors"
+                                    required
+                                />
+                                <button
+                                    type="submit"
+                                    disabled={creatingJob}
+                                    className="bg-gray-900 text-white font-bold rounded-xl hover:bg-gray-800 transition-all disabled:opacity-70"
+                                >
+                                    {creatingJob ? 'Posting...' : 'Post Job'}
+                                </button>
                             </form>
                         </section>
 
                         <div className="grid grid-cols-1 gap-6">
-                            {jobs.map(job => (
+                            {loadingJobs ? (
+                                <div className="text-center py-10">Loading jobs...</div>
+                            ) : jobs.map(job => (
                                 <div key={job.id} className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm flex items-center justify-between hover:shadow-md transition-shadow">
                                     <div>
                                         <h4 className="font-bold text-xl text-gray-900 mb-1 uppercase tracking-tight">{job.title}</h4>
-                                        <p className="text-gray-400 text-xs font-black uppercase tracking-tight">{job.location} • {job.type} • {job.salary}</p>
+                                        <p className="text-gray-400 text-xs font-black uppercase tracking-tight">{job.location} • {job.job_type.replace('_', ' ')} • Active</p>
                                     </div>
                                     <div className="flex gap-3">
                                         <button
                                             onClick={() => { setSelectedJobId(job.id); setActiveTab('ats'); }}
                                             className="px-4 py-2 bg-indigo-50 text-indigo-600 font-bold rounded-lg text-sm hover:bg-indigo-100 transition-colors"
                                         >
-                                            {getJobApplications(job.id).length} Applications
+                                            View Applications
                                         </button>
-                                        <button className="p-2 text-gray-300 hover:text-red-500 font-bold text-sm">×</button>
                                     </div>
                                 </div>
                             ))}
+                            {!loadingJobs && jobs.length === 0 && <p className="text-gray-400 text-center">No jobs posted yet.</p>}
                         </div>
                     </div>
                 )}
@@ -190,12 +232,6 @@ export default function RecruiterDashboard() {
 
                         <div className="flex flex-col md:flex-row gap-4 mb-8">
                             <div className="flex-1 flex gap-2 overflow-x-auto pb-2">
-                                <button
-                                    onClick={() => setSelectedJobId(null)}
-                                    className={`whitespace-nowrap px-4 py-2 rounded-full text-xs font-bold ${!selectedJobId ? 'bg-gray-900 text-white' : 'bg-gray-200 text-gray-600 hover:bg-gray-300'}`}
-                                >
-                                    All Jobs
-                                </button>
                                 {jobs.map(job => (
                                     <button
                                         key={job.id}
@@ -214,11 +250,13 @@ export default function RecruiterDashboard() {
                                     onChange={(e) => setStatusFilter(e.target.value)}
                                 >
                                     <option>All</option>
-                                    <option>Pending</option>
-                                    <option>Shortlisted</option>
+                                    <option>Applied</option>
+                                    <option>Under Review</option>
                                     <option>Interview Scheduled</option>
-                                    <option>Declined</option>
-                                    <option>Hired</option>
+                                    <option>Offered</option>
+                                    <option>Accepted</option>
+                                    <option>Rejected</option>
+                                    <option>Withdrawn</option>
                                 </select>
                             </div>
                         </div>
@@ -229,120 +267,71 @@ export default function RecruiterDashboard() {
                                     <thead>
                                         <tr className="bg-gray-50 border-b border-gray-100">
                                             <th className="px-6 py-4 text-xs font-black uppercase tracking-widest text-gray-400">Candidate</th>
-                                            <th className="px-6 py-4 text-xs font-black uppercase tracking-widest text-gray-400">Position</th>
                                             <th className="px-6 py-4 text-xs font-black uppercase tracking-widest text-gray-400">Status</th>
                                             <th className="px-6 py-4 text-xs font-black uppercase tracking-widest text-gray-400 text-right">Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-gray-50">
-                                        {filteredApplications.map(app => {
-                                            const candidate = getCandidateById(app.candidateId);
-                                            const job = jobs.find(j => j.id === app.jobId);
-                                            return (
-                                                <tr key={app.id} className="hover:bg-gray-50/50 transition-colors">
-                                                    <td className="px-6 py-6 border-b border-gray-50">
-                                                        <p className="font-bold text-gray-900">{candidate?.name}</p>
-                                                        <p className="text-[10px] text-gray-400">{candidate?.email}</p>
-                                                    </td>
-                                                    <td className="px-6 py-6 text-gray-600 text-sm border-b border-gray-50">{job?.title}</td>
-                                                    <td className="px-6 py-6 border-b border-gray-50">
-                                                        <span className={`px-2 py-1 rounded-full text-[9px] font-black uppercase tracking-tighter ${app.status === 'Hired' ? 'bg-green-100 text-green-600' :
-                                                            app.status === 'Declined' || app.status === 'Rejected' ? 'bg-red-100 text-red-600' :
-                                                                app.status === 'Shortlisted' ? 'bg-indigo-100 text-indigo-600' :
-                                                                    app.status === 'Interview Scheduled' ? 'bg-purple-100 text-purple-600' :
-                                                                        'bg-blue-100 text-blue-600'
-                                                            }`}>
-                                                            {app.status}
-                                                        </span>
-                                                    </td>
-                                                    <td className="px-6 py-6 text-right border-b border-gray-50">
-                                                        <div className="flex justify-end gap-2">
-                                                            <a
-                                                                href={`/resume/view/${candidate?.resumeToken}`}
-                                                                target="_blank"
-                                                                rel="noopener noreferrer"
-                                                                className="px-4 py-2 bg-gray-900 text-white font-bold text-xs rounded-xl hover:bg-gray-800 transition-colors uppercase tracking-tight"
-                                                            >
-                                                                View Resume
-                                                            </a>
+                                        {loadingApps ? (
+                                            <tr><td colSpan={3} className="px-6 py-10 text-center">Loading applications...</td></tr>
+                                        ) : filteredApplications.map(app => (
+                                            <tr key={app.id} className="hover:bg-gray-50/50 transition-colors">
+                                                <td className="px-6 py-6 border-b border-gray-50">
+                                                    <p className="font-bold text-gray-900">{app.candidate_name}</p>
+                                                    <p className="text-[10px] text-gray-400">{app.candidate_email}</p>
+                                                </td>
+                                                <td className="px-6 py-6 border-b border-gray-50">
+                                                    <span className={`px-2 py-1 rounded-full text-[9px] font-black uppercase tracking-tighter bg-gray-100 text-gray-600`}>
+                                                        {app.status.replace('_', ' ')}
+                                                    </span>
+                                                </td>
+                                                <td className="px-6 py-6 text-right border-b border-gray-50">
+                                                    <div className="flex justify-end gap-2">
+                                                        <button
+                                                            onClick={() => { setSelectedApplication(app); setIsDetailModalOpen(true); setActionMenuOpen(null); }}
+                                                            className="px-4 py-2 bg-blue-600 text-white font-bold text-xs rounded-xl hover:bg-blue-700 transition-colors uppercase tracking-tight shadow-sm shadow-blue-200"
+                                                        >
+                                                            View Details
+                                                        </button>
+                                                        <div className="relative">
                                                             <button
-                                                                onClick={() => handleViewDetails(app.candidateId, app.id)}
-                                                                className="px-4 py-2 bg-blue-600 text-white font-bold text-xs rounded-xl hover:bg-blue-700 transition-colors uppercase tracking-tight shadow-sm shadow-blue-200"
+                                                                onClick={() => setActionMenuOpen(actionMenuOpen === app.id ? null : app.id)}
+                                                                className="px-4 py-2 bg-indigo-600 text-white font-bold text-xs rounded-xl hover:bg-indigo-700 transition-colors uppercase tracking-tight shadow-sm shadow-indigo-200"
                                                             >
-                                                                View Details
+                                                                Actions ▼
                                                             </button>
-
-                                                            {/* Action Dropdown */}
-                                                            <div className="relative">
-                                                                <button
-                                                                    onClick={() => setActionMenuOpen(actionMenuOpen === app.id ? null : app.id)}
-                                                                    className="px-4 py-2 bg-indigo-600 text-white font-bold text-xs rounded-xl hover:bg-indigo-700 transition-colors uppercase tracking-tight shadow-sm shadow-indigo-200"
-                                                                >
-                                                                    Actions ▼
-                                                                </button>
-
-                                                                {actionMenuOpen === app.id && (
-                                                                    <div className="absolute right-0 mt-2 w-48 bg-white rounded-2xl shadow-xl border border-gray-100 py-2 z-50">
-                                                                        {app.status === 'Pending' && (
-                                                                            <button
-                                                                                onClick={() => { handleUpdateStatus(app.id, 'Shortlisted'); setActionMenuOpen(null); }}
-                                                                                className="w-full text-left px-4 py-2.5 text-sm font-bold text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 transition-colors flex items-center gap-2"
-                                                                            >
-                                                                                <span className="text-lg">⭐</span>
-                                                                                Shortlist
-                                                                            </button>
-                                                                        )}
-
-                                                                        {(app.status === 'Pending' || app.status === 'Shortlisted') && (
-                                                                            <button
-                                                                                onClick={() => { setSelectedAppForInterview(app.id); setIsInterviewModalOpen(true); setActionMenuOpen(null); }}
-                                                                                className="w-full text-left px-4 py-2.5 text-sm font-bold text-gray-700 hover:bg-purple-50 hover:text-purple-600 transition-colors flex items-center gap-2"
-                                                                            >
-                                                                                <span className="text-lg">📅</span>
-                                                                                Schedule Interview
-                                                                            </button>
-                                                                        )}
-
-                                                                        {app.status !== 'Hired' && app.status !== 'Rejected' && (
-                                                                            <button
-                                                                                onClick={() => handleAcceptCandidate(app.id)}
-                                                                                className="w-full text-left px-4 py-2.5 text-sm font-bold text-gray-700 hover:bg-green-50 hover:text-green-600 transition-colors flex items-center gap-2"
-                                                                            >
-                                                                                <span className="text-lg">✅</span>
-                                                                                Accept / Hire
-                                                                            </button>
-                                                                        )}
-
-                                                                        {app.status !== 'Declined' && app.status !== 'Hired' && app.status !== 'Rejected' && (
-                                                                            <>
-                                                                                <div className="border-t border-gray-100 my-1"></div>
-                                                                                <button
-                                                                                    onClick={() => { handleUpdateStatus(app.id, 'Declined'); setActionMenuOpen(null); }}
-                                                                                    className="w-full text-left px-4 py-2.5 text-sm font-bold text-gray-700 hover:bg-orange-50 hover:text-orange-600 transition-colors flex items-center gap-2"
-                                                                                >
-                                                                                    <span className="text-lg">⏸️</span>
-                                                                                    Decline
-                                                                                </button>
-                                                                                <button
-                                                                                    onClick={() => handleRejectCandidate(app.id)}
-                                                                                    className="w-full text-left px-4 py-2.5 text-sm font-bold text-gray-700 hover:bg-red-50 hover:text-red-600 transition-colors flex items-center gap-2"
-                                                                                >
-                                                                                    <span className="text-lg">❌</span>
-                                                                                    Reject
-                                                                                </button>
-                                                                            </>
-                                                                        )}
-                                                                    </div>
-                                                                )}
-                                                            </div>
+                                                            {actionMenuOpen === app.id && (
+                                                                <div className="absolute right-0 mt-2 w-48 bg-white rounded-2xl shadow-xl border border-gray-100 py-2 z-50">
+                                                                    {app.status === 'applied' && (
+                                                                        <button
+                                                                            onClick={() => { handleUpdateStatus(app.id, 'under_review'); setActionMenuOpen(null); }}
+                                                                            className="w-full text-left px-4 py-2.5 text-sm font-bold text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 transition-colors"
+                                                                        >
+                                                                            Mark Under Review
+                                                                        </button>
+                                                                    )}
+                                                                    <button
+                                                                        onClick={() => { handleUpdateStatus(app.id, 'interview_scheduled'); setActionMenuOpen(null); }}
+                                                                        className="w-full text-left px-4 py-2.5 text-sm font-bold text-gray-700 hover:bg-purple-50 hover:text-purple-600 transition-colors"
+                                                                    >
+                                                                        Schedule Interview
+                                                                    </button>
+                                                                    <button
+                                                                        onClick={() => { handleUpdateStatus(app.id, 'rejected'); setActionMenuOpen(null); }}
+                                                                        className="w-full text-left px-4 py-2.5 text-sm font-bold text-gray-700 hover:bg-red-50 hover:text-red-600 transition-colors"
+                                                                    >
+                                                                        Reject
+                                                                    </button>
+                                                                </div>
+                                                            )}
                                                         </div>
-                                                    </td>
-                                                </tr>
-                                            );
-                                        })}
-                                        {filteredApplications.length === 0 && (
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                        {!loadingApps && filteredApplications.length === 0 && (
                                             <tr>
-                                                <td colSpan={4} className="px-6 py-20 text-center text-gray-400 font-medium italic">No applications found matching the criteria.</td>
+                                                <td colSpan={3} className="px-6 py-20 text-center text-gray-400 font-medium italic">No applications found.</td>
                                             </tr>
                                         )}
                                     </tbody>
@@ -351,264 +340,38 @@ export default function RecruiterDashboard() {
                         </div>
                     </div>
                 )}
-
-                {activeTab === 'search' && (
-                    <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-                        <h1 className="text-3xl font-black text-gray-900 mb-4">Global Talent Search</h1>
-                        <p className="text-gray-500 mb-10">Discover active candidates directly from the database.</p>
-
-                        <div className="relative mb-12">
-                            <input
-                                type="text"
-                                placeholder="Search by name, role, or skills (e.g. React, Node.js)..."
-                                className="w-full px-6 py-5 bg-white shadow-xl shadow-gray-200/50 border-none rounded-3xl focus:ring-2 focus:ring-indigo-500 outline-none text-lg"
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                            />
-                        </div>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                            {filteredCandidates.map(candidate => (
-                                <div key={candidate.id} className="bg-white p-8 rounded-[40px] border border-gray-100 shadow-sm hover:shadow-xl transition-all group">
-                                    <div className="flex items-center gap-6 mb-8">
-                                        <div className="w-16 h-16 bg-indigo-50 rounded-full flex items-center justify-center group-hover:bg-indigo-100 transition-colors border border-indigo-100">
-                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-8 h-8 text-indigo-600">
-                                                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
-                                            </svg>
-                                        </div>
-                                        <div>
-                                            <h4 className="font-bold text-xl text-gray-900 mb-1">{candidate.name}</h4>
-                                            <p className="text-indigo-500 font-bold text-sm">{candidate.role}</p>
-                                        </div>
-                                    </div>
-                                    <div className="flex flex-wrap gap-2 mb-8">
-                                        {candidate.skills.map(skill => (
-                                            <span key={skill} className="px-3 py-1 bg-gray-50 text-gray-500 text-xs font-bold rounded-full">{skill}</span>
-                                        ))}
-                                    </div>
-                                    <div className="flex items-center justify-between pt-6 border-t border-gray-50">
-                                        <p className="text-xs text-gray-400">Experience: <span className="font-bold text-gray-900">{candidate.experience}</span></p>
-                                        <a
-                                            href={`/resume/view/${candidate.resumeToken}`}
-                                            target="_blank"
-                                            className="px-6 py-2 bg-indigo-600 text-white font-bold rounded-xl text-sm hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-200"
-                                        >
-                                            Preview Profile
-                                        </a>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                )}
             </main>
-
-            {/* Modal Backdrop */}
-            {isInterviewModalOpen && (
-                <div className="fixed inset-0 bg-gray-900/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
-                    <div className="bg-white rounded-[32px] w-full max-w-md p-8 shadow-2xl animate-in zoom-in-95 duration-200">
-                        <h2 className="text-2xl font-black text-gray-900 mb-2">Schedule Interview</h2>
-                        <p className="text-gray-500 mb-8 font-medium">Set the date and time for the candidate interview.</p>
-
-                        <form onSubmit={handleScheduleInterview} className="space-y-6">
-                            <div>
-                                <label className="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2">Interview Date</label>
-                                <input type="date" required className="w-full px-4 py-3 bg-gray-50 border-none rounded-xl focus:ring-2 focus:ring-purple-500 outline-none hover:bg-gray-100 transition-all" />
-                            </div>
-                            <div>
-                                <label className="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2">Interview Time</label>
-                                <input type="time" required className="w-full px-4 py-3 bg-gray-50 border-none rounded-xl focus:ring-2 focus:ring-purple-500 outline-none hover:bg-gray-100 transition-all" />
-                            </div>
-                            <div>
-                                <label className="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2">Notes for Candidate</label>
-                                <textarea placeholder="e.g. Please bring your portfolio..." className="w-full px-4 py-3 bg-gray-50 border-none rounded-xl focus:ring-2 focus:ring-purple-500 outline-none hover:bg-gray-100 transition-all min-h-[100px]" />
-                            </div>
-
-                            <div className="flex gap-4 pt-4">
-                                <button
-                                    type="button"
-                                    onClick={() => setIsInterviewModalOpen(false)}
-                                    className="flex-1 py-3 bg-gray-100 text-gray-600 font-bold rounded-xl hover:bg-gray-200 transition-all"
-                                >
-                                    Cancel
-                                </button>
-                                <button
-                                    type="submit"
-                                    className="flex-1 py-3 bg-purple-600 text-white font-black rounded-xl hover:bg-purple-700 transition-all shadow-lg shadow-purple-200"
-                                >
-                                    Confirm & Send
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            )}
-
-            {/* Candidate Detail Modal */}
-            {isDetailModalOpen && selectedCandidate && selectedApplication && (
+            {/* Candidate Detail Modal - Simply showing Application Details for now */}
+            {isDetailModalOpen && selectedApplication && (
                 <div
-                    className="fixed inset-0 bg-gray-900/60 backdrop-blur-sm z-[100] flex items-end sm:items-center justify-center p-0 sm:p-4"
+                    className="fixed inset-0 bg-gray-900/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4"
                     onClick={() => setIsDetailModalOpen(false)}
                 >
                     <div
-                        className="bg-white rounded-t-[32px] sm:rounded-[32px] w-full sm:max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl animate-in slide-in-from-bottom sm:zoom-in-95 duration-300"
+                        className="bg-white rounded-[32px] w-full max-w-2xl p-8 shadow-2xl animate-in zoom-in-95 duration-200"
                         onClick={(e) => e.stopPropagation()}
                     >
-                        {/* Header */}
-                        <div className="sticky top-0 bg-white border-b border-gray-100 p-6 flex items-center justify-between rounded-t-[32px]">
+                        <h2 className="text-2xl font-black text-gray-900 mb-6">Application Details</h2>
+                        <div className="space-y-4">
                             <div>
-                                <h2 className="text-2xl font-black text-gray-900">Candidate Details</h2>
-                                <p className="text-sm text-gray-500 font-medium mt-1">Full application information</p>
+                                <h3 className="text-sm font-black text-gray-400 uppercase">Candidate</h3>
+                                <p className="font-bold text-lg">{selectedApplication.candidate_name}</p>
+                                <p className="text-gray-500">{selectedApplication.candidate_email}</p>
                             </div>
-                            <button
-                                onClick={() => setIsDetailModalOpen(false)}
-                                className="w-10 h-10 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors flex items-center justify-center font-black text-gray-600"
-                            >
-                                ×
-                            </button>
-                        </div>
-
-                        {/* Content */}
-                        <div className="p-6 space-y-6">
-                            {/* Candidate Info */}
-                            <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-[24px] p-6 border border-blue-100">
-                                <div className="flex items-start gap-4">
-                                    <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center text-white font-black text-2xl shadow-lg">
-                                        {selectedCandidate.name.charAt(0)}
-                                    </div>
-                                    <div className="flex-1">
-                                        <h3 className="text-xl font-black text-gray-900 mb-1">{selectedCandidate.name}</h3>
-                                        <p className="text-sm font-bold text-gray-600 mb-3">{selectedCandidate.role}</p>
-                                        <div className="space-y-1.5">
-                                            <p className="text-xs text-gray-600 flex items-center gap-2">
-                                                <span className="font-black">📧</span>
-                                                <span className="font-medium">{selectedCandidate.email}</span>
-                                            </p>
-                                            <p className="text-xs text-gray-600 flex items-center gap-2">
-                                                <span className="font-black">💼</span>
-                                                <span className="font-medium">{selectedCandidate.experience}</span>
-                                            </p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Skills */}
                             <div>
-                                <h4 className="text-sm font-black text-gray-400 uppercase tracking-widest mb-3">Skills & Technologies</h4>
-                                <div className="flex flex-wrap gap-2">
-                                    {selectedCandidate.skills.map((skill, idx) => (
-                                        <span key={idx} className="px-3 py-1.5 bg-gray-100 text-gray-700 text-xs font-bold rounded-lg border border-gray-200">
-                                            {skill}
-                                        </span>
-                                    ))}
-                                </div>
+                                <h3 className="text-sm font-black text-gray-400 uppercase">Cover Letter</h3>
+                                <p className="text-gray-700 whitespace-pre-line bg-gray-50 p-4 rounded-xl mt-1">
+                                    {selectedApplication.cover_letter || 'No cover letter provided.'}
+                                </p>
                             </div>
-
-                            {/* Application Status */}
                             <div>
-                                <h4 className="text-sm font-black text-gray-400 uppercase tracking-widest mb-3">Application Status</h4>
-                                <div className="bg-gray-50 rounded-2xl p-4 border border-gray-100">
-                                    <div className="flex items-center justify-between mb-3">
-                                        <span className="text-sm font-bold text-gray-600">Current Status:</span>
-                                        <span className={`px-3 py-1 rounded-full text-xs font-black uppercase ${selectedApplication.status === 'Hired' ? 'bg-green-100 text-green-600' :
-                                            selectedApplication.status === 'Declined' || selectedApplication.status === 'Rejected' ? 'bg-red-100 text-red-600' :
-                                                selectedApplication.status === 'Shortlisted' ? 'bg-indigo-100 text-indigo-600' :
-                                                    selectedApplication.status === 'Interview Scheduled' ? 'bg-purple-100 text-purple-600' :
-                                                        'bg-blue-100 text-blue-600'
-                                            }`}>
-                                            {selectedApplication.status}
-                                        </span>
-                                    </div>
-                                    <div className="flex items-center justify-between">
-                                        <span className="text-sm font-bold text-gray-600">Applied For:</span>
-                                        <span className="text-sm font-black text-gray-900">
-                                            {jobs.find(j => j.id === selectedApplication.jobId)?.title}
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Quick Actions */}
-                            <div>
-                                <h4 className="text-sm font-black text-gray-400 uppercase tracking-widest mb-3">Quick Actions</h4>
-                                <div className="grid grid-cols-2 gap-3">
-                                    <a
-                                        href={`/resume/view/${selectedCandidate.resumeToken}`}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="px-4 py-3 bg-gray-900 text-white font-bold text-sm rounded-xl hover:bg-gray-800 transition-colors text-center uppercase tracking-tight"
-                                    >
-                                        📄 View Resume
-                                    </a>
-
-                                    {selectedApplication.status === 'Pending' && (
-                                        <button
-                                            onClick={() => { handleUpdateStatus(selectedApplication.id, 'Shortlisted'); setIsDetailModalOpen(false); }}
-                                            className="px-4 py-3 bg-indigo-600 text-white font-bold text-sm rounded-xl hover:bg-indigo-700 transition-colors uppercase tracking-tight"
-                                        >
-                                            ⭐ Shortlist
-                                        </button>
-                                    )}
-
-                                    {(selectedApplication.status === 'Pending' || selectedApplication.status === 'Shortlisted') && (
-                                        <button
-                                            onClick={() => { setSelectedAppForInterview(selectedApplication.id); setIsInterviewModalOpen(true); setIsDetailModalOpen(false); }}
-                                            className="px-4 py-3 bg-purple-600 text-white font-bold text-sm rounded-xl hover:bg-purple-700 transition-colors uppercase tracking-tight"
-                                        >
-                                            📅 Schedule Interview
-                                        </button>
-                                    )}
-
-                                    {selectedApplication.status !== 'Hired' && selectedApplication.status !== 'Rejected' && (
-                                        <button
-                                            onClick={() => { handleAcceptCandidate(selectedApplication.id); setIsDetailModalOpen(false); }}
-                                            className="px-4 py-3 bg-green-600 text-white font-bold text-sm rounded-xl hover:bg-green-700 transition-colors uppercase tracking-tight"
-                                        >
-                                            ✅ Accept / Hire
-                                        </button>
-                                    )}
-
-                                    {selectedApplication.status !== 'Declined' && selectedApplication.status !== 'Hired' && selectedApplication.status !== 'Rejected' && (
-                                        <>
-                                            <button
-                                                onClick={() => { handleUpdateStatus(selectedApplication.id, 'Declined'); setIsDetailModalOpen(false); }}
-                                                className="px-4 py-3 bg-orange-100 text-orange-600 font-bold text-sm rounded-xl hover:bg-orange-200 transition-colors uppercase tracking-tight"
-                                            >
-                                                ⏸️ Decline
-                                            </button>
-                                            <button
-                                                onClick={() => { handleRejectCandidate(selectedApplication.id); setIsDetailModalOpen(false); }}
-                                                className="px-4 py-3 bg-red-100 text-red-600 font-bold text-sm rounded-xl hover:bg-red-200 transition-colors uppercase tracking-tight"
-                                            >
-                                                ❌ Reject
-                                            </button>
-                                        </>
-                                    )}
-                                </div>
-                            </div>
-
-                            {/* Notes Section */}
-                            <div>
-                                <h4 className="text-sm font-black text-gray-400 uppercase tracking-widest mb-3">Recruiter Notes</h4>
-                                <textarea
-                                    placeholder="Add private notes about this candidate..."
-                                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none hover:bg-gray-100 transition-all min-h-[100px] text-sm font-medium"
-                                />
-                                <button className="mt-2 px-4 py-2 bg-blue-600 text-white font-bold text-xs rounded-lg hover:bg-blue-700 transition-colors uppercase tracking-tight">
-                                    Save Notes
-                                </button>
+                                <h3 className="text-sm font-black text-gray-400 uppercase">Resume</h3>
+                                <p className="text-gray-500">Resume ID: {selectedApplication.resume_id}</p>
+                                {/* Future: Link to resume preview */}
                             </div>
                         </div>
-
-                        {/* Footer */}
-                        <div className="sticky bottom-0 bg-gray-50 border-t border-gray-100 p-6 rounded-b-[32px]">
-                            <button
-                                onClick={() => setIsDetailModalOpen(false)}
-                                className="w-full py-3 bg-gray-900 text-white font-black rounded-xl hover:bg-gray-800 transition-all uppercase tracking-tight"
-                            >
-                                Close
-                            </button>
+                        <div className="mt-8 flex justify-end">
+                            <button onClick={() => setIsDetailModalOpen(false)} className="px-6 py-2 bg-gray-900 text-white font-bold rounded-xl">Close</button>
                         </div>
                     </div>
                 </div>

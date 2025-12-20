@@ -2,33 +2,41 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-// import { MOCK_USERS } from '@/config/mockData';
 import config from '@/config';
 import Image from 'next/image';
+import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
 import { api } from '@/lib/api';
 
-export default function CandidateLogin() {
+export default function CandidateSignup() {
     const router = useRouter();
-    const { login } = useAuth();
+    const { register } = useAuth();
+    const [fullName, setFullName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
     const [error, setError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
 
-    const handleLogin = async (e: React.FormEvent) => {
+    const handleSignup = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsLoading(true);
         setError('');
 
+        if (password !== confirmPassword) {
+            setError('Passwords do not match');
+            setIsLoading(false);
+            return;
+        }
+
         try {
-            await login(email, password);
+            await register(email, password, fullName);
             router.push('/candidate/dashboard');
         } catch (err: unknown) {
             if (err instanceof Error) {
-                setError(err.message || 'Invalid credentials. Please try again.');
+                setError(err.message);
             } else {
-                setError('An unexpected error occurred.');
+                setError('Registration failed. Please try again.');
             }
         } finally {
             setIsLoading(false);
@@ -42,7 +50,7 @@ export default function CandidateLogin() {
                     <div className="inline-flex items-center justify-center w-40 h-40 bg-white rounded-[48px] shadow-2xl shadow-blue-200 mb-8 overflow-hidden border border-gray-100 p-4">
                         <Image src={config.app.logoUrl} alt={config.app.name} width={120} height={120} className="object-contain" />
                     </div>
-                    <p className="text-gray-500 font-medium">Welcome back, Job Seeker. Your next move starts here.</p>
+                    <p className="text-gray-500 font-medium">Create your candidate profile.</p>
                 </div>
 
                 <div className="bg-white border border-gray-100 rounded-[40px] p-10 shadow-xl shadow-blue-500/5">
@@ -55,7 +63,19 @@ export default function CandidateLogin() {
                         </div>
                     )}
 
-                    <form className="space-y-6" onSubmit={handleLogin}>
+                    <form className="space-y-6" onSubmit={handleSignup}>
+                        <div>
+                            <label className="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-1">Full Name</label>
+                            <input
+                                type="text"
+                                required
+                                className="w-full px-6 py-4 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-blue-600 outline-none hover:bg-gray-100 transition-all font-medium"
+                                value={fullName}
+                                onChange={(e) => setFullName(e.target.value)}
+                                placeholder="John Doe"
+                            />
+                        </div>
+
                         <div>
                             <label className="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-1">Work Email</label>
                             <input
@@ -80,12 +100,16 @@ export default function CandidateLogin() {
                             />
                         </div>
 
-                        <div className="flex items-center justify-between px-1">
-                            <label className="flex items-center gap-2 cursor-pointer">
-                                <input type="checkbox" className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-600" />
-                                <span className="text-xs text-gray-500 font-bold">Keep me signed in</span>
-                            </label>
-                            <a href="#" className="text-xs text-blue-600 font-bold hover:underline">Forgot?</a>
+                        <div>
+                            <label className="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-1">Confirm Password</label>
+                            <input
+                                type="password"
+                                required
+                                className="w-full px-6 py-4 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-blue-600 outline-none hover:bg-gray-100 transition-all font-medium"
+                                value={confirmPassword}
+                                onChange={(e) => setConfirmPassword(e.target.value)}
+                                placeholder="••••••••"
+                            />
                         </div>
 
                         <button
@@ -97,7 +121,7 @@ export default function CandidateLogin() {
                                 <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                             ) : (
                                 <>
-                                    Sign In
+                                    Create Account
                                     <span className="group-hover:translate-x-1 transition-transform">→</span>
                                 </>
                             )}
@@ -110,7 +134,7 @@ export default function CandidateLogin() {
                                 <div className="w-full border-t border-gray-100"></div>
                             </div>
                             <div className="relative flex justify-center text-sm">
-                                <span className="px-2 bg-white text-gray-400 font-medium">Or continue with</span>
+                                <span className="px-2 bg-white text-gray-400 font-medium">Or sign up with</span>
                             </div>
                         </div>
 
@@ -152,13 +176,8 @@ export default function CandidateLogin() {
                     </div>
 
                     <div className="mt-10 pt-10 border-t border-gray-50 text-center">
-                        <p className="text-sm text-gray-400 font-medium">New to {config.app.name}? <a href="/candidate/signup" className="text-blue-600 font-bold hover:underline">Create an account</a></p>
+                        <p className="text-sm text-gray-400 font-medium">Already have an account? <Link href="/candidate/login" className="text-blue-600 font-bold hover:underline">Sign In</Link></p>
                     </div>
-                </div>
-
-                <div className="mt-10 text-center">
-                    <p className="text-[10px] text-gray-300 font-black uppercase tracking-[0.2em]">Demo Credentials</p>
-                    <p className="text-xs text-gray-400 font-bold mt-1">candidate@example.com · password123</p>
                 </div>
             </div>
         </div>

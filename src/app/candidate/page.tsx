@@ -43,7 +43,7 @@ export default function CandidateLanding() {
                             </p>
 
                             <div className="flex flex-wrap gap-4">
-                                <Link href="/candidate/login" className="px-10 py-5 bg-blue-600 text-white font-black rounded-2xl hover:bg-blue-700 transition-all shadow-2xl shadow-blue-200 uppercase tracking-tighter">Get Started</Link>
+                                <Link href="/candidate/signup" className="px-10 py-5 bg-blue-600 text-white font-black rounded-2xl hover:bg-blue-700 transition-all shadow-2xl shadow-blue-200 uppercase tracking-tighter">Get Started</Link>
                                 <Link href="/jobs" className="px-10 py-5 bg-white border border-gray-200 text-gray-900 font-black rounded-2xl hover:border-gray-900 transition-all uppercase tracking-tighter">Explore Opportunities</Link>
                             </div>
                         </div>

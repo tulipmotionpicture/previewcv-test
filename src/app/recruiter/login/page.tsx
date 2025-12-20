@@ -3,30 +3,36 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { MOCK_USERS } from '@/config/mockData';
+// import { MOCK_USERS } from '@/config/mockData';
 import config from '@/config';
 import Image from 'next/image';
+import { useRecruiterAuth } from '@/context/RecruiterAuthContext';
 
 export default function RecruiterLogin() {
     const router = useRouter();
+    const { login } = useRecruiterAuth();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
 
-    const handleLogin = (e: React.FormEvent) => {
+    const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsLoading(true);
         setError('');
 
-        setTimeout(() => {
-            if (email === MOCK_USERS.recruiter.email && password === MOCK_USERS.recruiter.password) {
-                router.push('/recruiter/dashboard');
+        try {
+            await login(email, password);
+            router.push('/recruiter/dashboard');
+        } catch (err: unknown) {
+            if (err instanceof Error) {
+                setError(err.message || 'Authentication failed. Check your access credentials.');
             } else {
-                setError('Authentication failed. Check your access credentials.');
-                setIsLoading(false);
+                setError('Authentication failed.');
             }
-        }, 800);
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     return (

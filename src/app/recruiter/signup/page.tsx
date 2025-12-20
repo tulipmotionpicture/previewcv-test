@@ -5,11 +5,13 @@ import { useRouter } from 'next/navigation';
 import config from '@/config';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useRecruiterAuth } from '@/context/RecruiterAuthContext';
 
 type RecruiterType = 'company' | 'individual';
 
 export default function RecruiterSignup() {
     const router = useRouter();
+    const { register } = useRecruiterAuth();
     const [formData, setFormData] = useState({
         email: '',
         password: '',
@@ -73,12 +75,31 @@ export default function RecruiterSignup() {
 
         setIsLoading(true);
 
-        // Simulate API call (replace with actual API call)
-        setTimeout(() => {
-            console.log('Signup data:', formData);
-            // TODO: Call backend API /api/v1/auth/register/recruiter
+        try {
+            await register({
+                email: formData.email,
+                password: formData.password,
+                full_name: formData.fullName,
+                username: formData.username,
+                company_name: formData.companyName,
+                company_website: formData.companyWebsite,
+                // bio and other fields can be added if API supports them or mapped accordingly
+                phone: formData.phone,
+                // store other fields in metadata or separate profile update if needed, 
+                // but based on API guide, register takes specific fields. 
+                // Guide says: { email, password, company_name, full_name, phone, company_website, bio }
+                bio: formData.recruiterType === 'individual' ? `Specialization: ${formData.specialization}, Experience: ${formData.yearsExperience}` : `Industry: ${formData.industry}, Size: ${formData.companySize}`
+            });
             router.push('/recruiter/dashboard');
-        }, 1500);
+        } catch (err: unknown) {
+            if (err instanceof Error) {
+                setError(err.message);
+            } else {
+                setError('Registration failed. Please try again.');
+            }
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     return (
