@@ -131,58 +131,61 @@ export default function CandidateDashboard() {
     return (
         <div className="min-h-screen bg-gray-50 dark:bg-gray-950 flex flex-col transition-colors duration-300">
             {/* Top Header */}
-            <header className="h-20 bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between px-8 sticky top-0 z-50">
-                <div className="flex items-center gap-8">
-                    <div className="flex items-center gap-3">
-                        <Image src={config.app.logoUrl} alt={config.app.name} width={120} height={120} className="rounded-2xl shadow-sm h-12 w-auto" />
+            <header className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 sticky top-0 z-50 shadow-sm">
+                <div className="max-w-7xl mx-auto px-6">
+                    <div className="flex items-center justify-between h-16">
+                        {/* Left: Logo */}
+                        <Link href="/" className="flex items-center gap-3">
+                            <Image 
+                                src={config.app.logoUrl} 
+                                alt={config.app.name} 
+                                width={120} 
+                                height={120} 
+                                className="h-10 w-auto" 
+                            />
+                        </Link>
+
+                        {/* Center: Navigation */}
+                        <nav className="hidden md:flex items-center gap-2">
+                            <button
+                                onClick={() => setActiveTab('explore')}
+                                className={`px-4 py-2 text-sm font-bold rounded-lg transition-all ${activeTab === 'explore' ? 'bg-blue-600 text-white' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'}`}
+                            >
+                                Explore Jobs
+                            </button>
+                            <button
+                                onClick={() => setActiveTab('applications')}
+                                className={`px-4 py-2 text-sm font-bold rounded-lg transition-all ${activeTab === 'applications' ? 'bg-blue-600 text-white' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'}`}
+                            >
+                                My Applications
+                            </button>
+                            <button
+                                onClick={() => setActiveTab('resumes')}
+                                className={`px-4 py-2 text-sm font-bold rounded-lg transition-all ${activeTab === 'resumes' ? 'bg-blue-600 text-white' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'}`}
+                            >
+                                My Resumes
+                            </button>
+                        </nav>
+
+                        {/* Right: User Profile & Actions */}
+                        <div className="flex items-center gap-4">
+                            <div className="hidden md:flex items-center gap-3">
+                                <div className="text-right">
+                                    <p className="text-sm font-bold text-gray-900 dark:text-gray-100">{user?.full_name || 'Candidate'}</p>
+                                    <p className="text-xs text-gray-500 dark:text-gray-400">Job Seeker</p>
+                                </div>
+                                <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center text-white font-bold text-sm">
+                                    {user?.full_name?.charAt(0).toUpperCase() || 'C'}
+                                </div>
+                            </div>
+                            <button 
+                                onClick={logout} 
+                                className="px-4 py-2 text-sm font-bold text-gray-600 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition-colors"
+                            >
+                                Logout
+                            </button>
+                        </div>
                     </div>
-                    <nav className="flex gap-6">
-                        <button
-                            onClick={() => setActiveTab('explore')}
-                            className={`px-4 py-2 text-sm font-bold rounded-lg transition-all ${activeTab === 'explore' ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400' : 'text-gray-400 dark:text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800'}`}
-                        >
-                            Explore Jobs
-                        </button>
-                        <button
-                            onClick={() => setActiveTab('applications')}
-                            className={`px-4 py-2 text-sm font-bold rounded-lg transition-all ${activeTab === 'applications' ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400' : 'text-gray-400 dark:text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800'}`}
-                        >
-                            My Applications
-                        </button>
-                        <button
-                            onClick={() => setActiveTab('resumes')}
-                            className={`px-4 py-2 text-sm font-bold rounded-lg transition-all ${activeTab === 'resumes' ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400' : 'text-gray-400 dark:text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800'}`}
-                        >
-                            My Resumes
-                        </button>
-                    </nav>
-                </div>
-                <div className="flex items-center gap-4">
-                    <button
-                        onClick={() => router.push('/candidate/resumes')}
-                        className="p-2 text-gray-400 hover:text-blue-600 transition-colors"
-                        title="My Resumes"
-                    >
-                        <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                        </svg>
-                    </button>
-                    <button
-                        onClick={() => router.push('/candidate/settings')}
-                        className="p-2 text-gray-400 hover:text-blue-600 transition-colors"
-                        title="Settings"
-                    >
-                        <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                        </svg>
-                    </button>
-                    <div className="text-right">
-                        <p className="text-sm font-bold text-gray-900 dark:text-gray-100">{user?.full_name || 'Candidate'}</p>
-                        <p className="text-[10px] text-gray-400 dark:text-gray-500 font-bold uppercase tracking-widest">Job Seeker</p>
-                    </div>
-                    <div className="w-10 h-10 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center text-lg">👤</div>
-                    <button onClick={logout} className="ml-4 p-2 text-gray-400 hover:text-red-500 transition-colors font-bold text-sm">Logout</button>
                 </div>
             </header>
 
