@@ -1,132 +1,79 @@
-'use client';
-
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import config from '@/config';
+import { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
-import { api } from '@/lib/api';
-import { Job, PdfResume, Resume } from '@/types/api';
-import { useAuth } from '@/context/AuthContext';
-import ResumeUpload from '@/components/ResumeUpload';
+import config from '@/config';
+import { Job } from '@/types/api';
+import JobDetailsClient from './JobDetailsClient';
+import { notFound } from 'next/navigation';
 
-export default function JobDetails({ params }: { params: Promise<{ slug: string }> }) {
-    const { isAuthenticated } = useAuth();
-    const router = useRouter();
-    const [job, setJob] = useState<Job | null>(null);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState('');
-    const [applying, setApplying] = useState(false);
-    const [applySuccess, setApplySuccess] = useState(false);
-    const [coverLetter, setCoverLetter] = useState('');
-    const [slug, setSlug] = useState<string>('');
-
-    // Resume selection state
-    const [resumeId, setResumeId] = useState<number | null>(null);
-    const [pdfResumes, setPdfResumes] = useState<PdfResume[]>([]);
-    const [builderResumes, setBuilderResumes] = useState<Resume[]>([]);
-    const [loadingResumes, setLoadingResumes] = useState(false);
-
-    // Unwrap params
-    useEffect(() => {
-        params.then(unwrappedParams => {
-            setSlug(unwrappedParams.slug);
+// Server-side data fetching function
+async function getJobBySlug(slug: string): Promise<Job | null> {
+    try {
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://letsmakecv.tulip-software.com';
+        const response = await fetch(`${apiUrl}/api/v1/jobs/slug/${slug}`, {
+            cache: 'no-store', // Always fetch fresh data for job details
         });
-    }, [params]);
 
-    useEffect(() => {
-        const fetchJob = async () => {
-            try {
-                const response = await api.getJobBySlug(slug);
-                if (response.success && response.job) {
-                    setJob(response.job);
-                } else {
-                    setError('Job not found');
-                }
-            } catch (err) {
-                setError('Failed to load job details');
-                console.error(err);
-            } finally {
-                setLoading(false);
-            }
+        if (!response.ok) {
+            return null;
+        }
+
+        const data = await response.json();
+        return data.success && data.job ? data.job : null;
+    } catch (error) {
+        console.error('Failed to fetch job:', error);
+        return null;
+    }
+}
+
+// Generate metadata for SEO
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+    const { slug } = await params;
+    const job = await getJobBySlug(slug);
+
+    if (!job) {
+        return {
+            title: 'Job Not Found | PreviewCV',
+            description: 'The job you are looking for could not be found.',
         };
+    }
 
-        if (slug) {
-            fetchJob();
-        }
-    }, [slug]);
+    const title = `${job.title} at ${job.company_name} | PreviewCV`;
+    const description = job.description.substring(0, 160) + '...';
+    const imageUrl = job.company_logo_url || config.app.logoUrl;
 
-    useEffect(() => {
-        if (isAuthenticated) {
-            fetchResumes();
-        }
-    }, [isAuthenticated]);
-
-    const fetchResumes = async () => {
-        setLoadingResumes(true);
-        try {
-            const [pdfRes, builderRes] = await Promise.all([
-                api.getPdfResumes().catch(() => ({ total: 0, resumes: [] })),
-                api.getResumes().catch(() => [])
-            ]);
-            setPdfResumes(pdfRes.resumes || []);
-            setBuilderResumes(builderRes || []);
-
-            // Try to pre-fill from local storage 
-            const storedResumeId = localStorage.getItem('last_uploaded_resume_id');
-            if (storedResumeId) {
-                const id = parseInt(storedResumeId, 10);
-                // Check if it exists in either list
-                const exists = (pdfRes.resumes || []).some(r => r.id === id) || (builderRes || []).some(r => r.id === id);
-                if (exists) {
-                    setResumeId(id);
-                }
-            }
-        } catch (error) {
-            console.error('Failed to fetch resumes', error);
-        } finally {
-            setLoadingResumes(false);
-        }
+    return {
+        title,
+        description,
+        openGraph: {
+            title,
+            description,
+            type: 'website',
+            images: [
+                {
+                    url: imageUrl,
+                    width: 1200,
+                    height: 630,
+                    alt: `${job.company_name} logo`,
+                },
+            ],
+        },
+        twitter: {
+            card: 'summary_large_image',
+            title,
+            description,
+            images: [imageUrl],
+        },
     };
+}
 
-    const handleApply = async (e: React.FormEvent) => {
-        e.preventDefault();
+export default async function JobDetailsPage({ params }: { params: Promise<{ slug: string }> }) {
+    const { slug } = await params;
+    const job = await getJobBySlug(slug);
 
-        if (!isAuthenticated) {
-            router.push(`/candidate/login?redirect=/jobs/${slug}`);
-            return;
-        }
-
-        if (!job) return;
-
-        if (!resumeId) {
-            alert('Please select or upload a resume before applying.');
-            return;
-        }
-
-        setApplying(true);
-        try {
-            await api.applyToJob(job.id, {
-                resume_id: resumeId,
-                cover_letter: coverLetter
-            });
-            setApplySuccess(true);
-        } catch (err: unknown) {
-            if (err instanceof Error) {
-                alert(err.message);
-            } else {
-                alert('Failed to apply');
-            }
-        } finally {
-            setApplying(false);
-        }
-    };
-
-    const handleResumeUploadSuccess = (id: number) => {
-        setResumeId(id);
-        localStorage.setItem('last_uploaded_resume_id', id.toString());
-        fetchResumes(); // Refresh list to include new upload
-    };
+    if (!job) {
+        notFound();
+    }
 
     const formatCurrency = (amount: number, currency: string) => {
         return new Intl.NumberFormat('en-US', {
@@ -135,23 +82,6 @@ export default function JobDetails({ params }: { params: Promise<{ slug: string 
             maximumFractionDigits: 0
         }).format(amount);
     };
-
-    if (loading) {
-        return (
-            <div className="min-h-screen bg-white flex items-center justify-center">
-                <div className="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
-            </div>
-        );
-    }
-
-    if (error || !job) {
-        return (
-            <div className="min-h-screen bg-white flex flex-col items-center justify-center p-6 text-center">
-                <h1 className="text-3xl font-black text-gray-900 mb-4">Job Not Found</h1>
-                <Link href="/jobs" className="text-blue-600 font-bold hover:underline">Browse all jobs</Link>
-            </div>
-        );
-    }
 
     return (
         <div className="min-h-screen bg-white">
@@ -225,108 +155,11 @@ export default function JobDetails({ params }: { params: Promise<{ slug: string 
                     </div>
 
                     <div className="lg:col-span-1">
-                        <div className="sticky top-32 bg-white border border-gray-100 rounded-[40px] p-8 shadow-xl">
-                            <h3 className="text-xl font-black text-gray-900 mb-6">Apply Now</h3>
-
-                            {applySuccess ? (
-                                <div className="bg-green-50 text-green-700 p-6 rounded-3xl text-center">
-                                    <div className="text-4xl mb-4">🎉</div>
-                                    <p className="font-bold mb-2">Application Sent!</p>
-                                    <p className="text-sm">The recruiter will review your profile shortly.</p>
-                                </div>
-                            ) : (
-                                <form onSubmit={handleApply} className="space-y-4">
-                                    <div>
-                                        <label className="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-1">Cover Letter (Optional)</label>
-                                        <textarea
-                                            rows={4}
-                                            className="w-full px-6 py-4 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-blue-600 outline-none hover:bg-gray-100 transition-all font-medium text-sm"
-                                            placeholder="Introduce yourself..."
-                                            value={coverLetter}
-                                            onChange={e => setCoverLetter(e.target.value)}
-                                        />
-                                    </div>
-
-                                    <div>
-                                        <label className="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-1">Resume</label>
-
-                                        {loadingResumes ? (
-                                            <div className="text-xs text-gray-400">Loading resumes...</div>
-                                        ) : (
-                                            <div className="space-y-4">
-                                                {/* Resume Selection */}
-                                                {(pdfResumes.length > 0 || builderResumes.length > 0) && (
-                                                    <div className="space-y-2">
-                                                        <select
-                                                            value={resumeId || ''}
-                                                            onChange={(e) => setResumeId(Number(e.target.value))}
-                                                            className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-600 outline-none text-sm"
-                                                        >
-                                                            <option value="" disabled>Select a resume</option>
-                                                            {pdfResumes.length > 0 && (
-                                                                <optgroup label="Uploaded Resumes">
-                                                                    {pdfResumes.map(r => (
-                                                                        <option key={`pdf-${r.id}`} value={r.id}>{r.resume_name}</option>
-                                                                    ))}
-                                                                </optgroup>
-                                                            )}
-                                                            {builderResumes.length > 0 && (
-                                                                <optgroup label="LetsMakeCV Resumes">
-                                                                    {builderResumes.map(r => (
-                                                                        <option key={`builder-${r.id}`} value={r.id}>{r.name}</option>
-                                                                    ))}
-                                                                </optgroup>
-                                                            )}
-                                                        </select>
-                                                    </div>
-                                                )}
-
-                                                {/* Upload New (always show option to upload) */}
-                                                {!resumeId && (
-                                                    <div className="border-t border-gray-100 pt-4">
-                                                        <p className="text-xs text-gray-400 mb-2">Or upload a new one:</p>
-                                                        <ResumeUpload onUploadSuccess={handleResumeUploadSuccess} />
-                                                    </div>
-                                                )}
-
-                                                {resumeId && (
-                                                    <div className="flex justify-end">
-                                                        <button
-                                                            type="button"
-                                                            onClick={() => setResumeId(null)}
-                                                            className="text-xs text-blue-600 hover:underline font-bold"
-                                                        >
-                                                            Using different resume?
-                                                        </button>
-                                                    </div>
-                                                )}
-                                            </div>
-                                        )}
-                                    </div>
-
-                                    {!isAuthenticated ? (
-                                        <Link href={`/candidate/login?redirect=/jobs/${slug}`} className="block w-full py-4 bg-blue-600 text-white font-black rounded-2xl hover:bg-blue-700 transition-all shadow-lg text-center">
-                                            Login to Apply
-                                        </Link>
-                                    ) : (
-                                        <button
-                                            type="submit"
-                                            disabled={applying || !resumeId}
-                                            className="w-full py-4 bg-gray-900 text-white font-black rounded-2xl hover:bg-black transition-all shadow-lg disabled:opacity-70 flex items-center justify-center gap-2"
-                                        >
-                                            {applying ? 'Sending...' : 'Submit Application'}
-                                        </button>
-                                    )}
-
-                                    <p className="text-center text-xs text-gray-400 mt-4">
-                                        Your PreviewCV profile and resume will be shared with {job.company_name}.
-                                    </p>
-                                </form>
-                            )}
-                        </div>
+                        <JobDetailsClient job={job} slug={slug} />
                     </div>
                 </div>
             </main>
         </div>
     );
 }
+

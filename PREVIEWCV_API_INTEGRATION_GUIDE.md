@@ -12,11 +12,12 @@
 2. [Authentication](#authentication)
 3. [Candidate Endpoints](#candidate-endpoints)
 4. [Recruiter Endpoints](#recruiter-endpoints)
-5. [PDF Resume Management (Candidates)](#pdf-resume-management-candidates)
-6. [Job Browsing & Application](#job-browsing--application)
-7. [Recruiter Job Management](#recruiter-job-management)
-8. [Error Handling](#error-handling)
-9. [Next.js Implementation Examples](#nextjs-implementation-examples)
+5. [Resume Management (Candidates)](#resume-management-candidates)
+6. [PDF Resume Upload (PreviewCV-Only Candidates)](#pdf-resume-upload-previewcv-only-candidates)
+7. [Job Browsing & Application](#job-browsing--application)
+8. [Recruiter Job Management](#recruiter-job-management)
+9. [Error Handling](#error-handling)
+10. [Next.js Implementation Examples](#nextjs-implementation-examples)
 
 ---
 
@@ -29,11 +30,7 @@ PreviewCV.com has **two types of users**:
   - ✅ Email/Password
   - ✅ Social Login (Google, LinkedIn, etc.)
 - **Shared with LetsMakeCV**: Same user database and authentication
-- **Features**:
-  - Upload PDF resumes directly (no builder needed)
-  - Generate permanent shareable links with QR codes
-  - Browse jobs, apply to jobs, track applications
-  - Manage profile and settings
+- **Features**: Browse jobs, apply to jobs, track applications
 
 ### 2. **Recruiters** (Employers)
 - **Login Methods**:
@@ -557,18 +554,253 @@ Recruiters have a **SEPARATE authentication system** (email/password ONLY).
 
 ---
 
-## 📄 PDF Resume Management (Candidates)
+## � Resume Management (Candidates)
+
+### 1. List My Resumes
+**Endpoint**: `GET /api/v1/resumes/`
+**Auth**: Required (Candidate Bearer Token)
+
+**Response**:
+```json
+[
+  {
+    "id": 1,
+    "name": "Software Developer Resume",
+    "template_id": 1,
+    "language": "en",
+    "is_active": true,
+    "created_at": "2025-12-20T10:00:00",
+    "updated_at": "2025-12-20T10:00:00",
+    "template_name": "Modern Professional"
+  },
+  {
+    "id": 2,
+    "name": "Senior Engineer Resume",
+    "template_id": 2,
+    "language": "en",
+    "is_active": true,
+    "created_at": "2025-12-19T15:30:00",
+    "updated_at": "2025-12-20T09:00:00",
+    "template_name": "Classic"
+  }
+]
+```
+
+---
+
+### 2. Get Resume Details
+**Endpoint**: `GET /api/v1/resumes/{resume_id}`
+**Auth**: Required (Candidate Bearer Token)
+
+**Response**:
+```json
+{
+  "id": 1,
+  "user_id": 1,
+  "template_id": 1,
+  "name": "Software Developer Resume",
+  "data_json": {
+    "personal_info": {
+      "full_name": "John Doe",
+      "email": "john@example.com",
+      "phone": "+1234567890",
+      "location": "San Francisco, CA",
+      "linkedin": "linkedin.com/in/johndoe",
+      "website": "johndoe.com",
+      "summary": "Experienced software developer..."
+    },
+    "experience": [
+      {
+        "company": "Tech Corp",
+        "position": "Senior Developer",
+        "start_date": "2020-01",
+        "end_date": null,
+        "is_current": true,
+        "location": "San Francisco, CA",
+        "description": "Leading development team...",
+        "achievements": [
+          "Increased performance by 40%",
+          "Led team of 5 developers"
+        ]
+      }
+    ],
+    "education": [
+      {
+        "institution": "Stanford University",
+        "degree": "Bachelor of Science",
+        "field_of_study": "Computer Science",
+        "start_date": "2015-09",
+        "end_date": "2019-06",
+        "gpa": "3.8",
+        "achievements": ["Dean's List", "Honors Graduate"]
+      }
+    ],
+    "skills": [
+      {
+        "name": "Python",
+        "level": "Expert",
+        "category": "Programming Languages"
+      },
+      {
+        "name": "React",
+        "level": "Advanced",
+        "category": "Frontend"
+      }
+    ],
+    "projects": [],
+    "certifications": [],
+    "languages": [],
+    "custom_sections": {}
+  },
+  "language": "en",
+  "is_active": true,
+  "pdf_url": "https://storage.example.com/resumes/1.pdf",
+  "docx_url": "https://storage.example.com/resumes/1.docx",
+  "created_at": "2025-12-20T10:00:00",
+  "updated_at": "2025-12-20T10:00:00"
+}
+```
+
+---
+
+### 3. Create Resume
+**Endpoint**: `POST /api/v1/resumes/`
+**Auth**: Required (Candidate Bearer Token)
+
+**Request**:
+```json
+{
+  "name": "Software Developer Resume",
+  "template_id": 1,
+  "language": "en",
+  "data_json": {
+    "personal_info": {
+      "full_name": "John Doe",
+      "email": "john@example.com",
+      "phone": "+1234567890",
+      "location": "San Francisco, CA",
+      "summary": "Experienced software developer..."
+    },
+    "experience": [
+      {
+        "company": "Tech Corp",
+        "position": "Senior Developer",
+        "start_date": "2020-01",
+        "is_current": true,
+        "location": "San Francisco, CA",
+        "description": "Leading development team...",
+        "achievements": ["Increased performance by 40%"]
+      }
+    ],
+    "education": [],
+    "skills": [
+      {
+        "name": "Python",
+        "level": "Expert",
+        "category": "Programming Languages"
+      }
+    ],
+    "projects": [],
+    "certifications": [],
+    "languages": [],
+    "custom_sections": {}
+  }
+}
+```
+
+**Response**: Same as "Get Resume Details"
+
+---
+
+### 4. Update Resume
+**Endpoint**: `PUT /api/v1/resumes/{resume_id}`
+**Auth**: Required (Candidate Bearer Token)
+
+**Request**:
+```json
+{
+  "name": "Updated Resume Name",
+  "data_json": {
+    "personal_info": {
+      "full_name": "John Doe",
+      "email": "john@example.com",
+      "summary": "Updated summary..."
+    },
+    "experience": [...],
+    "skills": [...]
+  }
+}
+```
+
+**Response**: Same as "Get Resume Details"
+
+---
+
+### 5. Delete Resume
+**Endpoint**: `DELETE /api/v1/resumes/{resume_id}`
+**Auth**: Required (Candidate Bearer Token)
+
+**Response**:
+```json
+{
+  "success": true,
+  "message": "Resume deleted successfully"
+}
+```
+
+---
+
+### 6. Generate Resume File (PDF/DOCX)
+**Endpoint**: `POST /api/v1/resumes/{resume_id}/generate`
+**Auth**: Required (Candidate Bearer Token)
+
+**Request**:
+```json
+{
+  "format": "pdf"
+}
+```
+
+**Response**:
+```json
+{
+  "success": true,
+  "format": "pdf",
+  "file_url": "https://storage.example.com/resumes/1.pdf",
+  "message": "Resume generated successfully"
+}
+```
+
+**Supported Formats**:
+- `pdf` - PDF format
+- `docx` - Microsoft Word format
+
+---
+
+## � PDF Resume Upload (PreviewCV-Only Candidates)
 
 ### Overview
 
-PreviewCV focuses on **PDF resume uploads** for candidates who want to:
-- ✅ Upload existing PDF resumes directly (no builder needed)
-- ✅ Store resumes securely in BunnyCDN
+**Use Case**: Candidates who register on PreviewCV.com but **never use LetsMakeCV.com's resume builder**.
+
+These candidates can:
+- ✅ Upload existing PDF resumes directly
+- ✅ Store resumes in BunnyCDN
 - ✅ Generate permanent shareable links with QR codes
 - ✅ Apply to jobs with uploaded resumes
-- ✅ Manage multiple resume versions
+- ✅ Bypass the entire LetsMakeCV resume builder workflow
 
-**Note**: Builder resumes from LetsMakeCV.com are also accessible via `GET /api/v1/resumes/` for candidates who use both platforms, but PreviewCV does not provide creation/editing of builder resumes.
+**Key Differences**:
+| Feature | Builder Resumes (`/api/v1/resumes/`) | Uploaded Resumes (`/api/v1/pdf-resumes/`) |
+|---------|--------------------------------------|-------------------------------------------|
+| **Source** | Created via LetsMakeCV builder | Uploaded PDF files |
+| **Template Required** | ✅ Yes (`template_id`) | ❌ No |
+| **Data JSON** | ✅ Yes (structured data) | ❌ No |
+| **File Format** | Generated (PDF/DOCX) | PDF only |
+| **Storage** | Database + BunnyCDN | BunnyCDN only |
+| **Use Case** | LetsMakeCV users | PreviewCV-only users |
+
+**Both resume types can coexist**: A user can have both builder resumes and uploaded resumes.
 
 ---
 
@@ -2596,6 +2828,469 @@ export default function RecruiterDashboard() {
     </div>
   );
 }
+```
+
+---
+
+## 🔗 Public URLs & SEO-Friendly Slugs
+
+### Overview
+
+PreviewCV uses SEO-friendly URLs for both job postings and recruiter profiles. These are **public endpoints** that don't require authentication, making them perfect for sharing and search engine indexing.
+
+---
+
+### 1. Job Slug URLs
+
+**Format**: `/jobs/{slug}`
+
+**Slug Pattern**: `{title}-at-{company}-{location}-{id}`
+
+**Example Slugs**:
+- `senior-python-developer-at-google-mountain-view-ca-123`
+- `frontend-engineer-at-meta-remote-456`
+- `data-scientist-at-netflix-los-angeles-ca-789`
+
+#### **API Endpoint**
+```
+GET /api/v1/jobs/slug/{slug}
+```
+
+#### **Example Request**
+```bash
+curl -X GET "https://api.previewcv.com/api/v1/jobs/slug/senior-python-developer-at-google-mountain-view-ca-123"
+```
+
+#### **Example Response**
+```json
+{
+  "success": true,
+  "job": {
+    "id": 123,
+    "slug": "senior-python-developer-at-google-mountain-view-ca-123",
+    "title": "Senior Python Developer",
+    "company_name": "Google",
+    "company_logo_url": "https://cdn.previewcv.com/logos/google.png",
+    "location": "Mountain View, CA",
+    "job_type": "full_time",
+    "experience_level": "senior",
+    "description": "We are looking for an experienced Python developer...",
+    "requirements": "5+ years of Python experience...",
+    "responsibilities": "Design and implement scalable backend systems...",
+    "salary_min": 150000,
+    "salary_max": 220000,
+    "salary_currency": "USD",
+    "is_remote": false,
+    "required_skills": ["Python", "Django", "PostgreSQL", "Redis"],
+    "preferred_skills": ["Kubernetes", "AWS", "GraphQL"],
+    "categories": ["Engineering", "Backend"],
+    "is_active": true,
+    "view_count": 1247,
+    "application_count": 34,
+    "posted_date": "2025-12-15T10:00:00",
+    "application_deadline": "2026-01-15T23:59:59",
+    "created_at": "2025-12-15T10:00:00",
+    "updated_at": "2025-12-20T14:30:00"
+  }
+}
+```
+
+#### **Frontend Usage (Next.js)**
+
+**File**: `app/jobs/[slug]/page.tsx`
+
+```typescript
+import { Metadata } from 'next';
+
+// Generate SEO metadata
+export async function generateMetadata({
+  params
+}: {
+  params: { slug: string }
+}): Promise<Metadata> {
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_API_URL}/api/v1/jobs/slug/${params.slug}`
+  );
+  const data = await res.json();
+  const job = data.job;
+
+  return {
+    title: `${job.title} at ${job.company_name} | PreviewCV`,
+    description: job.description?.substring(0, 160),
+    openGraph: {
+      title: `${job.title} at ${job.company_name}`,
+      description: job.description?.substring(0, 160),
+      url: `https://previewcv.com/jobs/${params.slug}`,
+      images: [job.company_logo_url],
+    },
+  };
+}
+
+// Server-side render job details
+export default async function JobPage({
+  params
+}: {
+  params: { slug: string }
+}) {
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_API_URL}/api/v1/jobs/slug/${params.slug}`,
+    { cache: 'no-store' } // Always fetch fresh data
+  );
+
+  if (!res.ok) {
+    return <div>Job not found</div>;
+  }
+
+  const data = await res.json();
+  const job = data.job;
+
+  return (
+    <div className="container mx-auto px-4 py-8">
+      <h1 className="text-3xl font-bold mb-4">{job.title}</h1>
+      <div className="flex items-center gap-4 mb-6">
+        {job.company_logo_url && (
+          <img
+            src={job.company_logo_url}
+            alt={job.company_name}
+            className="w-16 h-16 rounded"
+          />
+        )}
+        <div>
+          <h2 className="text-xl font-semibold">{job.company_name}</h2>
+          <p className="text-gray-600">{job.location}</p>
+        </div>
+      </div>
+
+      <div className="grid md:grid-cols-3 gap-6 mb-8">
+        <div>
+          <span className="font-semibold">Job Type:</span> {job.job_type}
+        </div>
+        <div>
+          <span className="font-semibold">Experience:</span> {job.experience_level}
+        </div>
+        <div>
+          <span className="font-semibold">Salary:</span>
+          ${job.salary_min?.toLocaleString()} - ${job.salary_max?.toLocaleString()}
+        </div>
+      </div>
+
+      <div className="prose max-w-none mb-8">
+        <h3>Description</h3>
+        <p>{job.description}</p>
+
+        <h3>Requirements</h3>
+        <p>{job.requirements}</p>
+
+        <h3>Responsibilities</h3>
+        <p>{job.responsibilities}</p>
+      </div>
+
+      <div className="mb-8">
+        <h3 className="font-semibold mb-2">Required Skills</h3>
+        <div className="flex flex-wrap gap-2">
+          {job.required_skills.map((skill: string) => (
+            <span
+              key={skill}
+              className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm"
+            >
+              {skill}
+            </span>
+          ))}
+        </div>
+      </div>
+
+      <button className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+        Apply Now
+      </button>
+
+      <div className="mt-4 text-sm text-gray-500">
+        👁️ {job.view_count} views • 📝 {job.application_count} applications
+      </div>
+    </div>
+  );
+}
+```
+
+**Shareable URL**: `https://previewcv.com/jobs/senior-python-developer-at-google-mountain-view-ca-123`
+
+---
+
+### 2. Recruiter Profile URLs
+
+**Format**: `/recruiter/{username}`
+
+**Username Pattern**: Alphanumeric, hyphens, underscores (lowercase)
+
+**Example Usernames**:
+- `google-careers`
+- `meta-recruiting`
+- `john-tech-recruiter`
+- `acme_corp`
+
+#### **API Endpoint**
+```
+GET /api/v1/recruiters/profile/{username}
+```
+
+#### **Example Request**
+```bash
+curl -X GET "https://api.previewcv.com/api/v1/recruiters/profile/google-careers"
+```
+
+#### **Example Response**
+```json
+{
+  "id": 42,
+  "username": "google-careers",
+  "recruiter_type": "company",
+  "display_name": "Google Careers",
+  "bio": "Google is a global technology leader focused on improving the ways people connect with information. We're hiring talented engineers, designers, and product managers to join our mission.\n\nOur Culture:\n- Innovation-driven environment\n- Work-life balance with flexible schedules\n- Competitive compensation and benefits\n- Opportunities for growth and learning\n\nWhy Join Google:\nAt Google, we believe in the power of technology to solve real-world problems. Our teams work on products used by billions of people worldwide. We offer:\n\n✓ Cutting-edge technology stack\n✓ Collaborative team environment\n✓ Comprehensive health benefits\n✓ 401(k) matching\n✓ Free meals and snacks\n✓ On-site fitness centers\n✓ Generous parental leave\n\nOur Hiring Process:\n1. Initial phone screen\n2. Technical interviews\n3. Team matching\n4. Offer\n\nWe're committed to building a diverse and inclusive workplace. We welcome applications from candidates of all backgrounds.",
+  "location": "Mountain View, CA",
+  "linkedin_url": "https://linkedin.com/company/google",
+  "is_verified": true,
+  "profile_url": "/recruiter/google-careers",
+  "created_at": "2025-01-15T10:00:00",
+  "company_name": "Google",
+  "company_website": "https://careers.google.com",
+  "company_size": "10000+",
+  "industry": "Technology",
+  "company_logo_url": "https://cdn.previewcv.com/logos/google.png"
+}
+```
+
+**Note**: The `bio` field can contain **detailed company information** including:
+- Company mission and values
+- Culture and work environment
+- Benefits and perks
+- Hiring process details
+- Team structure
+- Growth opportunities
+- Any other relevant information
+
+The `bio` field is a `Text` type with **unlimited length**, perfect for comprehensive company descriptions!
+
+#### **Frontend Usage (Next.js)**
+
+**File**: `app/recruiter/[username]/page.tsx`
+
+```typescript
+import { Metadata } from 'next';
+
+// Generate SEO metadata
+export async function generateMetadata({
+  params
+}: {
+  params: { username: string }
+}): Promise<Metadata> {
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_API_URL}/api/v1/recruiters/profile/${params.username}`
+  );
+  const recruiter = await res.json();
+
+  return {
+    title: `${recruiter.display_name} | Recruiter Profile | PreviewCV`,
+    description: recruiter.bio?.substring(0, 160) || `View ${recruiter.display_name}'s profile on PreviewCV`,
+    openGraph: {
+      title: recruiter.display_name,
+      description: recruiter.bio?.substring(0, 160),
+      url: `https://previewcv.com/recruiter/${params.username}`,
+      images: [recruiter.company_logo_url],
+    },
+  };
+}
+
+// Server-side render recruiter profile
+export default async function RecruiterProfilePage({
+  params
+}: {
+  params: { username: string }
+}) {
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_API_URL}/api/v1/recruiters/profile/${params.username}`,
+    { cache: 'no-store' }
+  );
+
+  if (!res.ok) {
+    return <div>Recruiter not found</div>;
+  }
+
+  const recruiter = await res.json();
+
+  return (
+    <div className="container mx-auto px-4 py-8">
+      {/* Header */}
+      <div className="bg-white rounded-lg shadow-lg p-8 mb-8">
+        <div className="flex items-start gap-6">
+          {recruiter.company_logo_url && (
+            <img
+              src={recruiter.company_logo_url}
+              alt={recruiter.display_name}
+              className="w-24 h-24 rounded-lg"
+            />
+          )}
+          <div className="flex-1">
+            <div className="flex items-center gap-3 mb-2">
+              <h1 className="text-3xl font-bold">{recruiter.display_name}</h1>
+              {recruiter.is_verified && (
+                <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">
+                  ✓ Verified
+                </span>
+              )}
+            </div>
+
+            <div className="flex flex-wrap gap-4 text-gray-600 mb-4">
+              {recruiter.location && (
+                <span>📍 {recruiter.location}</span>
+              )}
+              {recruiter.industry && (
+                <span>🏢 {recruiter.industry}</span>
+              )}
+              {recruiter.company_size && (
+                <span>👥 {recruiter.company_size} employees</span>
+              )}
+            </div>
+
+            <div className="flex gap-4">
+              {recruiter.company_website && (
+                <a
+                  href={recruiter.company_website}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-600 hover:underline"
+                >
+                  🌐 Website
+                </a>
+              )}
+              {recruiter.linkedin_url && (
+                <a
+                  href={recruiter.linkedin_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-600 hover:underline"
+                >
+                  💼 LinkedIn
+                </a>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* About Section */}
+      {recruiter.bio && (
+        <div className="bg-white rounded-lg shadow-lg p-8 mb-8">
+          <h2 className="text-2xl font-bold mb-4">About {recruiter.display_name}</h2>
+          <div className="prose max-w-none whitespace-pre-wrap">
+            {recruiter.bio}
+          </div>
+        </div>
+      )}
+
+      {/* Active Jobs Section */}
+      <div className="bg-white rounded-lg shadow-lg p-8">
+        <h2 className="text-2xl font-bold mb-4">Active Job Openings</h2>
+        {/* Fetch and display jobs posted by this recruiter */}
+        <p className="text-gray-600">Loading jobs...</p>
+      </div>
+    </div>
+  );
+}
+```
+
+**Shareable URL**: `https://previewcv.com/recruiter/google-careers`
+
+---
+
+### 3. How Candidates View Public Content
+
+#### **Scenario 1: Browsing Jobs**
+
+1. **Job Listing Page** → Shows all jobs with slugs
+   ```typescript
+   // Fetch jobs
+   const jobs = await fetch('/api/v1/jobs/list').then(r => r.json());
+
+   // Display with slug links
+   jobs.map(job => (
+     <Link href={`/jobs/${job.slug}`}>
+       {job.title} at {job.company_name}
+     </Link>
+   ))
+   ```
+
+2. **Click Job** → Navigate to `/jobs/{slug}`
+   - URL: `https://previewcv.com/jobs/senior-python-developer-at-google-mountain-view-ca-123`
+   - No authentication required
+   - View count increments automatically
+   - Can share URL on social media, email, etc.
+
+3. **Apply to Job** → Requires authentication
+   - Candidate must login/register
+   - Then can apply with resume
+
+#### **Scenario 2: Viewing Recruiter Profiles**
+
+1. **From Job Posting** → Click company name
+   ```typescript
+   <Link href={`/recruiter/${job.recruiter_username}`}>
+     {job.company_name}
+   </Link>
+   ```
+
+2. **Direct URL** → Share recruiter profile
+   - URL: `https://previewcv.com/recruiter/google-careers`
+   - No authentication required
+   - Shows company info, bio, active jobs
+   - Can share on LinkedIn, Twitter, etc.
+
+3. **Search Recruiters** → Browse all recruiters
+   ```typescript
+   // Future endpoint (not yet implemented)
+   GET /api/v1/recruiters/search?industry=Technology&location=California
+   ```
+
+---
+
+### 4. SEO Benefits
+
+#### **Job Slugs**
+✅ **Human-readable URLs**: `senior-python-developer-at-google` vs `job/12345`
+✅ **Keywords in URL**: Helps search engines understand content
+✅ **Social sharing**: Looks professional when shared
+✅ **Auto-generated**: No manual work required
+✅ **Unique**: ID suffix prevents duplicates
+
+#### **Recruiter Usernames**
+✅ **Brand consistency**: `google-careers` matches company branding
+✅ **Memorable**: Easy to remember and share
+✅ **Professional**: Clean URLs for marketing materials
+✅ **Permanent**: Username doesn't change (unlike job slugs)
+
+---
+
+### 5. Complete URL Structure
+
+```
+PreviewCV Public URLs:
+
+Jobs:
+├── /jobs                          (Browse all jobs)
+├── /jobs/{slug}                   (Job details - PUBLIC)
+└── /jobs/search?q=python          (Search jobs)
+
+Recruiters:
+├── /recruiter/{username}          (Public profile - PUBLIC)
+└── /recruiters                    (Browse all recruiters)
+
+Candidates:
+├── /candidates                    (Browse candidates - requires auth)
+└── /candidate/{username}          (Public profile - if enabled)
+
+Authentication:
+├── /login                         (Candidate login)
+├── /register                      (Candidate register)
+├── /recruiter/login               (Recruiter login)
+└── /recruiter/register            (Recruiter register)
 ```
 
 ---
