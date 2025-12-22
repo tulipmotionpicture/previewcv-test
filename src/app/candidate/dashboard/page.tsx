@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import config from "@/config";
 import Image from "next/image";
@@ -12,7 +12,7 @@ import { useToast } from "@/context/ToastContext";
 import ResumeUpload from "@/components/ResumeUpload";
 import Breadcrumb from "@/components/ui/Breadcrumb";
 
-export default function CandidateDashboard() {
+function CandidateDashboardContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { user, logout, isAuthenticated, loading: authLoading } = useAuth();
@@ -1269,5 +1269,17 @@ export default function CandidateDashboard() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function CandidateDashboard() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-950 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
+    }>
+      <CandidateDashboardContent />
+    </Suspense>
   );
 }
