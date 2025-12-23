@@ -32,28 +32,55 @@ export function RecruiterAuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     checkAuth();
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, []);
 
   const checkAuth = async () => {
+    console.log("RecruiterAuthContext: Starting checkAuth");
     try {
       // Ensure we're in the browser
       if (typeof window === "undefined") {
+        console.log("RecruiterAuthContext: Not in browser");
         setLoading(false);
         return;
       }
 
       const token = localStorage.getItem("recruiter_access_token");
+      console.log("RecruiterAuthContext: Token found:", !!token);
+
       if (!token) {
+        console.log("RecruiterAuthContext: No token, setting loading false");
         setLoading(false);
         return;
       }
 
       // Validate token by fetching recruiter profile
+      console.log("RecruiterAuthContext: Fetching recruiter profile");
       const response = await api.getRecruiterProfile();
-      if (response.success && response.recruiter) {
-        setRecruiter(response.recruiter);
+      console.log("RecruiterAuthContext: Profile response:", response);
+
+      // Check if response is the recruiter object directly or wrapped
+      const responseData = response as unknown as Recruiter | { success: boolean; recruiter: Recruiter };
+      if (responseData && 'id' in responseData) {
+        // Response is the recruiter object directly
+        console.log(
+          "RecruiterAuthContext: Setting recruiter (direct):",
+          responseData
+        );
+        setRecruiter(responseData);
+      } else if ('success' in responseData && 'recruiter' in responseData && responseData.success) {
+        // Response is wrapped with success and recruiter properties
+        console.log(
+          "RecruiterAuthContext: Setting recruiter (wrapped):",
+          responseData.recruiter
+        );
+        setRecruiter(responseData.recruiter);
+      } else {
+        console.log(
+          "RecruiterAuthContext: Response not valid recruiter format"
+        );
       }
     } catch (error: unknown) {
+      console.error("RecruiterAuthContext: Error in checkAuth:", error);
       if (error instanceof Error) {
         console.error("Failed to fetch recruiter profile:", error.message);
       }
@@ -64,15 +91,20 @@ export function RecruiterAuthProvider({ children }: { children: ReactNode }) {
         "status" in error &&
         (error as Error & { status: number }).status === 401;
       if (isUnauthorized && typeof window !== "undefined") {
+        console.log("RecruiterAuthContext: 401 error, clearing tokens");
         localStorage.removeItem("recruiter_access_token");
         localStorage.removeItem("recruiter_refresh_token");
         setRecruiter(null);
       }
       // If not 401, just set recruiter to null but keep tokens for retry
       else {
+        console.log("RecruiterAuthContext: Non-401 error, keeping tokens");
         setRecruiter(null);
       }
     } finally {
+      console.log(
+        "RecruiterAuthContext: checkAuth complete, setting loading false"
+      );
       setLoading(false);
     }
   };

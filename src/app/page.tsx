@@ -93,10 +93,13 @@ export default function Home() {
     <div className="min-h-screen bg-white dark:bg-gray-950 dark:text-gray-100 transition-colors duration-300">
       {/* Navigation */}
       <Header
-        links={[{ label: "Candidate Login", href: "/candidate/login" }]}
+        links={[
+          { label: "Candidate Login", href: "/candidate/login" },
+          { label: "Recruiter Login", href: "/recruiter/login" },
+        ]}
         cta={{
-          label: "Recruiter Login",
-          href: "/recruiter/login",
+          label: "Get Started",
+          href: "/candidate/signup",
           variant: "primary",
         }}
         showAuthButtons={true}

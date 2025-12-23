@@ -10,10 +10,13 @@ import { useEffect } from "react";
 
 interface JobDetailsClientProps {
   job: Job;
-  slug: string;
+  jobId: string;
 }
 
-export default function JobDetailsClient({ job, slug }: JobDetailsClientProps) {
+export default function JobDetailsClient({
+  job,
+  jobId,
+}: JobDetailsClientProps) {
   const { isAuthenticated } = useAuth();
   const router = useRouter();
   const [applying, setApplying] = useState(false);
@@ -65,7 +68,7 @@ export default function JobDetailsClient({ job, slug }: JobDetailsClientProps) {
     e.preventDefault();
 
     if (!isAuthenticated) {
-      router.push(`/candidate/login?redirect=/jobs/${slug}`);
+      router.push(`/candidate/login?redirect=/jobs/${jobId}`);
       return;
     }
 
@@ -248,7 +251,7 @@ export default function JobDetailsClient({ job, slug }: JobDetailsClientProps) {
 
           {!isAuthenticated ? (
             <a
-              href={`/candidate/login?redirect=/jobs/${slug}`}
+              href={`/candidate/login?redirect=/jobs/${jobId}`}
               className="block w-full py-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold rounded-xl transition-all shadow-md hover:shadow-lg text-center transform hover:-translate-y-0.5"
             >
               Login to Apply

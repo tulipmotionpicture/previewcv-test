@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import config from "@/config";
 import Image from "next/image";
@@ -21,13 +21,22 @@ export default function RecruiterDashboard() {
     loading: authLoading,
   } = useRecruiterAuth();
   const toast = useToast();
-  const [activeTab, setActiveTab] = useState<"jobs" | "ats">("jobs");
+  const [activeTab, setActiveTab] = useState<"jobs" | "ats" | "stats">("jobs");
   const [jobs, setJobs] = useState<Job[]>([]);
   const [applications, setApplications] = useState<Application[]>([]);
+  const [dashboardStats, setDashboardStats] = useState<{
+    total_jobs: number;
+    active_jobs: number;
+    total_applications: number;
+    pending_applications: number;
+    shortlisted_applications: number;
+    rejected_applications: number;
+  } | null>(null);
 
   // Loading states
   const [loadingJobs, setLoadingJobs] = useState(false);
   const [loadingApps, setLoadingApps] = useState(false);
+  const [loadingStats, setLoadingStats] = useState(false);
 
   const [selectedJobId, setSelectedJobId] = useState<number | null>(null);
   const [statusFilter, setStatusFilter] = useState<string>("All");
@@ -60,11 +69,6 @@ export default function RecruiterDashboard() {
   }, [isAuthenticated, authLoading, router]);
 
   useEffect(() => {
-    // Auth check handled by context/protected route logic mostly
-    fetchJobs();
-  }, []);
-
-  useEffect(() => {
     if (activeTab === "ats" || selectedJobId) {
       if (jobs.length > 0 && !selectedJobId) {
         setSelectedJobId(jobs[0].id);
@@ -78,19 +82,40 @@ export default function RecruiterDashboard() {
     }
   }, [selectedJobId]);
 
-  const fetchJobs = async () => {
+  const fetchJobs = useCallback(async () => {
     setLoadingJobs(true);
     try {
-      const response = await api.getRecruiterJobs();
-      if (response.success && response.jobs) {
-        setJobs(response.jobs);
+      const response = await api.getMyJobPostings();
+      if (response.items) {
+        setJobs(response.items);
       }
     } catch (error) {
       console.error("Failed to fetch jobs:", error);
+      toast?.error("Failed to load jobs");
     } finally {
       setLoadingJobs(false);
     }
-  };
+  }, [toast]);
+
+  const fetchDashboardStats = useCallback(async () => {
+    setLoadingStats(true);
+    try {
+      const response = await api.getRecruiterDashboardStats();
+      if (response.success && response.stats) {
+        setDashboardStats(response.stats);
+      }
+    } catch (error) {
+      console.error("Failed to fetch dashboard stats:", error);
+    } finally {
+      setLoadingStats(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    // Auth check handled by context/protected route logic mostly
+    fetchJobs();
+    fetchDashboardStats();
+  }, [fetchJobs, fetchDashboardStats]);
 
   const fetchApplications = async (jobId: number) => {
     setLoadingApps(true);
@@ -230,6 +255,16 @@ export default function RecruiterDashboard() {
         </div>
         <nav className="space-y-2">
           <button
+            onClick={() => setActiveTab("stats")}
+            className={`w-full text-left px-4 py-3 rounded-xl transition-all font-black text-xs uppercase tracking-tight ${
+              activeTab === "stats"
+                ? "bg-indigo-600 text-white shadow-lg shadow-indigo-200 dark:shadow-indigo-900/50"
+                : "text-gray-400 dark:text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800"
+            }`}
+          >
+            Dashboard Stats
+          </button>
+          <button
             onClick={() => setActiveTab("jobs")}
             className={`w-full text-left px-4 py-3 rounded-xl transition-all font-black text-xs uppercase tracking-tight ${
               activeTab === "jobs"
@@ -272,6 +307,85 @@ export default function RecruiterDashboard() {
       <main className="flex-1 p-10 max-w-6xl mx-auto overflow-x-hidden">
         {/* Breadcrumb */}
         <Breadcrumb className="mb-6" />
+
+        {activeTab === "stats" && (
+          <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <h1 className="text-3xl font-black text-gray-900 dark:text-gray-100 mb-10">
+              Dashboard Statistics
+            </h1>
+
+            {loadingStats ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {[...Array(6)].map((_, i) => (
+                  <div
+                    key={i}
+                    className="bg-white dark:bg-gray-800 rounded-2xl p-6 border border-gray-200 dark:border-gray-700 animate-pulse"
+                  >
+                    <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-24 mb-4"></div>
+                    <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-16"></div>
+                  </div>
+                ))}
+              </div>
+            ) : dashboardStats ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-2xl p-6 border border-blue-200 dark:border-blue-800">
+                  <p className="text-xs font-black uppercase tracking-wider text-blue-600 dark:text-blue-400 mb-2">
+                    Total Jobs
+                  </p>
+                  <p className="text-4xl font-black text-gray-900 dark:text-gray-100">
+                    {dashboardStats.total_jobs}
+                  </p>
+                </div>
+                <div className="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 rounded-2xl p-6 border border-green-200 dark:border-green-800">
+                  <p className="text-xs font-black uppercase tracking-wider text-green-600 dark:text-green-400 mb-2">
+                    Active Jobs
+                  </p>
+                  <p className="text-4xl font-black text-gray-900 dark:text-gray-100">
+                    {dashboardStats.active_jobs}
+                  </p>
+                </div>
+                <div className="bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-2xl p-6 border border-purple-200 dark:border-purple-800">
+                  <p className="text-xs font-black uppercase tracking-wider text-purple-600 dark:text-purple-400 mb-2">
+                    Total Applications
+                  </p>
+                  <p className="text-4xl font-black text-gray-900 dark:text-gray-100">
+                    {dashboardStats.total_applications}
+                  </p>
+                </div>
+                <div className="bg-gradient-to-br from-yellow-50 to-orange-50 dark:from-yellow-900/20 dark:to-orange-900/20 rounded-2xl p-6 border border-yellow-200 dark:border-yellow-800">
+                  <p className="text-xs font-black uppercase tracking-wider text-yellow-600 dark:text-yellow-400 mb-2">
+                    Pending
+                  </p>
+                  <p className="text-4xl font-black text-gray-900 dark:text-gray-100">
+                    {dashboardStats.pending_applications}
+                  </p>
+                </div>
+                <div className="bg-gradient-to-br from-teal-50 to-cyan-50 dark:from-teal-900/20 dark:to-cyan-900/20 rounded-2xl p-6 border border-teal-200 dark:border-teal-800">
+                  <p className="text-xs font-black uppercase tracking-wider text-teal-600 dark:text-teal-400 mb-2">
+                    Shortlisted
+                  </p>
+                  <p className="text-4xl font-black text-gray-900 dark:text-gray-100">
+                    {dashboardStats.shortlisted_applications}
+                  </p>
+                </div>
+                <div className="bg-gradient-to-br from-red-50 to-rose-50 dark:from-red-900/20 dark:to-rose-900/20 rounded-2xl p-6 border border-red-200 dark:border-red-800">
+                  <p className="text-xs font-black uppercase tracking-wider text-red-600 dark:text-red-400 mb-2">
+                    Rejected
+                  </p>
+                  <p className="text-4xl font-black text-gray-900 dark:text-gray-100">
+                    {dashboardStats.rejected_applications}
+                  </p>
+                </div>
+              </div>
+            ) : (
+              <div className="text-center py-20">
+                <p className="text-gray-500 dark:text-gray-400">
+                  Failed to load statistics
+                </p>
+              </div>
+            )}
+          </div>
+        )}
 
         {activeTab === "jobs" && (
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">

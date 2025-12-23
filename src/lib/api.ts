@@ -301,6 +301,128 @@ export class ApiClient {
     );
   }
 
+  // --- Recruiter Jobs ---
+  async createJobPosting(
+    data: Partial<Job>
+  ): Promise<{ success: boolean; job: Job }> {
+    return this.request<{ success: boolean; job: Job }>(
+      "/api/v1/recruiters/jobs/create",
+      {
+        method: "POST",
+        body: JSON.stringify(data),
+      },
+      true,
+      true
+    );
+  }
+
+  async getMyJobPostings(
+    params?: URLSearchParams
+  ): Promise<PaginatedResponse<Job>> {
+    const queryString = params ? `?${params.toString()}` : "";
+    return this.request<PaginatedResponse<Job>>(
+      `/api/v1/recruiters/jobs/my-postings${queryString}`,
+      {},
+      true,
+      true
+    );
+  }
+
+  async getJobPostingDetails(
+    jobId: number
+  ): Promise<{ success: boolean; job: Job }> {
+    return this.request<{ success: boolean; job: Job }>(
+      `/api/v1/recruiters/jobs/posting/${jobId}`,
+      {},
+      true,
+      true
+    );
+  }
+
+  async updateJobPosting(
+    jobId: number,
+    data: Partial<Job>
+  ): Promise<{ success: boolean; job: Job }> {
+    return this.request<{ success: boolean; job: Job }>(
+      `/api/v1/recruiters/jobs/posting/${jobId}`,
+      {
+        method: "PUT",
+        body: JSON.stringify(data),
+      },
+      true,
+      true
+    );
+  }
+
+  async deleteJobPosting(
+    jobId: number
+  ): Promise<{ success: boolean; message: string }> {
+    return this.request<{ success: boolean; message: string }>(
+      `/api/v1/recruiters/jobs/posting/${jobId}`,
+      {
+        method: "DELETE",
+      },
+      true,
+      true
+    );
+  }
+
+  async getJobApplications(
+    jobId: number
+  ): Promise<{ success: boolean; applications: Application[] }> {
+    return this.request<{ success: boolean; applications: Application[] }>(
+      `/api/v1/recruiters/jobs/posting/${jobId}/applications`,
+      {},
+      true,
+      true
+    );
+  }
+
+  async getRecruiterDashboardStats(): Promise<{
+    success: boolean;
+    stats: {
+      total_jobs: number;
+      active_jobs: number;
+      total_applications: number;
+      pending_applications: number;
+      shortlisted_applications: number;
+      rejected_applications: number;
+    };
+  }> {
+    return this.request(
+      "/api/v1/recruiters/jobs/dashboard/stats",
+      {},
+      true,
+      true
+    );
+  }
+
+  async updateApplicationStatus(
+    applicationId: number,
+    status: string
+  ): Promise<{ success: boolean; application: Application }> {
+    return this.request<{ success: boolean; application: Application }>(
+      `/api/v1/recruiters/jobs/application/${applicationId}/status`,
+      {
+        method: "PUT",
+        body: JSON.stringify({ status }),
+      },
+      true,
+      true
+    );
+  }
+
+  async getApplicationDetails(
+    applicationId: number
+  ): Promise<{ success: boolean; application: Application }> {
+    return this.request<{ success: boolean; application: Application }>(
+      `/api/v1/recruiters/jobs/application/${applicationId}`,
+      {},
+      true,
+      true
+    );
+  }
+
   // --- Jobs ---
   async getJobs(params: URLSearchParams): Promise<PaginatedResponse<Job>> {
     return this.request<PaginatedResponse<Job>>(
@@ -311,6 +433,12 @@ export class ApiClient {
   async getJobBySlug(slug: string): Promise<{ success: boolean; job: Job }> {
     return this.request<{ success: boolean; job: Job }>(
       `/api/v1/jobs/slug/${slug}`
+    );
+  }
+
+  async getJobById(jobId: number): Promise<{ success: boolean; job: Job }> {
+    return this.request<{ success: boolean; job: Job }>(
+      `/api/v1/jobs/${jobId}`
     );
   }
 
@@ -470,32 +598,32 @@ export class ApiClient {
     );
   }
 
-  async getJobApplications(
-    jobId: number
-  ): Promise<{ success: boolean; applications: Application[] }> {
-    return this.request<{ success: boolean; applications: Application[] }>(
-      `/api/v1/recruiters/jobs/${jobId}/applications`,
-      {},
-      true,
-      true
-    );
-  }
+  // async getJobApplications(
+  //   jobId: number
+  // ): Promise<{ success: boolean; applications: Application[] }> {
+  //   return this.request<{ success: boolean; applications: Application[] }>(
+  //     `/api/v1/recruiters/jobs/${jobId}/applications`,
+  //     {},
+  //     true,
+  //     true
+  //   );
+  // }
 
-  async updateApplicationStatus(
-    applicationId: number,
-    status: string,
-    notes?: string
-  ): Promise<{ success: boolean; application: Application }> {
-    return this.request<{ success: boolean; application: Application }>(
-      `/api/v1/recruiters/jobs/applications/${applicationId}/status`,
-      {
-        method: "PUT",
-        body: JSON.stringify({ status, notes }),
-      },
-      true,
-      true
-    );
-  }
+  // async updateApplicationStatus(
+  //   applicationId: number,
+  //   status: string,
+  //   notes?: string
+  // ): Promise<{ success: boolean; application: Application }> {
+  //   return this.request<{ success: boolean; application: Application }>(
+  //     `/api/v1/recruiters/jobs/applications/${applicationId}/status`,
+  //     {
+  //       method: "PUT",
+  //       body: JSON.stringify({ status, notes }),
+  //     },
+  //     true,
+  //     true
+  //   );
+  // }
 
   async updateJob(
     jobId: number,

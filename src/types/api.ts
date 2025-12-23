@@ -103,10 +103,7 @@ export interface Job {
 export interface Application {
   id: number;
   job_id: number;
-  candidate_id: number; // user_id in guide? Guide says "user_id". Mapping?
-  // Guide says: user_id, candidate_name, candidate_email, resume_id, status, applied_at, cover_letter, notes
-  // I should probably match guide exactly or map it.
-  // Let's match guide structure for "Application" response object
+  candidate_id: number;
   user_id: number;
   candidate_name: string;
   candidate_email: string;
@@ -123,6 +120,11 @@ export interface Application {
   applied_at: string;
   cover_letter?: string;
   notes?: string;
+  // Job details (if populated by API)
+  job?: Job;
+  job_title?: string;
+  company_name?: string;
+  job_slug?: string;
 }
 
 export interface AuthResponse {

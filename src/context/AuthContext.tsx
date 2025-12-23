@@ -32,7 +32,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     checkAuth();
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, []);
 
   const checkAuth = async () => {
     try {

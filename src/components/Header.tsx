@@ -49,6 +49,28 @@ export default function Header({
   const isAuthenticated = isCandidateAuth || isRecruiterAuth;
   const isLoading = candidateLoading || recruiterLoading;
 
+  // Debug log
+  useEffect(() => {
+    if (showAuthButtons) {
+      console.log("Header Auth State:", {
+        isCandidateAuth,
+        isRecruiterAuth,
+        isAuthenticated,
+        candidateLoading,
+        recruiterLoading,
+        isLoading,
+      });
+    }
+  }, [
+    showAuthButtons,
+    isCandidateAuth,
+    isRecruiterAuth,
+    isAuthenticated,
+    candidateLoading,
+    recruiterLoading,
+    isLoading,
+  ]);
+
   // Handle scroll effect
   useEffect(() => {
     const handleScroll = () => {
@@ -103,6 +125,53 @@ export default function Header({
         {/* Desktop Navigation */}
         <div className="flex items-center gap-8">
           {links.map((link) => {
+            // If showAuthButtons is enabled and any user is authenticated
+            if (showAuthButtons && isAuthenticated) {
+              // Candidate authenticated: show candidate dashboard, hide all login links
+              if (isCandidateAuth && link.href === "/candidate/login") {
+                return (
+                  <Link
+                    key="/candidate/dashboard"
+                    href="/candidate/dashboard"
+                    className={`text-sm font-bold uppercase tracking-widest transition-colors ${
+                      pathname === "/candidate/dashboard"
+                        ? "text-blue-600 dark:text-blue-400"
+                        : "text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
+                    }`}
+                  >
+                    Dashboard
+                  </Link>
+                );
+              }
+
+              // Recruiter authenticated: show recruiter dashboard, hide all login links
+              if (isRecruiterAuth && link.href === "/recruiter/login") {
+                return (
+                  <Link
+                    key="/recruiter/dashboard"
+                    href="/recruiter/dashboard"
+                    className={`text-sm font-bold uppercase tracking-widest transition-colors ${
+                      pathname === "/recruiter/dashboard"
+                        ? "text-blue-600 dark:text-blue-400"
+                        : "text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
+                    }`}
+                  >
+                    Dashboard
+                  </Link>
+                );
+              }
+
+              // Hide other auth-related links when authenticated
+              if (
+                link.href === "/candidate/login" ||
+                link.href === "/recruiter/login" ||
+                link.href === "/candidate/signup" ||
+                link.href === "/recruiter/signup"
+              ) {
+                return null;
+              }
+            }
+
             const isActive = pathname === link.href;
             return (
               <Link
@@ -120,16 +189,16 @@ export default function Header({
           })}
 
           {/* Auth-aware buttons */}
-          {showAuthButtons && !isLoading && (
+          {showAuthButtons && (
             <>
-              {isAuthenticated ? (
+              {!isLoading && isAuthenticated ? (
                 <button
                   onClick={handleLogout}
                   className="px-6 py-3 bg-red-600 hover:bg-red-700 text-white text-sm font-bold rounded-xl transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
                 >
                   Logout
                 </button>
-              ) : (
+              ) : !isLoading && !isAuthenticated ? (
                 <>
                   {cta && (
                     <Link
@@ -148,6 +217,9 @@ export default function Header({
                     </Link>
                   )}
                 </>
+              ) : (
+                // Loading state - show skeleton or nothing
+                <div className="w-24 h-11 bg-gray-200 dark:bg-gray-700 rounded-xl animate-pulse"></div>
               )}
             </>
           )}

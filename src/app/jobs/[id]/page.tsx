@@ -6,13 +6,13 @@ import { Job } from "@/types/api";
 import JobDetailsClient from "./JobDetailsClient";
 import { notFound } from "next/navigation";
 
-// Server-side data fetching function using the centralized API
-async function getJobBySlug(slug: string): Promise<Job | null> {
+// Server-side data fetching function using job ID
+async function getJobById(id: string): Promise<Job | null> {
   try {
     const apiUrl =
       process.env.NEXT_PUBLIC_API_URL ||
       "https://letsmakecv.tulip-software.com";
-    const response = await fetch(`${apiUrl}/api/v1/jobs/slug/${slug}`, {
+    const response = await fetch(`${apiUrl}/api/v1/jobs/${id}`, {
       cache: "no-store", // Always fetch fresh data for job details
       headers: {
         "Content-Type": "application/json",
@@ -46,10 +46,10 @@ async function getJobBySlug(slug: string): Promise<Job | null> {
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ slug: string }>;
+  params: Promise<{ id: string }>;
 }): Promise<Metadata> {
-  const { slug } = await params;
-  const job = await getJobBySlug(slug);
+  const { id } = await params;
+  const job = await getJobById(id);
 
   if (!job) {
     return {
@@ -90,10 +90,10 @@ export async function generateMetadata({
 export default async function JobDetailsPage({
   params,
 }: {
-  params: Promise<{ slug: string }>;
+  params: Promise<{ id: string }>;
 }) {
-  const { slug } = await params;
-  const job = await getJobBySlug(slug);
+  const { id } = await params;
+  const job = await getJobById(id);
 
   if (!job) {
     notFound();
@@ -335,7 +335,7 @@ export default async function JobDetailsPage({
 
             {/* Sidebar - Application Form */}
             <div className="lg:col-span-1">
-              <JobDetailsClient job={job} slug={slug} />
+              <JobDetailsClient job={job} jobId={id} />
             </div>
           </div>
         </div>
