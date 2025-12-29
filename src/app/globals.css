@@ -83,3 +83,17 @@ body {
 .dark .custom-scrollbar {
   scrollbar-color: rgba(75, 85, 99, 0.5) transparent;
 }
+
+
+/* add scrollbar none class */
+
+@layer utilities {
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}
