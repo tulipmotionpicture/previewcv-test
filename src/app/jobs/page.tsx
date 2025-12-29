@@ -21,7 +21,7 @@ export default function JobsPage() {
         const params = new URLSearchParams({ limit: "20" });
         const response = await api.getJobs(params);
         setJobs(response.items || response.jobs || []);
-      } catch (err) {
+      } catch {
         setError("Failed to load jobs. Please try again later.");
       } finally {
         setLoading(false);

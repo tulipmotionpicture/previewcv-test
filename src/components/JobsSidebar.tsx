@@ -1,4 +1,5 @@
 import React from "react";
+import Image from "next/image";
 
 const recruiters = [
   { name: "EMAAR", logo: "/images/emaar.png" },
@@ -22,9 +23,11 @@ export default function JobsSidebar() {
               key={idx}
               className="flex flex-col items-center bg-gray-50 rounded-xl p-4 border border-gray-100 shadow-sm hover:shadow-md transition"
             >
-              <img
+              <Image
                 src={rec.logo}
                 alt={rec.name}
+                width={40}
+                height={40}
                 className="h-10 w-10 object-contain mb-2"
               />
               <span className="text-xs font-medium text-gray-700">
