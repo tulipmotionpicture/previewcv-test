@@ -18,22 +18,20 @@ function formatSalary(job: Job) {
 
 export default function JobList({ jobs, loading, error }: JobListProps) {
   return (
-    <div>
+    <div className="relative">
       {/* <h2 className="text-2xl font-bold mb-6 text-gray-900">Job Listings</h2> */}
-      {loading ? (
-        <div className="text-center py-12 text-gray-500">Loading jobs...</div>
-      ) : error ? (
+      {error ? (
         <div className="text-center py-12 text-red-500 font-semibold">
           {error}
         </div>
-      ) : jobs.length === 0 ? (
+      ) : jobs.length === 0 && !loading ? (
         <div className="text-center py-12 text-gray-400">No jobs found.</div>
       ) : (
         <div className="flex flex-col gap-2">
           {jobs.map((job) => (
             <div
               key={job.id}
-              className="bg-white border border-gray-100 hover:shadow-xl transition-all p-6 md:p-8 flex flex-col gap-3 rounded-2xl group relative overflow-hidden"
+              className="bg-white transition-all p-6 md:p-8 flex flex-col gap-3 group relative overflow-hidden hover:scale-101 hover:bg-gray-100"
             >
               <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 mb-2">
                 <h3 className="text-xl md:text-2xl font-bold text-gray-900 group-hover:text-blue-700 transition-colors">
@@ -90,15 +88,13 @@ export default function JobList({ jobs, loading, error }: JobListProps) {
                     job.experience_level.slice(1)}
                 </span>
               </div>
-              <span className="absolute right-0 top-0 bg-blue-100 text-blue-600 text-xs font-bold px-3 py-1 rounded-bl-2xl rounded-tr-2xl shadow-sm">
-                {job.status === "active"
-                  ? "Open"
-                  : job.status
-                  ? job.status.charAt(0).toUpperCase() + job.status.slice(1)
-                  : "-"}
-              </span>
             </div>
           ))}
+        </div>
+      )}
+      {loading && (
+        <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-60 z-10">
+          <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
         </div>
       )}
     </div>

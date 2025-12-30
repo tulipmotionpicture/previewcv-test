@@ -6,23 +6,21 @@ import config from "@/config";
 import Image from "next/image";
 import Link from "next/link";
 import { api } from "@/lib/api";
-import { Job, Application, PdfResume, Resume } from "@/types/api";
+import { Application, PdfResume, Resume } from "@/types/api";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/context/ToastContext";
 import ResumeUpload from "@/components/ResumeUpload";
-import Breadcrumb from "@/components/ui/Breadcrumb";
+// import Breadcrumb from "@/components/ui/Breadcrumb";
 
 function CandidateDashboardContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { user, logout, isAuthenticated, loading: authLoading } = useAuth();
   const toast = useToast();
-  const [activeTab, setActiveTab] = useState<
-    "explore" | "applications" | "resumes"
-  >("explore");
-  const [jobs, setJobs] = useState<Job[]>([]);
+  const [activeTab, setActiveTab] = useState<"applications" | "resumes">(
+    "applications"
+  );
   const [applications, setApplications] = useState<Application[]>([]);
-  const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(false);
 
   // Resume state
@@ -35,13 +33,13 @@ function CandidateDashboardContent() {
   // Initialize active tab from URL on mount
   useEffect(() => {
     const tabParam = searchParams.get("tab");
-    if (tabParam && ["explore", "applications", "resumes"].includes(tabParam)) {
-      setActiveTab(tabParam as "explore" | "applications" | "resumes");
+    if (tabParam && ["applications", "resumes"].includes(tabParam)) {
+      setActiveTab(tabParam as "applications" | "resumes");
     }
   }, [searchParams]);
 
   // Function to change tab and update URL
-  const handleTabChange = (tab: "explore" | "applications" | "resumes") => {
+  const handleTabChange = (tab: "applications" | "resumes") => {
     setActiveTab(tab);
     router.push(`/candidate/dashboard?tab=${tab}`, { scroll: false });
   };
@@ -53,38 +51,13 @@ function CandidateDashboardContent() {
   }, [isAuthenticated, authLoading, router]);
 
   useEffect(() => {
-    if (activeTab === "explore") {
-      fetchJobs();
-    } else if (activeTab === "applications") {
+    if (activeTab === "applications") {
       fetchApplications();
     } else if (activeTab === "resumes") {
       fetchResumes();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTab]);
-
-  const fetchJobs = async () => {
-    setLoading(true);
-    try {
-      const response = await api.getJobs(new URLSearchParams({ limit: "50" }));
-      if (response.jobs && Array.isArray(response.jobs)) {
-        setJobs(response.jobs);
-      } else {
-        setJobs([]);
-      }
-    } catch (error) {
-      console.error("Failed to fetch jobs", error);
-      setJobs([]);
-      // Silently fail for database errors
-      const errorMsg =
-        error instanceof Error ? error.message : "Failed to load jobs";
-      if (!errorMsg.includes("Database service error")) {
-        toast.error(errorMsg);
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const fetchApplications = async () => {
     setLoading(true);
@@ -153,12 +126,12 @@ function CandidateDashboardContent() {
     }
   };
 
-  const filteredJobs = jobs.filter(
-    (job) =>
-      job.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      job.company_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      job.location.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  // const filteredJobs = jobs.filter(
+  //   (job) =>
+  //     job.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+  //     job.company_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+  //     job.location.toLowerCase().includes(searchQuery.toLowerCase())
+  // );
 
   const handleResumeUploadSuccess = (resumeId: number) => {
     localStorage.setItem("last_uploaded_resume_id", resumeId.toString());
@@ -185,16 +158,12 @@ function CandidateDashboardContent() {
 
             {/* Center: Navigation */}
             <nav className="hidden md:flex items-center gap-2">
-              <button
-                onClick={() => handleTabChange("explore")}
-                className={`px-4 py-2 text-sm font-bold rounded-lg transition-all ${
-                  activeTab === "explore"
-                    ? "bg-blue-600 text-white"
-                    : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800"
-                }`}
+              <Link
+                href={"/jobs"}
+                className={`px-4 py-2 text-sm font-bold rounded-lg transition-all`}
               >
                 Explore Jobs
-              </button>
+              </Link>
               <button
                 onClick={() => handleTabChange("applications")}
                 className={`px-4 py-2 text-sm font-bold rounded-lg transition-all ${
@@ -244,313 +213,6 @@ function CandidateDashboardContent() {
       </header>
 
       <main className="flex-1 p-8 max-w-6xl mx-auto w-full">
-        {/* Breadcrumb */}
-        <Breadcrumb className="mb-6" />
-
-        {activeTab === "explore" && (
-          <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-            {/* Header Section */}
-            <div className="mb-8">
-              <h1 className="text-3xl font-black text-gray-900 dark:text-gray-100 mb-2">
-                Find Your Dream Role
-              </h1>
-              <p className="text-gray-500 dark:text-gray-400">
-                Discover opportunities that match your skills and ambitions.
-              </p>
-            </div>
-
-            {/* Search and Filter Section */}
-            <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 p-6 mb-8">
-              <div className="flex flex-col gap-4">
-                {/* Search Bar */}
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      strokeWidth={2}
-                      stroke="currentColor"
-                      className="w-5 h-5 text-gray-400"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"
-                      />
-                    </svg>
-                  </div>
-                  <input
-                    type="text"
-                    placeholder="Search by job title, company, or location..."
-                    className="w-full pl-12 pr-6 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 transition-all"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                  />
-                </div>
-
-                {/* Results Count */}
-                {!loading && (
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-gray-600 dark:text-gray-400">
-                      {filteredJobs.length}{" "}
-                      {filteredJobs.length === 1 ? "job" : "jobs"} found
-                    </span>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Jobs Grid */}
-            {loading ? (
-              <div className="flex items-center justify-center py-20">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-              </div>
-            ) : filteredJobs.length === 0 ? (
-              <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 p-12 text-center">
-                <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gray-100 dark:bg-gray-800 mb-4">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    strokeWidth={1.5}
-                    stroke="currentColor"
-                    className="w-8 h-8 text-gray-400"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M20.25 14.15v4.25c0 1.094-.787 2.036-1.872 2.18-2.087.277-4.216.42-6.378.42s-4.291-.143-6.378-.42c-1.085-.144-1.872-1.086-1.872-2.18v-4.25m16.5 0a2.18 2.18 0 0 0 .75-1.661V8.706c0-1.081-.768-2.015-1.837-2.175a48.114 48.114 0 0 0-3.413-.387m4.5 8.006c-.194.165-.42.295-.673.38A23.978 23.978 0 0 1 12 15.75c-2.648 0-5.195-.429-7.577-1.22a2.016 2.016 0 0 1-.673-.38m0 0A2.18 2.18 0 0 1 3 12.489V8.706c0-1.081.768-2.015 1.837-2.175a48.111 48.111 0 0 1 3.413-.387m7.5 0V5.25A2.25 2.25 0 0 0 13.5 3h-3a2.25 2.25 0 0 0-2.25 2.25v.894m7.5 0a48.667 48.667 0 0 0-7.5 0M12 12.75h.008v.008H12v-.008Z"
-                    />
-                  </svg>
-                </div>
-                <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-2">
-                  No jobs found
-                </h3>
-                <p className="text-gray-500 dark:text-gray-400">
-                  Try adjusting your search criteria
-                </p>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {filteredJobs.map((job) => (
-                  <div
-                    key={job.id}
-                    className="group bg-white dark:bg-gray-900 rounded-3xl border border-gray-200 dark:border-gray-800 hover:border-blue-200 dark:hover:border-blue-900 shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden"
-                  >
-                    {/* Card Header */}
-                    <div className="p-6 pb-4">
-                      <div className="flex items-start justify-between mb-4">
-                        <div className="flex-1">
-                          <h3 className="text-xl font-black text-gray-900 dark:text-gray-100 mb-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
-                            {job.title}
-                          </h3>
-                          <div className="flex items-center gap-2">
-                            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white text-xs font-bold">
-                              {job.company_name.charAt(0).toUpperCase()}
-                            </div>
-                            <p className="text-sm font-bold text-gray-700 dark:text-gray-300">
-                              {job.company_name}
-                            </p>
-                          </div>
-                        </div>
-                        <span className="px-3 py-1.5 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 text-xs font-black uppercase tracking-wide rounded-full whitespace-nowrap">
-                          {job.job_type.replace("_", " ")}
-                        </span>
-                      </div>
-
-                      {/* Job Details Grid */}
-                      <div className="grid grid-cols-2 gap-3 mb-4">
-                        <div className="flex items-center gap-2 text-sm">
-                          <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-gray-50 dark:bg-gray-800">
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              fill="none"
-                              viewBox="0 0 24 24"
-                              strokeWidth={2}
-                              stroke="currentColor"
-                              className="w-4 h-4 text-gray-500 dark:text-gray-400"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"
-                              />
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z"
-                              />
-                            </svg>
-                          </div>
-                          <div>
-                            <p className="text-xs text-gray-400 dark:text-gray-500 font-medium">
-                              Location
-                            </p>
-                            <p className="font-bold text-gray-700 dark:text-gray-300">
-                              {job.location}
-                            </p>
-                          </div>
-                        </div>
-
-                        <div className="flex items-center gap-2 text-sm">
-                          <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-gray-50 dark:bg-gray-800">
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              fill="none"
-                              viewBox="0 0 24 24"
-                              strokeWidth={2}
-                              stroke="currentColor"
-                              className="w-4 h-4 text-gray-500 dark:text-gray-400"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                d="M12 6v12m-3-2.818.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
-                              />
-                            </svg>
-                          </div>
-                          <div>
-                            <p className="text-xs text-gray-400 dark:text-gray-500 font-medium">
-                              Salary
-                            </p>
-                            <p className="font-bold text-gray-700 dark:text-gray-300">
-                              {job.salary_min
-                                ? `${
-                                    job.salary_currency
-                                  }${job.salary_min.toLocaleString()}-${job.salary_max?.toLocaleString()}`
-                                : "Competitive"}
-                            </p>
-                          </div>
-                        </div>
-
-                        <div className="flex items-center gap-2 text-sm">
-                          <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-gray-50 dark:bg-gray-800">
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              fill="none"
-                              viewBox="0 0 24 24"
-                              strokeWidth={2}
-                              stroke="currentColor"
-                              className="w-4 h-4 text-gray-500 dark:text-gray-400"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                d="M3.75 3v11.25A2.25 2.25 0 0 0 6 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0 1 18 16.5h-2.25m-7.5 0h7.5m-7.5 0-1 3m8.5-3 1 3m0 0 .5 1.5m-.5-1.5h-9.5m0 0-.5 1.5m.75-9 3-3 2.148 2.148A12.061 12.061 0 0 1 16.5 7.605"
-                              />
-                            </svg>
-                          </div>
-                          <div>
-                            <p className="text-xs text-gray-400 dark:text-gray-500 font-medium">
-                              Experience
-                            </p>
-                            <p className="font-bold text-gray-700 dark:text-gray-300 capitalize">
-                              {job.experience_level.replace("_", " ")}
-                            </p>
-                          </div>
-                        </div>
-
-                        <div className="flex items-center gap-2 text-sm">
-                          <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-gray-50 dark:bg-gray-800">
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              fill="none"
-                              viewBox="0 0 24 24"
-                              strokeWidth={2}
-                              stroke="currentColor"
-                              className="w-4 h-4 text-gray-500 dark:text-gray-400"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5"
-                              />
-                            </svg>
-                          </div>
-                          <div>
-                            <p className="text-xs text-gray-400 dark:text-gray-500 font-medium">
-                              Posted
-                            </p>
-                            <p className="font-bold text-gray-700 dark:text-gray-300">
-                              {new Date(job.posted_date).toLocaleDateString(
-                                "en-US",
-                                { month: "short", day: "numeric" }
-                              )}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Stats */}
-                      <div className="flex items-center gap-4 pt-3 border-t border-gray-100 dark:border-gray-800">
-                        <div className="flex items-center gap-1.5 text-xs text-gray-500 dark:text-gray-400">
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            strokeWidth={2}
-                            stroke="currentColor"
-                            className="w-4 h-4"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z"
-                            />
-                          </svg>
-                          <span className="font-medium">
-                            {job.application_count} applicants
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-1.5 text-xs text-gray-500 dark:text-gray-400">
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            strokeWidth={2}
-                            stroke="currentColor"
-                            className="w-4 h-4"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z"
-                            />
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"
-                            />
-                          </svg>
-                          <span className="font-medium">
-                            {job.view_count} views
-                          </span>
-                        </div>
-                        {job.is_remote && (
-                          <span className="ml-auto px-2.5 py-1 bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 text-xs font-bold rounded-full">
-                            Remote
-                          </span>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Card Footer */}
-                    <div className="px-6 pb-6">
-                      <Link
-                        href={`/jobs/${job.slug}`}
-                        className="block w-full py-3.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-sm font-black rounded-xl transition-all shadow-lg shadow-blue-500/20 hover:shadow-xl hover:shadow-blue-500/30 text-center group-hover:scale-[1.02] duration-300"
-                      >
-                        View Details & Apply →
-                      </Link>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
-
         {activeTab === "applications" && (
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
             <div className="mb-8">
@@ -590,25 +252,6 @@ function CandidateDashboardContent() {
                 <p className="text-gray-500 dark:text-gray-400 mb-6">
                   Start applying to jobs to see your applications here
                 </p>
-                <button
-                  onClick={() => handleTabChange("explore")}
-                  className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl transition-all"
-                >
-                  <svg
-                    className="w-5 h-5"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                    />
-                  </svg>
-                  Explore Jobs
-                </button>
               </div>
             ) : (
               <div className="space-y-4">

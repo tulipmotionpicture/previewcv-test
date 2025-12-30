@@ -598,6 +598,26 @@ export class ApiClient {
     );
   }
 
+  async getJobFilters(): Promise<{
+    success: boolean;
+    filters: {
+      industries: { name: string; count: number }[];
+      job_titles: { name: string; count: number }[];
+      experience_levels: { name: string; count: number }[];
+      freshness: { name: string; value: string; count: number }[];
+    };
+  }> {
+    return this.request<{
+      success: boolean;
+      filters: {
+        industries: { name: string; count: number }[];
+        job_titles: { name: string; count: number }[];
+        experience_levels: { name: string; count: number }[];
+        freshness: { name: string; value: string; count: number }[];
+      };
+    }>("/api/v1/jobs/filters", {}, false, false);
+  }
+
   // async getJobApplications(
   //   jobId: number
   // ): Promise<{ success: boolean; applications: Application[] }> {

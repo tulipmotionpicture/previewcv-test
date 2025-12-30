@@ -12,13 +12,29 @@ export default function JobsPage() {
   const [jobs, setJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  // Store selected filters as a dynamic object
+  const [selectedFilters, setSelectedFilters] = useState<
+    Record<string, string[]>
+  >({});
+
+  // Helper to build params from selectedFilters
+  function buildJobFilterParams(selected: Record<string, string[]>) {
+    const params = new URLSearchParams();
+    Object.entries(selected).forEach(([key, values]) => {
+      if (Array.isArray(values) && values.length > 0) {
+        params.append(key, values.join(","));
+      }
+    });
+    params.append("limit", "20");
+    return params;
+  }
 
   useEffect(() => {
     const fetchJobs = async () => {
       setLoading(true);
       setError("");
       try {
-        const params = new URLSearchParams({ limit: "20" });
+        const params = buildJobFilterParams(selectedFilters);
         const response = await api.getJobs(params);
         setJobs(response.items || response.jobs || []);
       } catch {
@@ -28,7 +44,7 @@ export default function JobsPage() {
       }
     };
     fetchJobs();
-  }, []);
+  }, [selectedFilters]);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -43,7 +59,12 @@ export default function JobsPage() {
       />
       <div className="pt-24">
         <JobsLayout
-          filters={<JobsFilters />}
+          filters={
+            <JobsFilters
+              selectedFilters={selectedFilters}
+              setSelectedFilters={setSelectedFilters}
+            />
+          }
           jobs={<JobList jobs={jobs} loading={loading} error={error} />}
           sidebar={<JobsSidebar />}
         />

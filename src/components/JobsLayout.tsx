@@ -21,7 +21,7 @@ export default function JobsLayout({
         </aside>
         {/* Job Listings (scrollable) */}
         <main
-          className="md:col-span-2 lg:col-span-6 order-3 md:order-2 overflow-y-auto no-scrollbar"
+          className="md:col-span-2 lg:col-span-6 order-3 md:order-2  no-scrollbar"
           style={{ maxHeight: "76vh" }}
         >
           {jobs}
