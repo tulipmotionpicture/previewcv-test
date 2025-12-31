@@ -16,6 +16,9 @@ export default function JobsPage() {
   const [selectedFilters, setSelectedFilters] = useState<
     Record<string, string[]>
   >({});
+  // State for search bar
+  const [keyword, setKeyword] = useState("");
+  const [location, setLocation] = useState("");
 
   // Helper to build params from selectedFilters
   function buildJobFilterParams(selected: Record<string, string[]>) {
@@ -47,7 +50,7 @@ export default function JobsPage() {
   }, [selectedFilters]);
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen transition-colors duration-300">
       <Header
         links={[{ label: "Candidate Login", href: "/candidate/login" }]}
         cta={{
@@ -58,6 +61,63 @@ export default function JobsPage() {
         showAuthButtons={true}
       />
       <div className="pt-24">
+        {/* Horizontal Search Bar */}
+        <div className="w-full flex justify-center mb-8">
+          <form
+            className="w-full max-w-7xl flex bg-white dark:bg-gray-900 rounded-3xl shadow-lg p-3 gap-2 md:gap-4 items-center border border-gray-100 dark:border-gray-800"
+            style={{ boxShadow: "0 4px 24px 0 rgba(30, 41, 59, 0.10)" }}
+            onSubmit={(e) => {
+              e.preventDefault();
+              setSelectedFilters((prev) => ({
+                ...prev,
+                keyword: keyword ? [keyword] : [],
+                location: location ? [location] : [],
+              }));
+            }}
+          >
+            <div className="flex-1 flex flex-col">
+              <label
+                className="text-xs font-bold text-gray-400 tracking-widest mb-1 "
+                htmlFor="job-keywords"
+              >
+                KEYWORDS
+              </label>
+              <input
+                id="job-keywords"
+                type="text"
+                placeholder="Role, Company..."
+                className="bg-transparent outline-none text-gray-700 dark:text-gray-100 placeholder-gray-300 dark:placeholder-gray-500 text-base font-semibold"
+                value={keyword}
+                onChange={(e) => setKeyword(e.target.value)}
+                autoComplete="off"
+              />
+            </div>
+            <div className="flex-1 flex flex-col border-l border-gray-100 dark:border-gray-800 pl-2">
+              <label
+                className="text-xs font-bold text-gray-400 tracking-widest mb-1 "
+                htmlFor="job-location"
+              >
+                LOCATION
+              </label>
+              <input
+                id="job-location"
+                type="text"
+                placeholder="City or Remote"
+                className="bg-transparent outline-none text-gray-700 dark:text-gray-100 placeholder-gray-300 dark:placeholder-gray-500 text-base font-semibold"
+                value={location}
+                onChange={(e) => setLocation(e.target.value)}
+                autoComplete="off"
+              />
+            </div>
+            <button
+              type="submit"
+              className="md:h-8 px-4 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-2xl shadow-lg transition-all text-base md:text-sm tracking-widest ml-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+              style={{ boxShadow: "0 0 16px 2px #2563eb33" }}
+            >
+              SEARCH JOBS
+            </button>
+          </form>
+        </div>
         <JobsLayout
           filters={
             <JobsFilters

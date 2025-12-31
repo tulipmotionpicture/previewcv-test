@@ -8,9 +8,6 @@ import Input from "@/components/ui/Input";
 import Button from "@/components/ui/Button";
 import LoadingSkeleton from "@/components/ui/LoadingSkeleton";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
-import Breadcrumb from "@/components/ui/Breadcrumb";
-import Image from "next/image";
-import config from "@/config";
 
 export default function CandidateSettingsPage() {
   const router = useRouter();
@@ -160,168 +157,122 @@ export default function CandidateSettingsPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="h-20 bg-white border-b border-gray-100 flex items-center justify-between px-8 sticky top-0 z-40">
-        <div className="flex items-center gap-4">
-          <button
-            onClick={() => router.push("/candidate/dashboard")}
-            className="text-gray-400 hover:text-gray-600"
-          >
-            <svg
-              className="w-6 h-6"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M15 19l-7-7 7-7"
-              />
-            </svg>
-          </button>
-          <Image
-            src={config.app.logoUrl}
-            alt={config.app.name}
-            width={48}
-            height={48}
-            className="rounded-xl"
-          />
-          <h1 className="text-2xl font-bold text-gray-900">Settings</h1>
-        </div>
-      </header>
-
-      <div className="max-w-4xl mx-auto p-8 space-y-8">
-        {/* Breadcrumb */}
-        <Breadcrumb />
-
-        {/* Profile Information */}
-        <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-8">
-          <h2 className="text-xl font-bold text-gray-900 mb-6">
+      <div className="max-w-2xl mx-auto p-2 md:p-6 bg-white rounded-xl border border-gray-100 shadow-sm mt-8">
+        <h2 className="text-2xl font-bold text-gray-900 mb-1">Settings</h2>
+        <p className="text-gray-500 mb-6 text-sm">
+          Manage your profile, password, and account security.
+        </p>
+        {/* Profile */}
+        <form onSubmit={handleProfileUpdate} className="space-y-4">
+          <div className="font-semibold text-gray-800 mb-2 mt-6">
             Profile Information
-          </h2>
-          <form onSubmit={handleProfileUpdate} className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <Input
-                label="Full Name"
-                type="text"
-                value={formData.full_name}
-                onChange={(e) =>
-                  setFormData({ ...formData, full_name: e.target.value })
-                }
-                error={errors.full_name}
-                placeholder="John Doe"
-              />
-              <Input
-                label="Email"
-                type="email"
-                value={formData.email}
-                onChange={(e) =>
-                  setFormData({ ...formData, email: e.target.value })
-                }
-                error={errors.email}
-                placeholder="john@example.com"
-                disabled
-                helperText="Email cannot be changed"
-              />
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <Input
-                label="Phone Number"
-                type="tel"
-                value={formData.phone}
-                onChange={(e) =>
-                  setFormData({ ...formData, phone: e.target.value })
-                }
-                placeholder="+1 (555) 123-4567"
-              />
-            </div>
-
-            <div className="flex justify-end">
-              <Button type="submit" loading={loading}>
-                Save Changes
-              </Button>
-            </div>
-          </form>
-        </div>
-
-        {/* Password Change */}
-        <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-8">
-          <h2 className="text-xl font-bold text-gray-900 mb-6">
-            Change Password
-          </h2>
-          <form onSubmit={handlePasswordChange} className="space-y-6">
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <Input
-              label="Current Password"
+              label="Full Name"
+              type="text"
+              value={formData.full_name}
+              onChange={(e) =>
+                setFormData({ ...formData, full_name: e.target.value })
+              }
+              error={errors.full_name}
+              placeholder="John Doe"
+            />
+            <Input
+              label="Email"
+              type="email"
+              value={formData.email}
+              onChange={(e) =>
+                setFormData({ ...formData, email: e.target.value })
+              }
+              error={errors.email}
+              placeholder="john@example.com"
+              disabled
+              helperText="Email cannot be changed"
+            />
+          </div>
+          <Input
+            label="Phone Number"
+            type="tel"
+            value={formData.phone}
+            onChange={(e) =>
+              setFormData({ ...formData, phone: e.target.value })
+            }
+            placeholder="+1 (555) 123-4567"
+          />
+          <div className="flex justify-end mt-2">
+            <Button type="submit" loading={loading}>
+              Save Changes
+            </Button>
+          </div>
+        </form>
+        <div className="my-8 border-t border-gray-100" />
+        {/* Password */}
+        <form onSubmit={handlePasswordChange} className="space-y-4">
+          <div className="font-semibold text-gray-800 mb-2 mt-6">
+            Change Password
+          </div>
+          <Input
+            label="Current Password"
+            type="password"
+            value={passwordData.current_password}
+            onChange={(e) =>
+              setPasswordData({
+                ...passwordData,
+                current_password: e.target.value,
+              })
+            }
+            error={errors.current_password}
+            placeholder="••••••••"
+          />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <Input
+              label="New Password"
               type="password"
-              value={passwordData.current_password}
+              value={passwordData.new_password}
               onChange={(e) =>
                 setPasswordData({
                   ...passwordData,
-                  current_password: e.target.value,
+                  new_password: e.target.value,
                 })
               }
-              error={errors.current_password}
+              error={errors.new_password}
+              placeholder="••••••••"
+              helperText="Minimum 8 characters"
+            />
+            <Input
+              label="Confirm New Password"
+              type="password"
+              value={passwordData.confirm_password}
+              onChange={(e) =>
+                setPasswordData({
+                  ...passwordData,
+                  confirm_password: e.target.value,
+                })
+              }
+              error={errors.confirm_password}
               placeholder="••••••••"
             />
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <Input
-                label="New Password"
-                type="password"
-                value={passwordData.new_password}
-                onChange={(e) =>
-                  setPasswordData({
-                    ...passwordData,
-                    new_password: e.target.value,
-                  })
-                }
-                error={errors.new_password}
-                placeholder="••••••••"
-                helperText="Minimum 8 characters"
-              />
-              <Input
-                label="Confirm New Password"
-                type="password"
-                value={passwordData.confirm_password}
-                onChange={(e) =>
-                  setPasswordData({
-                    ...passwordData,
-                    confirm_password: e.target.value,
-                  })
-                }
-                error={errors.confirm_password}
-                placeholder="••••••••"
-              />
-            </div>
-            <div className="flex justify-end">
-              <Button type="submit" loading={passwordLoading}>
-                Update Password
-              </Button>
-            </div>
-          </form>
-        </div>
-
-        {/* Danger Zone */}
-        <div className="bg-white rounded-3xl shadow-sm border border-red-200 p-8">
-          <h2 className="text-xl font-bold text-red-600 mb-2">Danger Zone</h2>
-          <p className="text-gray-600 mb-6">
-            Irreversible actions that affect your account
-          </p>
-          <div className="flex items-center justify-between p-4 bg-red-50 rounded-2xl">
-            <div>
-              <h3 className="font-bold text-gray-900">
-                Logout from all devices
-              </h3>
-              <p className="text-sm text-gray-600">
-                This will sign you out from all active sessions
-              </p>
-            </div>
-            <Button variant="danger" onClick={() => setShowLogoutDialog(true)}>
-              Logout
+          </div>
+          <div className="flex justify-end mt-2">
+            <Button type="submit" loading={passwordLoading}>
+              Update Password
             </Button>
           </div>
+        </form>
+        <div className="my-8 border-t border-gray-100" />
+        {/* Danger Zone */}
+        <div className="flex flex-col md:flex-row items-center justify-between gap-4 py-4">
+          <div>
+            <div className="font-semibold text-red-600 mb-1">Danger Zone</div>
+            <p className="text-sm text-gray-500">
+              Sign out from all devices. This will end all active sessions for
+              your account.
+            </p>
+          </div>
+          <Button variant="danger" onClick={() => setShowLogoutDialog(true)}>
+            Logout
+          </Button>
         </div>
       </div>
 

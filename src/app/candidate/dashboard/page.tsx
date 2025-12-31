@@ -2,7 +2,6 @@
 
 import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import config from "@/config";
 import Image from "next/image";
 import Link from "next/link";
 import { api } from "@/lib/api";
@@ -15,7 +14,7 @@ import ResumeUpload from "@/components/ResumeUpload";
 function CandidateDashboardContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { user, logout, isAuthenticated, loading: authLoading } = useAuth();
+  const { isAuthenticated, loading: authLoading } = useAuth();
   const toast = useToast();
   const [activeTab, setActiveTab] = useState<"applications" | "resumes">(
     "applications"
@@ -37,12 +36,6 @@ function CandidateDashboardContent() {
       setActiveTab(tabParam as "applications" | "resumes");
     }
   }, [searchParams]);
-
-  // Function to change tab and update URL
-  const handleTabChange = (tab: "applications" | "resumes") => {
-    setActiveTab(tab);
-    router.push(`/candidate/dashboard?tab=${tab}`, { scroll: false });
-  };
 
   useEffect(() => {
     if (!authLoading && !isAuthenticated) {
@@ -142,75 +135,6 @@ function CandidateDashboardContent() {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-950 flex flex-col transition-colors duration-300">
       {/* Top Header */}
-      <header className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 sticky top-0 z-50 shadow-sm">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="flex items-center justify-between h-16">
-            {/* Left: Logo */}
-            <Link href="/" className="flex items-center gap-3">
-              <Image
-                src={config.app.logoUrl}
-                alt={config.app.name}
-                width={120}
-                height={120}
-                className="h-10 w-auto"
-              />
-            </Link>
-
-            {/* Center: Navigation */}
-            <nav className="hidden md:flex items-center gap-2">
-              <Link
-                href={"/jobs"}
-                className={`px-4 py-2 text-sm font-bold rounded-lg transition-all`}
-              >
-                Explore Jobs
-              </Link>
-              <button
-                onClick={() => handleTabChange("applications")}
-                className={`px-4 py-2 text-sm font-bold rounded-lg transition-all ${
-                  activeTab === "applications"
-                    ? "bg-blue-600 text-white"
-                    : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800"
-                }`}
-              >
-                My Applications
-              </button>
-              <button
-                onClick={() => handleTabChange("resumes")}
-                className={`px-4 py-2 text-sm font-bold rounded-lg transition-all ${
-                  activeTab === "resumes"
-                    ? "bg-blue-600 text-white"
-                    : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800"
-                }`}
-              >
-                My Resumes
-              </button>
-            </nav>
-
-            {/* Right: User Profile & Actions */}
-            <div className="flex items-center gap-4">
-              <div className="hidden md:flex items-center gap-3">
-                <div className="text-right">
-                  <p className="text-sm font-bold text-gray-900 dark:text-gray-100">
-                    {user?.full_name || "Candidate"}
-                  </p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">
-                    Job Seeker
-                  </p>
-                </div>
-                <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center text-white font-bold text-sm">
-                  {user?.full_name?.charAt(0).toUpperCase() || "C"}
-                </div>
-              </div>
-              <button
-                onClick={logout}
-                className="px-4 py-2 text-sm font-bold text-gray-600 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition-colors"
-              >
-                Logout
-              </button>
-            </div>
-          </div>
-        </div>
-      </header>
 
       <main className="flex-1 p-8 max-w-6xl mx-auto w-full">
         {activeTab === "applications" && (
@@ -359,7 +283,7 @@ function CandidateDashboardContent() {
                             {app.status.replace("_", " ")}
                           </span>
                           <Link
-                            href={`/jobs/${app.job_id}`}
+                            href={`/jobs/${app.job_slug}`}
                             className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium flex items-center gap-1"
                           >
                             View Job

@@ -11,7 +11,6 @@ import { CardSkeleton } from "@/components/ui/LoadingSkeleton";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
 import Breadcrumb from "@/components/ui/Breadcrumb";
 import Image from "next/image";
-import config from "@/config";
 
 export default function ResumesPage() {
   const router = useRouter();
@@ -105,41 +104,6 @@ export default function ResumesPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="h-20 bg-white border-b border-gray-100 flex items-center justify-between px-8 sticky top-0 z-40">
-        <div className="flex items-center gap-4">
-          <button
-            onClick={() => router.push("/candidate/dashboard")}
-            className="text-gray-400 hover:text-gray-600"
-          >
-            <svg
-              className="w-6 h-6"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M15 19l-7-7 7-7"
-              />
-            </svg>
-          </button>
-          <Image
-            src={config.app.logoUrl}
-            alt={config.app.name}
-            width={48}
-            height={48}
-            className="rounded-xl"
-          />
-          <h1 className="text-2xl font-bold text-gray-900">My Resumes</h1>
-        </div>
-        <Button onClick={() => router.push("/candidate/dashboard")}>
-          Upload New Resume
-        </Button>
-      </header>
-
       <div className="max-w-7xl mx-auto p-8">
         {/* Breadcrumb */}
         <Breadcrumb className="mb-6" />

@@ -31,20 +31,20 @@ export default function JobList({ jobs, loading, error }: JobListProps) {
           {jobs.map((job) => (
             <div
               key={job.id}
-              className="bg-white transition-all p-6 md:p-8 flex flex-col gap-3 group relative overflow-hidden hover:scale-101 hover:bg-gray-100"
+              className="bg-white dark:bg-gray-900 transition-all p-6 md:p-8 flex flex-col gap-3 group relative overflow-hidden hover:scale-101 hover:bg-gray-100 dark:hover:bg-gray-800 border border-gray-100 dark:border-gray-800"
             >
               <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 mb-2">
-                <h3 className="text-xl md:text-2xl font-bold text-gray-900 group-hover:text-blue-700 transition-colors">
+                <h3 className="text-xl md:text-2xl font-bold text-gray-900 dark:text-gray-100 group-hover:text-blue-700 dark:group-hover:text-blue-400 transition-colors">
                   {job.title}
                 </h3>
-                <span className="bg-gray-100 text-xs px-3 py-1 rounded font-semibold text-gray-700 whitespace-nowrap border border-gray-200">
+                <span className="bg-gray-100 dark:bg-gray-800 text-xs px-3 py-1 rounded font-semibold text-gray-700 dark:text-gray-200 whitespace-nowrap border border-gray-200 dark:border-gray-700">
                   {job.company_name}
                 </span>
               </div>
-              <div className="flex flex-wrap items-center gap-4 mb-2 text-sm text-gray-500">
+              <div className="flex flex-wrap items-center gap-4 mb-2 text-sm text-gray-500 dark:text-gray-400">
                 <span className="flex items-center gap-1">
                   <svg
-                    className="w-4 h-4 text-blue-400"
+                    className="w-4 h-4 text-blue-400 dark:text-blue-300"
                     fill="none"
                     stroke="currentColor"
                     strokeWidth="2"
@@ -63,26 +63,26 @@ export default function JobList({ jobs, loading, error }: JobListProps) {
                   </svg>
                   {job.location}
                 </span>
-                <span className="text-green-600 font-bold">
+                <span className="text-green-600 dark:text-green-400 font-bold">
                   {formatSalary(job)}
                 </span>
                 {job.is_remote && (
-                  <span className="bg-blue-50 text-blue-600 px-2 py-0.5 rounded text-xs font-semibold border border-blue-100">
+                  <span className="bg-blue-50 dark:bg-blue-900 text-blue-600 dark:text-blue-300 px-2 py-0.5 rounded text-xs font-semibold border border-blue-100 dark:border-blue-800">
                     Remote
                   </span>
                 )}
               </div>
-              <p className="mb-4 text-gray-700 text-sm md:text-base line-clamp-3">
+              <p className="mb-4 text-gray-700 dark:text-gray-300 text-sm md:text-base line-clamp-3">
                 {job.description}
               </p>
               <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 mt-auto">
                 <a
                   href={`/jobs/${job.slug}`}
-                  className="bg-blue-600 text-white px-4 py-1.5 rounded-md font-semibold hover:bg-blue-700 transition w-full md:w-auto text-center shadow group-hover:scale-105 group-hover:shadow-lg text-sm"
+                  className="bg-blue-600 text-white px-4 py-1.5 rounded-md font-semibold hover:bg-blue-700 dark:hover:bg-blue-800 transition w-full md:w-auto text-center shadow group-hover:scale-105 group-hover:shadow-lg text-sm"
                 >
                   Apply Now
                 </a>
-                <span className="text-xs text-gray-400 text-right md:text-left">
+                <span className="text-xs text-gray-400 dark:text-gray-500 text-right md:text-left">
                   Posted {new Date(job.posted_date).toLocaleDateString()} |{" "}
                   {job.experience_level.charAt(0).toUpperCase() +
                     job.experience_level.slice(1)}
@@ -93,7 +93,7 @@ export default function JobList({ jobs, loading, error }: JobListProps) {
         </div>
       )}
       {loading && (
-        <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-60 z-10">
+        <div className="absolute inset-0 flex items-center justify-center bg-white dark:bg-gray-900 bg-opacity-60 dark:bg-opacity-70 z-10">
           <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
         </div>
       )}

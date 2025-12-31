@@ -151,14 +151,14 @@ export default function Home() {
       {/* How It Works Section */}
       <section className="py-32 bg-gray-50 dark:bg-gray-900/50 border-b border-gray-100 dark:border-gray-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-20">
-            <div className="inline-block px-4 py-2 bg-blue-50 text-blue-600 text-[10px] font-black uppercase tracking-[0.2em] rounded-full mb-6">
+          <div className="text-center mb-10">
+            <div className="inline-block px-3 py-1 bg-blue-50 text-blue-600 text-[10px] font-bold uppercase tracking-widest rounded-full mb-4">
               Simple Process
             </div>
-            <h2 className="text-5xl lg:text-6xl font-black text-gray-900 mb-6 tracking-tighter uppercase">
+            <h2 className="text-2xl lg:text-3xl font-bold text-gray-900 mb-4 tracking-tight uppercase">
               How It <span className="italic text-blue-600">Works</span>
             </h2>
-            <p className="text-xl text-gray-500 max-w-2xl mx-auto font-medium">
+            <p className="text-base text-gray-500 max-w-2xl mx-auto font-normal">
               Get started in minutes with our seamless workflow
             </p>
           </div>
@@ -169,12 +169,12 @@ export default function Home() {
 
             {/* Step 1 */}
             <div className="relative">
-              <div className="bg-white dark:bg-gray-900 p-10 rounded-[40px] border border-gray-100 dark:border-gray-800 shadow-sm hover:shadow-xl transition-all relative z-10">
-                <div className="absolute -top-6 left-10 w-12 h-12 bg-blue-600 text-white rounded-2xl flex items-center justify-center font-black text-xl shadow-lg">
+              <div className="bg-white dark:bg-gray-900 p-5 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm hover:shadow-lg transition-all relative z-10">
+                <div className="absolute -top-4 left-6 w-8 h-8 bg-blue-600 text-white rounded-xl flex items-center justify-center font-bold text-base shadow-md">
                   1
                 </div>
-                <div className="mt-8 mb-6">
-                  <div className="w-16 h-16 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded-2xl flex items-center justify-center mx-auto">
+                <div className="mt-4 mb-4">
+                  <div className="w-10 h-10 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded-xl flex items-center justify-center mx-auto">
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
                       fill="none"
@@ -194,7 +194,7 @@ export default function Home() {
                 <h3 className="text-2xl font-black text-gray-900 dark:text-gray-100 mb-4 text-center uppercase tracking-tight">
                   Create Resume
                 </h3>
-                <p className="text-gray-500 dark:text-gray-400 text-center font-medium leading-relaxed">
+                <p className="text-gray-500 dark:text-gray-400 text-center font-normal leading-relaxed text-sm">
                   Build your professional resume on{" "}
                   <span className="font-bold text-gray-900 dark:text-white">
                     LetsMakeCV.com
@@ -206,12 +206,12 @@ export default function Home() {
 
             {/* Step 2 */}
             <div className="relative">
-              <div className="bg-white p-10 rounded-[40px] border border-gray-100 shadow-sm hover:shadow-xl transition-all relative z-10">
-                <div className="absolute -top-6 left-10 w-12 h-12 bg-indigo-600 text-white rounded-2xl flex items-center justify-center font-black text-xl shadow-lg">
+              <div className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm hover:shadow-lg transition-all relative z-10">
+                <div className="absolute -top-4 left-6 w-8 h-8 bg-indigo-600 text-white rounded-xl flex items-center justify-center font-bold text-base shadow-md">
                   2
                 </div>
-                <div className="mt-8 mb-6">
-                  <div className="w-16 h-16 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center mx-auto">
+                <div className="mt-4 mb-4">
+                  <div className="w-10 h-10 bg-indigo-50 text-indigo-600 rounded-xl flex items-center justify-center mx-auto">
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
                       fill="none"
@@ -231,7 +231,7 @@ export default function Home() {
                 <h3 className="text-2xl font-black text-gray-900 dark:text-gray-100 mb-4 text-center uppercase tracking-tight">
                   Get Your Link
                 </h3>
-                <p className="text-gray-500 text-center font-medium leading-relaxed">
+                <p className="text-gray-500 text-center font-normal leading-relaxed text-sm">
                   Receive your unique{" "}
                   <span className="font-bold text-gray-900 dark:text-gray-100">
                     PreviewCV link
@@ -243,12 +243,12 @@ export default function Home() {
 
             {/* Step 3 */}
             <div className="relative">
-              <div className="bg-white dark:bg-gray-900 p-10 rounded-[40px] border border-gray-100 dark:border-gray-800 shadow-sm hover:shadow-xl transition-all relative z-10">
-                <div className="absolute -top-6 left-10 w-12 h-12 bg-blue-600 text-white rounded-2xl flex items-center justify-center font-black text-xl shadow-lg">
+              <div className="bg-white dark:bg-gray-900 p-5 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm hover:shadow-lg transition-all relative z-10">
+                <div className="absolute -top-4 left-6 w-8 h-8 bg-blue-600 text-white rounded-xl flex items-center justify-center font-bold text-base shadow-md">
                   3
                 </div>
-                <div className="mt-8 mb-6">
-                  <div className="w-16 h-16 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center mx-auto">
+                <div className="mt-4 mb-4">
+                  <div className="w-10 h-10 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center mx-auto">
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
                       fill="none"
@@ -268,7 +268,7 @@ export default function Home() {
                 <h3 className="text-2xl font-black text-gray-900 dark:text-gray-100 mb-4 text-center uppercase tracking-tight">
                   Share & Track
                 </h3>
-                <p className="text-gray-500 text-center font-medium leading-relaxed">
+                <p className="text-gray-500 text-center font-normal leading-relaxed text-sm">
                   Share your link anywhere - email, LinkedIn, applications.
                   Updates automatically when you edit
                 </p>
@@ -279,7 +279,7 @@ export default function Home() {
           <div className="mt-16 text-center">
             <Link
               href="/candidate"
-              className="inline-flex items-center gap-2 px-8 py-4 bg-blue-600 text-white font-black rounded-2xl hover:bg-blue-700 transition-all shadow-lg shadow-blue-200 uppercase tracking-tight"
+              className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-all shadow-md shadow-blue-200 uppercase tracking-wide text-base"
             >
               Get Started Free →
             </Link>
