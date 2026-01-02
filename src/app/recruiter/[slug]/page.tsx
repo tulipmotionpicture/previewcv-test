@@ -23,7 +23,7 @@ interface Event {
   title: string;
   description: string;
   event_date?: string;
-  images?: string[];
+  images?: { image_url: string }[];
 }
 
 interface RecruiterProfile {
@@ -490,10 +490,10 @@ export default async function RecruiterProfilePage({
                     )}
                     {Array.isArray(event.images) && event.images.length > 0 && (
                       <div className="flex flex-wrap gap-2 mt-2">
-                        {event.images.map((img: string, idx: number) => (
+                        {event.images.map((data, idx: number) => (
                           <Image
                             key={idx}
-                            src={img}
+                            src={data.image_url}
                             alt={`Event image ${idx + 1}`}
                             width={120}
                             height={80}
