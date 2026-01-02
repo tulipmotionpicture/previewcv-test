@@ -1,5 +1,6 @@
 import React from "react";
 import { Job } from "@/types/api";
+import Link from "next/link";
 
 interface JobListProps {
   jobs: Job[];
@@ -34,12 +35,22 @@ export default function JobList({ jobs, loading, error }: JobListProps) {
               className="bg-white dark:bg-gray-900 transition-all p-6 md:p-8 flex flex-col gap-3 group relative overflow-hidden hover:scale-101 hover:bg-gray-100 dark:hover:bg-gray-800 border border-gray-100 dark:border-gray-800"
             >
               <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 mb-2">
-                <h3 className="text-xl md:text-2xl font-bold text-gray-900 dark:text-gray-100 group-hover:text-blue-700 dark:group-hover:text-blue-400 transition-colors">
+                <h3 className="text-sm md:text-xl text-gray-900 dark:text-gray-100 group-hover:text-blue-700 dark:group-hover:text-blue-400 transition-colors">
                   {job.title}
                 </h3>
-                <span className="bg-gray-100 dark:bg-gray-800 text-xs px-3 py-1 rounded font-semibold text-gray-700 dark:text-gray-200 whitespace-nowrap border border-gray-200 dark:border-gray-700">
-                  {job.company_name}
-                </span>
+
+                {job.recruiter_username && (
+                  <Link
+                    href={
+                      job.recruiter_profile_url ||
+                      `/recruiter/${job.recruiter_username}`
+                    }
+                    className="bg-gray-100 dark:bg-gray-800 text-xs p-1 rounded  text-gray-700 dark:text-gray-200 whitespace-nowrap border border-gray-200 dark:border-gray-700"
+                    title={`View recruiter profile: ${job.recruiter_username}`}
+                  >
+                    {job.company_name}
+                  </Link>
+                )}
               </div>
               <div className="flex flex-wrap items-center gap-4 mb-2 text-sm text-gray-500 dark:text-gray-400">
                 <span className="flex items-center gap-1">
@@ -63,30 +74,70 @@ export default function JobList({ jobs, loading, error }: JobListProps) {
                   </svg>
                   {job.location}
                 </span>
-                <span className="text-green-600 dark:text-green-400 font-bold">
-                  {formatSalary(job)}
-                </span>
+
                 {job.is_remote && (
                   <span className="bg-blue-50 dark:bg-blue-900 text-blue-600 dark:text-blue-300 px-2 py-0.5 rounded text-xs font-semibold border border-blue-100 dark:border-blue-800">
                     Remote
                   </span>
                 )}
+
+                {/* {job.industry && (
+                  <span className="bg-gray-200 dark:bg-gray-700 text-xs px-2 py-0.5 rounded font-medium text-gray-700 dark:text-gray-200 border border-gray-300 dark:border-gray-600">
+                    {job.industry}
+                  </span>
+                )} */}
               </div>
-              <p className="mb-4 text-gray-700 dark:text-gray-300 text-sm md:text-base line-clamp-3">
+
+              <p className="mb-4 text-gray-700 dark:text-gray-300 text-xs line-clamp-3">
                 {job.description}
               </p>
+              {(job.required_skills?.length > 0 ||
+                (job.preferred_skills && job.preferred_skills.length > 0)) && (
+                <div className="flex flex-wrap gap-2 mb-2">
+                  {job.required_skills?.map((skill) => (
+                    <span
+                      key={skill}
+                      className="bg-blue-100 dark:bg-blue-800 text-blue-700 dark:text-blue-200 p-1 rounded text-xs dark:border-blue-700"
+                    >
+                      {skill}
+                    </span>
+                  ))}
+                </div>
+              )}
+              <div className="flex flex-wrap gap-2 mb-2">
+                {job.preferred_skills?.map((skill) => (
+                  <span
+                    key={skill}
+                    className="bg-yellow-100 dark:bg-yellow-800 text-yellow-700 dark:text-yellow-200 p-0.5 rounded text-xs border-yellow-200 dark:border-yellow-700"
+                  >
+                    {skill} (Preferred)
+                  </span>
+                ))}
+              </div>
               <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 mt-auto">
-                <a
-                  href={`/jobs/${job.slug}`}
-                  className="bg-blue-600 text-white px-4 py-1.5 rounded-md font-semibold hover:bg-blue-700 dark:hover:bg-blue-800 transition w-full md:w-auto text-center shadow group-hover:scale-105 group-hover:shadow-lg text-sm"
-                >
-                  Apply Now
-                </a>
                 <span className="text-xs text-gray-400 dark:text-gray-500 text-right md:text-left">
                   Posted {new Date(job.posted_date).toLocaleDateString()} |{" "}
                   {job.experience_level.charAt(0).toUpperCase() +
                     job.experience_level.slice(1)}
+                  <br />
+                  <span className="text-xs text-gray-500 dark:text-gray-400">
+                    <span title="Applications">
+                      {job.application_count} apps
+                    </span>{" "}
+                    |<span title="Views"> {job.view_count} views</span>
+                  </span>
                 </span>
+                <div className="flex flex-col">
+                  <span className="text-green-600 dark:text-green-400 font-bold">
+                    {formatSalary(job)}
+                  </span>
+                  <a
+                    href={`/jobs/${job.slug}`}
+                    className="bg-blue-600 text-white px-4 py-1.5 rounded-md font-semibold hover:bg-blue-700 dark:hover:bg-blue-800 transition w-full md:w-auto text-center shadow group-hover:scale-105 group-hover:shadow-lg text-sm"
+                  >
+                    Apply Now
+                  </a>
+                </div>
               </div>
             </div>
           ))}

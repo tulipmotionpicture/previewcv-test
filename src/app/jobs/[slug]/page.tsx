@@ -157,9 +157,12 @@ export default async function JobDetailsPage({
               <div className="flex-1">
                 {/* Company Name */}
                 <div className="mb-2">
-                  <span className="inline-flex items-center px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-xs font-bold rounded-full uppercase tracking-wider border border-blue-200 dark:border-blue-800">
+                  <Link
+                    href={job.recruiter_profile_url || "#"}
+                    className="inline-flex items-center px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-xs font-bold rounded-full uppercase tracking-wider border border-blue-200 dark:border-blue-800"
+                  >
                     {job.company_name}
-                  </span>
+                  </Link>
                 </div>
 
                 {/* Job Title */}

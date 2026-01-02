@@ -4,7 +4,28 @@ import Image from "next/image";
 import config from "@/config";
 import { notFound } from "next/navigation";
 
-// Type for recruiter profile from API
+// Job and Event types for recruiter profile
+interface Job {
+  id: number;
+  title: string;
+  location: string;
+  job_type: string;
+  experience_level: string;
+  is_remote: boolean;
+  posted_date: string;
+  application_count: number;
+  view_count: number;
+  slug: string;
+}
+
+interface Event {
+  id: number;
+  title: string;
+  description: string;
+  event_date?: string;
+  images?: string[];
+}
+
 interface RecruiterProfile {
   id: number;
   username: string;
@@ -24,18 +45,23 @@ interface RecruiterProfile {
   specialization?: string;
   years_experience?: number;
   created_at?: string;
+  gallery?: {
+    images?: string[];
+  };
+  recent_jobs?: Job[];
+  events?: Event[];
 }
 
 // Server-side data fetching function
 async function getRecruiterProfile(
-  username: string
+  slug: string
 ): Promise<RecruiterProfile | null> {
   try {
     const apiUrl =
       process.env.NEXT_PUBLIC_API_URL ||
       "https://letsmakecv.tulip-software.com";
     const response = await fetch(
-      `${apiUrl}/api/v1/recruiters/profile/${username}`,
+      `${apiUrl}/api/v1/recruiters/profile/slug/${slug}`,
       {
         cache: "no-store", // Always fetch fresh data
         headers: {
@@ -63,10 +89,10 @@ async function getRecruiterProfile(
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ username: string }>;
+  params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
-  const { username } = await params;
-  const profile = await getRecruiterProfile(username);
+  const { slug } = await params;
+  const profile = await getRecruiterProfile(slug);
 
   if (!profile) {
     return {
@@ -78,8 +104,8 @@ export async function generateMetadata({
 
   const displayName =
     profile.recruiter_type === "company"
-      ? profile.company_name || profile.display_name || username
-      : profile.full_name || profile.display_name || username;
+      ? profile.company_name || profile.display_name
+      : profile.full_name || profile.display_name;
 
   const title = `${displayName} | Company Profile | PreviewCV`;
   const description = profile.bio
@@ -116,10 +142,10 @@ export async function generateMetadata({
 export default async function RecruiterProfilePage({
   params,
 }: {
-  params: Promise<{ username: string }>;
+  params: Promise<{ slug: string }>;
 }) {
-  const { username } = await params;
-  const profile = await getRecruiterProfile(username);
+  const { slug } = await params;
+  const profile = await getRecruiterProfile(slug);
 
   if (!profile) {
     notFound();
@@ -127,8 +153,8 @@ export default async function RecruiterProfilePage({
 
   const displayName =
     profile.recruiter_type === "company"
-      ? profile.company_name || profile.display_name || username
-      : profile.full_name || profile.display_name || username;
+      ? profile.company_name || profile.display_name
+      : profile.full_name || profile.display_name;
 
   const isCompany = profile.recruiter_type === "company";
 
@@ -163,23 +189,40 @@ export default async function RecruiterProfilePage({
         </div>
       </nav>
 
+      {Array.isArray(profile.gallery?.images) &&
+        profile.gallery.images.length > 0 && (
+          <Image
+            src={profile.gallery.images[0]}
+            alt="Company gallery background"
+            width={1920}
+            height={400}
+            className="h-120 w-full object-fill"
+            priority
+          />
+        )}
+
       {/* Hero Section */}
-      <section className="pt-24 pb-16 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-gray-900 dark:to-gray-800 border-b border-gray-200 dark:border-gray-700">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="pb-16 border-b border-gray-200 dark:border-gray-700 relative">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="flex flex-col md:flex-row items-start gap-8">
             {/* Logo/Avatar */}
             <div className="relative flex-shrink-0">
-              <div className="w-32 h-32 md:w-40 md:h-40 bg-white dark:bg-gray-800 rounded-2xl border-4 border-white dark:border-gray-700 shadow-xl overflow-hidden flex items-center justify-center p-4">
+              <div className="w-32 h-32 md:w-40 md:h-40 bg-white dark:bg-gray-800 rounded-2xl border-4 border-white dark:border-gray-700 shadow-xl overflow-hidden flex items-center justify-center p-4 -mt-[60px]">
                 {profile.company_logo_url ? (
                   <Image
                     src={profile.company_logo_url}
-                    alt={displayName}
+                    alt={displayName || "Company logo"}
                     width={160}
                     height={160}
                     className="object-contain w-full h-full"
                   />
                 ) : (
-                  <div className="text-6xl">{isCompany ? "🏢" : "👤"}</div>
+                  <div
+                    className="text-6xl"
+                    aria-label={isCompany ? "Company" : "Recruiter"}
+                  >
+                    {isCompany ? "🏢" : "👤"}
+                  </div>
                 )}
               </div>
               {profile.is_verified && (
@@ -365,6 +408,106 @@ export default async function RecruiterProfilePage({
           </div>
         </div>
       </section>
+
+      {/* Recent Jobs Section */}
+      {Array.isArray(profile.recent_jobs) && profile.recent_jobs.length > 0 && (
+        <section className="py-12 px-4 sm:px-6 lg:px-8 bg-white border-t border-gray-200 dark:bg-gray-950 dark:border-gray-800">
+          <div className="max-w-5xl mx-auto">
+            <h2 className="text-2xl font-bold mb-6 text-gray-900 dark:text-gray-100">
+              Recent Job Openings
+            </h2>
+            <div className="space-y-4">
+              {Array.isArray(profile.recent_jobs) &&
+                profile.recent_jobs.map((job: Job) => (
+                  <div
+                    key={job.id}
+                    className="bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4"
+                  >
+                    <div>
+                      <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-1">
+                        {job.title}
+                      </h3>
+                      <div className="flex flex-wrap gap-2 text-sm text-gray-600 dark:text-gray-400">
+                        <span>{job.location}</span>
+                        <span>| {job.job_type.replace("_", " ")}</span>
+                        <span>
+                          |{" "}
+                          {job.experience_level.charAt(0).toUpperCase() +
+                            job.experience_level.slice(1)}
+                        </span>
+                        {job.is_remote && (
+                          <span className="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-xs font-semibold ml-2">
+                            Remote
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                    <div className="flex flex-col items-end gap-1">
+                      <span className="text-xs text-gray-500">
+                        {new Date(job.posted_date).toLocaleDateString()}
+                      </span>
+                      <span className="text-xs text-gray-500">
+                        {job.application_count} apps | {job.view_count} views
+                      </span>
+                      <Link
+                        href={`/jobs/${job.slug}`}
+                        className="mt-2 px-4 py-1.5 bg-blue-600 text-white rounded font-semibold text-xs hover:bg-blue-700 transition"
+                      >
+                        View Job
+                      </Link>
+                    </div>
+                  </div>
+                ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* Events Section */}
+      {Array.isArray(profile.events) && profile.events.length > 0 && (
+        <section className="py-12 px-4 sm:px-6 lg:px-8 bg-gray-50 border-t border-gray-200 dark:bg-gray-900 dark:border-gray-800">
+          <div className="max-w-5xl mx-auto">
+            <h2 className="text-2xl font-bold mb-6 text-gray-900 dark:text-gray-100">
+              Company Events
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {Array.isArray(profile.events) &&
+                profile.events.map((event: Event) => (
+                  <div
+                    key={event.id}
+                    className="bg-white dark:bg-gray-950 border border-gray-200 dark:border-gray-800 rounded-xl p-6"
+                  >
+                    <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-2">
+                      {event.title}
+                    </h3>
+                    <p className="text-gray-600 dark:text-gray-400 mb-2">
+                      {event.description}
+                    </p>
+                    {event.event_date && (
+                      <p className="text-xs text-gray-500 mb-2">
+                        {new Date(event.event_date).toLocaleDateString()}
+                      </p>
+                    )}
+                    {Array.isArray(event.images) && event.images.length > 0 && (
+                      <div className="flex flex-wrap gap-2 mt-2">
+                        {event.images.map((img: string, idx: number) => (
+                          <Image
+                            key={idx}
+                            src={img}
+                            alt={`Event image ${idx + 1}`}
+                            width={120}
+                            height={80}
+                            className="rounded object-cover"
+                          />
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Footer CTA */}
       <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 border-t border-gray-200 dark:border-gray-700">

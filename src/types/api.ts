@@ -98,6 +98,10 @@ export interface Job {
   status: "active" | "closed" | "draft";
   created_at: string;
   updated_at: string;
+  // Extended fields for UI
+  recruiter_username?: string;
+  recruiter_profile_url?: string;
+  industry?: string;
 }
 
 export interface Application {
