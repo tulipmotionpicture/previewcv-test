@@ -1,23 +1,14 @@
-import { Metadata } from "next";
+"use client";
+
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import config from "@/config";
-import { notFound } from "next/navigation";
+import RecruiterProfileContent from "@/components/RecruiterProfileContent";
+import ImageGalleryModal from "@/components/ImageGalleryModal";
+import { Job } from "@/types/api";
 
-// Job and Event types for recruiter profile
-interface Job {
-  id: number;
-  title: string;
-  location: string;
-  job_type: string;
-  experience_level: string;
-  is_remote: boolean;
-  posted_date: string;
-  application_count: number;
-  view_count: number;
-  slug: string;
-}
-
+// Event type for recruiter profile
 interface Event {
   id: number;
   title: string;
@@ -85,70 +76,30 @@ async function getRecruiterProfile(
   }
 }
 
-// Generate metadata for SEO
-export async function generateMetadata({
-  params,
-}: {
-  params: Promise<{ slug: string }>;
-}): Promise<Metadata> {
-  const { slug } = await params;
-  const profile = await getRecruiterProfile(slug);
-
-  if (!profile) {
-    return {
-      title: "Company Not Found | PreviewCV",
-      description:
-        "The company profile you are looking for could not be found.",
-    };
-  }
-
-  const displayName =
-    profile.recruiter_type === "company"
-      ? profile.company_name || profile.display_name
-      : profile.full_name || profile.display_name;
-
-  const title = `${displayName} | Company Profile | PreviewCV`;
-  const description = profile.bio
-    ? profile.bio.substring(0, 160) + "..."
-    : `View ${displayName}'s company profile on PreviewCV. Browse active job openings and learn more about career opportunities.`;
-
-  const imageUrl = profile.company_logo_url || config.app.logoUrl;
-
-  return {
-    title,
-    description,
-    openGraph: {
-      title,
-      description,
-      type: "profile",
-      images: [
-        {
-          url: imageUrl,
-          width: 1200,
-          height: 630,
-          alt: `${displayName} logo`,
-        },
-      ],
-    },
-    twitter: {
-      card: "summary_large_image",
-      title,
-      description,
-      images: [imageUrl],
-    },
-  };
-}
-
-export default async function RecruiterProfilePage({
+export default function RecruiterProfilePage({
   params,
 }: {
   params: Promise<{ slug: string }>;
 }) {
-  const { slug } = await params;
-  const profile = await getRecruiterProfile(slug);
+  const [profile, setProfile] = useState<RecruiterProfile | null>(null);
+  const [isGalleryOpen, setIsGalleryOpen] = useState(false);
+  const [galleryStartIndex, setGalleryStartIndex] = useState(0);
+
+  useEffect(() => {
+    async function loadProfile() {
+      const resolvedParams = await params;
+      const data = await getRecruiterProfile(resolvedParams.slug);
+      setProfile(data);
+    }
+    loadProfile();
+  }, [params]);
 
   if (!profile) {
-    notFound();
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+      </div>
+    );
   }
 
   const displayName =
@@ -157,6 +108,12 @@ export default async function RecruiterProfilePage({
       : profile.full_name || profile.display_name;
 
   const isCompany = profile.recruiter_type === "company";
+  const galleryImages = profile.gallery?.images || [];
+
+  const openGallery = (index: number = 0) => {
+    setGalleryStartIndex(index);
+    setIsGalleryOpen(true);
+  };
 
   return (
     <div className="min-h-screen bg-white dark:bg-gray-950 transition-colors duration-300">
@@ -189,20 +146,41 @@ export default async function RecruiterProfilePage({
         </div>
       </nav>
 
-      {Array.isArray(profile.gallery?.images) &&
-        profile.gallery.images.length > 0 && (
+      {/* Gallery Banner - Clickable */}
+      {galleryImages.length > 0 && (
+        <button
+          onClick={() => openGallery(0)}
+          className="relative w-full h-120 overflow-hidden group cursor-pointer"
+        >
           <Image
-            src={profile.gallery.images[0]}
+            src={galleryImages[0]}
             alt="Company gallery background"
             width={1920}
             height={400}
-            className="h-120 w-full object-fill"
+            className="h-120 w-full object-fill group-hover:scale-105 transition-transform duration-300"
             priority
           />
-        )}
+          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300 flex items-center justify-center">
+            <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-white/90 dark:bg-gray-900/90 px-4 py-2 rounded-full flex items-center gap-2 text-sm font-semibold">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" />
+              </svg>
+              View Gallery ({galleryImages.length} {galleryImages.length === 1 ? 'image' : 'images'})
+            </div>
+          </div>
+        </button>
+      )}
+
+      {/* Image Gallery Modal */}
+      <ImageGalleryModal
+        images={galleryImages}
+        isOpen={isGalleryOpen}
+        onClose={() => setIsGalleryOpen(false)}
+        initialIndex={galleryStartIndex}
+      />
 
       {/* Hero Section */}
-      <section className="pb-16 border-b border-gray-200 dark:border-gray-700 relative">
+      <section className="relative pb-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="flex flex-col md:flex-row items-start gap-8">
             {/* Logo/Avatar */}
@@ -245,14 +223,10 @@ export default async function RecruiterProfilePage({
 
             {/* Info */}
             <div className="flex-1">
-              <div className="mb-4">
+              <div className="mt-2 flex flex-row justify-between">
                 <h1 className="text-4xl md:text-5xl font-black text-gray-900 dark:text-gray-100 mb-3 leading-tight">
                   {displayName}
                 </h1>
-                <div className="flex flex-wrap items-center gap-3">
-                  <span className="inline-flex items-center gap-2 px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-xs font-bold rounded-full border border-blue-200 dark:border-blue-800">
-                    {isCompany ? "🏢 Company" : "👤 Individual Recruiter"}
-                  </span>
                   {profile.is_verified && (
                     <span className="inline-flex items-center gap-2 px-3 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 text-xs font-bold rounded-full border border-green-200 dark:border-green-800">
                       <svg
@@ -265,7 +239,31 @@ export default async function RecruiterProfilePage({
                       Verified
                     </span>
                   )}
+                {/* Company Details */}
+              {isCompany && (profile.company_size || profile.industry) && (
+                <div className="flex flex-wrap gap-6 mb-2">
+                  {profile.industry && (
+                    <div>
+                      <span className="font-bold tracking-wider text-sm">
+                         Industry
+                      </span>
+                     <p className="text-gray-900 dark:text-gray-100 mt-1 text-xs">
+                        {profile.industry}
+                      </p>
+                    </div>
+                  )}
+                  {profile.company_size && (
+                    <div>
+                      <span className="font-bold tracking-wider text-sm">
+                        Company Size
+                      </span>
+                      <p className="text-gray-900 dark:text-gray-100 mt-1 text-xs">
+                        {profile.company_size}+ employees
+                      </p>
+                    </div>
+                  )}
                 </div>
+              )}
               </div>
 
               {profile.bio && (
@@ -275,7 +273,7 @@ export default async function RecruiterProfilePage({
               )}
 
               {/* Contact Info Grid */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
+              <div className="grid grid-cols-2 sm:grid-cols-6 gap-3 mb-6">
                 {profile.location && (
                   <div className="flex items-center gap-3 p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
                     <svg
@@ -352,32 +350,6 @@ export default async function RecruiterProfilePage({
                 )}
               </div>
 
-              {/* Company Details */}
-              {isCompany && (profile.company_size || profile.industry) && (
-                <div className="flex flex-wrap gap-6">
-                  {profile.industry && (
-                    <div>
-                      <span className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                        Industry
-                      </span>
-                      <p className="text-gray-900 dark:text-gray-100 font-bold mt-1">
-                        {profile.industry}
-                      </p>
-                    </div>
-                  )}
-                  {profile.company_size && (
-                    <div>
-                      <span className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                        Company Size
-                      </span>
-                      <p className="text-gray-900 dark:text-gray-100 font-bold mt-1">
-                        {profile.company_size}+ employees
-                      </p>
-                    </div>
-                  )}
-                </div>
-              )}
-
               {/* Individual Recruiter Details */}
               {!isCompany &&
                 (profile.specialization || profile.years_experience) && (
@@ -409,105 +381,15 @@ export default async function RecruiterProfilePage({
         </div>
       </section>
 
-      {/* Recent Jobs Section */}
-      {Array.isArray(profile.recent_jobs) && profile.recent_jobs.length > 0 && (
-        <section className="py-12 px-4 sm:px-6 lg:px-8 bg-white border-t border-gray-200 dark:bg-gray-950 dark:border-gray-800">
-          <div className="max-w-5xl mx-auto">
-            <h2 className="text-2xl font-bold mb-6 text-gray-900 dark:text-gray-100">
-              Recent Job Openings
-            </h2>
-            <div className="space-y-4">
-              {Array.isArray(profile.recent_jobs) &&
-                profile.recent_jobs.map((job: Job) => (
-                  <div
-                    key={job.id}
-                    className="bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl p-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4"
-                  >
-                    <div>
-                      <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-1">
-                        {job.title}
-                      </h3>
-                      <div className="flex flex-wrap gap-2 text-sm text-gray-600 dark:text-gray-400">
-                        <span>{job.location}</span>
-                        <span>| {job.job_type.replace("_", " ")}</span>
-                        <span>
-                          |{" "}
-                          {job.experience_level.charAt(0).toUpperCase() +
-                            job.experience_level.slice(1)}
-                        </span>
-                        {job.is_remote && (
-                          <span className="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-xs font-semibold ml-2">
-                            Remote
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                    <div className="flex flex-col items-end gap-1">
-                      <span className="text-xs text-gray-500">
-                        {new Date(job.posted_date).toLocaleDateString()}
-                      </span>
-                      <span className="text-xs text-gray-500">
-                        {job.application_count} apps | {job.view_count} views
-                      </span>
-                      <Link
-                        href={`/jobs/${job.slug}`}
-                        className="mt-2 px-4 py-1.5 bg-blue-600 text-white rounded font-semibold text-xs hover:bg-blue-700 transition"
-                      >
-                        View Job
-                      </Link>
-                    </div>
-                  </div>
-                ))}
-            </div>
-          </div>
-        </section>
+      {/* Jobs and Events Section with Tab Switcher */}
+      {((Array.isArray(profile.recent_jobs) && profile.recent_jobs.length > 0) ||
+        (Array.isArray(profile.events) && profile.events.length > 0)) && (
+        <RecruiterProfileContent
+          jobs={Array.isArray(profile.recent_jobs) ? profile.recent_jobs : []}
+          events={Array.isArray(profile.events) ? profile.events : []}
+        />
       )}
 
-      {/* Events Section */}
-      {Array.isArray(profile.events) && profile.events.length > 0 && (
-        <section className="py-12 px-4 sm:px-6 lg:px-8 bg-gray-50 border-t border-gray-200 dark:bg-gray-900 dark:border-gray-800">
-          <div className="max-w-5xl mx-auto">
-            <h2 className="text-2xl font-bold mb-6 text-gray-900 dark:text-gray-100">
-              Company Events
-            </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {Array.isArray(profile.events) &&
-                profile.events.map((event: Event) => (
-                  <div
-                    key={event.id}
-                    className="bg-white dark:bg-gray-950 border border-gray-200 dark:border-gray-800 rounded-xl p-6"
-                  >
-                    <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-2">
-                      {event.title}
-                    </h3>
-                    <p className="text-gray-600 dark:text-gray-400 mb-2">
-                      {event.description}
-                    </p>
-                    {event.event_date && (
-                      <p className="text-xs text-gray-500 mb-2">
-                        {new Date(event.event_date).toLocaleDateString()}
-                      </p>
-                    )}
-                    {Array.isArray(event.images) && event.images.length > 0 && (
-                      <div className="flex flex-wrap gap-2 mt-2">
-                        {event.images.map((data, idx: number) => (
-                          <Image
-                            key={idx}
-                            src={data.image_url}
-                            alt={`Event image ${idx + 1}`}
-                            width={120}
-                            height={80}
-                            className="rounded object-cover"
-                          />
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                ))}
-            </div>
-          </div>
-        </section>
-      )}
 
       {/* Footer CTA */}
       <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 border-t border-gray-200 dark:border-gray-700">

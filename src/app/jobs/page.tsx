@@ -62,62 +62,81 @@ export default function JobsPage() {
       />
       <div className="pt-24">
         {/* Horizontal Search Bar */}
-        <div className="w-full flex justify-center mb-8">
-          <form
-            className="w-full max-w-7xl flex bg-white dark:bg-gray-900 rounded-3xl shadow-lg p-3 gap-2 md:gap-4 items-center border border-gray-100 dark:border-gray-800"
-            style={{ boxShadow: "0 4px 24px 0 rgba(30, 41, 59, 0.10)" }}
-            onSubmit={(e) => {
-              e.preventDefault();
-              setSelectedFilters((prev) => ({
-                ...prev,
-                keyword: keyword ? [keyword] : [],
-                location: location ? [location] : [],
-              }));
-            }}
-          >
-            <div className="flex-1 flex flex-col">
-              <label
-                className="text-xs font-bold text-gray-400 tracking-widest mb-1 "
-                htmlFor="job-keywords"
-              >
-                KEYWORDS
-              </label>
-              <input
-                id="job-keywords"
-                type="text"
-                placeholder="Role, Company..."
-                className="bg-transparent outline-none text-gray-700 dark:text-gray-100 placeholder-gray-300 dark:placeholder-gray-500 text-base font-semibold"
-                value={keyword}
-                onChange={(e) => setKeyword(e.target.value)}
-                autoComplete="off"
-              />
-            </div>
-            <div className="flex-1 flex flex-col border-l border-gray-100 dark:border-gray-800 pl-2">
-              <label
-                className="text-xs font-bold text-gray-400 tracking-widest mb-1 "
-                htmlFor="job-location"
-              >
-                LOCATION
-              </label>
-              <input
-                id="job-location"
-                type="text"
-                placeholder="City or Remote"
-                className="bg-transparent outline-none text-gray-700 dark:text-gray-100 placeholder-gray-300 dark:placeholder-gray-500 text-base font-semibold"
-                value={location}
-                onChange={(e) => setLocation(e.target.value)}
-                autoComplete="off"
-              />
-            </div>
-            <button
-              type="submit"
-              className="md:h-8 px-4 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-2xl shadow-lg transition-all text-base md:text-sm tracking-widest ml-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
-              style={{ boxShadow: "0 0 16px 2px #2563eb33" }}
-            >
-              SEARCH JOBS
-            </button>
-          </form>
-        </div>
+       <div className="w-full flex justify-center mb-4 px-4">
+  <form
+    onSubmit={(e) => {
+      e.preventDefault();
+      setSelectedFilters((prev) => ({
+        ...prev,
+        keyword: keyword ? [keyword] : [],
+        location: location ? [location] : [],
+      }));
+    }}
+    className="w-full max-w-7xl bg-white dark:bg-gray-900 
+              border border-gray-300 dark:border-gray-800 rounded-lg"
+  >
+    <div className="flex flex-col md:flex-row items-stretch">
+
+      {/* Keyword */}
+      <div className="flex-1 p-1 pl-4">
+        <label
+          htmlFor="job-keywords"
+          className="block text-[11px] font-semibold"
+        >
+          KEYWORDS
+        </label>
+        <input
+          id="job-keywords"
+          type="text"
+          placeholder="Job title, skills, company"
+          value={keyword}
+          onChange={(e) => setKeyword(e.target.value)}
+          className="w-full bg-transparent outline-none 
+                     text-gray-800 dark:text-gray-100 
+                     placeholder-gray-400 font-medium text-sm"
+        />
+      </div>
+
+      {/* Divider */}
+      <div className="hidden md:block w-px bg-gray-200 dark:bg-gray-800" />
+
+      {/* Location */}
+      <div className="flex-1 p-1">
+        <label
+          htmlFor="job-location"
+          className="block text-[11px] font-semibold"
+        >
+          LOCATION
+        </label>
+        <input
+          id="job-location"
+          type="text"
+          placeholder="City, state or remote"
+          value={location}
+          onChange={(e) => setLocation(e.target.value)}
+          className="w-full bg-transparent outline-none 
+                     text-gray-800 dark:text-gray-100 
+                     placeholder-gray-400 font-medium text-sm"
+        />
+      </div>
+
+      {/* Button */}
+      <div className="p-1 flex items-center">
+        <button
+          type="submit"
+          className="w-full md:w-auto px-8 h-10
+                     bg-blue-600 hover:bg-blue-700 
+                     text-white font-medium text-xs
+                     rounded-xl shadow-md transition-all
+                     focus:outline-none focus:ring-2 focus:ring-blue-400"
+        >
+          Search Jobs
+        </button>
+      </div>
+    </div>
+  </form>
+</div>
+
         <JobsLayout
           filters={
             <JobsFilters

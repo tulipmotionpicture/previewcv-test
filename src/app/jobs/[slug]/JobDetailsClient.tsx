@@ -7,6 +7,7 @@ import { Job, PdfResume, Resume } from "@/types/api";
 import { useAuth } from "@/context/AuthContext";
 import ResumeUpload from "@/components/ResumeUpload";
 import { useEffect } from "react";
+import BookmarkButton from "@/components/BookmarkButton";
 
 interface JobDetailsClientProps {
   job: Job;
@@ -19,6 +20,7 @@ export default function JobDetailsClient({ job, slug }: JobDetailsClientProps) {
   const [applying, setApplying] = useState(false);
   const [applySuccess, setApplySuccess] = useState(false);
   const [coverLetter, setCoverLetter] = useState("");
+  const [isBookmarked, setIsBookmarked] = useState(job.is_bookmarked || false);
 
   // Resume selection state
   const [resumeId, setResumeId] = useState<number | null>(null);
@@ -26,11 +28,25 @@ export default function JobDetailsClient({ job, slug }: JobDetailsClientProps) {
   const [builderResumes, setBuilderResumes] = useState<Resume[]>([]);
   const [loadingResumes, setLoadingResumes] = useState(false);
 
+  // Fetch bookmark status when authenticated
   useEffect(() => {
     if (isAuthenticated) {
+      fetchBookmarkStatus();
       fetchResumes();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAuthenticated]);
+
+  const fetchBookmarkStatus = async () => {
+    try {
+      const response = await api.getJobBySlug(slug);
+      if (response.job) {
+        setIsBookmarked(response.job.is_bookmarked || false);
+      }
+    } catch (error) {
+      console.error("Failed to fetch bookmark status:", error);
+    }
+  };
 
   const fetchResumes = async () => {
     setLoadingResumes(true);
@@ -100,25 +116,34 @@ export default function JobDetailsClient({ job, slug }: JobDetailsClientProps) {
 
   return (
     <div className="sticky top-24 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-6 shadow-lg">
-      <div className="flex items-center gap-3 mb-6 pb-4 border-b border-gray-200 dark:border-gray-800">
-        <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
-          <svg
-            className="w-5 h-5 text-blue-600 dark:text-blue-400"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122"
-            />
-          </svg>
+      <div className="flex items-center justify-between mb-6 pb-4 border-b border-gray-200 dark:border-gray-800">
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
+            <svg
+              className="w-5 h-5 text-blue-600 dark:text-blue-400"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122"
+              />
+            </svg>
+          </div>
+          <h3 className="text-xl font-black text-gray-900 dark:text-gray-100">
+            Apply for this Job
+          </h3>
         </div>
-        <h3 className="text-xl font-black text-gray-900 dark:text-gray-100">
-          Apply for this Job
-        </h3>
+        <BookmarkButton
+          jobId={job.id}
+          jobSlug={job.slug}
+          isBookmarked={isBookmarked}
+          onBookmarkChange={setIsBookmarked}
+          size="md"
+        />
       </div>
 
       {applySuccess ? (

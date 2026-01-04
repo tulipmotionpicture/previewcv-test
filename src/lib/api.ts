@@ -8,6 +8,7 @@ import {
   RecruiterProfileResponse,
   PdfResume,
   Resume,
+  TopHiringPartnersResponse,
 } from "@/types/api";
 
 const API_BASE_URL =
@@ -301,6 +302,15 @@ export class ApiClient {
     );
   }
 
+  async getTopHiringPartners(
+    limit: number = 20
+  ): Promise<TopHiringPartnersResponse> {
+    return this.request<TopHiringPartnersResponse>(
+      `/api/v1/recruiters/profile/top-hiring-partners?limit=${limit}`
+    );
+  }
+
+
   // --- Recruiter Jobs ---
   async createJobPosting(
     data: Partial<Job>
@@ -426,19 +436,28 @@ export class ApiClient {
   // --- Jobs ---
   async getJobs(params: URLSearchParams): Promise<PaginatedResponse<Job>> {
     return this.request<PaginatedResponse<Job>>(
-      `/api/v1/jobs/list?${params.toString()}`
+      `/api/v1/jobs/list?${params.toString()}`,
+      {},
+      true,
+      false
     );
   }
 
   async getJobBySlug(slug: string): Promise<{ success: boolean; job: Job }> {
     return this.request<{ success: boolean; job: Job }>(
-      `/api/v1/jobs/slug/${slug}`
+      `/api/v1/jobs/slug/${slug}`,
+      {},
+      true,
+      false
     );
   }
 
   async getJobById(jobId: number): Promise<{ success: boolean; job: Job }> {
     return this.request<{ success: boolean; job: Job }>(
-      `/api/v1/jobs/${jobId}`
+      `/api/v1/jobs/${jobId}`,
+      {},
+      true,
+      false
     );
   }
 
@@ -468,6 +487,30 @@ export class ApiClient {
       false
     );
   }
+
+  // --- Job Bookmarks ---
+  async bookmarkJob(jobId: number): Promise<string> {
+    return this.request<string>(
+      `/api/v1/jobs/${jobId}/bookmark`,
+      {
+        method: "POST",
+      },
+      true,
+      false
+    );
+  }
+
+  async removeBookmark(jobId: number): Promise<string> {
+    return this.request<string>(
+      `/api/v1/jobs/${jobId}/bookmark`,
+      {
+        method: "DELETE",
+      },
+      true,
+      false
+    );
+  }
+
 
   async uploadResume(
     file: File,

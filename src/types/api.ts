@@ -102,6 +102,7 @@ export interface Job {
   recruiter_username?: string;
   recruiter_profile_url?: string;
   industry?: string;
+  is_bookmarked?: boolean;
 }
 
 export interface Application {
@@ -158,3 +159,20 @@ export interface RecruiterProfileResponse {
   success: boolean;
   recruiter: Recruiter;
 }
+
+export interface TopHiringPartner {
+  id: number;
+  username: string;
+  company_name: string;
+  company_logo_url?: string;
+  industry?: string;
+  active_jobs_count: number;
+}
+
+export interface TopHiringPartnersResponse {
+  success: boolean;
+  total: number;
+  hiring_partners: TopHiringPartner[];
+}
+
+

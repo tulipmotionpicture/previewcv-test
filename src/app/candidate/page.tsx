@@ -1,6 +1,5 @@
 
 import Link from 'next/link';
-import Header from '@/components/Header';
 
 const DocumentTextIcon = () => (
     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6">
@@ -17,10 +16,10 @@ const SparklesIcon = () => (
 export default function CandidateLanding() {
     return (
         <div className="min-h-screen bg-white dark:bg-gray-950 text-gray-950 dark:text-gray-100 selection:bg-teal-100 dark:selection:bg-teal-900 transition-colors duration-300">
-            <Header 
+            {/* <Header 
                 links={[{ label: 'Browse Jobs', href: '/jobs' }]}
                 cta={{ label: 'Candidate Login', href: '/candidate/login', variant: 'dark' }}
-            />
+            /> */}
 
             <section className="relative pt-32 pb-48 px-8 overflow-hidden">
                 <div className="absolute top-0 left-0 w-full h-full -z-10 bg-[radial-gradient(circle_at_50%_0%,#f0f9ff_0%,#ffffff_100%)]" />

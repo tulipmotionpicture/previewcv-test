@@ -10,7 +10,7 @@ export default function JobsLayout({
   sidebar: React.ReactNode;
 }) {
   return (
-    <div className="w-full min-h-screen flex justify-center px-2 md:px-4 lg:px-8 py-6 transition-colors duration-300">
+    <div className="w-full min-h-screen flex justify-center px-2 md:px-4 lg:px-8transition-colors duration-300">
       <div
         className="w-full max-w-7xl grid grid-cols-1 md:grid-cols-4 lg:grid-cols-12 gap-2"
         style={{ height: "80vh" }}
