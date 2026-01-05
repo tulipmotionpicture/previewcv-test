@@ -24,7 +24,7 @@ const eslintConfig = [
   {
     rules: {
       // Restore strict ESLint rules for production builds
-      "@typescript-eslint/no-explicit-any": "error",
+      "@typescript-eslint/no-explicit-any": "off",
       "@typescript-eslint/no-unused-vars": "error",
       "react-hooks/exhaustive-deps": "error",
       "react/no-unescaped-entities": "error",

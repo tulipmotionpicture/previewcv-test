@@ -10,7 +10,8 @@ import { useRecruiterAuth } from "@/context/RecruiterAuthContext";
 import { useToast } from "@/context/ToastContext";
 import EditJobModal from "@/components/EditJobModal";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
-import Breadcrumb from "@/components/ui/Breadcrumb";
+import CompanyGallerySection from "@/components/CompanyGallerySection";
+import RecruiterGalleryEventsSection from "@/components/RecruiterGalleryEventsSection";
 
 export default function RecruiterDashboard() {
   const router = useRouter();
@@ -21,7 +22,9 @@ export default function RecruiterDashboard() {
     loading: authLoading,
   } = useRecruiterAuth();
   const toast = useToast();
-  const [activeTab, setActiveTab] = useState<"jobs" | "ats" | "stats">("jobs");
+  const [activeTab, setActiveTab] = useState<
+    "jobs" | "ats" | "stats" | "gallery" | "galleryEvents"
+  >("jobs");
   const [jobs, setJobs] = useState<Job[]>([]);
   const [applications, setApplications] = useState<Application[]>([]);
   const [dashboardStats, setDashboardStats] = useState<{
@@ -86,9 +89,9 @@ export default function RecruiterDashboard() {
     setLoadingJobs(true);
     try {
       const response = await api.getMyJobPostings();
-      if (response.items) {
-        setJobs(response.items);
-      }
+      // Support both items and jobs keys
+      const jobList = response.items || response.jobs || [];
+      setJobs(jobList);
     } catch (error) {
       console.error("Failed to fetch jobs:", error);
       toast?.error("Failed to load jobs");
@@ -254,7 +257,7 @@ export default function RecruiterDashboard() {
           />
         </div>
         <nav className="space-y-2">
-          <button
+          {/* <button
             onClick={() => setActiveTab("stats")}
             className={`w-full text-left px-4 py-3 rounded-xl transition-all font-black text-xs uppercase tracking-tight ${
               activeTab === "stats"
@@ -263,7 +266,7 @@ export default function RecruiterDashboard() {
             }`}
           >
             Dashboard Stats
-          </button>
+          </button> */}
           <button
             onClick={() => setActiveTab("jobs")}
             className={`w-full text-left px-4 py-3 rounded-xl transition-all font-black text-xs uppercase tracking-tight ${
@@ -283,6 +286,26 @@ export default function RecruiterDashboard() {
             }`}
           >
             Application Review
+          </button>
+          <button
+            onClick={() => setActiveTab("gallery")}
+            className={`w-full text-left px-4 py-3 rounded-xl transition-all font-black text-xs uppercase tracking-tight ${
+              activeTab === "gallery"
+                ? "bg-indigo-600 text-white shadow-lg shadow-indigo-200 dark:shadow-indigo-900/50"
+                : "text-gray-400 dark:text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800"
+            }`}
+          >
+            Company Gallery
+          </button>
+          <button
+            onClick={() => setActiveTab("galleryEvents")}
+            className={`w-full text-left px-4 py-3 rounded-xl transition-all font-black text-xs uppercase tracking-tight ${
+              activeTab === "galleryEvents"
+                ? "bg-indigo-600 text-white shadow-lg shadow-indigo-200 dark:shadow-indigo-900/50"
+                : "text-gray-400 dark:text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800"
+            }`}
+          >
+            Gallery Events
           </button>
         </nav>
         <div className="absolute bottom-10 left-6 right-6">
@@ -305,9 +328,6 @@ export default function RecruiterDashboard() {
 
       {/* Main Content */}
       <main className="flex-1 p-10 max-w-6xl mx-auto overflow-x-hidden">
-        {/* Breadcrumb */}
-        <Breadcrumb className="mb-6" />
-
         {activeTab === "stats" && (
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
             <h1 className="text-3xl font-black text-gray-900 dark:text-gray-100 mb-10">
@@ -449,8 +469,10 @@ export default function RecruiterDashboard() {
                               : "text-yellow-600"
                           }`}
                         >
-                          {job.status.charAt(0).toUpperCase() +
-                            job.status.slice(1)}
+                          {job.status
+                            ? job.status.charAt(0).toUpperCase() +
+                              job.status.slice(1)
+                            : "Unknown"}
                         </span>
                       </p>
                     </div>
@@ -686,6 +708,12 @@ export default function RecruiterDashboard() {
               </div>
             </div>
           </div>
+        )}
+        {activeTab === "gallery" && recruiter && (
+          <CompanyGallerySection recruiter={recruiter} toast={toast} />
+        )}
+        {activeTab === "galleryEvents" && (
+          <RecruiterGalleryEventsSection recruiter={recruiter} toast={toast} />
         )}
       </main>
       {/* Candidate Detail Modal - Simply showing Application Details for now */}

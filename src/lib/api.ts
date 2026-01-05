@@ -310,7 +310,6 @@ export class ApiClient {
     );
   }
 
-
   // --- Recruiter Jobs ---
   async createJobPosting(
     data: Partial<Job>
@@ -511,7 +510,6 @@ export class ApiClient {
     );
   }
 
-
   async uploadResume(
     file: File,
     resumeName?: string
@@ -661,6 +659,259 @@ export class ApiClient {
     }>("/api/v1/jobs/filters", {}, false, false);
   }
 
+  /**
+   * Upload company logo (multipart/form-data)
+   */
+  async uploadRecruiterLogo(
+    file: File
+  ): Promise<{ url: string; logo_url?: string }> {
+    const formData = new FormData();
+    formData.append("file", file);
+    const headers = this.getHeaders(true, true);
+    // @ts-expect-error - let browser set Content-Type with boundary
+    delete headers["Content-Type"];
+    return this.request<{ url: string; logo_url?: string }>(
+      "/api/v1/recruiters/profile/upload-logo",
+      {
+        method: "POST",
+        body: formData,
+        headers: headers as HeadersInit,
+      },
+      true,
+      true
+    );
+  }
+
+  /**
+   * Delete company logo
+   */
+  async deleteRecruiterLogo(): Promise<{ success: boolean; message?: string }> {
+    return this.request<{ success: boolean; message?: string }>(
+      "/api/v1/recruiters/profile/delete-logo",
+      {
+        method: "DELETE",
+        headers: this.getHeaders(true, true) as HeadersInit,
+      },
+      true,
+      true
+    );
+  }
+
+  /**
+   * Upload gallery image (multipart/form-data)
+   */
+  async uploadRecruiterGalleryImage(
+    file: File
+  ): Promise<{ url: string; image_url?: string }> {
+    const formData = new FormData();
+    formData.append("file", file);
+    const headers = this.getHeaders(true, true);
+    // Remove Content-Type so browser sets boundary for multipart/form-data
+    // @ts-expect-error: This is required due to third-party type mismatch
+    delete headers["Content-Type"];
+    return this.request<{ url: string; image_url?: string }>(
+      "/api/v1/recruiters/profile/upload-gallery-image",
+      {
+        method: "POST",
+        body: formData,
+        headers: headers as HeadersInit,
+      },
+      true,
+      true
+    );
+  }
+
+  /**
+   * Delete gallery image by image_url (query param)
+   */
+  async deleteRecruiterGalleryImage(
+    imageUrl: string
+  ): Promise<{ success: boolean; message?: string }> {
+    const endpoint = `/api/v1/recruiters/profile/delete-gallery-image?image_url=${encodeURIComponent(
+      imageUrl
+    )}`;
+    return this.request<{ success: boolean; message?: string }>(
+      endpoint,
+      {
+        method: "DELETE",
+        headers: this.getHeaders(true, true) as HeadersInit,
+      },
+      true,
+      true
+    );
+  }
+
+  /**
+   * Get my gallery images (authenticated recruiter)
+   */
+  async getMyRecruiterGalleryImages(): Promise<{ images: string[] }> {
+    return this.request<{ images: string[] }>(
+      "/api/v1/recruiters/profile/gallery/me",
+      {
+        method: "GET",
+        headers: this.getHeaders(true, true) as HeadersInit,
+      },
+      true,
+      true
+    );
+  }
+
+  /**
+   * Get gallery images by username (public)
+   */
+  async getRecruiterGalleryByUsername(
+    username: string
+  ): Promise<{ images: string[] }> {
+    return this.request<{ images: string[] }>(
+      `/api/v1/recruiters/profile/gallery/${username}`,
+      {
+        method: "GET",
+        headers: this.getHeaders(false, true) as HeadersInit,
+      },
+      false,
+      true
+    );
+  }
+
+  // --- Recruiter Gallery Events & Images ---
+  /** Create Gallery Event */
+  async createGalleryEvent(data: object): Promise<any> {
+    return this.request<any>(
+      "/api/v1/recruiters/gallery/events",
+      {
+        method: "POST",
+        body: JSON.stringify(data),
+        headers: this.getHeaders(true, true) as HeadersInit,
+      },
+      true,
+      true
+    );
+  }
+
+  /** Get My Gallery Events */
+  async getMyGalleryEvents(): Promise<any> {
+    return this.request<any>(
+      "/api/v1/recruiters/gallery/events",
+      {
+        method: "GET",
+        headers: this.getHeaders(true, true) as HeadersInit,
+      },
+      true,
+      true
+    );
+  }
+
+  /** Get Gallery Event by ID */
+  async getGalleryEvent(eventId: number): Promise<any> {
+    return this.request<any>(
+      `/api/v1/recruiters/gallery/events/${eventId}`,
+      {
+        method: "GET",
+        headers: this.getHeaders(true, true) as HeadersInit,
+      },
+      true,
+      true
+    );
+  }
+
+  /** Update Gallery Event */
+  async updateGalleryEvent(eventId: number, data: object): Promise<any> {
+    return this.request<any>(
+      `/api/v1/recruiters/gallery/events/${eventId}`,
+      {
+        method: "PUT",
+        body: JSON.stringify(data),
+        headers: this.getHeaders(true, true) as HeadersInit,
+      },
+      true,
+      true
+    );
+  }
+
+  /** Delete Gallery Event */
+  async deleteGalleryEvent(eventId: number): Promise<any> {
+    return this.request<any>(
+      `/api/v1/recruiters/gallery/events/${eventId}`,
+      {
+        method: "DELETE",
+        headers: this.getHeaders(true, true) as HeadersInit,
+      },
+      true,
+      true
+    );
+  }
+
+  /** Upload Gallery Image */
+  async uploadGalleryImage(file: File): Promise<any> {
+    const formData = new FormData();
+    formData.append("file", file);
+    const headers = this.getHeaders(true, true);
+    // @ts-expect-error - let browser set Content-Type with boundary
+    delete headers["Content-Type"];
+    return this.request<any>(
+      "/api/v1/recruiters/gallery/images/upload",
+      {
+        method: "POST",
+        body: formData,
+        headers: headers as HeadersInit,
+      },
+      true,
+      true
+    );
+  }
+
+  /** Update Gallery Image */
+  async updateGalleryImage(imageId: number, data: object): Promise<any> {
+    return this.request<any>(
+      `/api/v1/recruiters/gallery/images/${imageId}`,
+      {
+        method: "PUT",
+        body: JSON.stringify(data),
+        headers: this.getHeaders(true, true) as HeadersInit,
+      },
+      true,
+      true
+    );
+  }
+
+  /** Delete Gallery Image */
+  async deleteGalleryImage(imageId: number): Promise<any> {
+    return this.request<any>(
+      `/api/v1/recruiters/gallery/images/${imageId}`,
+      {
+        method: "DELETE",
+        headers: this.getHeaders(true, true) as HeadersInit,
+      },
+      true,
+      true
+    );
+  }
+
+  /** Get Public Gallery by Username */
+  async getPublicGallery(username: string): Promise<any> {
+    return this.request<any>(
+      `/api/v1/recruiters/gallery/public/${username}`,
+      {
+        method: "GET",
+        headers: this.getHeaders(false, true) as HeadersInit,
+      },
+      false,
+      true
+    );
+  }
+
+  /** Get Public Gallery Event by Username and Event ID */
+  async getPublicGalleryEvent(username: string, eventId: number): Promise<any> {
+    return this.request<any>(
+      `/api/v1/recruiters/gallery/public/${username}/event/${eventId}`,
+      {
+        method: "GET",
+        headers: this.getHeaders(false, true) as HeadersInit,
+      },
+      false,
+      true
+    );
+  }
   // async getJobApplications(
   //   jobId: number
   // ): Promise<{ success: boolean; applications: Application[] }> {
