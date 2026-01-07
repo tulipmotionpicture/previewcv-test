@@ -105,6 +105,28 @@ export interface Job {
   is_bookmarked?: boolean;
 }
 
+export interface ApplicationApplicant {
+  id: number;
+  email: string;
+  full_name: string;
+  role?: string;
+  created_at?: string;
+}
+
+export interface ApplicationResume {
+  id: number;
+  name: string;
+  pdf_url?: string | null;
+  created_at?: string;
+}
+
+export interface ApplicationUploadedResume {
+  id: number;
+  name?: string;
+  pdf_url?: string | null;
+  created_at?: string;
+}
+
 export interface Application {
   id: number;
   job_id: number;
@@ -113,6 +135,8 @@ export interface Application {
   candidate_name: string;
   candidate_email: string;
   resume_id: number;
+  uploaded_resume_id?: number | null;
+  cover_letter_id?: number | null;
   status:
     | "applied"
     | "under_review"
@@ -123,13 +147,26 @@ export interface Application {
     | "withdrawn"
     | "declined";
   applied_at: string;
+  created_at?: string;
+  custom_message?: string | null;
   cover_letter?: string;
   notes?: string;
+  applicant?: ApplicationApplicant;
+  resume?: ApplicationResume;
+  uploaded_resume?: ApplicationUploadedResume | null;
   // Job details (if populated by API)
   job?: Job;
   job_title?: string;
   company_name?: string;
   job_slug?: string;
+}
+
+export interface JobApplicationsResponse {
+  success: boolean;
+  job_id: number;
+  job_title: string;
+  total_applications: number;
+  applications: Application[];
 }
 
 export interface AuthResponse {
@@ -174,5 +211,3 @@ export interface TopHiringPartnersResponse {
   total: number;
   hiring_partners: TopHiringPartner[];
 }
-
-

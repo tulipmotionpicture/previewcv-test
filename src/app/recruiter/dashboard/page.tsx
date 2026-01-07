@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import config from "@/config";
 import Image from "next/image";
 import { api } from "@/lib/api";
-import { Job, Application } from "@/types/api";
+import { Job, Application, JobApplicationsResponse } from "@/types/api";
 import { useRecruiterAuth } from "@/context/RecruiterAuthContext";
 import { useToast } from "@/context/ToastContext";
 import EditJobModal from "@/components/EditJobModal";
@@ -124,14 +124,11 @@ export default function RecruiterDashboard() {
     setLoadingApps(true);
     setApplications([]); // Clear prev
     try {
-      const response = await api.getJobApplications(jobId);
+      const response: JobApplicationsResponse = await api.getJobApplications(
+        jobId
+      );
       if (response.success && response.applications) {
-        // augment applications with correct job_id if missing (though it should be there)
-        const apps = response.applications.map((app) => ({
-          ...app,
-          job_id: jobId,
-        }));
-        setApplications(apps);
+        setApplications(response.applications);
       }
     } catch (error) {
       console.error("Failed to fetch applications:", error);
@@ -537,7 +534,7 @@ export default function RecruiterDashboard() {
 
         {activeTab === "ats" && (
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <h1 className="text-3xl font-black text-gray-900 dark:text-gray-100 mb-4">
+            <h1 className="text-3xl font-black mb-4">
               Application Review System
             </h1>
             <p className="text-gray-500 dark:text-gray-400 mb-10">
@@ -545,7 +542,7 @@ export default function RecruiterDashboard() {
             </p>
 
             <div className="flex flex-col md:flex-row gap-4 mb-8">
-              <div className="flex-1 flex gap-2 overflow-x-auto pb-2">
+              <div className="flex-1 flex gap-2 pb-2">
                 {jobs.map((job) => (
                   <button
                     key={job.id}
@@ -582,130 +579,175 @@ export default function RecruiterDashboard() {
             </div>
 
             <div className="bg-white dark:bg-gray-900 rounded-3xl shadow-sm border border-gray-100 dark:border-gray-800 overflow-hidden">
-              <div className="overflow-x-auto">
-                <table className="w-full text-left border-collapse">
-                  <thead>
-                    <tr className="bg-gray-50 dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700">
-                      <th className="px-6 py-4 text-xs font-black uppercase tracking-widest text-gray-400 dark:text-gray-500">
-                        Candidate
-                      </th>
-                      <th className="px-6 py-4 text-xs font-black uppercase tracking-widest text-gray-400 dark:text-gray-500">
-                        Status
-                      </th>
-                      <th className="px-6 py-4 text-xs font-black uppercase tracking-widest text-gray-400 dark:text-gray-500 text-right">
-                        Actions
-                      </th>
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="bg-gray-50 dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700">
+                    <th className="px-6 py-4 text-xs font-black uppercase tracking-widest text-gray-400 dark:text-gray-500">
+                      Candidate
+                    </th>
+                    <th className="px-6 py-4 text-xs font-black uppercase tracking-widest text-gray-400 dark:text-gray-500">
+                      Status
+                    </th>
+                    <th className="px-6 py-4 text-xs font-black uppercase tracking-widest text-gray-400 dark:text-gray-500">
+                      Resume
+                    </th>
+                    <th className="px-6 py-4 text-xs font-black uppercase tracking-widest text-gray-400 dark:text-gray-500 text-right">
+                      Actions
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-50">
+                  {loadingApps ? (
+                    <tr>
+                      <td colSpan={4} className="px-6 py-10 text-center">
+                        Loading applications...
+                      </td>
                     </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-50">
-                    {loadingApps ? (
-                      <tr>
-                        <td colSpan={3} className="px-6 py-10 text-center">
-                          Loading applications...
+                  ) : (
+                    filteredApplications.map((app) => (
+                      <tr
+                        key={app.id}
+                        className="hover:bg-gray-50/50 dark:hover:bg-gray-800/50 transition-colors"
+                      >
+                        <td className="px-6 py-6 border-b border-gray-50 dark:border-gray-800">
+                          <p className="font-bold text-gray-900 dark:text-gray-100">
+                            {app.applicant?.full_name || app.candidate_name}
+                          </p>
+                          <p className="text-[10px] text-gray-400 dark:text-gray-500">
+                            {app.applicant?.email || app.candidate_email}
+                          </p>
                         </td>
-                      </tr>
-                    ) : (
-                      filteredApplications.map((app) => (
-                        <tr
-                          key={app.id}
-                          className="hover:bg-gray-50/50 dark:hover:bg-gray-800/50 transition-colors"
-                        >
-                          <td className="px-6 py-6 border-b border-gray-50 dark:border-gray-800">
-                            <p className="font-bold text-gray-900 dark:text-gray-100">
-                              {app.candidate_name}
-                            </p>
-                            <p className="text-[10px] text-gray-400 dark:text-gray-500">
-                              {app.candidate_email}
-                            </p>
-                          </td>
-                          <td className="px-6 py-6 border-b border-gray-50 dark:border-gray-800">
-                            <span
-                              className={`px-2 py-1 rounded-full text-[9px] font-black uppercase tracking-tighter bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300`}
+                        <td className="px-6 py-6 border-b border-gray-50 dark:border-gray-800">
+                          <span
+                            className={`px-2 py-1 rounded-full text-[9px] font-black uppercase tracking-tighter bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300`}
+                          >
+                            {app.status.replace("_", " ")}
+                          </span>
+                        </td>
+                        <td className="px-6 py-6 border-b border-gray-50 dark:border-gray-800">
+                          <span className="text-xs text-gray-700 dark:text-gray-300">
+                            {app.resume?.name || "No Resume"}
+                          </span>
+                          {app.resume?.pdf_url && (
+                            <a
+                              href={app.resume.pdf_url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="ml-2 text-blue-600 dark:text-blue-400 underline text-xs"
                             >
-                              {app.status.replace("_", " ")}
-                            </span>
-                          </td>
-                          <td className="px-6 py-6 text-right border-b border-gray-50 dark:border-gray-800">
-                            <div className="flex justify-end gap-2">
+                              View PDF
+                            </a>
+                          )}
+                        </td>
+                        <td className="px-6 py-6 text-right border-b border-gray-50 dark:border-gray-800">
+                          <div className="flex justify-end gap-2">
+                            <button
+                              onClick={() => {
+                                setSelectedApplication(app);
+                                setIsDetailModalOpen(true);
+                                setActionMenuOpen(null);
+                              }}
+                              className="px-4 py-2 bg-blue-600 text-white font-bold text-xs rounded-xl hover:bg-blue-700 transition-colors uppercase tracking-tight shadow-sm shadow-blue-200"
+                            >
+                              View Details
+                            </button>
+                            <div>
                               <button
-                                onClick={() => {
-                                  setSelectedApplication(app);
-                                  setIsDetailModalOpen(true);
-                                  setActionMenuOpen(null);
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setActionMenuOpen(
+                                    actionMenuOpen === app.id ? null : app.id
+                                  );
+                                  // Optionally, store the button position for overlay
                                 }}
-                                className="px-4 py-2 bg-blue-600 text-white font-bold text-xs rounded-xl hover:bg-blue-700 transition-colors uppercase tracking-tight shadow-sm shadow-blue-200"
+                                className="px-4 py-2 bg-indigo-600 text-white font-bold text-xs rounded-xl hover:bg-indigo-700 transition-colors uppercase tracking-tight shadow-sm shadow-indigo-200"
                               >
-                                View Details
+                                Actions ▼
                               </button>
-                              <div className="relative">
-                                <button
-                                  onClick={() =>
-                                    setActionMenuOpen(
-                                      actionMenuOpen === app.id ? null : app.id
-                                    )
-                                  }
-                                  className="px-4 py-2 bg-indigo-600 text-white font-bold text-xs rounded-xl hover:bg-indigo-700 transition-colors uppercase tracking-tight shadow-sm shadow-indigo-200"
-                                >
-                                  Actions ▼
-                                </button>
-                                {actionMenuOpen === app.id && (
-                                  <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-100 dark:border-gray-700 py-2 z-50">
-                                    {app.status === "applied" && (
-                                      <button
-                                        onClick={() => {
-                                          handleUpdateStatus(
-                                            app.id,
-                                            "under_review"
-                                          );
-                                          setActionMenuOpen(null);
-                                        }}
-                                        className="w-full text-left px-4 py-2.5 text-sm font-bold text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 transition-colors"
-                                      >
-                                        Mark Under Review
-                                      </button>
-                                    )}
-                                    <button
-                                      onClick={() => {
-                                        handleUpdateStatus(
-                                          app.id,
-                                          "interview_scheduled"
-                                        );
-                                        setActionMenuOpen(null);
-                                      }}
-                                      className="w-full text-left px-4 py-2.5 text-sm font-bold text-gray-700 hover:bg-purple-50 hover:text-purple-600 transition-colors"
-                                    >
-                                      Schedule Interview
-                                    </button>
-                                    <button
-                                      onClick={() => {
-                                        handleUpdateStatus(app.id, "rejected");
-                                        setActionMenuOpen(null);
-                                      }}
-                                      className="w-full text-left px-4 py-2.5 text-sm font-bold text-gray-700 hover:bg-red-50 hover:text-red-600 transition-colors"
-                                    >
-                                      Reject
-                                    </button>
-                                  </div>
-                                )}
-                              </div>
                             </div>
-                          </td>
-                        </tr>
-                      ))
-                    )}
-                    {!loadingApps && filteredApplications.length === 0 && (
-                      <tr>
-                        <td
-                          colSpan={3}
-                          className="px-6 py-20 text-center text-gray-400 font-medium italic"
-                        >
-                          No applications found.
+                            {/* Action Menu Overlay */}
+                            {actionMenuOpen !== null &&
+                              (() => {
+                                const app = filteredApplications.find(
+                                  (a) => a.id === actionMenuOpen
+                                );
+                                if (!app) return null;
+                                return (
+                                  <div
+                                    className="fixed inset-0 z-[200] flex items-start justify-center"
+                                    style={{ pointerEvents: "none" }}
+                                    onClick={() => setActionMenuOpen(null)}
+                                  >
+                                    <div
+                                      className="absolute"
+                                      style={{
+                                        top: "23vw",
+                                        right: "0vw",
+                                        pointerEvents: "auto",
+                                      }}
+                                      onClick={(e) => e.stopPropagation()}
+                                    >
+                                      <div className="w-48 bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-100 dark:border-gray-700 py-2">
+                                        {app.status === "applied" && (
+                                          <button
+                                            onClick={() => {
+                                              handleUpdateStatus(
+                                                app.id,
+                                                "under_review"
+                                              );
+                                              setActionMenuOpen(null);
+                                            }}
+                                            className="w-full text-left px-4 py-2.5 text-sm font-bold text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 transition-colors"
+                                          >
+                                            Mark Under Review
+                                          </button>
+                                        )}
+                                        <button
+                                          onClick={() => {
+                                            handleUpdateStatus(
+                                              app.id,
+                                              "interview_scheduled"
+                                            );
+                                            setActionMenuOpen(null);
+                                          }}
+                                          className="w-full text-left px-4 py-2.5 text-sm font-bold text-gray-700 hover:bg-purple-50 hover:text-purple-600 transition-colors"
+                                        >
+                                          Schedule Interview
+                                        </button>
+                                        <button
+                                          onClick={() => {
+                                            handleUpdateStatus(
+                                              app.id,
+                                              "rejected"
+                                            );
+                                            setActionMenuOpen(null);
+                                          }}
+                                          className="w-full text-left px-4 py-2.5 text-sm font-bold text-gray-700 hover:bg-red-50 hover:text-red-600 transition-colors"
+                                        >
+                                          Reject
+                                        </button>
+                                      </div>
+                                    </div>
+                                  </div>
+                                );
+                              })()}
+                          </div>
                         </td>
                       </tr>
-                    )}
-                  </tbody>
-                </table>
-              </div>
+                    ))
+                  )}
+                  {!loadingApps && filteredApplications.length === 0 && (
+                    <tr>
+                      <td
+                        colSpan={4}
+                        className="px-6 py-20 text-center text-gray-400 font-medium italic"
+                      >
+                        No applications found.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
             </div>
           </div>
         )}

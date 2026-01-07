@@ -9,6 +9,7 @@ import {
   PdfResume,
   Resume,
   TopHiringPartnersResponse,
+  JobApplicationsResponse,
 } from "@/types/api";
 
 const API_BASE_URL =
@@ -376,10 +377,8 @@ export class ApiClient {
     );
   }
 
-  async getJobApplications(
-    jobId: number
-  ): Promise<{ success: boolean; applications: Application[] }> {
-    return this.request<{ success: boolean; applications: Application[] }>(
+  async getJobApplications(jobId: number): Promise<JobApplicationsResponse> {
+    return this.request<JobApplicationsResponse>(
       `/api/v1/recruiters/jobs/posting/${jobId}/applications`,
       {},
       true,
