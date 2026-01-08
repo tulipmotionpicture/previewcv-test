@@ -122,12 +122,6 @@ export default function RecruiterLogin() {
             <label className="block text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">
               Security Key
             </label>
-            <Link
-              href="#"
-              className="text-xs text-indigo-600 dark:text-indigo-400 font-bold hover:underline"
-            >
-              Forgot Key?
-            </Link>
           </div>
           <input
             type="password"
@@ -137,20 +131,14 @@ export default function RecruiterLogin() {
             onChange={(e) => setPassword(e.target.value)}
             placeholder="••••••••"
           />
-        </div>
-
-        <div className="flex items-center">
-          <input
-            type="checkbox"
-            id="encrypted"
-            className="w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-indigo-600 focus:ring-indigo-500 dark:bg-gray-800"
-          />
-          <label
-            htmlFor="encrypted"
-            className="ml-2 text-sm text-gray-600 dark:text-gray-400 font-medium"
-          >
-            Encrypted Session
-          </label>
+          <div className="flex justify-end mt-2">
+            <Link
+              href="/recruiter/password-reset"
+              className="text-xs text-indigo-600 dark:text-indigo-400 font-bold hover:underline text-end"
+            >
+              Forgot Password?
+            </Link>
+          </div>
         </div>
 
         <button
@@ -184,16 +172,6 @@ export default function RecruiterLogin() {
           )}
         </button>
       </form>
-
-      {/* Demo credentials */}
-      <div className="mt-6 p-3 bg-gray-50 dark:bg-gray-800/50 rounded-xl border border-gray-200 dark:border-gray-700">
-        <p className="text-xs text-gray-500 dark:text-gray-400 font-bold text-center mb-1">
-          Internal Test Access
-        </p>
-        <p className="text-xs text-gray-600 dark:text-gray-300 font-mono text-center">
-          recruiter@example.com · password123
-        </p>
-      </div>
     </AuthLayout>
   );
 }

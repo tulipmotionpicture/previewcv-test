@@ -295,6 +295,29 @@ export class ApiClient {
     );
   }
 
+  async recruiterResetPassword(email: string): Promise<{ email: string }> {
+    return this.request<{ email: string }>(
+      "/api/v1/recruiters/auth/password-reset/request",
+      {
+        method: "POST",
+        body: JSON.stringify({ email }),
+      }
+    );
+  }
+
+  async recruiterPasswordConfirm(
+    token: string,
+    new_password: string
+  ): Promise<{ token: string; new_password: string }> {
+    return this.request<{ token: string; new_password: string }>(
+      "/api/v1/recruiters/auth/password-reset/confirm",
+      {
+        method: "POST",
+        body: JSON.stringify({ token, new_password }),
+      }
+    );
+  }
+
   async getPublicRecruiterProfile(
     username: string
   ): Promise<RecruiterProfileResponse> {

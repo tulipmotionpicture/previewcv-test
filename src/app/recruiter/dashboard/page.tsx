@@ -12,6 +12,7 @@ import EditJobModal from "@/components/EditJobModal";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
 import CompanyGallerySection from "@/components/CompanyGallerySection";
 import RecruiterGalleryEventsSection from "@/components/RecruiterGalleryEventsSection";
+import RecruiterProfileEdit from "./profile/page";
 
 export default function RecruiterDashboard() {
   const router = useRouter();
@@ -23,7 +24,7 @@ export default function RecruiterDashboard() {
   } = useRecruiterAuth();
   const toast = useToast();
   const [activeTab, setActiveTab] = useState<
-    "jobs" | "ats" | "stats" | "gallery" | "galleryEvents"
+    "jobs" | "ats" | "stats" | "gallery" | "galleryEvents" | "profile"
   >("jobs");
   const [jobs, setJobs] = useState<Job[]>([]);
   const [applications, setApplications] = useState<Application[]>([]);
@@ -303,6 +304,16 @@ export default function RecruiterDashboard() {
             }`}
           >
             Gallery Events
+          </button>
+          <button
+            onClick={() => setActiveTab("profile")}
+            className={`w-full text-left px-4 py-3 rounded-xl transition-all font-black text-xs uppercase tracking-tight ${
+              activeTab === "profile"
+                ? "bg-indigo-600 text-white shadow-lg shadow-indigo-200 dark:shadow-indigo-900/50"
+                : "text-gray-400 dark:text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800"
+            }`}
+          >
+            Profile
           </button>
         </nav>
         <div className="absolute bottom-10 left-6 right-6">
@@ -757,6 +768,8 @@ export default function RecruiterDashboard() {
         {activeTab === "galleryEvents" && (
           <RecruiterGalleryEventsSection recruiter={recruiter} toast={toast} />
         )}
+
+        {activeTab === "profile" && <RecruiterProfileEdit />}
       </main>
       {/* Candidate Detail Modal - Simply showing Application Details for now */}
       {isDetailModalOpen && selectedApplication && (

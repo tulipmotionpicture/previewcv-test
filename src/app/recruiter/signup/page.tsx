@@ -10,6 +10,8 @@ import { useRecruiterAuth } from "@/context/RecruiterAuthContext";
 type RecruiterType = "company" | "individual";
 
 export default function RecruiterSignup() {
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const router = useRouter();
   const {
     register,
@@ -127,17 +129,13 @@ export default function RecruiterSignup() {
         password: formData.password,
         full_name: formData.fullName,
         username: formData.username,
-        company_name: formData.companyName,
-        company_website: formData.companyWebsite,
-        // bio and other fields can be added if API supports them or mapped accordingly
-        phone: formData.phone,
-        // store other fields in metadata or separate profile update if needed,
-        // but based on API guide, register takes specific fields.
-        // Guide says: { email, password, company_name, full_name, phone, company_website, bio }
-        bio:
-          formData.recruiterType === "individual"
-            ? `Specialization: ${formData.specialization}, Experience: ${formData.yearsExperience}`
-            : `Industry: ${formData.industry}, Size: ${formData.companySize}`,
+        // company_name: formData.companyName,
+        // company_website: formData.companyWebsite,
+        // phone: formData.phone,
+        // bio:
+        //   formData.recruiterType === "individual"
+        //     ? `Specialization: ${formData.specialization}, Experience: ${formData.yearsExperience}`
+        //     : `Industry: ${formData.industry}, Size: ${formData.companySize}`,
         recruiter_type: formData.recruiterType,
       });
       router.push("/recruiter/dashboard");
@@ -290,35 +288,123 @@ export default function RecruiterSignup() {
               </div>
 
               {/* Password */}
-              <div>
+              <div className="relative">
                 <label className="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2 ml-1">
                   Password
                 </label>
                 <input
-                  type="password"
+                  type={showPassword ? "text" : "password"}
                   name="password"
                   required
-                  className="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-indigo-600 outline-none hover:bg-gray-100 transition-all font-medium text-gray-900 placeholder-gray-300"
+                  className="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-indigo-600 outline-none hover:bg-gray-100 transition-all font-medium text-gray-900 placeholder-gray-300 pr-12"
                   value={formData.password}
                   onChange={handleChange}
                   placeholder="••••••••"
                 />
+                <button
+                  type="button"
+                  className="absolute right-4 top-9 text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
+                  tabIndex={-1}
+                  onClick={() => setShowPassword((v) => !v)}
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                >
+                  {showPassword ? (
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="24"
+                      height="24"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      className="lucide lucide-eye-icon lucide-eye"
+                    >
+                      <path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0" />
+                      <circle cx="12" cy="12" r="3" />
+                    </svg>
+                  ) : (
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="24"
+                      height="24"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      className="lucide lucide-eye-oxff-icon lucide-eye-off"
+                    >
+                      <path d="M10.733 5.076a10.744 10.744 0 0 1 11.205 6.575 1 1 0 0 1 0 .696 10.747 10.747 0 0 1-1.444 2.49" />
+                      <path d="M14.084 14.158a3 3 0 0 1-4.242-4.242" />
+                      <path d="M17.479 17.499a10.75 10.75 0 0 1-15.417-5.151 1 1 0 0 1 0-.696 10.75 10.75 0 0 1 4.446-5.143" />
+                      <path d="m2 2 20 20" />
+                    </svg>
+                  )}
+                </button>
               </div>
 
               {/* Confirm Password */}
-              <div>
+              <div className="relative">
                 <label className="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2 ml-1">
                   Confirm Password
                 </label>
                 <input
-                  type="password"
+                  type={showConfirmPassword ? "text" : "password"}
                   name="confirmPassword"
                   required
-                  className="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-indigo-600 outline-none hover:bg-gray-100 transition-all font-medium text-gray-900 placeholder-gray-300"
+                  className="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-indigo-600 outline-none hover:bg-gray-100 transition-all font-medium text-gray-900 placeholder-gray-300 pr-12"
                   value={formData.confirmPassword}
                   onChange={handleChange}
                   placeholder="••••••••"
                 />
+                <button
+                  type="button"
+                  className="absolute right-4 top-9 text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
+                  tabIndex={-1}
+                  onClick={() => setShowConfirmPassword((v) => !v)}
+                  aria-label={
+                    showConfirmPassword ? "Hide password" : "Show password"
+                  }
+                >
+                  {showConfirmPassword ? (
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="24"
+                      height="24"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      className="lucide lucide-eye-icon lucide-eye"
+                    >
+                      <path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0" />
+                      <circle cx="12" cy="12" r="3" />
+                    </svg>
+                  ) : (
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="24"
+                      height="24"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      className="lucide lucide-eye-off-icon lucide-eye-off"
+                    >
+                      <path d="M10.733 5.076a10.744 10.744 0 0 1 11.205 6.575 1 1 0 0 1 0 .696 10.747 10.747 0 0 1-1.444 2.49" />
+                      <path d="M14.084 14.158a3 3 0 0 1-4.242-4.242" />
+                      <path d="M17.479 17.499a10.75 10.75 0 0 1-15.417-5.151 1 1 0 0 1 0-.696 10.75 10.75 0 0 1 4.446-5.143" />
+                      <path d="m2 2 20 20" />
+                    </svg>
+                  )}
+                </button>
               </div>
 
               {/* Username */}

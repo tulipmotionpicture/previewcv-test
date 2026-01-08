@@ -2,13 +2,11 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
 import { useRecruiterAuth } from "@/context/RecruiterAuthContext";
 import { useToast } from "@/context/ToastContext";
 import Button from "@/components/ui/Button";
 import LoadingSkeleton from "@/components/ui/LoadingSkeleton";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
-import Breadcrumb from "@/components/ui/Breadcrumb";
 import { Recruiter } from "@/types/api";
 
 export default function RecruiterProfileEdit() {
@@ -24,10 +22,12 @@ export default function RecruiterProfileEdit() {
 
   const [formData, setFormData] = useState({
     display_name: "",
+    username: "",
     bio: "",
     phone: "",
     location: "",
     linkedin_url: "",
+    company_name: "",
     company_website: "",
     company_size: "",
     industry: "",
@@ -57,10 +57,12 @@ export default function RecruiterProfileEdit() {
     if (recruiter) {
       setFormData({
         display_name: recruiter.display_name || "",
+        username: recruiter.username || "",
         bio: recruiter.bio || "",
         phone: recruiter.phone || "",
         location: recruiter.location || "",
         linkedin_url: recruiter.linkedin_url || "",
+        company_name: recruiter.company_name || "",
         company_website: recruiter.company_website || "",
         company_size: recruiter.company_size || "",
         industry: recruiter.industry || "",
@@ -124,10 +126,12 @@ export default function RecruiterProfileEdit() {
       // Convert years_experience to number if provided
       const profileData: Partial<Recruiter> = {
         display_name: formData.display_name,
+        username: formData.username,
         bio: formData.bio,
         phone: formData.phone,
         location: formData.location,
         linkedin_url: formData.linkedin_url,
+        company_name: formData.company_name,
         company_website: formData.company_website,
         company_size: formData.company_size,
         industry: formData.industry,
@@ -196,36 +200,9 @@ export default function RecruiterProfileEdit() {
     return null;
   }
 
-  const publicProfileUrl = `https://previewcv.com/recruiter/${
-    recruiter?.id || ""
-  }`;
-
   return (
     <div className="min-h-screen bg-gray-50 selection:bg-indigo-100">
-      {/* Header */}
-      <div className="bg-white border-b border-gray-100 px-8 py-6">
-        <div className="max-w-5xl mx-auto flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-black text-gray-900 uppercase tracking-tight">
-              Profile Settings
-            </h1>
-            <p className="text-sm text-gray-500 font-medium mt-1 normal-case">
-              Manage your recruiter profile information
-            </p>
-          </div>
-          <Link
-            href="/recruiter/dashboard"
-            className="px-6 py-3 bg-gray-100 text-gray-900 font-black rounded-xl hover:bg-gray-200 transition-all uppercase tracking-tight text-sm"
-          >
-            ← Back to Dashboard
-          </Link>
-        </div>
-      </div>
-
-      <div className="max-w-5xl mx-auto px-8 py-12 space-y-8">
-        {/* Breadcrumb */}
-        <Breadcrumb />
-
+      <div className="max-w-5xl mx-auto space-y-8">
         {/* Public Profile URL */}
         <div className="bg-gradient-to-br from-indigo-50 to-blue-50 border border-indigo-100 p-6 rounded-[32px]">
           <div className="flex items-start justify-between gap-6">
@@ -236,13 +213,15 @@ export default function RecruiterProfileEdit() {
               <div className="flex items-center gap-3">
                 <input
                   type="text"
-                  value={publicProfileUrl}
+                  value={`http://localhost:3000${recruiter?.profile_url}`}
                   readOnly
                   className="flex-1 px-4 py-3 bg-white border border-gray-200 rounded-xl font-medium text-gray-700 text-sm normal-case"
                 />
                 <button
                   onClick={() => {
-                    navigator.clipboard.writeText(publicProfileUrl);
+                    navigator.clipboard.writeText(
+                      `http://localhost:3000${recruiter?.profile_url}`
+                    );
                     toast.success("Link copied to clipboard!");
                   }}
                   className="px-6 py-3 bg-indigo-600 text-white font-black rounded-xl hover:bg-indigo-700 transition-all uppercase tracking-tight text-sm whitespace-nowrap"
@@ -281,6 +260,35 @@ export default function RecruiterProfileEdit() {
                     {errors.display_name}
                   </p>
                 )}
+              </div>
+              <div>
+                <label className="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2 ml-1">
+                  Username
+                </label>
+                <input
+                  type="text"
+                  name="username"
+                  className="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-indigo-600 outline-none hover:bg-gray-100 transition-all font-medium text-gray-900"
+                  value={formData.username}
+                  onChange={handleChange}
+                  placeholder="your username"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2 ml-1">
+                  Company Name
+                </label>
+                <input
+                  type="text"
+                  name="company_name"
+                  className="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-indigo-600 outline-none hover:bg-gray-100 transition-all font-medium text-gray-900"
+                  value={formData.company_name}
+                  onChange={handleChange}
+                  placeholder="Your Company Name"
+                />
               </div>
               <div>
                 <label className="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2 ml-1">
