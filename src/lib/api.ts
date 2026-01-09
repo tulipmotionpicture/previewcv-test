@@ -334,21 +334,6 @@ export class ApiClient {
     );
   }
 
-  // --- Recruiter Jobs ---
-  async createJobPosting(
-    data: Partial<Job>
-  ): Promise<{ success: boolean; job: Job }> {
-    return this.request<{ success: boolean; job: Job }>(
-      "/api/v1/recruiters/jobs/create",
-      {
-        method: "POST",
-        body: JSON.stringify(data),
-      },
-      true,
-      true
-    );
-  }
-
   async getMyJobPostings(
     params?: URLSearchParams
   ): Promise<PaginatedResponse<Job>> {
@@ -400,13 +385,22 @@ export class ApiClient {
     );
   }
 
-  async getJobApplications(jobId: number): Promise<JobApplicationsResponse> {
-    return this.request<JobApplicationsResponse>(
-      `/api/v1/recruiters/jobs/posting/${jobId}/applications`,
-      {},
-      true,
-      true
-    );
+  async getJobApplications(
+    jobId: number,
+    statusFilter?: string
+  ): Promise<JobApplicationsResponse> {
+    const params = new URLSearchParams();
+    if (statusFilter && statusFilter !== "All") {
+      params.append(
+        "status_filter",
+        statusFilter.toLowerCase().replace(" ", "_")
+      );
+    }
+    const queryString = params.toString();
+    const endpoint = `/api/v1/recruiters/jobs/posting/${jobId}/applications${
+      queryString ? `?${queryString}` : ""
+    }`;
+    return this.request<JobApplicationsResponse>(endpoint, {}, true, true);
   }
 
   async getRecruiterDashboardStats(): Promise<{
