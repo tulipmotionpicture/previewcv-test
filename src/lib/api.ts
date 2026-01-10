@@ -10,6 +10,7 @@ import {
   Resume,
   TopHiringPartnersResponse,
   JobApplicationsResponse,
+  ApplicationDetailResponse,
 } from "@/types/api";
 
 const API_BASE_URL =
@@ -108,10 +109,16 @@ export class ApiClient {
     includeAuth: boolean = false,
     isRecruiter: boolean = false
   ): Promise<T> {
+    // Get base headers, but skip Content-Type for FormData (browser sets it with boundary)
+    const baseHeaders = this.getHeaders(includeAuth, isRecruiter);
+    if (options.body instanceof FormData) {
+      delete (baseHeaders as Record<string, string>)["Content-Type"];
+    }
+
     const response = await fetch(`${this.baseUrl}${endpoint}`, {
       ...options,
       headers: {
-        ...this.getHeaders(includeAuth, isRecruiter),
+        ...baseHeaders,
         ...options.headers,
       },
     });
@@ -439,8 +446,8 @@ export class ApiClient {
 
   async getApplicationDetails(
     applicationId: number
-  ): Promise<{ success: boolean; application: Application }> {
-    return this.request<{ success: boolean; application: Application }>(
+  ): Promise<ApplicationDetailResponse> {
+    return this.request<ApplicationDetailResponse>(
       `/api/v1/recruiters/jobs/application/${applicationId}`,
       {},
       true,
@@ -549,28 +556,30 @@ export class ApiClient {
     formData.append("file", file);
     formData.append("resume_name", resumeName || file.name);
 
-    const headers = this.getHeaders(true);
-    // @ts-expect-error - we need to remove Content-Type to let browser set it with boundary
-    delete headers["Content-Type"];
-
-    const response = await fetch(`${this.baseUrl}/api/v1/pdf-resumes/upload`, {
-      method: "POST",
-      body: formData,
-      headers: headers as HeadersInit,
-    });
-
-    if (!response.ok) {
-      let errorMsg = "Failed to upload resume";
-      try {
-        const error = await response.json();
-        errorMsg = error.detail || error.message || errorMsg;
-      } catch {
-        // ignore
-      }
-      throw new Error(errorMsg);
-    }
-
-    return response.json();
+    return this.request<{
+      success: boolean;
+      message: string;
+      resume_id: number;
+      resume_name: string;
+      file_size_mb: number;
+      bunny_cdn_url: string;
+      permanent_link: {
+        token: string;
+        share_url: string;
+        qr_code_base64: string;
+        view_count: number;
+        access_count: number;
+      };
+      created_at: string;
+    }>(
+      "/api/v1/pdf-resumes/upload",
+      {
+        method: "POST",
+        body: formData,
+      },
+      true,
+      false
+    );
   }
 
   async getPdfResumes(): Promise<{ total: number; resumes: PdfResume[] }> {
@@ -683,15 +692,11 @@ export class ApiClient {
   ): Promise<{ url: string; logo_url?: string }> {
     const formData = new FormData();
     formData.append("file", file);
-    const headers = this.getHeaders(true, true);
-    // @ts-expect-error - let browser set Content-Type with boundary
-    delete headers["Content-Type"];
     return this.request<{ url: string; logo_url?: string }>(
       "/api/v1/recruiters/profile/upload-logo",
       {
         method: "POST",
         body: formData,
-        headers: headers as HeadersInit,
       },
       true,
       true
@@ -721,16 +726,11 @@ export class ApiClient {
   ): Promise<{ url: string; image_url?: string }> {
     const formData = new FormData();
     formData.append("file", file);
-    const headers = this.getHeaders(true, true);
-    // Remove Content-Type so browser sets boundary for multipart/form-data
-    // @ts-expect-error: This is required due to third-party type mismatch
-    delete headers["Content-Type"];
     return this.request<{ url: string; image_url?: string }>(
       "/api/v1/recruiters/profile/upload-gallery-image",
       {
         method: "POST",
         body: formData,
-        headers: headers as HeadersInit,
       },
       true,
       true
@@ -861,15 +861,11 @@ export class ApiClient {
   async uploadGalleryImage(file: File): Promise<any> {
     const formData = new FormData();
     formData.append("file", file);
-    const headers = this.getHeaders(true, true);
-    // @ts-expect-error - let browser set Content-Type with boundary
-    delete headers["Content-Type"];
     return this.request<any>(
       "/api/v1/recruiters/gallery/images/upload",
       {
         method: "POST",
         body: formData,
-        headers: headers as HeadersInit,
       },
       true,
       true

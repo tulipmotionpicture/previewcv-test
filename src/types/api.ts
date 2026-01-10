@@ -111,6 +111,28 @@ export interface ApplicationApplicant {
   full_name: string;
   role?: string;
   created_at?: string;
+  first_name?: string;
+  last_name?: string;
+  country_code?: string;
+  phone_code?: string;
+  phone?: string;
+  date_of_birth?: string;
+  gender?: string;
+  nationality?: string;
+  country?: string;
+  state?: string;
+  city?: string;
+  street_number?: string;
+  address?: string;
+  postal_zip_code?: string;
+}
+
+export interface ApplicationResumeDetail {
+  id: number;
+  name: string;
+  current_title?: string;
+  pdf_url?: string | null;
+  created_at?: string;
 }
 
 export interface ApplicationResume {
@@ -167,6 +189,29 @@ export interface JobApplicationsResponse {
   job_title: string;
   total_applications: number;
   applications: Application[];
+}
+
+export interface ApplicationDetailResponse {
+  success: boolean;
+  application: {
+    id: number;
+    status: Application["status"];
+    applied_at: string;
+    custom_message?: string | null;
+    portfolio_items: string[];
+    created_at: string;
+    updated_at: string;
+  };
+  candidate: ApplicationApplicant;
+  job: {
+    id: number;
+    title: string;
+    slug: string;
+    company_name: string;
+    location: string;
+  };
+  resume: ApplicationResumeDetail | null;
+  uploaded_resume: ApplicationUploadedResume | null;
 }
 
 export interface AuthResponse {

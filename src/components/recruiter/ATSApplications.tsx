@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import { Job, Application } from "@/types/api";
 
 interface ATSApplicationsProps {
@@ -26,11 +25,8 @@ export default function ATSApplications({
   onViewDetails,
   onUpdateStatus,
 }: ATSApplicationsProps) {
-  const [actionMenuOpen, setActionMenuOpen] = useState<number | null>(null);
-
   const handleStatusUpdate = (appId: number, newStatus: string) => {
     onUpdateStatus(appId, newStatus);
-    setActionMenuOpen(null);
   };
 
   return (
@@ -146,62 +142,30 @@ export default function ATSApplications({
                     )}
                   </td>
                   <td className="px-6 py-6 text-right border-b border-gray-50 dark:border-gray-800">
-                    <div className="flex justify-end gap-2">
+                    <div className="flex justify-end items-center gap-3">
                       <button
-                        onClick={() => {
-                          onViewDetails(app);
-                          setActionMenuOpen(null);
-                        }}
+                        onClick={() => onViewDetails(app)}
                         className="px-4 py-2 bg-blue-600 text-white font-bold text-xs rounded-xl hover:bg-blue-700 transition-colors uppercase tracking-tight shadow-sm shadow-blue-200 dark:shadow-blue-900/50"
                       >
                         View Details
                       </button>
-                      <div className="relative">
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setActionMenuOpen(
-                              actionMenuOpen === app.id ? null : app.id
-                            );
-                          }}
-                          className="px-4 py-2 bg-indigo-600 text-white font-bold text-xs rounded-xl hover:bg-indigo-700 transition-colors uppercase tracking-tight shadow-sm shadow-indigo-200 dark:shadow-indigo-900/50"
-                        >
-                          Actions ▼
-                        </button>
-                        {actionMenuOpen === app.id && (
-                          <div className="absolute right-0 top-full mt-2 z-50 w-48 bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-100 dark:border-gray-700 py-2">
-                            {app.status === "applied" && (
-                              <button
-                                onClick={() =>
-                                  handleStatusUpdate(app.id, "under_review")
-                                }
-                                className="w-full text-left px-4 py-2.5 text-sm font-bold text-gray-700 dark:text-gray-300 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 hover:text-indigo-600 transition-colors"
-                              >
-                                Mark Under Review
-                              </button>
-                            )}
-                            <button
-                              onClick={() =>
-                                handleStatusUpdate(
-                                  app.id,
-                                  "interview_scheduled"
-                                )
-                              }
-                              className="w-full text-left px-4 py-2.5 text-sm font-bold text-gray-700 dark:text-gray-300 hover:bg-purple-50 dark:hover:bg-purple-900/30 hover:text-purple-600 transition-colors"
-                            >
-                              Schedule Interview
-                            </button>
-                            <button
-                              onClick={() =>
-                                handleStatusUpdate(app.id, "rejected")
-                              }
-                              className="w-full text-left px-4 py-2.5 text-sm font-bold text-gray-700 dark:text-gray-300 hover:bg-red-50 dark:hover:bg-red-900/30 hover:text-red-600 transition-colors"
-                            >
-                              Reject
-                            </button>
-                          </div>
-                        )}
-                      </div>
+                      <select
+                        value={app.status}
+                        onChange={(e) =>
+                          handleStatusUpdate(app.id, e.target.value)
+                        }
+                        className="px-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-xs font-bold outline-none cursor-pointer hover:border-indigo-300 dark:hover:border-indigo-600 focus:ring-2 focus:ring-indigo-500 transition-colors text-gray-700 dark:text-gray-300"
+                      >
+                        <option value="applied">Applied</option>
+                        <option value="under_review">Under Review</option>
+                        <option value="interview_scheduled">
+                          Interview Scheduled
+                        </option>
+                        <option value="offered">Offered</option>
+                        <option value="accepted">Accepted</option>
+                        <option value="rejected">Rejected</option>
+                        <option value="withdrawn">Withdrawn</option>
+                      </select>
                     </div>
                   </td>
                 </tr>

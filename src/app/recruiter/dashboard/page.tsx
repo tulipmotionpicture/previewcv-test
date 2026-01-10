@@ -3,7 +3,12 @@
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { api } from "@/lib/api";
-import { Job, Application, JobApplicationsResponse } from "@/types/api";
+import {
+  Job,
+  Application,
+  JobApplicationsResponse,
+  ApplicationDetailResponse,
+} from "@/types/api";
 import { useRecruiterAuth } from "@/context/RecruiterAuthContext";
 import { useToast } from "@/context/ToastContext";
 import EditJobModal from "@/components/EditJobModal";
@@ -54,8 +59,10 @@ export default function RecruiterDashboard() {
 
   // Detail Modal State
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
-  const [selectedApplication, setSelectedApplication] =
-    useState<Application | null>(null);
+  const [selectedApplicationDetail, setSelectedApplicationDetail] =
+    useState<ApplicationDetailResponse | null>(null);
+  const [loadingApplicationDetail, setLoadingApplicationDetail] =
+    useState(false);
 
   // Create Job State
   const [creatingJob, setCreatingJob] = useState(false);
@@ -66,6 +73,7 @@ export default function RecruiterDashboard() {
   // Edit Job State
   const [editJobModalOpen, setEditJobModalOpen] = useState(false);
   const [editingJob, setEditingJob] = useState<Job | null>(null);
+  const [loadingJobDetails, setLoadingJobDetails] = useState(false);
 
   // Delete Job State
   const [deleteJobId, setDeleteJobId] = useState<number | null>(null);
@@ -216,9 +224,25 @@ export default function RecruiterDashboard() {
     }
   };
 
-  const handleEditJob = (job: Job) => {
-    setEditingJob(job);
+  const handleEditJob = async (job: Job) => {
+    setLoadingJobDetails(true);
     setEditJobModalOpen(true);
+    try {
+      const response = await api.getJobPostingDetails(job.id);
+      if (response.success && response.job) {
+        setEditingJob(response.job);
+      } else {
+        // Fallback to passed job data if API fails
+        setEditingJob(job);
+      }
+    } catch (error) {
+      console.error("Failed to fetch job details:", error);
+      // Fallback to passed job data if API fails
+      setEditingJob(job);
+      toast.error("Failed to load latest job details, using cached data");
+    } finally {
+      setLoadingJobDetails(false);
+    }
   };
 
   const handleSaveJob = async (jobId: number, data: Partial<Job>) => {
@@ -261,16 +285,26 @@ export default function RecruiterDashboard() {
             : app
         )
       );
-      if (selectedApplication?.id === appId) {
-        setSelectedApplication((prev) =>
-          prev ? { ...prev, status: newStatus as Application["status"] } : null
+      // Update the detail modal if it's showing this application
+      if (selectedApplicationDetail?.application.id === appId) {
+        setSelectedApplicationDetail((prev) =>
+          prev
+            ? {
+                ...prev,
+                application: {
+                  ...prev.application,
+                  status: newStatus as Application["status"],
+                },
+              }
+            : null
         );
       }
+      toast.success(`Status updated to ${newStatus.replace("_", " ")}`);
     } catch (error: unknown) {
       if (error instanceof Error) {
-        alert(error.message || "Failed to update status");
+        toast.error(error.message || "Failed to update status");
       } else {
-        alert("Failed to update status");
+        toast.error("Failed to update status");
       }
     }
   };
@@ -280,9 +314,18 @@ export default function RecruiterDashboard() {
     setActiveTab("ats");
   };
 
-  const handleViewApplicationDetail = (app: Application) => {
-    setSelectedApplication(app);
+  const handleViewApplicationDetail = async (app: Application) => {
     setIsDetailModalOpen(true);
+    setLoadingApplicationDetail(true);
+    try {
+      const details = await api.getApplicationDetails(app.id);
+      setSelectedApplicationDetail(details);
+    } catch (error) {
+      toast.error(`Failed to load application details ${error}`);
+      setIsDetailModalOpen(false);
+    } finally {
+      setLoadingApplicationDetail(false);
+    }
   };
 
   return (
@@ -342,17 +385,25 @@ export default function RecruiterDashboard() {
 
       {/* Application Detail Modal */}
       <ApplicationDetailModal
-        application={selectedApplication}
+        applicationDetail={selectedApplicationDetail}
         isOpen={isDetailModalOpen}
-        onClose={() => setIsDetailModalOpen(false)}
+        loading={loadingApplicationDetail}
+        onClose={() => {
+          setIsDetailModalOpen(false);
+          setSelectedApplicationDetail(null);
+        }}
       />
 
       {/* Edit Job Modal */}
       <EditJobModal
         isOpen={editJobModalOpen}
-        onClose={() => setEditJobModalOpen(false)}
+        onClose={() => {
+          setEditJobModalOpen(false);
+          setEditingJob(null);
+        }}
         onSave={handleSaveJob}
         job={editingJob}
+        loadingJobDetails={loadingJobDetails}
       />
 
       {/* Delete Job Confirmation */}

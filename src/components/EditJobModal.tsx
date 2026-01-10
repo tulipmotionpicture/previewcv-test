@@ -9,6 +9,7 @@ interface EditJobModalProps {
   onClose: () => void;
   onSave: (jobId: number, data: Partial<Job>) => Promise<void>;
   job: Job | null;
+  loadingJobDetails?: boolean;
 }
 
 export default function EditJobModal({
@@ -16,6 +17,7 @@ export default function EditJobModal({
   onClose,
   onSave,
   job,
+  loadingJobDetails = false,
 }: EditJobModalProps) {
   const [formData, setFormData] = useState({
     title: "",
@@ -178,7 +180,61 @@ export default function EditJobModal({
     });
   };
 
-  if (!isOpen || !job) return null;
+  if (!isOpen) return null;
+
+  // Loading skeleton while fetching job details
+  if (loadingJobDetails || !job) {
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-y-auto">
+        <div
+          className="absolute inset-0 bg-black bg-opacity-50 backdrop-blur-sm"
+          onClick={onClose}
+        ></div>
+        <div className="relative bg-white dark:bg-gray-900 rounded-3xl shadow-2xl max-w-4xl w-full p-8 my-8">
+          <div className="flex items-center justify-between mb-6">
+            <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-48 animate-pulse"></div>
+            <button
+              onClick={onClose}
+              className="p-2 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800"
+            >
+              <svg
+                className="w-6 h-6"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            </button>
+          </div>
+          <div className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="h-12 bg-gray-200 dark:bg-gray-700 rounded-xl animate-pulse"></div>
+              <div className="h-12 bg-gray-200 dark:bg-gray-700 rounded-xl animate-pulse"></div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="h-12 bg-gray-200 dark:bg-gray-700 rounded-xl animate-pulse"></div>
+              <div className="h-12 bg-gray-200 dark:bg-gray-700 rounded-xl animate-pulse"></div>
+              <div className="h-12 bg-gray-200 dark:bg-gray-700 rounded-xl animate-pulse"></div>
+            </div>
+            <div className="h-32 bg-gray-200 dark:bg-gray-700 rounded-xl animate-pulse"></div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="h-24 bg-gray-200 dark:bg-gray-700 rounded-xl animate-pulse"></div>
+              <div className="h-24 bg-gray-200 dark:bg-gray-700 rounded-xl animate-pulse"></div>
+            </div>
+          </div>
+          <p className="text-center text-gray-500 dark:text-gray-400 mt-6 font-medium">
+            Loading job details...
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-y-auto">
