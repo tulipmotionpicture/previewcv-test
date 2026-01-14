@@ -638,6 +638,24 @@ export class ApiClient {
     );
   }
 
+  // --- Application Resume Download ---
+  async getApplicationResumeDownloadUrl(
+    applicationId: number,
+    downloadType: "url" | "stream" = "url",
+    forceDownload: boolean = false
+  ): Promise<{ download_url: string }> {
+    const params = new URLSearchParams({
+      download_type: downloadType,
+      force_download: forceDownload.toString(),
+    });
+    return this.request<{ download_url: string }>(
+      `/api/v1/recruiters/jobs/application/${applicationId}/resume?${params.toString()}`,
+      {},
+      true,
+      true
+    );
+  }
+
   async getResumes(): Promise<Resume[]> {
     return this.request<Resume[]>("/api/v1/resumes/", {}, true);
   }

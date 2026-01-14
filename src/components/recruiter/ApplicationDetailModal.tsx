@@ -1,6 +1,8 @@
 "use client";
 
+import { useState } from "react";
 import { ApplicationDetailResponse } from "@/types/api";
+import { api } from "@/lib/api";
 
 interface ApplicationDetailModalProps {
   applicationDetail: ApplicationDetailResponse | null;
@@ -15,6 +17,63 @@ export default function ApplicationDetailModal({
   loading,
   onClose,
 }: ApplicationDetailModalProps) {
+  const [viewLoading, setViewLoading] = useState(false);
+  const [downloadLoading, setDownloadLoading] = useState(false);
+
+  const handleViewResume = async () => {
+    if (!applicationDetail?.application?.id) return;
+    setViewLoading(true);
+    try {
+      const response = await api.getApplicationResumeDownloadUrl(
+        applicationDetail.application.id,
+        "url",
+        false
+      );
+      if (response.download_url) {
+        window.open(response.download_url, "_blank");
+      }
+    } catch (error) {
+      console.error("Failed to get resume URL:", error);
+    } finally {
+      setViewLoading(false);
+    }
+  };
+
+  const handleDownloadResume = async () => {
+    if (!applicationDetail?.application?.id) return;
+    setDownloadLoading(true);
+    try {
+      const response = await api.getApplicationResumeDownloadUrl(
+        applicationDetail.application.id,
+        "url",
+        true
+      );
+      if (response.download_url) {
+        // Fetch the PDF as a blob to force download
+        const pdfResponse = await fetch(response.download_url);
+        const blob = await pdfResponse.blob();
+        const blobUrl = window.URL.createObjectURL(blob);
+
+        const link = document.createElement("a");
+        link.href = blobUrl;
+        link.download =
+          applicationDetail.resume?.name ||
+          applicationDetail.uploaded_resume?.name ||
+          "resume.pdf";
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        // Clean up the blob URL
+        window.URL.revokeObjectURL(blobUrl);
+      }
+    } catch (error) {
+      console.error("Failed to download resume:", error);
+    } finally {
+      setDownloadLoading(false);
+    }
+  };
+
   if (!isOpen) return null;
 
   const getStatusBadgeColor = (status: string) => {
@@ -223,7 +282,8 @@ export default function ApplicationDetailModal({
               </div>
 
               {/* Resume Info */}
-              {applicationDetail.resume && (
+              {(applicationDetail.resume ||
+                applicationDetail.uploaded_resume) && (
                 <div>
                   <h4 className="text-sm font-bold text-gray-900 dark:text-gray-100 mb-3 uppercase tracking-wider">
                     Resume
@@ -231,37 +291,72 @@ export default function ApplicationDetailModal({
                   <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-xl flex items-center justify-between">
                     <div>
                       <p className="font-semibold text-gray-900 dark:text-gray-100">
-                        {applicationDetail.resume.name}
+                        {applicationDetail.resume?.name ||
+                          applicationDetail.uploaded_resume?.name ||
+                          "Resume"}
                       </p>
-                      {applicationDetail.resume.current_title && (
+                      {applicationDetail.resume?.current_title && (
                         <p className="text-sm text-gray-500 dark:text-gray-400">
                           {applicationDetail.resume.current_title}
                         </p>
                       )}
                     </div>
-                    {applicationDetail.resume.pdf_url && (
-                      <a
-                        href={applicationDetail.resume.pdf_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white font-bold text-sm rounded-xl hover:bg-indigo-700 transition-colors"
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={handleViewResume}
+                        disabled={viewLoading}
+                        className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white font-bold text-sm rounded-xl hover:bg-indigo-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                       >
-                        <svg
-                          className="w-4 h-4"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                          />
-                        </svg>
-                        View Resume
-                      </a>
-                    )}
+                        {viewLoading ? (
+                          <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                        ) : (
+                          <svg
+                            className="w-4 h-4"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                            />
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                            />
+                          </svg>
+                        )}
+                        View
+                      </button>
+                      <button
+                        onClick={handleDownloadResume}
+                        disabled={downloadLoading}
+                        className="inline-flex items-center gap-2 px-4 py-2 bg-green-600 text-white font-bold text-sm rounded-xl hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {downloadLoading ? (
+                          <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                        ) : (
+                          <svg
+                            className="w-4 h-4"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+                            />
+                          </svg>
+                        )}
+                        Download
+                      </button>
+                    </div>
                   </div>
                 </div>
               )}
