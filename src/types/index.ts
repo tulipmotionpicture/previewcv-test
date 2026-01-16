@@ -58,3 +58,50 @@ export interface AccessLog {
   ipAddress: string;
   userAgent?: string;
 }
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface RecruiterProfile {}
+
+export interface ReviewedResumeMetadata {
+  personal_details: {
+    name?: string;
+    email?: string;
+    phone?: string;
+    location?: string;
+    portfolio_link?: string;
+    linkedin_url?: string;
+  };
+  work_experiences: {
+    company: string;
+    position: string;
+    start_date: string;
+    end_date: string;
+    description: string;
+    location: string;
+    is_current: boolean;
+  }[];
+  education: {
+    institution_name: string;
+    degree: string;
+    start_date: string;
+    end_date: string;
+    gpa?: number | string;
+    field_of_study: string;
+  }[];
+  skills: {
+    skill_name: string;
+    proficiency_level: number;
+  }[];
+  languages: {
+    language: string;
+    proficiency_level:
+      | "beginner"
+      | "intermediate"
+      | "advanced"
+      | "expert"
+      | "native";
+  }[];
+}
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface RecruiterUser {}

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { api } from "@/lib/api";
+import { api, ResumeMetadata } from "@/lib/api";
 import { Job, PdfResume, Resume } from "@/types/api";
 import { useAuth } from "@/context/AuthContext";
 import ResumeUpload from "@/components/ResumeUpload";
@@ -21,6 +21,7 @@ export default function JobDetailsClient({ job, slug }: JobDetailsClientProps) {
   const [applySuccess, setApplySuccess] = useState(false);
   const [coverLetter, setCoverLetter] = useState("");
   const [isBookmarked, setIsBookmarked] = useState(job.is_bookmarked || false);
+  const [isApplied, setIsApplied] = useState(job.is_applied || false);
 
   // Resume selection state
   const [resumeId, setResumeId] = useState<number | null>(null);
@@ -31,17 +32,18 @@ export default function JobDetailsClient({ job, slug }: JobDetailsClientProps) {
   // Fetch bookmark status when authenticated
   useEffect(() => {
     if (isAuthenticated) {
-      fetchBookmarkStatus();
+      fetchJobStatus();
       fetchResumes();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAuthenticated]);
 
-  const fetchBookmarkStatus = async () => {
+  const fetchJobStatus = async () => {
     try {
       const response = await api.getJobBySlug(slug);
       if (response.job) {
         setIsBookmarked(response.job.is_bookmarked || false);
+        setIsApplied(response.job.is_applied || false);
       }
     } catch (error) {
       console.error("Failed to fetch bookmark status:", error);
@@ -108,9 +110,15 @@ export default function JobDetailsClient({ job, slug }: JobDetailsClientProps) {
     }
   };
 
-  const handleResumeUploadSuccess = (id: number) => {
+  const handleResumeUploadSuccess = (id: number, metadata?: ResumeMetadata) => {
     setResumeId(id);
     localStorage.setItem("last_uploaded_resume_id", id.toString());
+
+    // Log parsed metadata for debugging (can be used for auto-fill features later)
+    if (metadata) {
+      console.log("Parsed resume metadata:", metadata);
+    }
+
     fetchResumes(); // Refresh list to include new upload
   };
 
@@ -146,7 +154,29 @@ export default function JobDetailsClient({ job, slug }: JobDetailsClientProps) {
         />
       </div>
 
-      {applySuccess ? (
+      {isApplied ? (
+        <div className="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/30 dark:to-emerald-900/30 text-green-700 dark:text-green-400 p-8 rounded-2xl text-center border border-green-200 dark:border-green-800">
+          <div className="w-16 h-16 bg-green-100 dark:bg-green-800/50 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg
+              className="w-8 h-8 text-green-600 dark:text-green-400"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M5 13l4 4L19 7"
+              />
+            </svg>
+          </div>
+          <p className="font-bold text-lg mb-2">Already Applied</p>
+          <p className="text-sm text-green-600 dark:text-green-400">
+            You have already applied for this job.
+          </p>
+        </div>
+      ) : applySuccess ? (
         <div className="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/30 dark:to-emerald-900/30 text-green-700 dark:text-green-400 p-8 rounded-2xl text-center border border-green-200 dark:border-green-800">
           <div className="w-16 h-16 bg-green-100 dark:bg-green-800/50 rounded-full flex items-center justify-center mx-auto mb-4">
             <svg

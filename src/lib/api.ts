@@ -12,6 +12,7 @@ import {
   JobApplicationsResponse,
   ApplicationDetailResponse,
 } from "@/types/api";
+import { ReviewedResumeMetadata } from "@/types";
 
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_URL || "https://letsmakecv.tulip-software.com";
@@ -998,6 +999,137 @@ export class ApiClient {
       true
     );
   }
+
+  /*
+    Resume apis 
+  */
+
+  // Resume Parse API - Initiate parsing for uploaded resume
+  async parseResumeById(resumeId: number): Promise<{
+    success: boolean;
+    message: string;
+    resume_id: number;
+    status: string;
+    status_url: string;
+  }> {
+    return this.request<{
+      success: boolean;
+      message: string;
+      resume_id: number;
+      status: string;
+      status_url: string;
+    }>(
+      `/api/v1/pdf-resumes/${resumeId}/parse`,
+      {
+        method: "POST",
+      },
+      true,
+      false // Use candidate token, not recruiter
+    );
+  }
+
+  // Get parse status for a resume
+  async getParseStatus(resumeId: number): Promise<{
+    resume_id: number;
+    status: "pending" | "processing" | "completed" | "failed";
+    metadata?: ResumeMetadata | null;
+    error?: string | null;
+  }> {
+    return this.request<{
+      resume_id: number;
+      status: "pending" | "processing" | "completed" | "failed";
+      metadata?: ResumeMetadata | null;
+      error?: string | null;
+    }>(`/api/v1/pdf-resumes/${resumeId}/parse-status`, {}, true, false);
+  }
+
+  async transformMetadataForGraphQL(
+    resumeId: number
+  ): Promise<ReviewedResumeMetadata> {
+    return this.request(
+      `/api/v1/pdf-resumes/${resumeId}/transform-for-graphql`,
+      {},
+      true,
+      false
+    );
+  }
+
+  async saveReviewedMetadata(
+    resumeId: number,
+    metadata: ReviewedResumeMetadata
+  ): Promise<{ success: boolean; message: string }> {
+    return this.request<{ success: boolean; message: string }>(
+      `/api/v1/pdf-resumes/${resumeId}/save-reviewed-metadata`,
+      {
+        method: "POST",
+        body: JSON.stringify(metadata),
+      },
+      true, // includeAuth
+      false // isRecruiter
+    );
+  }
+}
+
+// Resume Metadata types for parsed resume
+export interface ResumeMetadata {
+  data: {
+    skills: ResumeSkill[];
+    education: ResumeEducation[];
+    experience: ResumeExperience[];
+    languages: ResumeLanguage[];
+    personal_details: ResumePersonalDetails;
+  };
+  success: boolean;
+  error: string | null;
+}
+
+export interface ResumeSkill {
+  name: string;
+  proficiency: string | null;
+}
+
+export interface ResumePersonalDetails {
+  first_name: string | null;
+  last_name: string | null;
+  email: string | null;
+  phone: string | null;
+  city: string | null;
+  state: string | null;
+  country: string | null;
+  country_code?: string | null;
+  postal_code: string | null;
+  street_number?: string | null;
+  full_address?: string | null;
+  gender?: string | null;
+  professional_title: string | null;
+  profile_description: string | null;
+}
+
+export interface ResumeExperience {
+  title: string;
+  company: string;
+  duration?: string | null;
+  start_date?: string | null;
+  end_date?: string | null;
+  description: string | null;
+  location: string | null;
+}
+
+export interface ResumeEducation {
+  degree: string;
+  institution: string;
+  year?: string | null;
+  grade?: string | null;
+  start_date?: string | null;
+  end_date?: string | null;
+  graduation_date?: string | null;
+  field_of_study: string | null;
+  gpa?: string | null;
+}
+
+export interface ResumeLanguage {
+  name: string;
+  proficiency: string | null;
 }
 
 export const api = new ApiClient();

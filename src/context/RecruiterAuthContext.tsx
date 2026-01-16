@@ -59,15 +59,21 @@ export function RecruiterAuthProvider({ children }: { children: ReactNode }) {
       console.log("RecruiterAuthContext: Profile response:", response);
 
       // Check if response is the recruiter object directly or wrapped
-      const responseData = response as unknown as Recruiter | { success: boolean; recruiter: Recruiter };
-      if (responseData && 'id' in responseData) {
+      const responseData = response as unknown as
+        | Recruiter
+        | { success: boolean; recruiter: Recruiter };
+      if (responseData && "id" in responseData) {
         // Response is the recruiter object directly
         console.log(
           "RecruiterAuthContext: Setting recruiter (direct):",
           responseData
         );
         setRecruiter(responseData);
-      } else if ('success' in responseData && 'recruiter' in responseData && responseData.success) {
+      } else if (
+        "success" in responseData &&
+        "recruiter" in responseData &&
+        responseData.success
+      ) {
         // Response is wrapped with success and recruiter properties
         console.log(
           "RecruiterAuthContext: Setting recruiter (wrapped):",
@@ -113,6 +119,10 @@ export function RecruiterAuthProvider({ children }: { children: ReactNode }) {
     try {
       const response = await api.recruiterLogin(email, password);
       if (typeof window !== "undefined") {
+        // Clear candidate tokens to ensure only one role is logged in at a time
+        localStorage.removeItem("access_token");
+        localStorage.removeItem("refresh_token");
+
         localStorage.setItem("recruiter_access_token", response.access_token);
         localStorage.setItem("recruiter_refresh_token", response.refresh_token);
       }
@@ -131,6 +141,10 @@ export function RecruiterAuthProvider({ children }: { children: ReactNode }) {
     try {
       const response = await api.recruiterRegister(data);
       if (typeof window !== "undefined") {
+        // Clear candidate tokens to ensure only one role is logged in at a time
+        localStorage.removeItem("access_token");
+        localStorage.removeItem("refresh_token");
+
         localStorage.setItem("recruiter_access_token", response.access_token);
         localStorage.setItem("recruiter_refresh_token", response.refresh_token);
       }

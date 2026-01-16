@@ -103,6 +103,7 @@ export interface Job {
   recruiter_profile_url?: string;
   industry?: string;
   is_bookmarked?: boolean;
+  is_applied: boolean;
 }
 
 export interface ApplicationApplicant {

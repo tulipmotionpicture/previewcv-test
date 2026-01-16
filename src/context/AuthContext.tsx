@@ -77,6 +77,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const response = await api.candidateLogin(email, password);
     if (response.access_token) {
       if (typeof window !== "undefined") {
+        // Clear recruiter tokens to ensure only one role is logged in at a time
+        localStorage.removeItem("recruiter_access_token");
+        localStorage.removeItem("recruiter_refresh_token");
+
         localStorage.setItem("access_token", response.access_token);
         if (response.refresh_token) {
           localStorage.setItem("refresh_token", response.refresh_token);
@@ -98,6 +102,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const response = await api.candidateRegister(email, password, fullName);
     if (response.access_token) {
       if (typeof window !== "undefined") {
+        // Clear recruiter tokens to ensure only one role is logged in at a time
+        localStorage.removeItem("recruiter_access_token");
+        localStorage.removeItem("recruiter_refresh_token");
+
         localStorage.setItem("access_token", response.access_token);
         if (response.refresh_token) {
           localStorage.setItem("refresh_token", response.refresh_token);
