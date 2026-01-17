@@ -85,6 +85,94 @@ export class ResumeApiService {
   }
 
   /**
+   * Saves the reviewed and transformed resume metadata.
+   * This function prepares the data for the GraphQL backend by:
+   * 1. Taking the `personal_details` object and renaming it to `portfolio`.
+   * 2. Filtering out any internal fields (e.g., `_original`, `_preview`).
+   * 3. Sending the cleaned data to the `save-reviewed-metadata` endpoint.
+   */
+  static async saveReviewedMetadata(
+    permanentToken: string,
+    transformedData: any
+  ): Promise<any> {
+    if (!permanentToken) {
+      throw new Error('Invalid permanent token provided');
+    }
+
+    // 1. Clean and prepare the payload
+    const payload = {
+      work_experiences: (transformedData.work_experiences || []).map((item: any) => ({
+        company: item.company,
+        position: item.position,
+        start_date: item.start_date,
+        end_date: item.end_date,
+        is_current: item.is_current,
+        country: item.country,
+        city: item.city,
+        description: item.description,
+      })),
+      education: (transformedData.education || []).map((item: any) => ({
+        degree: item.degree,
+        university: item.university,
+        field_of_study: item.field_of_study,
+        start_year: item.start_year,
+        end_year: item.end_year,
+        is_currently_studying: item.is_currently_studying,
+        gpa: item.gpa,
+        country: item.country,
+        city: item.city,
+      })),
+      skills: (transformedData.skills || []).map((item: any) => ({
+        skill_name: item.skill_name,
+        proficiency_level: item.proficiency_level,
+      })),
+      languages: (transformedData.languages || []).map((item: any) => ({
+        language: item.language,
+        proficiency_level: item.proficiency_level,
+        can_read: item.can_read,
+        can_write: item.can_write,
+        can_speak: item.can_speak,
+      })),
+      portfolio: transformedData.personal_details ? {
+        first_name: transformedData.personal_details.first_name,
+        last_name: transformedData.personal_details.last_name,
+        email: transformedData.personal_details.email,
+        phone: transformedData.personal_details.phone,
+        phone_code: transformedData.personal_details.phone_code,
+        country_code: transformedData.personal_details.country_code,
+        city: transformedData.personal_details.city,
+        state: transformedData.personal_details.state,
+        country: transformedData.personal_details.country,
+        postal_zip_code: transformedData.personal_details.postal_zip_code,
+        address: transformedData.personal_details.address,
+        street_number: transformedData.personal_details.street_number,
+        current_title: transformedData.personal_details.current_title,
+        profile_description: transformedData.personal_details.profile_description,
+      } : {},
+    };
+
+    // 2. Save the cleaned data
+    const response = await fetch(`/api/resume/${permanentToken}/save-reviewed-metadata`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(payload),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new ResumeApiError(
+        errorData.error || 'Failed to save reviewed metadata',
+        response.status,
+        errorData.code
+      );
+    }
+
+    return response.json();
+  }
+
+  /**
    * Validate the structure of the resume API response
    */
   private static validateResumeResponse(data: ResumeApiResponse): void {

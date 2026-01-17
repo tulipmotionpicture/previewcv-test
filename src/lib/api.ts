@@ -203,6 +203,17 @@ export class ApiClient {
     return this.request<User>("/api/v1/users/me", {}, true, false);
   }
 
+  // Get linked entities (saved data) for a resume
+  async getLinkedEntities(resumeId: number): Promise<any> {
+    return this.request<any>(
+      `/api/v1/pdf-resumes/${resumeId}/linked-entities`,
+      {},
+      true,
+      false
+    );
+  }
+
+
   async updateCandidateProfile(data: Partial<User>): Promise<User> {
     return this.request<User>(
       "/api/v1/users/me",

@@ -8,6 +8,8 @@ import LoadingSpinner from '@/components/LoadingSpinner';
 import ErrorDisplay from '@/components/ErrorDisplay';
 import PDFViewer from '@/components/PDFViewer';
 import ResponsiveLayout, { useResponsive } from '@/components/ResponsiveLayout';
+import ResumeReview from '@/components/ResumeReview';
+import Button from '@/components/ui/Button';
 
 export default function ResumePreviewPage() {
   const params = useParams();
@@ -19,6 +21,7 @@ export default function ResumePreviewPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [pdfAccessible, setPdfAccessible] = useState<boolean | null>(null);
+  const [isReviewMode, setIsReviewMode] = useState(false); // State for review mode
 
   const fetchResumeData = useCallback(async (permanentToken: string) => {
     try {
@@ -47,7 +50,7 @@ export default function ResumePreviewPage() {
 
     } catch (fetchError) {
       console.error('Failed to fetch resume:', fetchError);
-      
+
       const errorMessage = ResumeApiService.getDisplayErrorMessage(fetchError);
       setError(errorMessage);
 
@@ -85,7 +88,7 @@ export default function ResumePreviewPage() {
     try {
       const isAccessible = await ResumeApiService.checkPdfAccessibility(pdfUrl);
       setPdfAccessible(isAccessible);
-      
+
       if (!isAccessible) {
         console.warn('PDF may not be accessible:', pdfUrl);
       }
@@ -103,6 +106,11 @@ export default function ResumePreviewPage() {
       fetchResumeData(token);
     }
   };
+
+  // If in review mode, show the ResumeReview component
+  if (isReviewMode) {
+    return <ResumeReview permanentToken={token} onClose={() => setIsReviewMode(false)} />;
+  }
 
   // Loading state
   if (loading) {
@@ -143,7 +151,7 @@ export default function ResumePreviewPage() {
   // Success state - render PDF viewer
   if (resumeData && resumeData.success) {
     return (
-      <ResponsiveLayout 
+      <ResponsiveLayout
         title={resumeData.resume_name || 'Resume'}
         showHeader={true}
         showFooter={!isMobile} // Hide footer on mobile for more space
@@ -157,7 +165,7 @@ export default function ResumePreviewPage() {
                   {resumeData.resume_name}
                 </p>
               </div>
-              
+
               <div className="ml-4 flex space-x-2">
                 {pdfAccessible === false && (
                   <span className="text-amber-500 text-xs">⚠️</span>
@@ -166,7 +174,7 @@ export default function ResumePreviewPage() {
             </div>
           </div>
         )}
-        
+
         {/* Desktop-specific header info */}
         {!isMobile && (
           <div className="bg-white border-b border-gray-200">
@@ -178,12 +186,17 @@ export default function ResumePreviewPage() {
                       ⚠️ PDF may not load properly
                     </span>
                   )}
-                  
+
                   {resumeData.last_accessed_at && (
                     <span className="text-gray-500 text-sm">
                       Last accessed: {new Date(resumeData.last_accessed_at).toLocaleDateString()}
                     </span>
                   )}
+                </div>
+                <div>
+                  <Button onClick={() => setIsReviewMode(true)}>
+                    Review & Save Data
+                  </Button>
                 </div>
               </div>
             </div>

@@ -9,6 +9,7 @@ import { Application, PdfResume, Resume } from "@/types/api";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/context/ToastContext";
 import ResumeUpload from "@/components/ResumeUpload";
+import ResumeReview from "@/components/ResumeReview";
 // import Breadcrumb from "@/components/ui/Breadcrumb";
 
 function CandidateDashboardContent() {
@@ -28,6 +29,7 @@ function CandidateDashboardContent() {
   const [shareModalResume, setShareModalResume] = useState<PdfResume | null>(
     null
   );
+  const [parsingResumeId, setParsingResumeId] = useState<number | null>(null);
 
   // Initialize active tab from URL on mount
   useEffect(() => {
@@ -276,9 +278,8 @@ function CandidateDashboardContent() {
 
                         <div className="flex flex-col items-end gap-3">
                           <span
-                            className={`px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wide border ${
-                              statusColors[app.status]
-                            }`}
+                            className={`px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wide border ${statusColors[app.status]
+                              }`}
                           >
                             {app.status.replace("_", " ")}
                           </span>
@@ -442,11 +443,10 @@ function CandidateDashboardContent() {
                           <div className="px-5 py-3 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 flex items-center justify-between">
                             <div className="flex items-center gap-3">
                               <span
-                                className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${
-                                  resume.is_active
+                                className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${resume.is_active
                                     ? "bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400"
                                     : "bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400"
-                                }`}
+                                  }`}
                               >
                                 {resume.is_active ? "Active" : "Inactive"}
                               </span>
@@ -457,6 +457,26 @@ function CandidateDashboardContent() {
                               )}
                             </div>
                             <div className="flex items-center gap-2">
+                              <button
+                                onClick={() => setParsingResumeId(resume.id)}
+                                className="p-1.5 text-purple-600 dark:text-purple-400 hover:text-purple-800 dark:hover:text-purple-200 hover:bg-purple-50 dark:hover:bg-purple-900/20 rounded-lg transition-all"
+                                title="Parse Resume Data"
+                              >
+                                <svg
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  fill="none"
+                                  viewBox="0 0 24 24"
+                                  strokeWidth={2}
+                                  stroke="currentColor"
+                                  className="w-4 h-4"
+                                >
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    d="M13 10V3L4 14h7v7l9-11h-7z"
+                                  />
+                                </svg>
+                              </button>
                               {resume.permanent_link && (
                                 <>
                                   <button
@@ -687,11 +707,10 @@ function CandidateDashboardContent() {
                           <div className="px-5 py-3 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 flex items-center justify-between">
                             <div className="flex items-center gap-3">
                               <span
-                                className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${
-                                  resume.is_active
+                                className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${resume.is_active
                                     ? "bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400"
                                     : "bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400"
-                                }`}
+                                  }`}
                               >
                                 {resume.is_active ? "Active" : "Inactive"}
                               </span>
@@ -803,6 +822,32 @@ function CandidateDashboardContent() {
           </div>
         )}
       </main>
+
+      {/* Resume Review Modal */}
+      {parsingResumeId && (
+        <div className="fixed inset-0 z-[300] bg-white dark:bg-gray-950 overflow-y-auto">
+          <div className="min-h-screen p-4 md:p-8">
+            <div className="max-w-6xl mx-auto">
+              <button
+                onClick={() => setParsingResumeId(null)}
+                className="mb-4 flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 font-bold"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+                Back to Dashboard
+              </button>
+              <ResumeReview
+                resumeId={parsingResumeId}
+                onSaveComplete={() => {
+                  setParsingResumeId(null);
+                  fetchResumes();
+                }}
+              />
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Share Resume Modal */}
       {shareModalResume && shareModalResume.permanent_link && (
