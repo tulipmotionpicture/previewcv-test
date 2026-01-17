@@ -203,16 +203,6 @@ export default function CandidateLogin() {
           </button>
         </div>
       </div>
-
-      {/* Demo credentials */}
-      <div className="mt-6 p-3 bg-gray-50 dark:bg-gray-800/50 rounded-xl border border-gray-200 dark:border-gray-700">
-        <p className="text-xs text-gray-500 dark:text-gray-400 font-bold text-center mb-1">
-          Demo Credentials
-        </p>
-        <p className="text-xs text-gray-600 dark:text-gray-300 font-mono text-center">
-          candidate@example.com · password123
-        </p>
-      </div>
     </AuthLayout>
   );
 }
