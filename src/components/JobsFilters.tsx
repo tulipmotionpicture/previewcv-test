@@ -31,11 +31,13 @@ function JobsFilters({
         // Ensure every filter option has a 'value' property
         const normalizedFilters: Record<string, FilterOption[]> = {};
         Object.entries(response.filters).forEach(([key, options]) => {
-          normalizedFilters[key] = (options as FilterOption[]).map((opt) => ({
-            name: opt.name,
-            value: opt.value !== undefined ? opt.value : opt.name,
-            count: opt.count,
-          }));
+          if (Array.isArray(options)) {
+            normalizedFilters[key] = options.map((opt) => ({
+              name: opt.name,
+              value: opt.value !== undefined ? opt.value : opt.name,
+              count: opt.count,
+            }));
+          }
         });
         setFilters(normalizedFilters);
       } catch (err) {

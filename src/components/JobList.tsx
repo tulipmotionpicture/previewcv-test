@@ -1,3 +1,4 @@
+"use client";
 import React, { useState } from "react";
 import { Job } from "@/types/api";
 import Link from "next/link";
@@ -29,11 +30,10 @@ export default function JobList({ jobs, loading, error }: JobListProps) {
   const handleBookmarkChange = (jobId: number, isBookmarked: boolean) => {
     setJobsState((prevJobs) =>
       prevJobs.map((job) =>
-        job.id === jobId ? { ...job, is_bookmarked: isBookmarked } : job
-      )
+        job.id === jobId ? { ...job, is_bookmarked: isBookmarked } : job,
+      ),
     );
   };
-
 
   // console.log(jobsState[0].is_bookmarked, "jobsState");
   return (
@@ -55,15 +55,12 @@ export default function JobList({ jobs, loading, error }: JobListProps) {
               {/* Header: Title, Company, Bookmark */}
               <div className="flex items-start justify-between gap-4 mb-4">
                 <div className="flex-1">
-                  <a 
-                    href={`/jobs/${job.slug}`}
-                    className="block group/title"
-                  >
+                  <a href={`/job/${job.slug}`} className="block group/title">
                     <h3 className="text-xl md:text-2xl font-bold text-gray-900 dark:text-gray-100 group-hover/title:text-blue-600 dark:group-hover/title:text-blue-400 transition-colors">
                       {job.title}
                     </h3>
                   </a>
-                  
+
                   {job.recruiter_username && (
                     <Link
                       href={
@@ -115,7 +112,11 @@ export default function JobList({ jobs, loading, error }: JobListProps) {
 
                 {job.is_remote && (
                   <span className="inline-flex items-center gap-1 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-3 py-1 rounded-full text-xs font-bold border border-blue-200 dark:border-blue-800">
-                    <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                    <svg
+                      className="w-3 h-3"
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
+                    >
                       <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" />
                     </svg>
                     Remote
@@ -124,7 +125,8 @@ export default function JobList({ jobs, loading, error }: JobListProps) {
 
                 <span className="inline-flex items-center bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 px-3 py-1 rounded-full text-xs font-semibold border border-gray-200 dark:border-gray-700">
                   {job.experience_level.charAt(0).toUpperCase() +
-                    job.experience_level.slice(1)} Level
+                    job.experience_level.slice(1)}{" "}
+                  Level
                 </span>
               </div>
 
@@ -158,7 +160,8 @@ export default function JobList({ jobs, loading, error }: JobListProps) {
               <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 pt-4 border-t border-gray-200 dark:border-gray-800">
                 <div className="flex flex-col gap-1">
                   <span className="text-xs text-gray-500 dark:text-gray-400">
-                    Posted {new Date(job.posted_date).toLocaleDateString("en-US", {
+                    Posted{" "}
+                    {new Date(job.posted_date).toLocaleDateString("en-US", {
                       year: "numeric",
                       month: "short",
                       day: "numeric",
@@ -166,15 +169,27 @@ export default function JobList({ jobs, loading, error }: JobListProps) {
                   </span>
                   <div className="flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400">
                     <span className="flex items-center gap-1">
-                      <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
+                      <svg
+                        className="w-3.5 h-3.5"
+                        fill="currentColor"
+                        viewBox="0 0 20 20"
+                      >
                         <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
                       </svg>
                       {job.application_count} applicants
                     </span>
                     <span className="flex items-center gap-1">
-                      <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
+                      <svg
+                        className="w-3.5 h-3.5"
+                        fill="currentColor"
+                        viewBox="0 0 20 20"
+                      >
                         <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
-                        <path fillRule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clipRule="evenodd" />
+                        <path
+                          fillRule="evenodd"
+                          d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z"
+                          clipRule="evenodd"
+                        />
                       </svg>
                       {job.view_count} views
                     </span>
@@ -186,12 +201,22 @@ export default function JobList({ jobs, loading, error }: JobListProps) {
                     {formatSalary(job)}
                   </span>
                   <a
-                    href={`/jobs/${job.slug}`}
+                    href={`/job/${job.slug}`}
                     className="inline-flex items-center gap-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-6 py-2.5 rounded-xl font-bold text-sm transition-all shadow-lg hover:shadow-xl hover:scale-105"
                   >
                     Apply Now
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                    <svg
+                      className="w-4 h-4"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M13 7l5 5m0 0l-5 5m5-5H6"
+                      />
                     </svg>
                   </a>
                 </div>

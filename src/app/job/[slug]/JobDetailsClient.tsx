@@ -85,8 +85,12 @@ export default function JobDetailsClient({ job, slug }: JobDetailsClientProps) {
       if (storedResumeId) {
         const id = parseInt(storedResumeId, 10);
         const exists =
-          (Array.isArray(pdfRes) ? pdfRes : (pdfRes.resumes || [])).some((r) => r.id === id) ||
-          (Array.isArray(builderRes) ? builderRes : []).some((r) => r.id === id);
+          (Array.isArray(pdfRes) ? pdfRes : pdfRes.resumes || []).some(
+            (r) => r.id === id,
+          ) ||
+          (Array.isArray(builderRes) ? builderRes : []).some(
+            (r) => r.id === id,
+          );
         if (exists) {
           setResumeId(id);
         }
@@ -114,8 +118,8 @@ export default function JobDetailsClient({ job, slug }: JobDetailsClientProps) {
     setApplying(true);
     try {
       // Check if the selected resume is from LetsMakeCV or uploaded PDF
-      const isBuilderResume = builderResumes.some(r => r.id === resumeId);
-      const isPdfResume = pdfResumes.some(r => r.id === resumeId);
+      const isBuilderResume = builderResumes.some((r) => r.id === resumeId);
+      const isPdfResume = pdfResumes.some((r) => r.id === resumeId);
 
       // Prepare the application data based on resume type
       const applicationData: any = {
@@ -298,7 +302,9 @@ export default function JobDetailsClient({ job, slug }: JobDetailsClientProps) {
                       <p className="text-sm text-gray-600 dark:text-gray-400 mb-3 font-medium">
                         Or upload a new resume:
                       </p>
-                      <ResumeUpload onUploadSuccess={handleResumeUploadSuccess} />
+                      <ResumeUpload
+                        onUploadSuccess={handleResumeUploadSuccess}
+                      />
                     </div>
                   )}
                   {resumeId && (
@@ -306,8 +312,18 @@ export default function JobDetailsClient({ job, slug }: JobDetailsClientProps) {
                       <div className="flex items-center justify-between p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg gap-3">
                         {/* Left Info */}
                         <div className="flex items-center gap-2 text-sm text-blue-700 dark:text-blue-400 font-medium">
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                          <svg
+                            className="w-4 h-4"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M5 13l4 4L19 7"
+                            />
                           </svg>
                           Resume selected
                         </div>
@@ -321,17 +337,34 @@ export default function JobDetailsClient({ job, slug }: JobDetailsClientProps) {
                             Change
                           </button>
                           {(() => {
-                            const selectedResume = pdfResumes.find(r => r.id === resumeId);
+                            const selectedResume = pdfResumes.find(
+                              (r) => r.id === resumeId,
+                            );
                             if (selectedResume?.permanent_link?.share_url) {
                               return (
                                 <button
                                   type="button"
-                                  onClick={() => window.open(selectedResume.permanent_link!.share_url, '_blank')}
+                                  onClick={() =>
+                                    window.open(
+                                      selectedResume.permanent_link!.share_url,
+                                      "_blank",
+                                    )
+                                  }
                                   className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 flex items-center gap-1"
                                 >
                                   View
-                                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                                  <svg
+                                    className="w-3 h-3"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                  >
+                                    <path
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                      strokeWidth={2}
+                                      d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                                    />
                                   </svg>
                                 </button>
                               );
@@ -341,20 +374,31 @@ export default function JobDetailsClient({ job, slug }: JobDetailsClientProps) {
                         </div>
                       </div>
                       {/* Parse Resume Button for Selected Resume */}
-                      {pdfResumes.some(r => r.id === resumeId) && (
+                      {pdfResumes.some((r) => r.id === resumeId) && (
                         <div className="flex gap-3 items-center">
-
                           {/* Parse Resume */}
                           <button
                             type="button"
                             onClick={() => {
-                              const selectedResume = pdfResumes.find(r => r.id === resumeId);
+                              const selectedResume = pdfResumes.find(
+                                (r) => r.id === resumeId,
+                              );
                               if (selectedResume) setParsingResumeId(resumeId);
                             }}
                             className="flex items-center gap-1.5 px-3 py-1.5 bg-purple-600 hover:bg-purple-700 text-white text-xs font-semibold rounded-md transition w-full border-1 border-purple-600 dark:border-purple-400"
                           >
-                            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                            <svg
+                              className="w-3.5 h-3.5"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M13 10V3L4 14h7v7l9-11h-7z"
+                              />
                             </svg>
                             Parse
                           </button>
@@ -364,24 +408,44 @@ export default function JobDetailsClient({ job, slug }: JobDetailsClientProps) {
                             type="button"
                             onClick={async () => {
                               try {
-                                const { api } = await import('@/lib/api');
-                                const data = await api.getLinkedEntities(resumeId);
+                                const { api } = await import("@/lib/api");
+                                const data =
+                                  await api.getLinkedEntities(resumeId);
                                 setLinkedEntities(data);
                                 setShowLinkedDataModal(true);
                               } catch (err) {
-                                console.error('Failed to fetch linked entities:', err);
-                                alert('Failed to load saved data. Please try again.');
+                                console.error(
+                                  "Failed to fetch linked entities:",
+                                  err,
+                                );
+                                alert(
+                                  "Failed to load saved data. Please try again.",
+                                );
                               }
                             }}
                             className="flex items-center gap-1.5 px-3 py-1.5 bg-white dark:bg-gray-800 border border-blue-500 text-blue-600 dark:text-blue-400 text-xs font-semibold rounded-md hover:bg-blue-50 dark:hover:bg-blue-900/20 transition w-full"
                           >
-                            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                            <svg
+                              className="w-3.5 h-3.5"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                              />
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                              />
                             </svg>
                             View Saved Data
                           </button>
-
                         </div>
                       )}
                     </div>
@@ -391,7 +455,7 @@ export default function JobDetailsClient({ job, slug }: JobDetailsClientProps) {
             </div>
             {!isAuthenticated ? (
               <a
-                href={`/candidate/login?redirect=/jobs/${slug}`}
+                href={`/candidate/login?redirect=/job/${slug}`}
                 className="block w-full py-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold rounded-xl transition-all shadow-md hover:shadow-lg text-center transform hover:-translate-y-0.5"
               >
                 Login to Apply
@@ -467,8 +531,18 @@ export default function JobDetailsClient({ job, slug }: JobDetailsClientProps) {
               <div className="flex items-center justify-between px-8 py-6 border-b border-gray-100 dark:border-gray-800 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 bg-green-600 rounded-xl flex items-center justify-center shadow-lg shadow-green-600/20">
-                    <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    <svg
+                      className="w-5 h-5 text-white"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M5 13l4 4L19 7"
+                      />
                     </svg>
                   </div>
                   <h2 className="text-xl font-black text-gray-900 dark:text-gray-100 italic tracking-tight">
@@ -479,8 +553,18 @@ export default function JobDetailsClient({ job, slug }: JobDetailsClientProps) {
                   onClick={() => setShowLinkedDataModal(false)}
                   className="p-2 hover:bg-white/50 dark:hover:bg-gray-800 rounded-full transition-colors group"
                 >
-                  <svg className="w-6 h-6 text-gray-400 group-hover:text-gray-900 dark:group-hover:text-gray-100" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  <svg
+                    className="w-6 h-6 text-gray-400 group-hover:text-gray-900 dark:group-hover:text-gray-100"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
                   </svg>
                 </button>
               </div>
@@ -495,91 +579,201 @@ export default function JobDetailsClient({ job, slug }: JobDetailsClientProps) {
                     }}
                     className="flex items-center justify-end gap-2 "
                   >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                    <svg
+                      className="w-5 h-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                      />
                     </svg>
                     Edit Data
                   </button>
                 </div>
                 <div className="space-y-8">
-                  {linkedEntities.linked_entities?.work_experiences && linkedEntities.linked_entities.work_experiences.length > 0 && (
-                    <section>
-                      <h3 className="text-lg font-black text-gray-900 dark:text-gray-100 mb-4 flex items-center gap-2">
-                        <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                        </svg>
-                        Work Experience ({linkedEntities.linked_entities.work_experiences.length})
-                      </h3>
-                      <div className="space-y-3">
-                        {linkedEntities.linked_entities.work_experiences.map((exp: any, idx: number) => (
-                          <div key={idx} className="p-4 bg-blue-50/50 dark:bg-blue-900/10 rounded-2xl border border-blue-100 dark:border-blue-900/30">
-                            <div className="font-bold text-gray-900 dark:text-gray-100">{exp.position}</div>
-                            <div className="text-sm text-blue-600 dark:text-blue-400">{exp.company}</div>
-                            <div className="text-xs text-gray-500 mt-1">{exp.start_date} - {exp.end_date || 'Present'}</div>
-                            {exp.city && <div className="text-xs text-gray-400 mt-1">{exp.city}{exp.country ? `, ${exp.country}` : ''}</div>}
-                          </div>
-                        ))}
-                      </div>
-                    </section>
-                  )}
+                  {linkedEntities.linked_entities?.work_experiences &&
+                    linkedEntities.linked_entities.work_experiences.length >
+                      0 && (
+                      <section>
+                        <h3 className="text-lg font-black text-gray-900 dark:text-gray-100 mb-4 flex items-center gap-2">
+                          <svg
+                            className="w-5 h-5 text-blue-600"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                            />
+                          </svg>
+                          Work Experience (
+                          {
+                            linkedEntities.linked_entities.work_experiences
+                              .length
+                          }
+                          )
+                        </h3>
+                        <div className="space-y-3">
+                          {linkedEntities.linked_entities.work_experiences.map(
+                            (exp: any, idx: number) => (
+                              <div
+                                key={idx}
+                                className="p-4 bg-blue-50/50 dark:bg-blue-900/10 rounded-2xl border border-blue-100 dark:border-blue-900/30"
+                              >
+                                <div className="font-bold text-gray-900 dark:text-gray-100">
+                                  {exp.position}
+                                </div>
+                                <div className="text-sm text-blue-600 dark:text-blue-400">
+                                  {exp.company}
+                                </div>
+                                <div className="text-xs text-gray-500 mt-1">
+                                  {exp.start_date} - {exp.end_date || "Present"}
+                                </div>
+                                {exp.city && (
+                                  <div className="text-xs text-gray-400 mt-1">
+                                    {exp.city}
+                                    {exp.country ? `, ${exp.country}` : ""}
+                                  </div>
+                                )}
+                              </div>
+                            ),
+                          )}
+                        </div>
+                      </section>
+                    )}
 
-                  {linkedEntities.linked_entities?.education && linkedEntities.linked_entities.education.length > 0 && (
-                    <section>
-                      <h3 className="text-lg font-black text-gray-900 dark:text-gray-100 mb-4 flex items-center gap-2">
-                        <svg className="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 14l9-5-9-5-9 5 9 5z" />
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
-                        </svg>
-                        Education ({linkedEntities.linked_entities.education.length})
-                      </h3>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                        {linkedEntities.linked_entities.education.map((edu: any, idx: number) => (
-                          <div key={idx} className="p-4 bg-emerald-50/50 dark:bg-emerald-900/10 rounded-2xl border border-emerald-100 dark:border-emerald-900/30">
-                            <div className="font-bold text-gray-900 dark:text-gray-100 text-sm">{edu.degree}</div>
-                            <div className="text-xs text-emerald-600 dark:text-emerald-400">{edu.university}</div>
-                            <div className="text-xs text-gray-500 mt-1">{edu.start_year} - {edu.end_year || 'Present'}</div>
-                            {edu.gpa && <div className="text-xs text-gray-400 mt-1">{edu.gpa}</div>}
-                          </div>
-                        ))}
-                      </div>
-                    </section>
-                  )}
+                  {linkedEntities.linked_entities?.education &&
+                    linkedEntities.linked_entities.education.length > 0 && (
+                      <section>
+                        <h3 className="text-lg font-black text-gray-900 dark:text-gray-100 mb-4 flex items-center gap-2">
+                          <svg
+                            className="w-5 h-5 text-emerald-600"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M12 14l9-5-9-5-9 5 9 5z"
+                            />
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"
+                            />
+                          </svg>
+                          Education (
+                          {linkedEntities.linked_entities.education.length})
+                        </h3>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                          {linkedEntities.linked_entities.education.map(
+                            (edu: any, idx: number) => (
+                              <div
+                                key={idx}
+                                className="p-4 bg-emerald-50/50 dark:bg-emerald-900/10 rounded-2xl border border-emerald-100 dark:border-emerald-900/30"
+                              >
+                                <div className="font-bold text-gray-900 dark:text-gray-100 text-sm">
+                                  {edu.degree}
+                                </div>
+                                <div className="text-xs text-emerald-600 dark:text-emerald-400">
+                                  {edu.university}
+                                </div>
+                                <div className="text-xs text-gray-500 mt-1">
+                                  {edu.start_year} - {edu.end_year || "Present"}
+                                </div>
+                                {edu.gpa && (
+                                  <div className="text-xs text-gray-400 mt-1">
+                                    {edu.gpa}
+                                  </div>
+                                )}
+                              </div>
+                            ),
+                          )}
+                        </div>
+                      </section>
+                    )}
 
-                  {linkedEntities.linked_entities?.skills && linkedEntities.linked_entities.skills.length > 0 && (
-                    <section>
-                      <h3 className="text-lg font-black text-gray-900 dark:text-gray-100 mb-4 flex items-center gap-2">
-                        <svg className="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 4a2 2 0 114 0v1a1 1 0 001 1h3a1 1 0 011 1v3a1 1 0 01-1 1h-1a2 2 0 100 4h1a1 1 0 011 1v3a1 1 0 01-1 1h-3a1 1 0 01-1-1v-1a2 2 0 10-4 0v1a1 1 0 01-1 1H7a1 1 0 01-1-1v-3a1 1 0 00-1-1H4a2 2 0 110-4h1a1 1 0 001-1V7a1 1 0 011-1h3a1 1 0 001-1V4z" />
-                        </svg>
-                        Skills ({linkedEntities.linked_entities.skills.length})
-                      </h3>
-                      <div className="flex flex-wrap gap-2">
-                        {linkedEntities.linked_entities.skills.map((skill: any, idx: number) => (
-                          <span key={idx} className="px-3 py-1.5 bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-400 rounded-full text-xs font-bold border border-amber-200 dark:border-amber-800">
-                            {skill.skill_name} • {skill.proficiency_level}/10
-                          </span>
-                        ))}
-                      </div>
-                    </section>
-                  )}
+                  {linkedEntities.linked_entities?.skills &&
+                    linkedEntities.linked_entities.skills.length > 0 && (
+                      <section>
+                        <h3 className="text-lg font-black text-gray-900 dark:text-gray-100 mb-4 flex items-center gap-2">
+                          <svg
+                            className="w-5 h-5 text-amber-600"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M11 4a2 2 0 114 0v1a1 1 0 001 1h3a1 1 0 011 1v3a1 1 0 01-1 1h-1a2 2 0 100 4h1a1 1 0 011 1v3a1 1 0 01-1 1h-3a1 1 0 01-1-1v-1a2 2 0 10-4 0v1a1 1 0 01-1 1H7a1 1 0 01-1-1v-3a1 1 0 00-1-1H4a2 2 0 110-4h1a1 1 0 001-1V7a1 1 0 011-1h3a1 1 0 001-1V4z"
+                            />
+                          </svg>
+                          Skills ({linkedEntities.linked_entities.skills.length}
+                          )
+                        </h3>
+                        <div className="flex flex-wrap gap-2">
+                          {linkedEntities.linked_entities.skills.map(
+                            (skill: any, idx: number) => (
+                              <span
+                                key={idx}
+                                className="px-3 py-1.5 bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-400 rounded-full text-xs font-bold border border-amber-200 dark:border-amber-800"
+                              >
+                                {skill.skill_name} • {skill.proficiency_level}
+                                /10
+                              </span>
+                            ),
+                          )}
+                        </div>
+                      </section>
+                    )}
 
-                  {linkedEntities.linked_entities?.languages && linkedEntities.linked_entities.languages.length > 0 && (
-                    <section>
-                      <h3 className="text-lg font-black text-gray-900 dark:text-gray-100 mb-4 flex items-center gap-2">
-                        <svg className="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
-                        </svg>
-                        Languages ({linkedEntities.linked_entities.languages.length})
-                      </h3>
-                      <div className="flex flex-wrap gap-2">
-                        {linkedEntities.linked_entities.languages.map((lang: any, idx: number) => (
-                          <span key={idx} className="px-3 py-1.5 bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-400 rounded-full text-xs font-bold border border-purple-200 dark:border-purple-800 uppercase">
-                            {lang.language_name} • {lang.proficiency_level}
-                          </span>
-                        ))}
-                      </div>
-                    </section>
-                  )}
+                  {linkedEntities.linked_entities?.languages &&
+                    linkedEntities.linked_entities.languages.length > 0 && (
+                      <section>
+                        <h3 className="text-lg font-black text-gray-900 dark:text-gray-100 mb-4 flex items-center gap-2">
+                          <svg
+                            className="w-5 h-5 text-purple-600"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129"
+                            />
+                          </svg>
+                          Languages (
+                          {linkedEntities.linked_entities.languages.length})
+                        </h3>
+                        <div className="flex flex-wrap gap-2">
+                          {linkedEntities.linked_entities.languages.map(
+                            (lang: any, idx: number) => (
+                              <span
+                                key={idx}
+                                className="px-3 py-1.5 bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-400 rounded-full text-xs font-bold border border-purple-200 dark:border-purple-800 uppercase"
+                              >
+                                {lang.language_name} • {lang.proficiency_level}
+                              </span>
+                            ),
+                          )}
+                        </div>
+                      </section>
+                    )}
                 </div>
               </div>
             </div>
@@ -596,8 +790,18 @@ export default function JobDetailsClient({ job, slug }: JobDetailsClientProps) {
                 onClick={() => setParsingResumeId(null)}
                 className="mb-4 flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 font-bold"
               >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M15 19l-7-7 7-7"
+                  />
                 </svg>
                 Back to Application
               </button>

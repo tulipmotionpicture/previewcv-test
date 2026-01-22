@@ -18,7 +18,7 @@ function CandidateDashboardContent() {
   const { isAuthenticated, loading: authLoading } = useAuth();
   const toast = useToast();
   const [activeTab, setActiveTab] = useState<"applications" | "resumes">(
-    "applications"
+    "applications",
   );
   const [applications, setApplications] = useState<Application[]>([]);
   const [loading, setLoading] = useState(false);
@@ -27,7 +27,7 @@ function CandidateDashboardContent() {
   const [pdfResumes, setPdfResumes] = useState<PdfResume[]>([]);
   const [builderResumes, setBuilderResumes] = useState<Resume[]>([]);
   const [shareModalResume, setShareModalResume] = useState<PdfResume | null>(
-    null
+    null,
   );
   const [parsingResumeId, setParsingResumeId] = useState<number | null>(null);
 
@@ -252,7 +252,7 @@ function CandidateDashboardContent() {
                                   month: "short",
                                   day: "numeric",
                                   year: "numeric",
-                                }
+                                },
                               )}
                             </div>
                             {app.cover_letter && (
@@ -278,13 +278,14 @@ function CandidateDashboardContent() {
 
                         <div className="flex flex-col items-end gap-3">
                           <span
-                            className={`px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wide border ${statusColors[app.status]
-                              }`}
+                            className={`px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wide border ${
+                              statusColors[app.status]
+                            }`}
                           >
                             {app.status.replace("_", " ")}
                           </span>
                           <Link
-                            href={`/jobs/${app.job_slug}`}
+                            href={`/job/${app.job_slug}`}
                             className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium flex items-center gap-1"
                           >
                             View Job
@@ -386,7 +387,7 @@ function CandidateDashboardContent() {
                                       />
                                     </svg>
                                     {new Date(
-                                      resume.created_at
+                                      resume.created_at,
                                     ).toLocaleDateString("en-US", {
                                       month: "short",
                                       day: "numeric",
@@ -443,10 +444,11 @@ function CandidateDashboardContent() {
                           <div className="px-5 py-3 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 flex items-center justify-between">
                             <div className="flex items-center gap-3">
                               <span
-                                className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${resume.is_active
+                                className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${
+                                  resume.is_active
                                     ? "bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400"
                                     : "bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400"
-                                  }`}
+                                }`}
                               >
                                 {resume.is_active ? "Active" : "Inactive"}
                               </span>
@@ -630,7 +632,7 @@ function CandidateDashboardContent() {
                                       />
                                     </svg>
                                     {new Date(
-                                      resume.created_at
+                                      resume.created_at,
                                     ).toLocaleDateString("en-US", {
                                       month: "short",
                                       day: "numeric",
@@ -707,10 +709,11 @@ function CandidateDashboardContent() {
                           <div className="px-5 py-3 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 flex items-center justify-between">
                             <div className="flex items-center gap-3">
                               <span
-                                className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${resume.is_active
+                                className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${
+                                  resume.is_active
                                     ? "bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400"
                                     : "bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400"
-                                  }`}
+                                }`}
                               >
                                 {resume.is_active ? "Active" : "Inactive"}
                               </span>
@@ -832,8 +835,18 @@ function CandidateDashboardContent() {
                 onClick={() => setParsingResumeId(null)}
                 className="mb-4 flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 font-bold"
               >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M15 19l-7-7 7-7"
+                  />
                 </svg>
                 Back to Dashboard
               </button>
@@ -923,7 +936,7 @@ function CandidateDashboardContent() {
                 <button
                   onClick={() => {
                     navigator.clipboard.writeText(
-                      shareModalResume.permanent_link!.share_url
+                      shareModalResume.permanent_link!.share_url,
                     );
                     toast.success("Link copied to clipboard!");
                   }}

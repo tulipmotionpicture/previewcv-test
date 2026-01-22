@@ -13,6 +13,17 @@ import {
   ApplicationDetailResponse,
 } from "@/types/api";
 import { ReviewedResumeMetadata } from "@/types";
+import type {
+  SEOJobsResponse,
+  SEOPatternsResponse,
+  CountryCardsResponse,
+  CityCardsResponse,
+  IndustryCardsResponse,
+  JobTypeCardsResponse,
+  ExperienceCardsResponse,
+  RemoteCardsResponse,
+  CardsSummaryResponse,
+} from "@/types/jobs";
 
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_URL || "https://letsmakecv.tulip-software.com";
@@ -28,7 +39,7 @@ export class ApiClient {
 
   private getHeaders(
     includeAuth: boolean = false,
-    isRecruiter: boolean = false
+    isRecruiter: boolean = false,
   ): HeadersInit {
     const headers: HeadersInit = {
       "Content-Type": "application/json",
@@ -108,7 +119,7 @@ export class ApiClient {
     endpoint: string,
     options: RequestInit = {},
     includeAuth: boolean = false,
-    isRecruiter: boolean = false
+    isRecruiter: boolean = false,
   ): Promise<T> {
     // Get base headers, but skip Content-Type for FormData (browser sets it with boundary)
     const baseHeaders = this.getHeaders(includeAuth, isRecruiter);
@@ -148,7 +159,7 @@ export class ApiClient {
             localStorage.removeItem(refreshKey);
           }
           const error = new Error(
-            "Session expired. Please login again."
+            "Session expired. Please login again.",
           ) as Error & { status: number };
           error.status = 401;
           throw error;
@@ -191,7 +202,7 @@ export class ApiClient {
   async candidateRegister(
     email: string,
     password: string,
-    full_name: string
+    full_name: string,
   ): Promise<AuthResponse> {
     return this.request<AuthResponse>("/api/v1/auth/register", {
       method: "POST",
@@ -209,10 +220,9 @@ export class ApiClient {
       `/api/v1/pdf-resumes/${resumeId}/linked-entities`,
       {},
       true,
-      false
+      false,
     );
   }
-
 
   async updateCandidateProfile(data: Partial<User>): Promise<User> {
     return this.request<User>(
@@ -222,12 +232,12 @@ export class ApiClient {
         body: JSON.stringify(data),
       },
       true,
-      false
+      false,
     );
   }
 
   async candidateRefreshToken(
-    refreshToken: string
+    refreshToken: string,
   ): Promise<{ access_token: string }> {
     return this.request<{ access_token: string }>("/api/v1/auth/refresh", {
       method: "POST",
@@ -242,7 +252,7 @@ export class ApiClient {
         method: "POST",
       },
       true,
-      false
+      false,
     );
   }
 
@@ -273,12 +283,12 @@ export class ApiClient {
       "/api/v1/recruiters/profile/me",
       {},
       true,
-      true
+      true,
     );
   }
 
   async updateRecruiterProfile(
-    data: Partial<Recruiter>
+    data: Partial<Recruiter>,
   ): Promise<RecruiterProfileResponse> {
     return this.request<RecruiterProfileResponse>(
       "/api/v1/recruiters/profile/me",
@@ -287,19 +297,19 @@ export class ApiClient {
         body: JSON.stringify(data),
       },
       true,
-      true
+      true,
     );
   }
 
   async recruiterRefreshToken(
-    refreshToken: string
+    refreshToken: string,
   ): Promise<{ access_token: string }> {
     return this.request<{ access_token: string }>(
       "/api/v1/recruiters/auth/refresh",
       {
         method: "POST",
         body: JSON.stringify({ refresh_token: refreshToken }),
-      }
+      },
     );
   }
 
@@ -310,7 +320,7 @@ export class ApiClient {
         method: "POST",
       },
       true,
-      true
+      true,
     );
   }
 
@@ -320,65 +330,65 @@ export class ApiClient {
       {
         method: "POST",
         body: JSON.stringify({ email }),
-      }
+      },
     );
   }
 
   async recruiterPasswordConfirm(
     token: string,
-    new_password: string
+    new_password: string,
   ): Promise<{ token: string; new_password: string }> {
     return this.request<{ token: string; new_password: string }>(
       "/api/v1/recruiters/auth/password-reset/confirm",
       {
         method: "POST",
         body: JSON.stringify({ token, new_password }),
-      }
+      },
     );
   }
 
   async getPublicRecruiterProfile(
-    username: string
+    username: string,
   ): Promise<RecruiterProfileResponse> {
     return this.request<RecruiterProfileResponse>(
-      `/api/v1/recruiters/profile/${username}`
+      `/api/v1/recruiters/profile/${username}`,
     );
   }
 
   async getTopHiringPartners(
-    limit: number = 20
+    limit: number = 20,
   ): Promise<TopHiringPartnersResponse> {
     return this.request<TopHiringPartnersResponse>(
-      `/api/v1/recruiters/profile/top-hiring-partners?limit=${limit}`
+      `/api/v1/recruiters/profile/top-hiring-partners?limit=${limit}`,
     );
   }
 
   async getMyJobPostings(
-    params?: URLSearchParams
+    params?: URLSearchParams,
   ): Promise<PaginatedResponse<Job>> {
     const queryString = params ? `?${params.toString()}` : "";
     return this.request<PaginatedResponse<Job>>(
       `/api/v1/recruiters/jobs/my-postings${queryString}`,
       {},
       true,
-      true
+      true,
     );
   }
 
   async getJobPostingDetails(
-    jobId: number
+    jobId: number,
   ): Promise<{ success: boolean; job: Job }> {
     return this.request<{ success: boolean; job: Job }>(
       `/api/v1/recruiters/jobs/posting/${jobId}`,
       {},
       true,
-      true
+      true,
     );
   }
 
   async updateJobPosting(
     jobId: number,
-    data: Partial<Job>
+    data: Partial<Job>,
   ): Promise<{ success: boolean; job: Job }> {
     return this.request<{ success: boolean; job: Job }>(
       `/api/v1/recruiters/jobs/posting/${jobId}`,
@@ -387,12 +397,12 @@ export class ApiClient {
         body: JSON.stringify(data),
       },
       true,
-      true
+      true,
     );
   }
 
   async deleteJobPosting(
-    jobId: number
+    jobId: number,
   ): Promise<{ success: boolean; message: string }> {
     return this.request<{ success: boolean; message: string }>(
       `/api/v1/recruiters/jobs/posting/${jobId}`,
@@ -400,19 +410,19 @@ export class ApiClient {
         method: "DELETE",
       },
       true,
-      true
+      true,
     );
   }
 
   async getJobApplications(
     jobId: number,
-    statusFilter?: string
+    statusFilter?: string,
   ): Promise<JobApplicationsResponse> {
     const params = new URLSearchParams();
     if (statusFilter && statusFilter !== "All") {
       params.append(
         "status_filter",
-        statusFilter.toLowerCase().replace(" ", "_")
+        statusFilter.toLowerCase().replace(" ", "_"),
       );
     }
     const queryString = params.toString();
@@ -437,13 +447,13 @@ export class ApiClient {
       "/api/v1/recruiters/jobs/dashboard/stats",
       {},
       true,
-      true
+      true,
     );
   }
 
   async updateApplicationStatus(
     applicationId: number,
-    status: string
+    status: string,
   ): Promise<{ success: boolean; application: Application }> {
     return this.request<{ success: boolean; application: Application }>(
       `/api/v1/recruiters/jobs/application/${applicationId}/status`,
@@ -452,18 +462,18 @@ export class ApiClient {
         body: JSON.stringify({ status }),
       },
       true,
-      true
+      true,
     );
   }
 
   async getApplicationDetails(
-    applicationId: number
+    applicationId: number,
   ): Promise<ApplicationDetailResponse> {
     return this.request<ApplicationDetailResponse>(
       `/api/v1/recruiters/jobs/application/${applicationId}`,
       {},
       true,
-      true
+      true,
     );
   }
 
@@ -473,16 +483,21 @@ export class ApiClient {
       `/api/v1/jobs/list?${params.toString()}`,
       {},
       true,
-      false
+      false,
     );
   }
 
+  /**
+   * Get individual job by its unique slug
+   * Used for job details page: /jobs/[slug]
+   * @example getJobBySlug('software-engineer-at-google-123')
+   */
   async getJobBySlug(slug: string): Promise<{ success: boolean; job: Job }> {
     return this.request<{ success: boolean; job: Job }>(
       `/api/v1/jobs/slug/${slug}`,
       {},
       true,
-      false
+      false,
     );
   }
 
@@ -491,13 +506,13 @@ export class ApiClient {
       `/api/v1/jobs/${jobId}`,
       {},
       true,
-      false
+      false,
     );
   }
 
   async applyToJob(
     jobId: number,
-    data: { resume_id: number; cover_letter: string }
+    data: { resume_id: number; cover_letter: string },
   ): Promise<{ success: boolean; application: Application }> {
     return this.request<{ success: boolean; application: Application }>(
       `/api/v1/jobs/${jobId}/apply`,
@@ -506,7 +521,7 @@ export class ApiClient {
         body: JSON.stringify(data),
       },
       true,
-      false
+      false,
     );
   }
 
@@ -518,7 +533,7 @@ export class ApiClient {
       "/api/v1/jobs/my-applications",
       {},
       true,
-      false
+      false,
     );
   }
 
@@ -530,7 +545,7 @@ export class ApiClient {
         method: "POST",
       },
       true,
-      false
+      false,
     );
   }
 
@@ -541,13 +556,13 @@ export class ApiClient {
         method: "DELETE",
       },
       true,
-      false
+      false,
     );
   }
 
   async uploadResume(
     file: File,
-    resumeName?: string
+    resumeName?: string,
   ): Promise<{
     success: boolean;
     message: string;
@@ -590,7 +605,7 @@ export class ApiClient {
         body: formData,
       },
       true,
-      false
+      false,
     );
   }
 
@@ -598,7 +613,7 @@ export class ApiClient {
     return this.request<{ total: number; resumes: PdfResume[] }>(
       "/api/v1/pdf-resumes/",
       {},
-      true
+      true,
     );
   }
 
@@ -608,7 +623,7 @@ export class ApiClient {
 
   async updatePdfResume(
     id: number,
-    data: { resume_name?: string; description?: string; is_public?: boolean }
+    data: { resume_name?: string; description?: string; is_public?: boolean },
   ): Promise<PdfResume> {
     return this.request<PdfResume>(
       `/api/v1/pdf-resumes/${id}`,
@@ -616,7 +631,7 @@ export class ApiClient {
         method: "PUT",
         body: JSON.stringify(data),
       },
-      true
+      true,
     );
   }
 
@@ -624,7 +639,7 @@ export class ApiClient {
     return this.request<{ download_url: string }>(
       `/api/v1/pdf-resumes/${id}/download`,
       {},
-      true
+      true,
     );
   }
 
@@ -646,7 +661,7 @@ export class ApiClient {
     return this.request<{ success: boolean }>(
       `/api/v1/pdf-resumes/${id}`,
       { method: "DELETE" },
-      true
+      true,
     );
   }
 
@@ -654,7 +669,7 @@ export class ApiClient {
   async getApplicationResumeDownloadUrl(
     applicationId: number,
     downloadType: "url" | "stream" = "url",
-    forceDownload: boolean = false
+    forceDownload: boolean = false,
   ): Promise<{ download_url: string }> {
     const params = new URLSearchParams({
       download_type: downloadType,
@@ -664,7 +679,7 @@ export class ApiClient {
       `/api/v1/recruiters/jobs/application/${applicationId}/resume?${params.toString()}`,
       {},
       true,
-      true
+      true,
     );
   }
 
@@ -681,7 +696,7 @@ export class ApiClient {
         body: JSON.stringify(data),
       },
       true,
-      true
+      true,
     );
   }
 
@@ -690,27 +705,23 @@ export class ApiClient {
       "/api/v1/recruiters/jobs/my-jobs",
       {},
       true,
-      true
+      true,
     );
   }
 
   async getJobFilters(): Promise<{
     success: boolean;
-    filters: {
-      industries: { name: string; count: number }[];
-      job_titles: { name: string; count: number }[];
-      experience_levels: { name: string; count: number }[];
-      freshness: { name: string; value: string; count: number }[];
-    };
+    filters: Record<
+      string,
+      { name: string; value: string; count: number; [key: string]: any }[]
+    >;
   }> {
     return this.request<{
       success: boolean;
-      filters: {
-        industries: { name: string; count: number }[];
-        job_titles: { name: string; count: number }[];
-        experience_levels: { name: string; count: number }[];
-        freshness: { name: string; value: string; count: number }[];
-      };
+      filters: Record<
+        string,
+        { name: string; value: string; count: number; [key: string]: any }[]
+      >;
     }>("/api/v1/jobs/filters", {}, false, false);
   }
 
@@ -718,7 +729,7 @@ export class ApiClient {
    * Upload company logo (multipart/form-data)
    */
   async uploadRecruiterLogo(
-    file: File
+    file: File,
   ): Promise<{ url: string; logo_url?: string }> {
     const formData = new FormData();
     formData.append("file", file);
@@ -729,7 +740,7 @@ export class ApiClient {
         body: formData,
       },
       true,
-      true
+      true,
     );
   }
 
@@ -744,7 +755,7 @@ export class ApiClient {
         headers: this.getHeaders(true, true) as HeadersInit,
       },
       true,
-      true
+      true,
     );
   }
 
@@ -752,7 +763,7 @@ export class ApiClient {
    * Upload gallery image (multipart/form-data)
    */
   async uploadRecruiterGalleryImage(
-    file: File
+    file: File,
   ): Promise<{ url: string; image_url?: string }> {
     const formData = new FormData();
     formData.append("file", file);
@@ -763,7 +774,7 @@ export class ApiClient {
         body: formData,
       },
       true,
-      true
+      true,
     );
   }
 
@@ -771,10 +782,10 @@ export class ApiClient {
    * Delete gallery image by image_url (query param)
    */
   async deleteRecruiterGalleryImage(
-    imageUrl: string
+    imageUrl: string,
   ): Promise<{ success: boolean; message?: string }> {
     const endpoint = `/api/v1/recruiters/profile/delete-gallery-image?image_url=${encodeURIComponent(
-      imageUrl
+      imageUrl,
     )}`;
     return this.request<{ success: boolean; message?: string }>(
       endpoint,
@@ -783,7 +794,7 @@ export class ApiClient {
         headers: this.getHeaders(true, true) as HeadersInit,
       },
       true,
-      true
+      true,
     );
   }
 
@@ -798,7 +809,7 @@ export class ApiClient {
         headers: this.getHeaders(true, true) as HeadersInit,
       },
       true,
-      true
+      true,
     );
   }
 
@@ -806,7 +817,7 @@ export class ApiClient {
    * Get gallery images by username (public)
    */
   async getRecruiterGalleryByUsername(
-    username: string
+    username: string,
   ): Promise<{ images: string[] }> {
     return this.request<{ images: string[] }>(
       `/api/v1/recruiters/profile/gallery/${username}`,
@@ -815,7 +826,7 @@ export class ApiClient {
         headers: this.getHeaders(false, true) as HeadersInit,
       },
       false,
-      true
+      true,
     );
   }
 
@@ -830,7 +841,7 @@ export class ApiClient {
         headers: this.getHeaders(true, true) as HeadersInit,
       },
       true,
-      true
+      true,
     );
   }
 
@@ -843,7 +854,7 @@ export class ApiClient {
         headers: this.getHeaders(true, true) as HeadersInit,
       },
       true,
-      true
+      true,
     );
   }
 
@@ -856,7 +867,7 @@ export class ApiClient {
         headers: this.getHeaders(true, true) as HeadersInit,
       },
       true,
-      true
+      true,
     );
   }
 
@@ -870,7 +881,7 @@ export class ApiClient {
         headers: this.getHeaders(true, true) as HeadersInit,
       },
       true,
-      true
+      true,
     );
   }
 
@@ -883,7 +894,7 @@ export class ApiClient {
         headers: this.getHeaders(true, true) as HeadersInit,
       },
       true,
-      true
+      true,
     );
   }
 
@@ -898,7 +909,7 @@ export class ApiClient {
         body: formData,
       },
       true,
-      true
+      true,
     );
   }
 
@@ -912,7 +923,7 @@ export class ApiClient {
         headers: this.getHeaders(true, true) as HeadersInit,
       },
       true,
-      true
+      true,
     );
   }
 
@@ -925,7 +936,7 @@ export class ApiClient {
         headers: this.getHeaders(true, true) as HeadersInit,
       },
       true,
-      true
+      true,
     );
   }
 
@@ -938,7 +949,7 @@ export class ApiClient {
         headers: this.getHeaders(false, true) as HeadersInit,
       },
       false,
-      true
+      true,
     );
   }
 
@@ -951,7 +962,7 @@ export class ApiClient {
         headers: this.getHeaders(false, true) as HeadersInit,
       },
       false,
-      true
+      true,
     );
   }
   // async getJobApplications(
@@ -983,7 +994,7 @@ export class ApiClient {
 
   async updateJob(
     jobId: number,
-    data: Partial<Job>
+    data: Partial<Job>,
   ): Promise<{ success: boolean; job: Job }> {
     return this.request<{ success: boolean; job: Job }>(
       `/api/v1/recruiters/jobs/posting/${jobId}`,
@@ -992,13 +1003,13 @@ export class ApiClient {
         body: JSON.stringify(data),
       },
       true,
-      true
+      true,
     );
   }
 
   async deleteJob(
     jobId: number,
-    permanent: boolean = false
+    permanent: boolean = false,
   ): Promise<{ success: boolean; message: string; job_id: number }> {
     const query = permanent ? "?permanent=true" : "";
     return this.request<{ success: boolean; message: string; job_id: number }>(
@@ -1007,7 +1018,7 @@ export class ApiClient {
         method: "DELETE",
       },
       true,
-      true
+      true,
     );
   }
 
@@ -1035,7 +1046,7 @@ export class ApiClient {
         method: "POST",
       },
       true,
-      false // Use candidate token, not recruiter
+      false, // Use candidate token, not recruiter
     );
   }
 
@@ -1055,19 +1066,19 @@ export class ApiClient {
   }
 
   async transformMetadataForGraphQL(
-    resumeId: number
+    resumeId: number,
   ): Promise<ReviewedResumeMetadata> {
     return this.request(
       `/api/v1/pdf-resumes/${resumeId}/transform-for-graphql`,
       {},
       true,
-      false
+      false,
     );
   }
 
   async saveReviewedMetadata(
     resumeId: number,
-    metadata: ReviewedResumeMetadata
+    metadata: ReviewedResumeMetadata,
   ): Promise<{ success: boolean; message: string }> {
     return this.request<{ success: boolean; message: string }>(
       `/api/v1/pdf-resumes/${resumeId}/save-reviewed-metadata`,
@@ -1076,7 +1087,170 @@ export class ApiClient {
         body: JSON.stringify(metadata),
       },
       true, // includeAuth
-      false // isRecruiter
+      false, // isRecruiter
+    );
+  }
+
+  // ============================================================================
+  // SEO Jobs API - For job listing pages by location/type/experience
+  // ============================================================================
+
+  /**
+   * Fetch multiple jobs by SEO slug pattern
+   * Used for SEO job listing pages: /[...slug]
+   * @example getJobsBySlug('jobs-in-bangalore')
+   * @example getJobsBySlug('remote-python-developer-jobs')
+   * @example getJobsBySlug('full-time-jobs-in-india')
+   */
+  async getJobsBySlug(
+    slug: string,
+    options?: {
+      limit?: number;
+      offset?: number;
+    },
+  ): Promise<SEOJobsResponse> {
+    const params = new URLSearchParams();
+
+    if (options?.limit) params.set("limit", options.limit.toString());
+    if (options?.offset) params.set("offset", options.offset.toString());
+
+    const queryString = params.toString();
+    const url = `/api/v1/jobs/by-slug/${slug}${queryString ? `?${queryString}` : ""}`;
+
+    return this.request<SEOJobsResponse>(url, {}, false, false);
+  }
+
+  /**
+   * Fetch all SEO patterns for sitemap generation
+   */
+  async getSEOPatterns(options?: {
+    limit?: number;
+    minJobs?: number;
+  }): Promise<SEOPatternsResponse> {
+    const params = new URLSearchParams();
+
+    if (options?.limit) params.set("limit", options.limit.toString());
+    if (options?.minJobs) params.set("min_jobs", options.minJobs.toString());
+
+    return this.request<SEOPatternsResponse>(
+      `/api/v1/jobs/seo-patterns?${params.toString()}`,
+      {},
+      false,
+      false,
+    );
+  }
+
+  // ============================================================================
+  // Job Cards API
+  // ============================================================================
+
+  /**
+   * Fetch jobs grouped by country
+   */
+  async getJobsByCountry(options?: {
+    limit?: number;
+    minJobs?: number;
+  }): Promise<CountryCardsResponse> {
+    const params = new URLSearchParams();
+
+    if (options?.limit) params.set("limit", options.limit.toString());
+    if (options?.minJobs) params.set("min_jobs", options.minJobs.toString());
+
+    return this.request<CountryCardsResponse>(
+      `/api/v1/jobs/cards/by-country?${params.toString()}`,
+      {},
+      false,
+      false,
+    );
+  }
+
+  /**
+   * Fetch jobs grouped by city
+   */
+  async getJobsByCity(options?: {
+    limit?: number;
+    minJobs?: number;
+    country?: string;
+  }): Promise<CityCardsResponse> {
+    const params = new URLSearchParams();
+
+    if (options?.limit) params.set("limit", options.limit.toString());
+    if (options?.minJobs) params.set("min_jobs", options.minJobs.toString());
+    if (options?.country) params.set("country", options.country);
+
+    return this.request<CityCardsResponse>(
+      `/api/v1/jobs/cards/by-city?${params.toString()}`,
+      {},
+      false,
+      false,
+    );
+  }
+
+  /**
+   * Fetch jobs grouped by industry
+   */
+  async getJobsByIndustry(options?: {
+    limit?: number;
+    minJobs?: number;
+  }): Promise<IndustryCardsResponse> {
+    const params = new URLSearchParams();
+
+    if (options?.limit) params.set("limit", options.limit.toString());
+    if (options?.minJobs) params.set("min_jobs", options.minJobs.toString());
+
+    return this.request<IndustryCardsResponse>(
+      `/api/v1/jobs/cards/by-industry?${params.toString()}`,
+      {},
+      false,
+      false,
+    );
+  }
+
+  /**
+   * Fetch jobs grouped by job type
+   */
+  async getJobsByJobType(): Promise<JobTypeCardsResponse> {
+    return this.request<JobTypeCardsResponse>(
+      "/api/v1/jobs/cards/by-job-type",
+      {},
+      false,
+      false,
+    );
+  }
+
+  /**
+   * Fetch jobs grouped by experience level
+   */
+  async getJobsByExperience(): Promise<ExperienceCardsResponse> {
+    return this.request<ExperienceCardsResponse>(
+      "/api/v1/jobs/cards/by-experience",
+      {},
+      false,
+      false,
+    );
+  }
+
+  /**
+   * Fetch remote vs on-site job stats
+   */
+  async getRemoteJobsStats(): Promise<RemoteCardsResponse> {
+    return this.request<RemoteCardsResponse>(
+      "/api/v1/jobs/cards/remote",
+      {},
+      false,
+      false,
+    );
+  }
+
+  /**
+   * Fetch all cards summary in one request (optimized for homepage)
+   */
+  async getCardsSummary(): Promise<CardsSummaryResponse> {
+    return this.request<CardsSummaryResponse>(
+      "/api/v1/jobs/cards/summary",
+      {},
+      false,
+      false,
     );
   }
 }

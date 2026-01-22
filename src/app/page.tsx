@@ -1,7 +1,13 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
 import config from "@/config";
 import Header from "@/components/Header";
+import { JobCards } from "@/components/jobs";
+import { useEffect, useState } from "react";
+import { CardsSummaryResponse } from "@/types/jobs";
+import { api } from "@/lib/api";
 
 const UserIcon = () => (
   <svg
@@ -89,6 +95,25 @@ const TargetIcon = () => (
 );
 
 export default function Home() {
+  const [cardsData, setCardsData] = useState<CardsSummaryResponse | null>(null);
+  const [cardsLoading, setCardsLoading] = useState(true);
+
+  // Fetch job cards data
+  useEffect(() => {
+    const fetchCards = async () => {
+      setCardsLoading(true);
+      try {
+        const response = await api.getCardsSummary();
+        setCardsData(response);
+      } catch (err) {
+        console.error("Failed to load job cards:", err);
+      } finally {
+        setCardsLoading(false);
+      }
+    };
+    fetchCards();
+  }, []);
+
   return (
     <div className="min-h-screen bg-white dark:bg-gray-950 dark:text-gray-100 transition-colors duration-300">
       {/* Navigation */}
@@ -148,6 +173,19 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Job Cards Section */}
+      {cardsData && (
+        <div className="w-full max-w-7xl mx-auto px-4 mb-8">
+          <JobCards
+            countries={cardsData.countries}
+            cities={cardsData.cities}
+            industries={cardsData.industries}
+            jobTypes={cardsData.job_types}
+            remote={cardsData.remote}
+            loading={cardsLoading}
+          />
+        </div>
+      )}
       {/* How It Works Section */}
       <section className="py-32 bg-gray-50 dark:bg-gray-900/50 border-b border-gray-100 dark:border-gray-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

@@ -55,7 +55,7 @@ export default function JobsSidebar() {
                   <div className="relative h-10 w-10 mb-2">
                     <Image
                       src={partner.company_logo_url}
-                      alt={partner.company_name}
+                      alt={partner.company_name || "Company"}
                       fill
                       className="object-contain"
                     />
@@ -63,12 +63,12 @@ export default function JobsSidebar() {
                 ) : (
                   <div className="h-10 w-10 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center mb-2">
                     <span className="text-blue-600 dark:text-blue-400 font-bold text-lg">
-                      {partner.company_name.charAt(0)}
+                      {partner.company_name?.charAt(0) || "?"}
                     </span>
                   </div>
                 )}
                 <span className="text-xs font-medium text-gray-700 dark:text-gray-300 text-center line-clamp-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition">
-                  {partner.company_name}
+                  {partner.company_name || "Unknown Company"}
                 </span>
                 {partner.active_jobs_count > 0 && (
                   <span className="text-[10px] text-blue-600 dark:text-blue-400 font-semibold mt-1">
