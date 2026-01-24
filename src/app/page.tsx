@@ -114,6 +114,8 @@ export default function Home() {
     fetchCards();
   }, []);
 
+  console.log(cardsData);
+
   return (
     <div className="min-h-screen bg-white dark:bg-gray-950 dark:text-gray-100 transition-colors duration-300">
       {/* Navigation */}
@@ -131,61 +133,501 @@ export default function Home() {
       />
 
       {/* Hero Section */}
-      <section className="relative pt-32 pb-20 lg:pt-48 lg:pb-32 overflow-hidden">
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full -z-10">
-          <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-blue-100 rounded-full blur-[120px] opacity-50" />
-          <div className="absolute bottom-[10%] right-[-5%] w-[30%] h-[30%] bg-indigo-100 rounded-full blur-[100px] opacity-40" />
+      <section className="relative pt-24 pb-16 lg:pt-32 lg:pb-20 overflow-hidden bg-gradient-to-br from-blue-50/50 via-teal-50/30 to-gray-50/50 dark:from-gray-900 dark:to-gray-950">
+        {/* Background Decorations */}
+        <div className="absolute inset-0 -z-10 overflow-hidden">
+          <div className="absolute top-[10%] left-[-15%] w-[500px] h-[500px] bg-gradient-to-br from-blue-200/40 to-teal-200/40 dark:from-blue-900/20 dark:to-teal-900/20 rounded-full blur-3xl" />
+          <div className="absolute bottom-[20%] left-[-10%] w-[400px] h-[400px] bg-gradient-to-br from-teal-200/30 to-blue-200/30 dark:from-teal-900/15 dark:to-blue-900/15 rounded-full blur-3xl" />
         </div>
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 className="text-6xl lg:text-8xl font-black text-gray-900 dark:text-gray-100 mb-8 tracking-tighter leading-[0.9]">
-            Share Your Resume <br />
-            with a{" "}
-            <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-              Single Link.
-            </span>
-          </h1>
-          <p className="text-xl text-gray-500 dark:text-gray-400 mb-12 max-w-2xl mx-auto leading-relaxed font-medium">
-            Stop sending PDF attachments. Create your resume on LetsMakeCV, then
-            share it instantly with recruiters using a live PreviewCV link.
-          </p>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center min-h-[500px]">
+            {/* Left Side - Search Section */}
+            <div className="order-2 lg:order-1">
+              <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-gray-100 mb-8">
+                Search through{" "}
+                <span className="text-gray-900 dark:text-gray-100">92,868</span>{" "}
+                Jobs
+              </h2>
 
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
-            <Link
-              href="/candidate"
-              className="w-full sm:w-auto px-8 py-4 bg-white border border-gray-200 text-gray-900 font-bold rounded-2xl hover:border-blue-500 hover:text-blue-600 transition-all shadow-sm hover:shadow-md flex items-center justify-center gap-3"
-            >
-              <span className="text-blue-600">
-                <UserIcon />
-              </span>
-              I&apos;m a Job Seeker
-            </Link>
-            <Link
-              href="/recruiter"
-              className="w-full sm:w-auto px-8 py-4 bg-gray-900 text-white font-bold rounded-2xl hover:bg-gray-800 transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-3"
-            >
-              <span className="text-gray-400">
-                <BriefcaseIcon />
-              </span>
-              I&apos;m a Recruiter
-            </Link>
+              <div className="flex gap-3">
+                <input
+                  type="text"
+                  placeholder="Search by keywords, destinations, company"
+                  className="flex-1 px-6 py-4 bg-white dark:bg-gray-800 rounded-full border border-gray-200 dark:border-gray-700 outline-none focus:border-teal-600 dark:focus:border-teal-500 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 shadow-sm"
+                />
+                <Link
+                  href="/jobs"
+                  className="px-8 py-4 bg-teal-700 hover:bg-teal-800 dark:bg-teal-600 dark:hover:bg-teal-700 text-white font-semibold rounded-full transition-all shadow-md whitespace-nowrap"
+                >
+                  Search job
+                </Link>
+              </div>
+            </div>
+
+            {/* Right Side - Main Hero Content */}
+            <div className="order-1 lg:order-2">
+              <h1 className="text-4xl lg:text-6xl font-bold text-gray-900 dark:text-gray-100 mb-6 leading-tight">
+                Share Your Resume with a Single Link.
+              </h1>
+              <p className="text-lg text-gray-600 dark:text-gray-400 mb-10 leading-relaxed">
+                Stop sending PDF attachments. Create your resume on LetsMakeCV,
+                then share it instantly with recruiters using a live PreviewCV
+                link.
+              </p>
+
+              {/* CTA Buttons */}
+              <div className="flex flex-col sm:flex-row gap-4">
+                <Link
+                  href="/candidate"
+                  className="px-10 py-4 bg-teal-700 hover:bg-teal-800 dark:bg-teal-600 dark:hover:bg-teal-700 text-white font-semibold rounded-full transition-all shadow-md text-center"
+                >
+                  Job Seeker
+                </Link>
+                <Link
+                  href="/recruiter"
+                  className="px-10 py-4 bg-transparent border-2 border-teal-700 dark:border-teal-600 text-teal-700 dark:text-teal-400 hover:bg-teal-50 dark:hover:bg-teal-900/20 font-semibold rounded-full transition-all text-center"
+                >
+                  Recruiter
+                </Link>
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* Job Cards Section */}
-      {cardsData && (
-        <div className="w-full max-w-7xl mx-auto px-4 mb-8">
-          <JobCards
-            countries={cardsData.countries}
-            cities={cardsData.cities}
-            industries={cardsData.industries}
-            jobTypes={cardsData.job_types}
-            remote={cardsData.remote}
-            loading={cardsLoading}
-          />
+      {/* Company Logos Section */}
+      <section className="py-12 bg-white dark:bg-gray-900 border-y border-gray-100 dark:border-gray-800">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <p className="text-center text-sm text-gray-500 dark:text-gray-400 font-medium mb-8">
+            Career Opportunities With Top Companies
+          </p>
+          <div className="flex flex-wrap items-center justify-center gap-8 lg:gap-12">
+            <div className="text-gray-600 dark:text-gray-400 font-bold text-xl lg:text-2xl opacity-70 hover:opacity-100 transition-opacity">
+              Google
+            </div>
+            <div className="text-gray-600 dark:text-gray-400 font-bold text-xl lg:text-2xl opacity-70 hover:opacity-100 transition-opacity">
+              ORACLE
+            </div>
+            <div className="text-gray-600 dark:text-gray-400 font-bold text-xl lg:text-2xl opacity-70 hover:opacity-100 transition-opacity">
+              Bloomberg
+            </div>
+            <div className="text-gray-600 dark:text-gray-400 font-bold text-xl lg:text-2xl opacity-70 hover:opacity-100 transition-opacity">
+              Microsoft
+            </div>
+            <div className="text-gray-600 dark:text-gray-400 font-bold text-xl lg:text-2xl opacity-70 hover:opacity-100 transition-opacity">
+              DocuSign
+            </div>
+            <div className="text-gray-600 dark:text-gray-400 font-bold text-xl lg:text-2xl opacity-70 hover:opacity-100 transition-opacity">
+              Dropbox
+            </div>
+            <div className="text-gray-600 dark:text-gray-400 font-bold text-xl lg:text-2xl opacity-70 hover:opacity-100 transition-opacity">
+              TWO SIGMA
+            </div>
+            <div className="text-gray-600 dark:text-gray-400 font-bold text-xl lg:text-2xl opacity-70 hover:opacity-100 transition-opacity">
+              Apple
+            </div>
+          </div>
         </div>
-      )}
+      </section>
+
+      <div className="flex flex-row  bg-gray-50 dark:bg-gray-900 p-16 itmes-center justify-around gap-2 ">
+        {/* Jobs by Location Section */}
+        <section className="">
+          <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-gray-100 mb-8">
+            Jobs By Location
+          </h2>
+          <div className="flex flex-wrap gap-3 flex-row">
+            {cardsData?.cities?.slice(0, 7).map((city) => (
+              <Link
+                key={city.slug}
+                href={`/jobs/${city.slug}`}
+                className="px-6 py-3 bg-white dark:bg-gray-800 hover:bg-teal-50 dark:hover:bg-teal-900/20 text-gray-900 dark:text-gray-100 font-medium rounded-full border border-gray-300 dark:border-gray-700 hover:border-teal-600 dark:hover:border-teal-500 transition-all shadow-sm hover:shadow-md"
+              >
+                {city.city}
+              </Link>
+            ))}
+            {cardsData?.cities && cardsData.cities.length > 7 && (
+              <Link
+                href="/jobs"
+                className="px-6 py-3 bg-white dark:bg-gray-800 hover:bg-teal-50 dark:hover:bg-teal-900/20 text-teal-600 dark:text-teal-400 font-semibold rounded-full border border-gray-300 dark:border-gray-700 hover:border-teal-600 dark:hover:border-teal-500 transition-all shadow-sm hover:shadow-md"
+              >
+                {cardsData.cities.length - 7}+ more
+              </Link>
+            )}
+          </div>
+        </section>
+
+        {/* Jobs by Category Section */}
+        <section className="">
+          <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-gray-100 mb-8">
+            Jobs By Category
+          </h2>
+          <div className="flex flex-wrap gap-3">
+            {cardsData?.industries?.slice(0, 5).map((ind) => (
+              <Link
+                key={ind.slug}
+                href={`/jobs/${ind.slug}`}
+                className="px-6 py-3 bg-white dark:bg-gray-800 hover:bg-teal-50 dark:hover:bg-teal-900/20 text-gray-900 dark:text-gray-100 font-medium rounded-full border border-gray-300 dark:border-gray-700 hover:border-teal-600 dark:hover:border-teal-500 transition-all shadow-sm hover:shadow-md"
+              >
+                {ind.industry}
+              </Link>
+            ))}
+            {cardsData?.industries && cardsData.industries.length > 5 && (
+              <Link
+                href="/jobs"
+                className="px-6 py-3 bg-white dark:bg-gray-800 hover:bg-teal-50 dark:hover:bg-teal-900/20 text-teal-600 dark:text-teal-400 font-semibold rounded-full border border-gray-300 dark:border-gray-700 hover:border-teal-600 dark:hover:border-teal-500 transition-all shadow-sm hover:shadow-md"
+              >
+                {cardsData.industries.length - 5}+ more
+              </Link>
+            )}
+          </div>
+        </section>
+      </div>
+
+      {/* Create CV Section */}
+      <section className="py-20 bg-gradient-to-br from-blue-50/50 to-purple-50/30 dark:bg-gray-900">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+            {/* Left: Content */}
+            <div>
+              <h2 className="text-4xl lg:text-5xl font-bold text-gray-900 dark:text-gray-100 mb-4">
+                Create your CV with us
+              </h2>
+              <p className="text-xl text-gray-600 dark:text-gray-400 mb-8">
+                It is{" "}
+                <span className="text-purple-600 font-bold">AI enabled</span> &
+                faster!
+              </p>
+
+              <ul className="space-y-4 mb-10">
+                <li className="flex items-center gap-3">
+                  <div className="w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center flex-shrink-0">
+                    <svg
+                      className="w-4 h-4"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={3}
+                        d="M5 13l4 4L19 7"
+                      />
+                    </svg>
+                  </div>
+                  <span className="text-gray-800 dark:text-gray-200 font-medium">
+                    Choose from multiple templates
+                  </span>
+                </li>
+                <li className="flex items-center gap-3">
+                  <div className="w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center flex-shrink-0">
+                    <svg
+                      className="w-4 h-4"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={3}
+                        d="M5 13l4 4L19 7"
+                      />
+                    </svg>
+                  </div>
+                  <span className="text-gray-800 dark:text-gray-200 font-medium">
+                    Fill in your details & let AI assist you
+                  </span>
+                </li>
+                <li className="flex items-center gap-3">
+                  <div className="w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center flex-shrink-0">
+                    <svg
+                      className="w-4 h-4"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={3}
+                        d="M5 13l4 4L19 7"
+                      />
+                    </svg>
+                  </div>
+                  <span className="text-gray-800 dark:text-gray-200 font-medium">
+                    Download in PDF format
+                  </span>
+                </li>
+              </ul>
+
+              <Link
+                href="/candidate/signup"
+                className="inline-flex items-center gap-2 px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl transition-all shadow-lg text-lg"
+              >
+                Create CV ✨
+              </Link>
+            </div>
+
+            {/* Right: Resume Templates Grid */}
+            <div className="grid grid-cols-2 gap-4">
+              {/* Template 1 - Red/Orange with photo */}
+              <div className="bg-gradient-to-br from-orange-500 to-red-600 rounded-2xl shadow-xl overflow-hidden aspect-[3/4] relative transform hover:scale-105 transition-transform">
+                <div className="p-4 text-white">
+                  <div className="w-20 h-20 bg-white/90 rounded-full mx-auto mb-3 overflow-hidden border-4 border-white/50">
+                    <div className="w-full h-full bg-gradient-to-br from-orange-200 to-orange-300"></div>
+                  </div>
+                  <div className="text-center mb-4">
+                    <div className="h-3 w-24 bg-white/80 rounded mx-auto mb-1"></div>
+                    <div className="h-2 w-20 bg-white/60 rounded mx-auto"></div>
+                  </div>
+                  <div className="space-y-2 mt-6">
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 bg-white/70 rounded-sm"></div>
+                      <div className="h-1.5 w-full bg-white/40 rounded"></div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 bg-white/70 rounded-sm"></div>
+                      <div className="h-1.5 w-4/5 bg-white/40 rounded"></div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 bg-white/70 rounded-sm"></div>
+                      <div className="h-1.5 w-full bg-white/40 rounded"></div>
+                    </div>
+                  </div>
+                  <div className="mt-4 pt-4 border-t border-white/30">
+                    <div className="h-2 w-16 bg-white/70 rounded mb-2"></div>
+                    <div className="space-y-1">
+                      <div className="h-1 w-full bg-white/30 rounded"></div>
+                      <div className="h-1 w-full bg-white/30 rounded"></div>
+                      <div className="h-1 w-3/4 bg-white/30 rounded"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Template 2 - Beige/Cream professional */}
+              <div className="bg-gradient-to-br from-amber-50 to-orange-100 dark:from-amber-100 dark:to-orange-200 rounded-2xl shadow-xl overflow-hidden aspect-[3/4] relative transform hover:scale-105 transition-transform border border-gray-200">
+                <div className="p-4">
+                  <div className="mb-3 pb-3 border-b-2 border-orange-400">
+                    <div className="h-4 w-28 bg-gray-800 rounded mb-1"></div>
+                    <div className="h-2 w-24 bg-gray-600 rounded"></div>
+                  </div>
+                  <div className="space-y-3">
+                    <div>
+                      <div className="h-2 w-20 bg-orange-500 rounded mb-2 font-bold"></div>
+                      <div className="space-y-1">
+                        <div className="h-1.5 w-full bg-gray-400 rounded"></div>
+                        <div className="h-1.5 w-full bg-gray-400 rounded"></div>
+                        <div className="h-1.5 w-4/5 bg-gray-400 rounded"></div>
+                      </div>
+                    </div>
+                    <div>
+                      <div className="h-2 w-24 bg-orange-500 rounded mb-2"></div>
+                      <div className="space-y-1">
+                        <div className="h-1.5 w-full bg-gray-400 rounded"></div>
+                        <div className="h-1.5 w-5/6 bg-gray-400 rounded"></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Template 3 - Light/Minimalist */}
+              <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl overflow-hidden aspect-[3/4] relative transform hover:scale-105 transition-transform border-2 border-gray-200 dark:border-gray-700">
+                <div className="p-4">
+                  <div className="text-center mb-4 pb-4 border-b-2 border-gray-300 dark:border-gray-600">
+                    <div className="h-4 w-32 bg-gray-800 dark:bg-gray-200 rounded mx-auto mb-1"></div>
+                    <div className="h-2 w-24 bg-gray-500 dark:bg-gray-400 rounded mx-auto mb-2"></div>
+                    <div className="flex gap-2 justify-center">
+                      <div className="h-1.5 w-12 bg-blue-600 rounded"></div>
+                      <div className="h-1.5 w-12 bg-blue-600 rounded"></div>
+                    </div>
+                  </div>
+                  <div className="space-y-3">
+                    <div>
+                      <div className="h-2 w-20 bg-blue-600 rounded mb-2"></div>
+                      <div className="space-y-1">
+                        <div className="h-1.5 w-full bg-gray-300 dark:bg-gray-600 rounded"></div>
+                        <div className="h-1.5 w-full bg-gray-300 dark:bg-gray-600 rounded"></div>
+                      </div>
+                    </div>
+                    <div>
+                      <div className="h-2 w-16 bg-blue-600 rounded mb-2"></div>
+                      <div className="h-1.5 w-5/6 bg-gray-300 dark:bg-gray-600 rounded"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Template 4 - Dark/Professional */}
+              <div className="bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl shadow-xl overflow-hidden aspect-[3/4] relative transform hover:scale-105 transition-transform">
+                <div className="p-4 text-white">
+                  <div className="flex items-start gap-3 mb-4">
+                    <div className="w-14 h-14 bg-blue-500 rounded-lg flex-shrink-0"></div>
+                    <div>
+                      <div className="h-3 w-24 bg-white/90 rounded mb-1"></div>
+                      <div className="h-2 w-20 bg-white/60 rounded"></div>
+                    </div>
+                  </div>
+                  <div className="space-y-3">
+                    <div>
+                      <div className="h-2 w-20 bg-blue-400 rounded mb-2"></div>
+                      <div className="space-y-1">
+                        <div className="h-1.5 w-full bg-white/40 rounded"></div>
+                        <div className="h-1.5 w-full bg-white/40 rounded"></div>
+                        <div className="h-1.5 w-4/5 bg-white/40 rounded"></div>
+                      </div>
+                    </div>
+                    <div>
+                      <div className="h-2 w-16 bg-blue-400 rounded mb-2"></div>
+                      <div className="space-y-1">
+                        <div className="h-1.5 w-full bg-white/40 rounded"></div>
+                        <div className="h-1.5 w-3/4 bg-white/40 rounded"></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Cover Letter Section */}
+      <section className="py-20 bg-blue-50/30 dark:bg-gray-950">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h2 className="text-4xl lg:text-5xl font-bold text-gray-900 dark:text-gray-100 mb-4">
+              Create a Professional{" "}
+              <span className="text-blue-600">Cover Letter</span>
+            </h2>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-start">
+            {/* Left: Cover Letter Mockup */}
+            <div className="grid grid-cols-2 gap-6">
+              {/* Cover Letter 1 - Teal */}
+              <div className="bg-gradient-to-br from-teal-500 to-teal-600 rounded-2xl shadow-lg overflow-hidden aspect-[3/4] p-6 text-white transform hover:scale-105 transition-transform">
+                <div className="space-y-3">
+                  <div className="h-2 w-2/3 bg-white/30 rounded"></div>
+                  <div className="h-2 w-1/2 bg-white/30 rounded"></div>
+                  <div className="pt-6 space-y-2">
+                    <div className="h-1.5 w-full bg-white/20 rounded"></div>
+                    <div className="h-1.5 w-full bg-white/20 rounded"></div>
+                    <div className="h-1.5 w-4/5 bg-white/20 rounded"></div>
+                    <div className="h-1.5 w-full bg-white/20 rounded"></div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Cover Letter 2 - Blue */}
+              <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-lg overflow-hidden aspect-[3/4] p-6 border border-gray-200 dark:border-gray-700 transform hover:scale-105 transition-transform mt-8">
+                <div className="space-y-3">
+                  <div className="h-2 w-2/3 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                  <div className="h-2 w-1/2 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                  <div className="pt-6 space-y-2">
+                    <div className="h-1.5 w-full bg-gray-100 dark:bg-gray-800 rounded"></div>
+                    <div className="h-1.5 w-full bg-gray-100 dark:bg-gray-800 rounded"></div>
+                    <div className="h-1.5 w-4/5 bg-gray-100 dark:bg-gray-800 rounded"></div>
+                    <div className="h-1.5 w-full bg-gray-100 dark:bg-gray-800 rounded"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Right: Features */}
+            <div className="lg:pl-8">
+              <ul className="space-y-6 mb-8">
+                <li className="flex items-start gap-4">
+                  <div className="w-8 h-8 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <svg
+                      className="w-5 h-5 text-green-600 dark:text-green-400"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2.5}
+                        d="M5 13l4 4L19 7"
+                      />
+                    </svg>
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-gray-900 dark:text-gray-100 mb-1">
+                      Automated Cover Letter Maker
+                    </h4>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                      Generate professional cover letters in seconds
+                    </p>
+                  </div>
+                </li>
+                <li className="flex items-start gap-4">
+                  <div className="w-8 h-8 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <svg
+                      className="w-5 h-5 text-green-600 dark:text-green-400"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2.5}
+                        d="M5 13l4 4L19 7"
+                      />
+                    </svg>
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-gray-900 dark:text-gray-100 mb-1">
+                      Integrated with your resume
+                    </h4>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                      Maintains consistency with your CV design
+                    </p>
+                  </div>
+                </li>
+                <li className="flex items-start gap-4">
+                  <div className="w-8 h-8 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <svg
+                      className="w-5 h-5 text-green-600 dark:text-green-400"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2.5}
+                        d="M5 13l4 4L19 7"
+                      />
+                    </svg>
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-gray-900 dark:text-gray-100 mb-1">
+                      Hiring manager approved
+                    </h4>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                      Templates designed by recruitment experts
+                    </p>
+                  </div>
+                </li>
+              </ul>
+              <Link
+                href="/candidate/signup"
+                className="inline-flex items-center gap-2 px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl transition-all shadow-md"
+              >
+                Create Cover Letter →
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* How It Works Section */}
       <section className="py-32 bg-gray-50 dark:bg-gray-900/50 border-b border-gray-100 dark:border-gray-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
