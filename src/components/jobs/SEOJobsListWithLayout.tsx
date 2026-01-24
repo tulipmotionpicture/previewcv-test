@@ -34,7 +34,16 @@ export default function SEOJobsListWithLayout({
       setLoading(true);
       setError("");
       try {
-        const response = await api.getJobsBySlug(slug, { limit, offset });
+        // Build query params from selectedFilters
+        const params: Record<string, string | number> = { limit, offset };
+
+        Object.entries(selectedFilters).forEach(([key, values]) => {
+          if (Array.isArray(values) && values.length > 0) {
+            params[key] = values.join(",");
+          }
+        });
+
+        const response = await api.getJobsBySlug(slug, params);
         setData(response);
       } catch (err) {
         setError(err instanceof Error ? err.message : "Failed to load jobs.");
@@ -43,7 +52,7 @@ export default function SEOJobsListWithLayout({
       }
     };
     fetchJobs();
-  }, [slug, limit, offset]);
+  }, [slug, limit, offset, selectedFilters]);
 
   return (
     <div>
