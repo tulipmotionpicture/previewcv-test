@@ -6,6 +6,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useRecruiterAuth } from "@/context/RecruiterAuthContext";
 import Header from "@/components/Header";
+import HeroSection from "@/components/HeroSection";
 
 const MagnifyingGlassIcon = () => (
   <svg
@@ -65,7 +66,7 @@ export default function RecruiterLanding() {
   }
 
   return (
-    <div className="min-h-screen bg-white dark:bg-gray-950 text-gray-950 dark:text-gray-100 selection:bg-indigo-100 dark:selection:bg-indigo-900 uppercase tracking-tight transition-colors duration-300">
+    <div className="min-h-screen bg-white dark:bg-gray-950 text-gray-950 dark:text-gray-100 transition-colors duration-300">
       {/* SaaS Nav */}
       <Header
         links={[
@@ -76,96 +77,25 @@ export default function RecruiterLanding() {
         showAuthButtons={true}
       />
 
-      <section className="relative pt-32 pb-40 px-8 overflow-hidden">
-        {/* Background Gradients */}
-        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-indigo-50 rounded-full blur-[120px] -z-10" />
-        <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-blue-50 rounded-full blur-[100px] -z-10" />
-
-        <div className="max-w-7xl mx-auto flex flex-col lg:flex-row items-center gap-20">
-          <div className="flex-1 text-center lg:text-left">
-            <div className="inline-block px-4 py-2 bg-indigo-50 text-indigo-600 text-[10px] font-black uppercase tracking-[0.2em] rounded-full mb-8">
-              Recruitment Platform
-            </div>
-            <h1 className="text-5xl lg:text-8xl font-black mb-10 leading-[0.9] tracking-tighter text-gray-900 dark:text-gray-100 uppercase">
-              Hire Smarter, <br /> Not{" "}
-              <span className="text-indigo-600 italic">Harder.</span>
-            </h1>
-            <p className="text-xl text-gray-500 dark:text-gray-400 font-medium mb-12 max-w-xl leading-relaxed mx-auto lg:mx-0">
-              Find and engage with top-tier talent effortlessly. Preview live
-              candidate resumes from LetsMakeCV and manage your hiring pipeline
-              in one place.
-            </p>
-
-            <div className="flex flex-wrap justify-center lg:justify-start gap-4 mb-16">
-              <Link
-                href="/recruiter/signup"
-                className="px-8 py-4 bg-gray-900 text-white font-black rounded-2xl hover:bg-gray-800 transition-all shadow-xl shadow-gray-200 uppercase tracking-tighter"
-              >
-                Start Hiring Now
-              </Link>
-              <a
-                href="#demo"
-                className="px-8 py-4 bg-white border border-gray-200 text-gray-900 font-black rounded-2xl hover:border-gray-900 transition-all uppercase tracking-tighter"
-              >
-                Watch Demo
-              </a>
-            </div>
-
-            <div className="flex items-center justify-center lg:justify-start gap-12 border-t border-gray-100 pt-12">
-              <div>
-                <div className="text-4xl font-black mb-1 text-gray-900">
-                  500+
-                </div>
-                <div className="text-[10px] text-gray-400 uppercase font-black tracking-widest leading-none">
-                  Companies
-                </div>
-              </div>
-              <div className="w-px h-10 bg-gray-100" />
-              <div>
-                <div className="text-4xl font-black mb-1 text-gray-900">
-                  10k+
-                </div>
-                <div className="text-[10px] text-gray-400 uppercase font-black tracking-widest leading-none">
-                  Hires Made
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="flex-1 relative group w-full lg:w-auto">
-            <div className="absolute -inset-4 bg-indigo-100 rounded-[60px] blur-3xl opacity-50 -z-10" />
-            <div className="relative bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-[48px] p-8 shadow-2xl overflow-hidden">
-              {/* Mock Recruiter Dashboard */}
-              <div className="flex items-center justify-between mb-10">
-                <div className="w-32 h-4 bg-gray-100 rounded-full" />
-                <div className="flex gap-2">
-                  <div className="w-10 h-10 bg-indigo-50 rounded-xl" />
-                  <div className="w-10 h-10 bg-blue-50 rounded-xl" />
-                </div>
-              </div>
-              <div className="space-y-6">
-                {[1, 2, 3].map((i) => (
-                  <div
-                    key={i}
-                    className="flex items-center justify-between p-5 bg-gray-50/50 rounded-3xl border border-gray-100"
-                  >
-                    <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 bg-indigo-100 rounded-2xl" />
-                      <div>
-                        <div className="w-24 h-3 bg-gray-200 rounded-full mb-2" />
-                        <div className="w-16 h-2 bg-gray-100 rounded-full" />
-                      </div>
-                    </div>
-                    <div className="px-3 py-1.5 bg-indigo-100 text-indigo-700 text-[9px] font-black rounded-full uppercase tracking-tighter">
-                      Reviewing
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+      <HeroSection
+        subtitle="For Recruiters"
+        title="Hire Smarter, Not Harder."
+        description="Find and engage with top-tier talent effortlessly. Preview live candidate resumes from LetsMakeCV and manage your hiring pipeline in one place."
+        showImage={true}
+        imageSrc="/sable-flow-o-6GhmpELnw-unsplash 1.png"
+        imageAlt="Professional hiring meeting"
+        imageStyle="contain"
+        showJobSearch={false}
+        ctaButtons={{
+          primary: { label: "Start Hiring Now", href: "/recruiter/signup" },
+          secondary: { label: "Watch Demo", href: "#demo" },
+        }}
+        stats={[
+          { value: "500+", label: "Companies" },
+          { value: "10k+", label: "Hires Made" },
+        ]}
+        backgroundColor="bg-mint dark:bg-gray-900"
+      />
 
       {/* NEW: Talent Preview Teaser */}
       <section className="py-32 px-8 bg-gray-50/50 dark:bg-gray-900/50 border-y border-gray-100 dark:border-gray-800 relative overflow-hidden">

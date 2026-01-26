@@ -57,8 +57,6 @@ export default function CandidateSignup() {
     <AuthLayout
       title="Join PreviewCV"
       subtitle="Create your candidate profile and get discovered"
-      footerText="Already have an account?"
-      footerLink={{ text: "Sign In", href: "/candidate/login" }}
       variant="candidate"
     >
       {error && (

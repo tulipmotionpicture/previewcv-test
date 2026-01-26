@@ -8,12 +8,17 @@ export default function CandidateLayout({ children }: { children: ReactNode }) {
   const { user, logout } = useAuth();
   const pathname = usePathname();
 
-  // Don't show header on public auth pages
-  const isAuthPage = pathname === '/candidate/login' || pathname === '/candidate/signup';
+  // Don't show candidate header on public pages (landing, login, signup)
+  const isPublicPage =
+    pathname === "/candidate" ||
+    pathname === "/candidate/login" ||
+    pathname === "/candidate/signup";
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
-      {!isAuthPage && <CandidateHeader user={user ?? undefined} logout={logout} />}
+    <div
+      className={`min-h-screen ${!isPublicPage ? "bg-gray-50 dark:bg-gray-950" : ""}`}
+    >
+      {!isPublicPage && user && <CandidateHeader user={user} logout={logout} />}
       <main>{children}</main>
     </div>
   );

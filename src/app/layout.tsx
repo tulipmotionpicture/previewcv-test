@@ -21,6 +21,7 @@ export const metadata: Metadata = {
 import { Providers } from "@/components/Providers";
 
 import ThemeToggle from "@/components/ThemeToggle";
+import Footer from "@/components/Footer";
 
 export default function RootLayout({
   children,
@@ -33,6 +34,7 @@ export default function RootLayout({
         <Providers>
           {children}
           <ThemeToggle />
+          <Footer />
         </Providers>
       </body>
     </html>

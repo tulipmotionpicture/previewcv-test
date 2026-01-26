@@ -64,7 +64,8 @@ export default function RecruiterLogin() {
     } catch (err: unknown) {
       if (err instanceof Error) {
         setError(
-          err.message || "Authentication failed. Check your access credentials."
+          err.message ||
+            "Authentication failed. Check your access credentials.",
         );
       } else {
         setError("Authentication failed.");
@@ -78,8 +79,6 @@ export default function RecruiterLogin() {
     <AuthLayout
       title="Recruiter Portal"
       subtitle="Access your hiring dashboard"
-      footerText="New recruiter?"
-      footerLink={{ text: "Create Account", href: "/recruiter/signup" }}
       variant="recruiter"
     >
       {error && (

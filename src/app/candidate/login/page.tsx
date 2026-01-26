@@ -44,8 +44,6 @@ export default function CandidateLogin() {
     <AuthLayout
       title="Welcome Back"
       subtitle="Sign in to your candidate account"
-      footerText="New to PreviewCV?"
-      footerLink={{ text: "Create an account", href: "/candidate/signup" }}
       variant="candidate"
     >
       {error && (

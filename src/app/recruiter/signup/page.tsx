@@ -6,6 +6,17 @@ import config from "@/config";
 import Image from "next/image";
 import Link from "next/link";
 import { useRecruiterAuth } from "@/context/RecruiterAuthContext";
+import {
+  Users,
+  TrendingUp,
+  DollarSign,
+  Eye,
+  EyeOff,
+  AlertTriangle,
+  ArrowRight,
+  Building2,
+  User,
+} from "lucide-react";
 
 type RecruiterType = "company" | "individual";
 
@@ -81,7 +92,7 @@ export default function RecruiterSignup() {
   }
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
   ) => {
     const { name, value, type } = e.target;
     setFormData((prev) => ({
@@ -151,480 +162,542 @@ export default function RecruiterSignup() {
   };
 
   return (
-    <div className="min-h-screen bg-white dark:bg-gray-950 flex items-center justify-center p-6 selection:bg-indigo-100 dark:selection:bg-indigo-900 uppercase tracking-tight transition-colors duration-300">
-      {/* Background Effects */}
-      <div className="fixed top-0 right-0 w-[500px] h-[500px] bg-indigo-50 rounded-full blur-[120px] -z-10" />
-      <div className="fixed bottom-0 left-0 w-[500px] h-[500px] bg-blue-50 rounded-full blur-[120px] -z-10" />
+    <div className="min-h-screen bg-white dark:bg-gray-950 flex transition-colors duration-300">
+      {/* Left Side - Image & Branding */}
+      <div className="hidden lg:flex lg:w-1/2 bg-mint dark:bg-gray-900 overflow-hidden sticky top-0 h-screen">
+        <div className="absolute inset-0">
+          <Image
+            src="/sable-flow-o-6GhmpELnw-unsplash 1.png"
+            alt="Recruitment team"
+            fill
+            className="object-cover opacity-20"
+          />
+        </div>
+        <div className="relative z-10 flex flex-col justify-between p-12 w-full">
+          <div>
+            <Link href="/" className="inline-block mb-12">
+              <Image
+                src={config.app.logoUrl}
+                alt={config.app.name}
+                width={150}
+                height={40}
+                className="object-contain"
+              />
+            </Link>
+            <h1 className="text-4xl lg:text-5xl font-black text-gray-900 dark:text-gray-100 mb-6 leading-tight">
+              Start Hiring
+              <br />
+              Top Talent Today
+            </h1>
+            <p className="text-lg text-gray-700 dark:text-gray-300 mb-12 max-w-md">
+              Join thousands of recruiters finding and engaging with qualified
+              candidates on PreviewCV.
+            </p>
+            <div className="space-y-6">
+              <div className="flex items-start gap-4">
+                <div className="w-12 h-12 rounded-xl bg-teal-dark dark:bg-teal-dark/20 text-white dark:text-mint flex items-center justify-center flex-shrink-0">
+                  <Users size={24} />
+                </div>
+                <div>
+                  <h3 className="font-bold text-gray-900 dark:text-gray-100 mb-1">
+                    Access Live Resumes
+                  </h3>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                    Preview candidate profiles in real-time from LetsMakeCV
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-start gap-4">
+                <div className="w-12 h-12 rounded-xl bg-teal-dark dark:bg-teal-dark/20 text-white dark:text-mint flex items-center justify-center flex-shrink-0">
+                  <TrendingUp size={24} />
+                </div>
+                <div>
+                  <h3 className="font-bold text-gray-900 dark:text-gray-100 mb-1">
+                    Track Your Pipeline
+                  </h3>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                    Manage applications and hiring progress in one place
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-start gap-4">
+                <div className="w-12 h-12 rounded-xl bg-teal-dark dark:bg-teal-dark/20 text-white dark:text-mint flex items-center justify-center flex-shrink-0">
+                  <DollarSign size={24} />
+                </div>
+                <div>
+                  <h3 className="font-bold text-gray-900 dark:text-gray-100 mb-1">
+                    Free to Start
+                  </h3>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                    No credit card required. Start hiring immediately
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="flex items-center gap-12">
+            <div>
+              <div className="text-3xl font-black text-gray-900 dark:text-gray-100">
+                500+
+              </div>
+              <div className="text-sm text-gray-600 dark:text-gray-400">
+                Companies
+              </div>
+            </div>
+            <div>
+              <div className="text-3xl font-black text-gray-900 dark:text-gray-100">
+                10k+
+              </div>
+              <div className="text-sm text-gray-600 dark:text-gray-400">
+                Hires Made
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
 
-      <div className="w-full max-w-[900px] animate-in fade-in slide-in-from-bottom-4 duration-700">
-        <div className="text-center mb-12">
-          <div className="inline-flex items-center justify-center w-40 h-40 bg-white dark:bg-gray-900 rounded-[48px] shadow-2xl shadow-indigo-100 dark:shadow-indigo-900/20 mb-8 border border-gray-100 dark:border-gray-800 overflow-hidden p-6">
+      {/* Right Side - Form */}
+      <div className="w-full lg:w-1/2 flex items-center justify-center p-4 lg:p-8 overflow-y-auto">
+        <div className="w-full max-w-[580px]">
+          <div className="lg:hidden">
             <Image
               src={config.app.logoUrl}
               alt={config.app.name}
               width={120}
-              height={120}
-              className="object-contain"
+              height={32}
+              className="object-contain mb-6"
             />
           </div>
-          <h1 className="text-3xl font-black mb-2">
-            Join Our Recruiter Network
-          </h1>
-          <p className="text-gray-500 font-medium lowercase first-letter:uppercase">
-            Create your account and start hiring top talent.
-          </p>
-        </div>
 
-        <div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-[40px] p-10 shadow-2xl shadow-indigo-500/5 dark:shadow-indigo-900/10 relative overflow-hidden">
-          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-500 to-blue-500" />
-
-          {error && (
-            <div className="mb-8 p-4 bg-red-50 text-red-600 text-sm font-bold rounded-2xl border border-red-100 flex items-center gap-3">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth={2}
-                stroke="currentColor"
-                className="w-5 h-5"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z"
-                />
-              </svg>
-              {error}
-            </div>
-          )}
-
-          <form className="space-y-6" onSubmit={handleSubmit}>
-            {/* Recruiter Type Selection */}
-            <div>
-              <label className="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-3 ml-1">
-                Account Type
-              </label>
-              <div className="grid grid-cols-2 gap-4">
-                <label
-                  className={`relative flex items-center justify-center p-4 border-2 rounded-2xl cursor-pointer transition-all ${
-                    formData.recruiterType === "company"
-                      ? "border-indigo-600 bg-indigo-50"
-                      : "border-gray-100 bg-gray-50 hover:bg-gray-100"
-                  }`}
-                >
-                  <input
-                    type="radio"
-                    name="recruiterType"
-                    value="company"
-                    checked={formData.recruiterType === "company"}
-                    onChange={handleChange}
-                    className="sr-only"
-                  />
-                  <div className="text-center">
-                    <div className="text-2xl mb-2">🏢</div>
-                    <div className="font-black text-sm">Company</div>
-                    <div className="text-[10px] text-gray-500 font-medium mt-1 normal-case">
-                      Hiring for organization
-                    </div>
-                  </div>
-                </label>
-                <label
-                  className={`relative flex items-center justify-center p-4 border-2 rounded-2xl cursor-pointer transition-all ${
-                    formData.recruiterType === "individual"
-                      ? "border-indigo-600 bg-indigo-50"
-                      : "border-gray-100 bg-gray-50 hover:bg-gray-100"
-                  }`}
-                >
-                  <input
-                    type="radio"
-                    name="recruiterType"
-                    value="individual"
-                    checked={formData.recruiterType === "individual"}
-                    onChange={handleChange}
-                    className="sr-only"
-                  />
-                  <div className="text-center">
-                    <div className="text-2xl mb-2">👤</div>
-                    <div className="font-black text-sm">Individual</div>
-                    <div className="text-[10px] text-gray-500 font-medium mt-1 normal-case">
-                      Independent recruiter
-                    </div>
-                  </div>
-                </label>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Email */}
-              <div>
-                <label className="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2 ml-1">
-                  Email Address
-                </label>
-                <input
-                  type="email"
-                  name="email"
-                  required
-                  className="w-full px-6 py-4 bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl focus:ring-2 focus:ring-indigo-600 outline-none hover:bg-gray-100 dark:hover:bg-gray-700 transition-all font-medium text-gray-900 dark:text-gray-100 placeholder-gray-300 dark:placeholder-gray-500"
-                  value={formData.email}
-                  onChange={handleChange}
-                  placeholder="recruiter@company.com"
-                />
-              </div>
-
-              {/* Full Name */}
-              <div>
-                <label className="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2 ml-1">
-                  Full Name
-                </label>
-                <input
-                  type="text"
-                  name="fullName"
-                  required
-                  className="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-indigo-600 outline-none hover:bg-gray-100 transition-all font-medium text-gray-900 placeholder-gray-300"
-                  value={formData.fullName}
-                  onChange={handleChange}
-                  placeholder="John Doe"
-                />
-              </div>
-
-              {/* Password */}
-              <div className="relative">
-                <label className="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2 ml-1">
-                  Password
-                </label>
-                <input
-                  type={showPassword ? "text" : "password"}
-                  name="password"
-                  required
-                  className="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-indigo-600 outline-none hover:bg-gray-100 transition-all font-medium text-gray-900 placeholder-gray-300 pr-12"
-                  value={formData.password}
-                  onChange={handleChange}
-                  placeholder="••••••••"
-                />
-                <button
-                  type="button"
-                  className="absolute right-4 top-9 text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
-                  tabIndex={-1}
-                  onClick={() => setShowPassword((v) => !v)}
-                  aria-label={showPassword ? "Hide password" : "Show password"}
-                >
-                  {showPassword ? (
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="24"
-                      height="24"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className="lucide lucide-eye-icon lucide-eye"
-                    >
-                      <path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0" />
-                      <circle cx="12" cy="12" r="3" />
-                    </svg>
-                  ) : (
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="24"
-                      height="24"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className="lucide lucide-eye-oxff-icon lucide-eye-off"
-                    >
-                      <path d="M10.733 5.076a10.744 10.744 0 0 1 11.205 6.575 1 1 0 0 1 0 .696 10.747 10.747 0 0 1-1.444 2.49" />
-                      <path d="M14.084 14.158a3 3 0 0 1-4.242-4.242" />
-                      <path d="M17.479 17.499a10.75 10.75 0 0 1-15.417-5.151 1 1 0 0 1 0-.696 10.75 10.75 0 0 1 4.446-5.143" />
-                      <path d="m2 2 20 20" />
-                    </svg>
-                  )}
-                </button>
-              </div>
-
-              {/* Confirm Password */}
-              <div className="relative">
-                <label className="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2 ml-1">
-                  Confirm Password
-                </label>
-                <input
-                  type={showConfirmPassword ? "text" : "password"}
-                  name="confirmPassword"
-                  required
-                  className="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-indigo-600 outline-none hover:bg-gray-100 transition-all font-medium text-gray-900 placeholder-gray-300 pr-12"
-                  value={formData.confirmPassword}
-                  onChange={handleChange}
-                  placeholder="••••••••"
-                />
-                <button
-                  type="button"
-                  className="absolute right-4 top-9 text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
-                  tabIndex={-1}
-                  onClick={() => setShowConfirmPassword((v) => !v)}
-                  aria-label={
-                    showConfirmPassword ? "Hide password" : "Show password"
-                  }
-                >
-                  {showConfirmPassword ? (
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="24"
-                      height="24"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className="lucide lucide-eye-icon lucide-eye"
-                    >
-                      <path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0" />
-                      <circle cx="12" cy="12" r="3" />
-                    </svg>
-                  ) : (
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="24"
-                      height="24"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className="lucide lucide-eye-off-icon lucide-eye-off"
-                    >
-                      <path d="M10.733 5.076a10.744 10.744 0 0 1 11.205 6.575 1 1 0 0 1 0 .696 10.747 10.747 0 0 1-1.444 2.49" />
-                      <path d="M14.084 14.158a3 3 0 0 1-4.242-4.242" />
-                      <path d="M17.479 17.499a10.75 10.75 0 0 1-15.417-5.151 1 1 0 0 1 0-.696 10.75 10.75 0 0 1 4.446-5.143" />
-                      <path d="m2 2 20 20" />
-                    </svg>
-                  )}
-                </button>
-              </div>
-
-              {/* Username */}
-              <div className="md:col-span-2">
-                <label className="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2 ml-1">
-                  Profile Username
-                </label>
-                <div className="relative">
-                  <span className="absolute left-6 top-1/2 -translate-y-1/2 text-gray-400 font-medium text-sm normal-case">
-                    previewcv.com/recruiter/
-                  </span>
-                  <input
-                    type="text"
-                    name="username"
-                    required
-                    className="w-full pl-[240px] pr-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-indigo-600 outline-none hover:bg-gray-100 transition-all font-medium text-gray-900 placeholder-gray-300 normal-case"
-                    value={formData.username}
-                    onChange={handleChange}
-                    placeholder="your-username"
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* Conditional Fields Based on Recruiter Type */}
-            {formData.recruiterType === "company" ? (
-              <div className="space-y-6 pt-6 border-t border-gray-100">
-                <h3 className="text-sm font-black text-gray-900">
-                  Company Information
-                </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <label className="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2 ml-1">
-                      Company Name
-                    </label>
-                    <input
-                      type="text"
-                      name="companyName"
-                      required
-                      className="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-indigo-600 outline-none hover:bg-gray-100 transition-all font-medium text-gray-900 placeholder-gray-300"
-                      value={formData.companyName}
-                      onChange={handleChange}
-                      placeholder="Tech Corp Inc."
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2 ml-1">
-                      Company Website
-                    </label>
-                    <input
-                      type="url"
-                      name="companyWebsite"
-                      className="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-indigo-600 outline-none hover:bg-gray-100 transition-all font-medium text-gray-900 placeholder-gray-300 normal-case"
-                      value={formData.companyWebsite}
-                      onChange={handleChange}
-                      placeholder="https://company.com"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2 ml-1">
-                      Company Size
-                    </label>
-                    <select
-                      name="companySize"
-                      className="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-indigo-600 outline-none hover:bg-gray-100 transition-all font-medium text-gray-900"
-                      value={formData.companySize}
-                      onChange={handleChange}
-                    >
-                      <option value="">Select size</option>
-                      <option value="1-10">1-10 employees</option>
-                      <option value="11-50">11-50 employees</option>
-                      <option value="51-200">51-200 employees</option>
-                      <option value="201-500">201-500 employees</option>
-                      <option value="501-1000">501-1000 employees</option>
-                      <option value="1000+">1000+ employees</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2 ml-1">
-                      Industry
-                    </label>
-                    <input
-                      type="text"
-                      name="industry"
-                      className="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-indigo-600 outline-none hover:bg-gray-100 transition-all font-medium text-gray-900 placeholder-gray-300"
-                      value={formData.industry}
-                      onChange={handleChange}
-                      placeholder="Technology, Finance, etc."
-                    />
-                  </div>
-                </div>
-              </div>
-            ) : (
-              <div className="space-y-6 pt-6 border-t border-gray-100">
-                <h3 className="text-sm font-black text-gray-900">
-                  Professional Information
-                </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <label className="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2 ml-1">
-                      Specialization
-                    </label>
-                    <input
-                      type="text"
-                      name="specialization"
-                      required
-                      className="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-indigo-600 outline-none hover:bg-gray-100 transition-all font-medium text-gray-900 placeholder-gray-300"
-                      value={formData.specialization}
-                      onChange={handleChange}
-                      placeholder="Tech Recruiting, Executive Search, etc."
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2 ml-1">
-                      Years of Experience
-                    </label>
-                    <input
-                      type="number"
-                      name="yearsExperience"
-                      min="0"
-                      className="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-indigo-600 outline-none hover:bg-gray-100 transition-all font-medium text-gray-900 placeholder-gray-300"
-                      value={formData.yearsExperience}
-                      onChange={handleChange}
-                      placeholder="5"
-                    />
-                  </div>
-                </div>
+          <div className="">
+            {error && (
+              <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 text-sm font-semibold rounded-xl border border-red-200 dark:border-red-800 flex items-center gap-3">
+                <AlertTriangle size={20} className="flex-shrink-0" />
+                {error}
               </div>
             )}
 
-            {/* Common Fields */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-6 border-t border-gray-100">
+            <form className="space-y-6" onSubmit={handleSubmit}>
+              {/* Recruiter Type Selection */}
               <div>
-                <label className="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2 ml-1">
-                  Phone Number
+                <label className="block text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3">
+                  I am signing up as
                 </label>
-                <input
-                  type="tel"
-                  name="phone"
-                  className="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-indigo-600 outline-none hover:bg-gray-100 transition-all font-medium text-gray-900 placeholder-gray-300"
-                  value={formData.phone}
-                  onChange={handleChange}
-                  placeholder="+1 (555) 123-4567"
-                />
+                <div className="grid grid-cols-2 gap-3">
+                  <label
+                    className={`relative flex flex-col items-center justify-center p-5 border-2 rounded-2xl cursor-pointer transition-all group ${
+                      formData.recruiterType === "company"
+                        ? "border-teal-dark dark:border-mint bg-teal-dark/5 dark:bg-teal-dark/10 shadow-sm"
+                        : "border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 hover:border-teal-dark/50 dark:hover:border-mint/50 hover:shadow-sm"
+                    }`}
+                  >
+                    <input
+                      type="radio"
+                      name="recruiterType"
+                      value="company"
+                      checked={formData.recruiterType === "company"}
+                      onChange={handleChange}
+                      className="sr-only"
+                    />
+                    <div
+                      className={`w-14 h-14 rounded-xl flex items-center justify-center mb-3 transition-all ${
+                        formData.recruiterType === "company"
+                          ? "bg-teal-dark dark:bg-teal-dark/20 text-white dark:text-mint"
+                          : "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 group-hover:bg-teal-dark/10 dark:group-hover:bg-teal-dark/10 group-hover:text-teal-dark dark:group-hover:text-mint"
+                      }`}
+                    >
+                      <Building2 size={28} strokeWidth={2} />
+                    </div>
+                    <div className="text-center">
+                      <div className="font-bold text-base text-gray-900 dark:text-gray-100 mb-1">
+                        Company
+                      </div>
+                      <div className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
+                        Hiring for an organization
+                      </div>
+                    </div>
+                    {formData.recruiterType === "company" && (
+                      <div className="absolute top-3 right-3 w-5 h-5 bg-teal-dark dark:bg-mint rounded-full flex items-center justify-center">
+                        <svg
+                          className="w-3 h-3 text-white dark:text-gray-900"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={3}
+                            d="M5 13l4 4L19 7"
+                          />
+                        </svg>
+                      </div>
+                    )}
+                  </label>
+                  <label
+                    className={`relative flex flex-col items-center justify-center p-5 border-2 rounded-2xl cursor-pointer transition-all group ${
+                      formData.recruiterType === "individual"
+                        ? "border-teal-dark dark:border-mint bg-teal-dark/5 dark:bg-teal-dark/10 shadow-sm"
+                        : "border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 hover:border-teal-dark/50 dark:hover:border-mint/50 hover:shadow-sm"
+                    }`}
+                  >
+                    <input
+                      type="radio"
+                      name="recruiterType"
+                      value="individual"
+                      checked={formData.recruiterType === "individual"}
+                      onChange={handleChange}
+                      className="sr-only"
+                    />
+                    <div
+                      className={`w-14 h-14 rounded-xl flex items-center justify-center mb-3 transition-all ${
+                        formData.recruiterType === "individual"
+                          ? "bg-teal-dark dark:bg-teal-dark/20 text-white dark:text-mint"
+                          : "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 group-hover:bg-teal-dark/10 dark:group-hover:bg-teal-dark/10 group-hover:text-teal-dark dark:group-hover:text-mint"
+                      }`}
+                    >
+                      <User size={28} strokeWidth={2} />
+                    </div>
+                    <div className="text-center">
+                      <div className="font-bold text-base text-gray-900 dark:text-gray-100 mb-1">
+                        Individual
+                      </div>
+                      <div className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
+                        Independent recruiter
+                      </div>
+                    </div>
+                    {formData.recruiterType === "individual" && (
+                      <div className="absolute top-3 right-3 w-5 h-5 bg-teal-dark dark:bg-mint rounded-full flex items-center justify-center">
+                        <svg
+                          className="w-3 h-3 text-white dark:text-gray-900"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={3}
+                            d="M5 13l4 4L19 7"
+                          />
+                        </svg>
+                      </div>
+                    )}
+                  </label>
+                </div>
               </div>
-              <div>
-                <label className="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2 ml-1">
-                  Location
-                </label>
-                <input
-                  type="text"
-                  name="location"
-                  className="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-indigo-600 outline-none hover:bg-gray-100 transition-all font-medium text-gray-900 placeholder-gray-300"
-                  value={formData.location}
-                  onChange={handleChange}
-                  placeholder="San Francisco, CA"
-                />
+
+              <div className="space-y-4">
+                {/* Email */}
+                <div>
+                  <label className="block text-sm font-semibold text-gray-900 dark:text-gray-100 mb-2">
+                    Email Address
+                  </label>
+                  <input
+                    type="email"
+                    name="email"
+                    required
+                    className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-teal-dark dark:focus:ring-mint focus:border-transparent outline-none transition-all text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
+                    value={formData.email}
+                    onChange={handleChange}
+                    placeholder="recruiter@company.com"
+                  />
+                </div>
+
+                {/* Full Name */}
+                <div>
+                  <label className="block text-sm font-semibold text-gray-900 dark:text-gray-100 mb-2">
+                    Full Name
+                  </label>
+                  <input
+                    type="text"
+                    name="fullName"
+                    required
+                    className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-teal-dark dark:focus:ring-mint focus:border-transparent outline-none transition-all text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
+                    value={formData.fullName}
+                    onChange={handleChange}
+                    placeholder="John Doe"
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Password */}
+                  <div className="relative">
+                    <label className="block text-sm font-semibold text-gray-900 dark:text-gray-100 mb-2">
+                      Password
+                    </label>
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      name="password"
+                      required
+                      className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-teal-dark dark:focus:ring-mint focus:border-transparent outline-none transition-all text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 pr-12"
+                      value={formData.password}
+                      onChange={handleChange}
+                      placeholder="••••••••"
+                    />
+                    <button
+                      type="button"
+                      className="absolute right-4 top-[42px] text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
+                      tabIndex={-1}
+                      onClick={() => setShowPassword((v) => !v)}
+                      aria-label={
+                        showPassword ? "Hide password" : "Show password"
+                      }
+                    >
+                      {showPassword ? <Eye size={20} /> : <EyeOff size={20} />}
+                    </button>
+                  </div>
+
+                  {/* Confirm Password */}
+                  <div className="relative">
+                    <label className="block text-sm font-semibold text-gray-900 dark:text-gray-100 mb-2">
+                      Confirm Password
+                    </label>
+                    <input
+                      type={showConfirmPassword ? "text" : "password"}
+                      name="confirmPassword"
+                      required
+                      className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-teal-dark dark:focus:ring-mint focus:border-transparent outline-none transition-all text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 pr-12"
+                      value={formData.confirmPassword}
+                      onChange={handleChange}
+                      placeholder="••••••••"
+                    />
+                    <button
+                      type="button"
+                      className="absolute right-4 top-[42px] text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
+                      tabIndex={-1}
+                      onClick={() => setShowConfirmPassword((v) => !v)}
+                      aria-label={
+                        showConfirmPassword ? "Hide password" : "Show password"
+                      }
+                    >
+                      {showConfirmPassword ? (
+                        <Eye size={20} />
+                      ) : (
+                        <EyeOff size={20} />
+                      )}
+                    </button>
+                  </div>
+                </div>
+
+                {/* Username */}
+                <div>
+                  <label className="block text-sm font-semibold text-gray-900 dark:text-gray-100 mb-2">
+                    Profile Username
+                  </label>
+                  <div className="relative">
+                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 text-sm">
+                      previewcv.com/recruiter/
+                    </span>
+                    <input
+                      type="text"
+                      name="username"
+                      required
+                      className="w-full pl-[200px] pr-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-teal-dark dark:focus:ring-mint focus:border-transparent outline-none transition-all text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
+                      value={formData.username}
+                      onChange={handleChange}
+                      placeholder="your-username"
+                    />
+                  </div>
+                </div>
               </div>
-            </div>
 
-            {/* Terms and Conditions */}
-            <div className="flex items-start gap-3 px-1">
-              <input
-                type="checkbox"
-                name="agreeToTerms"
-                id="agreeToTerms"
-                checked={formData.agreeToTerms}
-                onChange={handleChange}
-                className="w-5 h-5 mt-0.5 rounded border-gray-300 bg-gray-50 text-indigo-600 focus:ring-indigo-600"
-              />
-              <label
-                htmlFor="agreeToTerms"
-                className="text-xs text-gray-500 font-medium normal-case leading-relaxed"
-              >
-                I agree to the{" "}
-                <a
-                  href="#"
-                  className="text-indigo-600 font-bold hover:underline"
-                >
-                  Terms and Conditions
-                </a>{" "}
-                and{" "}
-                <a
-                  href="#"
-                  className="text-indigo-600 font-bold hover:underline"
-                >
-                  Privacy Policy
-                </a>
-              </label>
-            </div>
-
-            {/* Submit Button */}
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="w-full py-5 bg-indigo-600 text-white font-black rounded-2xl hover:bg-indigo-700 transition-all shadow-2xl shadow-indigo-500/20 flex items-center justify-center gap-2 group disabled:opacity-70"
-            >
-              {isLoading ? (
-                <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              {/* Conditional Fields Based on Recruiter Type */}
+              {formData.recruiterType === "company" ? (
+                <div className="space-y-6 pt-6 border-t border-gray-200 dark:border-gray-700">
+                  <h3 className="text-sm font-bold text-gray-900 dark:text-gray-100">
+                    Company Information
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-900 dark:text-gray-100 mb-2">
+                        Company Name
+                      </label>
+                      <input
+                        type="text"
+                        name="companyName"
+                        required
+                        className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-teal-dark dark:focus:ring-mint focus:border-transparent outline-none transition-all text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
+                        value={formData.companyName}
+                        onChange={handleChange}
+                        placeholder="Tech Corp Inc."
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-900 dark:text-gray-100 mb-2">
+                        Company Website
+                      </label>
+                      <input
+                        type="url"
+                        name="companyWebsite"
+                        className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-teal-dark dark:focus:ring-mint focus:border-transparent outline-none transition-all text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
+                        value={formData.companyWebsite}
+                        onChange={handleChange}
+                        placeholder="https://company.com"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-900 dark:text-gray-100 mb-2">
+                        Company Size
+                      </label>
+                      <select
+                        name="companySize"
+                        className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-teal-dark dark:focus:ring-mint focus:border-transparent outline-none transition-all text-gray-900 dark:text-gray-100"
+                        value={formData.companySize}
+                        onChange={handleChange}
+                      >
+                        <option value="">Select size</option>
+                        <option value="1-10">1-10 employees</option>
+                        <option value="11-50">11-50 employees</option>
+                        <option value="51-200">51-200 employees</option>
+                        <option value="201-500">201-500 employees</option>
+                        <option value="501-1000">501-1000 employees</option>
+                        <option value="1000+">1000+ employees</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-900 dark:text-gray-100 mb-2">
+                        Industry
+                      </label>
+                      <input
+                        type="text"
+                        name="industry"
+                        className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-teal-dark dark:focus:ring-mint focus:border-transparent outline-none transition-all text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
+                        value={formData.industry}
+                        onChange={handleChange}
+                        placeholder="Technology, Finance, etc."
+                      />
+                    </div>
+                  </div>
+                </div>
               ) : (
-                <>
-                  Create Account
-                  <span className="group-hover:translate-x-1 transition-transform">
-                    →
-                  </span>
-                </>
+                <div className="space-y-6 pt-6 border-t border-gray-200 dark:border-gray-700">
+                  <h3 className="text-sm font-bold text-gray-900 dark:text-gray-100">
+                    Professional Information
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-900 dark:text-gray-100 mb-2">
+                        Specialization
+                      </label>
+                      <input
+                        type="text"
+                        name="specialization"
+                        required
+                        className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-teal-dark dark:focus:ring-mint focus:border-transparent outline-none transition-all text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
+                        value={formData.specialization}
+                        onChange={handleChange}
+                        placeholder="Tech Recruiting, Executive Search, etc."
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-900 dark:text-gray-100 mb-2">
+                        Years of Experience
+                      </label>
+                      <input
+                        type="number"
+                        name="yearsExperience"
+                        min="0"
+                        className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-teal-dark dark:focus:ring-mint focus:border-transparent outline-none transition-all text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
+                        value={formData.yearsExperience}
+                        onChange={handleChange}
+                        placeholder="5"
+                      />
+                    </div>
+                  </div>
+                </div>
               )}
-            </button>
-          </form>
 
-          <div className="mt-10 pt-10 border-t border-gray-50 text-center">
-            <p className="text-sm text-gray-500 font-medium normal-case">
-              Already have an account?{" "}
-              <Link
-                href="/recruiter/login"
-                className="text-indigo-600 font-black hover:underline uppercase tracking-tight"
+              {/* Common Fields */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-6 border-t border-gray-200 dark:border-gray-700">
+                <div>
+                  <label className="block text-sm font-semibold text-gray-900 dark:text-gray-100 mb-2">
+                    Phone Number
+                  </label>
+                  <input
+                    type="tel"
+                    name="phone"
+                    className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-teal-dark dark:focus:ring-mint focus:border-transparent outline-none transition-all text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
+                    value={formData.phone}
+                    onChange={handleChange}
+                    placeholder="+1 (555) 123-4567"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-900 dark:text-gray-100 mb-2">
+                    Location
+                  </label>
+                  <input
+                    type="text"
+                    name="location"
+                    className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-teal-dark dark:focus:ring-mint focus:border-transparent outline-none transition-all text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
+                    value={formData.location}
+                    onChange={handleChange}
+                    placeholder="San Francisco, CA"
+                  />
+                </div>
+              </div>
+
+              {/* Terms and Conditions */}
+              <div className="flex items-start gap-3">
+                <input
+                  type="checkbox"
+                  name="agreeToTerms"
+                  id="agreeToTerms"
+                  checked={formData.agreeToTerms}
+                  onChange={handleChange}
+                  className="w-5 h-5 mt-0.5 rounded border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 text-teal-dark focus:ring-teal-dark dark:focus:ring-mint"
+                />
+                <label
+                  htmlFor="agreeToTerms"
+                  className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed"
+                >
+                  I agree to the{" "}
+                  <Link
+                    href="/terms"
+                    className="text-teal-dark dark:text-mint font-semibold hover:underline"
+                  >
+                    Terms and Conditions
+                  </Link>{" "}
+                  and{" "}
+                  <Link
+                    href="/privacy"
+                    className="text-teal-dark dark:text-mint font-semibold hover:underline"
+                  >
+                    Privacy Policy
+                  </Link>
+                </label>
+              </div>
+
+              {/* Submit Button */}
+              <button
+                type="submit"
+                disabled={isLoading}
+                className="w-full py-3.5 bg-teal-dark hover:bg-teal-dark/90 text-white font-bold rounded-xl transition-all shadow-lg shadow-teal-dark/20 flex items-center justify-center gap-2 group disabled:opacity-70 disabled:cursor-not-allowed"
               >
-                Sign In
-              </Link>
-            </p>
+                {isLoading ? (
+                  <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                ) : (
+                  <>
+                    Create Account
+                    <ArrowRight
+                      size={18}
+                      className="group-hover:translate-x-1 transition-transform"
+                    />
+                  </>
+                )}
+              </button>
+
+              <p className="text-gray-600 dark:text-gray-400">
+                Already have an account?{" "}
+                <Link
+                  href="/recruiter/login"
+                  className="text-teal-dark dark:text-mint font-semibold hover:underline"
+                >
+                  Sign in
+                </Link>
+              </p>
+            </form>
           </div>
         </div>
       </div>
