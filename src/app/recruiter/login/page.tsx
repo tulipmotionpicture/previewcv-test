@@ -89,7 +89,7 @@ export default function RecruiterLogin() {
   return (
     <div className="min-h-screen bg-white dark:bg-gray-950 flex transition-colors duration-300">
       {/* Left Side - Image & Branding */}
-      <div className="hidden lg:flex lg:w-1/2 bg-mint dark:bg-gray-900 relative overflow-hidden sticky top-0 h-screen">
+      <div className="hidden lg:flex lg:w-1/2 bg-mint dark:bg-gray-900  overflow-hidden sticky top-0 h-screen">
         <div className="absolute inset-0">
           <Image
             src="/sable-flow-o-6GhmpELnw-unsplash 1.png"
