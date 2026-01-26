@@ -1,24 +1,20 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Inter } from "next/font/google";
 import config from "@/config";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const inter = Inter({
+  variable: "--font-inter",
   subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {
   title: "PreviewCV - Resume Viewer",
   description: "Secure PDF resume viewer for shared resume links",
   icons: {
-    icon: config.app.logoUrl || '/favicon.ico',
-    apple: config.app.logoUrl || '/favicon.ico',
+    icon: config.app.logoUrl || "/favicon.ico",
+    apple: config.app.logoUrl || "/favicon.ico",
   },
 };
 
@@ -33,9 +29,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
+      <body className={`${inter.variable} antialiased`}>
         <Providers>
           {children}
           <ThemeToggle />

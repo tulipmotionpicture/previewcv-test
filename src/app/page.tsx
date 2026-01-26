@@ -4,44 +4,11 @@ import Image from "next/image";
 import Link from "next/link";
 import config from "@/config";
 import Header from "@/components/Header";
-import { JobCards } from "@/components/jobs";
+import HeroSection from "@/components/HeroSection";
 import { useEffect, useState } from "react";
 import { CardsSummaryResponse } from "@/types/jobs";
 import { api } from "@/lib/api";
-
-const UserIcon = () => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    fill="none"
-    viewBox="0 0 24 24"
-    strokeWidth={2}
-    stroke="currentColor"
-    className="w-6 h-6"
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z"
-    />
-  </svg>
-);
-
-const BriefcaseIcon = () => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    fill="none"
-    viewBox="0 0 24 24"
-    strokeWidth={2}
-    stroke="currentColor"
-    className="w-6 h-6"
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M20.25 14.15v4.25c0 .245-.2.438-.456.438l-4.544.012c-.118 0-.23-.047-.314-.131l-1.428-1.428a.434.434 0 0 0-.612 0l-1.428 1.428c-.084.084-.196.13-.314.13l-4.544-.01a.44.44 0 0 1-.456-.44v-4.25m13.125-4.5h-13.125a1.125 1.125 0 0 0-1.125 1.125v4.125c0 .621.504 1.125 1.125 1.125h13.125c.621 0 1.125-.504 1.125-1.125v-4.125c0-.621-.504-1.125-1.125-1.125Zm-3.75-1.5v-1.125c0-.621-.504-1.125-1.125-1.125H11.25c-.621 0-1.125.504-1.125 1.125V8.15"
-    />
-  </svg>
-);
+import { CheckCircle2 } from "lucide-react";
 
 const LockClosedIcon = () => (
   <svg
@@ -132,68 +99,9 @@ export default function Home() {
         showAuthButtons={true}
       />
 
-      {/* Hero Section */}
-      <section className="relative pt-24 pb-16 lg:pt-32 lg:pb-20 overflow-hidden bg-gradient-to-br from-blue-50/50 via-teal-50/30 to-gray-50/50 dark:from-gray-900 dark:to-gray-950">
-        {/* Background Decorations */}
-        <div className="absolute inset-0 -z-10 overflow-hidden">
-          <div className="absolute top-[10%] left-[-15%] w-[500px] h-[500px] bg-gradient-to-br from-blue-200/40 to-teal-200/40 dark:from-blue-900/20 dark:to-teal-900/20 rounded-full blur-3xl" />
-          <div className="absolute bottom-[20%] left-[-10%] w-[400px] h-[400px] bg-gradient-to-br from-teal-200/30 to-blue-200/30 dark:from-teal-900/15 dark:to-blue-900/15 rounded-full blur-3xl" />
-        </div>
-
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center min-h-[500px]">
-            {/* Left Side - Search Section */}
-            <div className="order-2 lg:order-1">
-              <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-gray-100 mb-8">
-                Search through{" "}
-                <span className="text-gray-900 dark:text-gray-100">92,868</span>{" "}
-                Jobs
-              </h2>
-
-              <div className="flex gap-3">
-                <input
-                  type="text"
-                  placeholder="Search by keywords, destinations, company"
-                  className="flex-1 px-6 py-4 bg-white dark:bg-gray-800 rounded-full border border-gray-200 dark:border-gray-700 outline-none focus:border-teal-600 dark:focus:border-teal-500 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 shadow-sm"
-                />
-                <Link
-                  href="/jobs"
-                  className="px-8 py-4 bg-teal-700 hover:bg-teal-800 dark:bg-teal-600 dark:hover:bg-teal-700 text-white font-semibold rounded-full transition-all shadow-md whitespace-nowrap"
-                >
-                  Search job
-                </Link>
-              </div>
-            </div>
-
-            {/* Right Side - Main Hero Content */}
-            <div className="order-1 lg:order-2">
-              <h1 className="text-4xl lg:text-6xl font-bold text-gray-900 dark:text-gray-100 mb-6 leading-tight">
-                Share Your Resume with a Single Link.
-              </h1>
-              <p className="text-lg text-gray-600 dark:text-gray-400 mb-10 leading-relaxed">
-                Stop sending PDF attachments. Create your resume on LetsMakeCV,
-                then share it instantly with recruiters using a live PreviewCV
-                link.
-              </p>
-
-              {/* CTA Buttons */}
-              <div className="flex flex-col sm:flex-row gap-4">
-                <Link
-                  href="/candidate"
-                  className="px-10 py-4 bg-teal-700 hover:bg-teal-800 dark:bg-teal-600 dark:hover:bg-teal-700 text-white font-semibold rounded-full transition-all shadow-md text-center"
-                >
-                  Job Seeker
-                </Link>
-                <Link
-                  href="/recruiter"
-                  className="px-10 py-4 bg-transparent border-2 border-teal-700 dark:border-teal-600 text-teal-700 dark:text-teal-400 hover:bg-teal-50 dark:hover:bg-teal-900/20 font-semibold rounded-full transition-all text-center"
-                >
-                  Recruiter
-                </Link>
-              </div>
-            </div>
-          </div>
-        </div>
+      <section className="mt-16">
+        {/* Hero Section */}
+        <HeroSection />
       </section>
 
       {/* Company Logos Section */}
@@ -231,13 +139,13 @@ export default function Home() {
         </div>
       </section>
 
-      <div className="flex flex-row  bg-gray-50 dark:bg-gray-900 p-16 itmes-center justify-around gap-2 ">
+      <div className="flex flex-row  bg-[#F0F6F5] p-16 itmes-center justify-around gap-6 ">
         {/* Jobs by Location Section */}
-        <section className="">
+        <section className="shadow-lg rounded-2xl p-4  bg-white">
           <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-gray-100 mb-8">
             Jobs By Location
           </h2>
-          <div className="flex flex-wrap gap-3 flex-row">
+          <div className="flex flex-wrap gap-3 justify-center">
             {cardsData?.cities?.slice(0, 7).map((city) => (
               <Link
                 key={city.slug}
@@ -252,18 +160,18 @@ export default function Home() {
                 href="/jobs"
                 className="px-6 py-3 bg-white dark:bg-gray-800 hover:bg-teal-50 dark:hover:bg-teal-900/20 text-teal-600 dark:text-teal-400 font-semibold rounded-full border border-gray-300 dark:border-gray-700 hover:border-teal-600 dark:hover:border-teal-500 transition-all shadow-sm hover:shadow-md"
               >
-                {cardsData.cities.length - 7}+ more
+                {cardsData.cities.length + 7}+ more
               </Link>
             )}
           </div>
         </section>
 
         {/* Jobs by Category Section */}
-        <section className="">
+        <section className="shadow-lg rounded-2xl p-4 bg-white">
           <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-gray-100 mb-8">
             Jobs By Category
           </h2>
-          <div className="flex flex-wrap gap-3">
+          <div className="flex flex-wrap gap-3 justify-center">
             {cardsData?.industries?.slice(0, 5).map((ind) => (
               <Link
                 key={ind.slug}
@@ -278,7 +186,7 @@ export default function Home() {
                 href="/jobs"
                 className="px-6 py-3 bg-white dark:bg-gray-800 hover:bg-teal-50 dark:hover:bg-teal-900/20 text-teal-600 dark:text-teal-400 font-semibold rounded-full border border-gray-300 dark:border-gray-700 hover:border-teal-600 dark:hover:border-teal-500 transition-all shadow-sm hover:shadow-md"
               >
-                {cardsData.industries.length - 5}+ more
+                {cardsData.industries.length + 5}+ more
               </Link>
             )}
           </div>
@@ -286,78 +194,38 @@ export default function Home() {
       </div>
 
       {/* Create CV Section */}
-      <section className="py-20 bg-gradient-to-br from-blue-50/50 to-purple-50/30 dark:bg-gray-900">
+      <section className="py-20 bg-[#E8DFF5] dark:bg-gray-900 overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
             {/* Left: Content */}
-            <div>
-              <h2 className="text-4xl lg:text-5xl font-bold text-gray-900 dark:text-gray-100 mb-4">
-                Create your CV with us
-              </h2>
-              <p className="text-xl text-gray-600 dark:text-gray-400 mb-8">
-                It is{" "}
-                <span className="text-purple-600 font-bold">AI enabled</span> &
-                faster!
-              </p>
+            <div className="space-y-8">
+              <div>
+                <h2 className="text-3xl lg:text-4xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
+                  Create your CV with us
+                </h2>
+                <p className="text-xl text-gray-600 dark:text-gray-400">
+                  It is{" "}
+                  <span className="text-purple-600 font-bold">AI enabled</span>{" "}
+                  & faster!
+                </p>
+              </div>
 
-              <ul className="space-y-4 mb-10">
+              <ul className="space-y-4">
                 <li className="flex items-center gap-3">
-                  <div className="w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center flex-shrink-0">
-                    <svg
-                      className="w-4 h-4"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={3}
-                        d="M5 13l4 4L19 7"
-                      />
-                    </svg>
-                  </div>
-                  <span className="text-gray-800 dark:text-gray-200 font-medium">
+                  <CheckCircle2 />
+                  <span className="text-gray-800 dark:text-gray-200 font-medium text-lg">
                     Choose from multiple templates
                   </span>
                 </li>
                 <li className="flex items-center gap-3">
-                  <div className="w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center flex-shrink-0">
-                    <svg
-                      className="w-4 h-4"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={3}
-                        d="M5 13l4 4L19 7"
-                      />
-                    </svg>
-                  </div>
-                  <span className="text-gray-800 dark:text-gray-200 font-medium">
+                  <CheckCircle2 />
+                  <span className="text-gray-800 dark:text-gray-200 font-medium text-lg">
                     Fill in your details & let AI assist you
                   </span>
                 </li>
                 <li className="flex items-center gap-3">
-                  <div className="w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center flex-shrink-0">
-                    <svg
-                      className="w-4 h-4"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={3}
-                        d="M5 13l4 4L19 7"
-                      />
-                    </svg>
-                  </div>
-                  <span className="text-gray-800 dark:text-gray-200 font-medium">
+                  <CheckCircle2 />
+                  <span className="text-gray-800 dark:text-gray-200 font-medium text-lg">
                     Download in PDF format
                   </span>
                 </li>
@@ -365,132 +233,22 @@ export default function Home() {
 
               <Link
                 href="/candidate/signup"
-                className="inline-flex items-center gap-2 px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl transition-all shadow-lg text-lg"
+                className="inline-flex items-center gap-2 px-10 py-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl transition-all shadow-lg text-lg"
               >
                 Create CV ✨
               </Link>
             </div>
 
-            {/* Right: Resume Templates Grid */}
-            <div className="grid grid-cols-2 gap-4">
-              {/* Template 1 - Red/Orange with photo */}
-              <div className="bg-gradient-to-br from-orange-500 to-red-600 rounded-2xl shadow-xl overflow-hidden aspect-[3/4] relative transform hover:scale-105 transition-transform">
-                <div className="p-4 text-white">
-                  <div className="w-20 h-20 bg-white/90 rounded-full mx-auto mb-3 overflow-hidden border-4 border-white/50">
-                    <div className="w-full h-full bg-gradient-to-br from-orange-200 to-orange-300"></div>
-                  </div>
-                  <div className="text-center mb-4">
-                    <div className="h-3 w-24 bg-white/80 rounded mx-auto mb-1"></div>
-                    <div className="h-2 w-20 bg-white/60 rounded mx-auto"></div>
-                  </div>
-                  <div className="space-y-2 mt-6">
-                    <div className="flex items-center gap-2">
-                      <div className="w-3 h-3 bg-white/70 rounded-sm"></div>
-                      <div className="h-1.5 w-full bg-white/40 rounded"></div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div className="w-3 h-3 bg-white/70 rounded-sm"></div>
-                      <div className="h-1.5 w-4/5 bg-white/40 rounded"></div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div className="w-3 h-3 bg-white/70 rounded-sm"></div>
-                      <div className="h-1.5 w-full bg-white/40 rounded"></div>
-                    </div>
-                  </div>
-                  <div className="mt-4 pt-4 border-t border-white/30">
-                    <div className="h-2 w-16 bg-white/70 rounded mb-2"></div>
-                    <div className="space-y-1">
-                      <div className="h-1 w-full bg-white/30 rounded"></div>
-                      <div className="h-1 w-full bg-white/30 rounded"></div>
-                      <div className="h-1 w-3/4 bg-white/30 rounded"></div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Template 2 - Beige/Cream professional */}
-              <div className="bg-gradient-to-br from-amber-50 to-orange-100 dark:from-amber-100 dark:to-orange-200 rounded-2xl shadow-xl overflow-hidden aspect-[3/4] relative transform hover:scale-105 transition-transform border border-gray-200">
-                <div className="p-4">
-                  <div className="mb-3 pb-3 border-b-2 border-orange-400">
-                    <div className="h-4 w-28 bg-gray-800 rounded mb-1"></div>
-                    <div className="h-2 w-24 bg-gray-600 rounded"></div>
-                  </div>
-                  <div className="space-y-3">
-                    <div>
-                      <div className="h-2 w-20 bg-orange-500 rounded mb-2 font-bold"></div>
-                      <div className="space-y-1">
-                        <div className="h-1.5 w-full bg-gray-400 rounded"></div>
-                        <div className="h-1.5 w-full bg-gray-400 rounded"></div>
-                        <div className="h-1.5 w-4/5 bg-gray-400 rounded"></div>
-                      </div>
-                    </div>
-                    <div>
-                      <div className="h-2 w-24 bg-orange-500 rounded mb-2"></div>
-                      <div className="space-y-1">
-                        <div className="h-1.5 w-full bg-gray-400 rounded"></div>
-                        <div className="h-1.5 w-5/6 bg-gray-400 rounded"></div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Template 3 - Light/Minimalist */}
-              <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl overflow-hidden aspect-[3/4] relative transform hover:scale-105 transition-transform border-2 border-gray-200 dark:border-gray-700">
-                <div className="p-4">
-                  <div className="text-center mb-4 pb-4 border-b-2 border-gray-300 dark:border-gray-600">
-                    <div className="h-4 w-32 bg-gray-800 dark:bg-gray-200 rounded mx-auto mb-1"></div>
-                    <div className="h-2 w-24 bg-gray-500 dark:bg-gray-400 rounded mx-auto mb-2"></div>
-                    <div className="flex gap-2 justify-center">
-                      <div className="h-1.5 w-12 bg-blue-600 rounded"></div>
-                      <div className="h-1.5 w-12 bg-blue-600 rounded"></div>
-                    </div>
-                  </div>
-                  <div className="space-y-3">
-                    <div>
-                      <div className="h-2 w-20 bg-blue-600 rounded mb-2"></div>
-                      <div className="space-y-1">
-                        <div className="h-1.5 w-full bg-gray-300 dark:bg-gray-600 rounded"></div>
-                        <div className="h-1.5 w-full bg-gray-300 dark:bg-gray-600 rounded"></div>
-                      </div>
-                    </div>
-                    <div>
-                      <div className="h-2 w-16 bg-blue-600 rounded mb-2"></div>
-                      <div className="h-1.5 w-5/6 bg-gray-300 dark:bg-gray-600 rounded"></div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Template 4 - Dark/Professional */}
-              <div className="bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl shadow-xl overflow-hidden aspect-[3/4] relative transform hover:scale-105 transition-transform">
-                <div className="p-4 text-white">
-                  <div className="flex items-start gap-3 mb-4">
-                    <div className="w-14 h-14 bg-blue-500 rounded-lg flex-shrink-0"></div>
-                    <div>
-                      <div className="h-3 w-24 bg-white/90 rounded mb-1"></div>
-                      <div className="h-2 w-20 bg-white/60 rounded"></div>
-                    </div>
-                  </div>
-                  <div className="space-y-3">
-                    <div>
-                      <div className="h-2 w-20 bg-blue-400 rounded mb-2"></div>
-                      <div className="space-y-1">
-                        <div className="h-1.5 w-full bg-white/40 rounded"></div>
-                        <div className="h-1.5 w-full bg-white/40 rounded"></div>
-                        <div className="h-1.5 w-4/5 bg-white/40 rounded"></div>
-                      </div>
-                    </div>
-                    <div>
-                      <div className="h-2 w-16 bg-blue-400 rounded mb-2"></div>
-                      <div className="space-y-1">
-                        <div className="h-1.5 w-full bg-white/40 rounded"></div>
-                        <div className="h-1.5 w-3/4 bg-white/40 rounded"></div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
+            {/* Right: Resume Templates Grid with Creative Layout */}
+            <div className="relative w-full h-full flex items-center justify-center">
+              {/* Template 1 - Far left, rotated */}
+              <Image
+                src="/Group 8.png"
+                alt="Resume template 1"
+                fill
+                className="object-contain h-[600px] w-100 "
+                priority
+              />
             </div>
           </div>
         </div>
@@ -508,55 +266,21 @@ export default function Home() {
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-start">
             {/* Left: Cover Letter Mockup */}
-            <div className="grid grid-cols-2 gap-6">
-              {/* Cover Letter 1 - Teal */}
-              <div className="bg-gradient-to-br from-teal-500 to-teal-600 rounded-2xl shadow-lg overflow-hidden aspect-[3/4] p-6 text-white transform hover:scale-105 transition-transform">
-                <div className="space-y-3">
-                  <div className="h-2 w-2/3 bg-white/30 rounded"></div>
-                  <div className="h-2 w-1/2 bg-white/30 rounded"></div>
-                  <div className="pt-6 space-y-2">
-                    <div className="h-1.5 w-full bg-white/20 rounded"></div>
-                    <div className="h-1.5 w-full bg-white/20 rounded"></div>
-                    <div className="h-1.5 w-4/5 bg-white/20 rounded"></div>
-                    <div className="h-1.5 w-full bg-white/20 rounded"></div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Cover Letter 2 - Blue */}
-              <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-lg overflow-hidden aspect-[3/4] p-6 border border-gray-200 dark:border-gray-700 transform hover:scale-105 transition-transform mt-8">
-                <div className="space-y-3">
-                  <div className="h-2 w-2/3 bg-gray-200 dark:bg-gray-700 rounded"></div>
-                  <div className="h-2 w-1/2 bg-gray-200 dark:bg-gray-700 rounded"></div>
-                  <div className="pt-6 space-y-2">
-                    <div className="h-1.5 w-full bg-gray-100 dark:bg-gray-800 rounded"></div>
-                    <div className="h-1.5 w-full bg-gray-100 dark:bg-gray-800 rounded"></div>
-                    <div className="h-1.5 w-4/5 bg-gray-100 dark:bg-gray-800 rounded"></div>
-                    <div className="h-1.5 w-full bg-gray-100 dark:bg-gray-800 rounded"></div>
-                  </div>
-                </div>
-              </div>
+            <div className="w-full h-full relative">
+              <Image
+                src="/Group 5.png"
+                alt="Resume template 1"
+                fill
+                className="object-contain w-[804px] "
+                priority
+              />
             </div>
 
             {/* Right: Features */}
             <div className="lg:pl-8">
               <ul className="space-y-6 mb-8">
-                <li className="flex items-start gap-4">
-                  <div className="w-8 h-8 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5">
-                    <svg
-                      className="w-5 h-5 text-green-600 dark:text-green-400"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2.5}
-                        d="M5 13l4 4L19 7"
-                      />
-                    </svg>
-                  </div>
+                <li className="flex items-start gap-3">
+                  <CheckCircle2 />
                   <div>
                     <h4 className="font-semibold text-gray-900 dark:text-gray-100 mb-1">
                       Automated Cover Letter Maker
@@ -566,22 +290,8 @@ export default function Home() {
                     </p>
                   </div>
                 </li>
-                <li className="flex items-start gap-4">
-                  <div className="w-8 h-8 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5">
-                    <svg
-                      className="w-5 h-5 text-green-600 dark:text-green-400"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2.5}
-                        d="M5 13l4 4L19 7"
-                      />
-                    </svg>
-                  </div>
+                <li className="flex items-start gap-3">
+                  <CheckCircle2 />
                   <div>
                     <h4 className="font-semibold text-gray-900 dark:text-gray-100 mb-1">
                       Integrated with your resume
@@ -591,22 +301,8 @@ export default function Home() {
                     </p>
                   </div>
                 </li>
-                <li className="flex items-start gap-4">
-                  <div className="w-8 h-8 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5">
-                    <svg
-                      className="w-5 h-5 text-green-600 dark:text-green-400"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2.5}
-                        d="M5 13l4 4L19 7"
-                      />
-                    </svg>
-                  </div>
+                <li className="flex items-start gap-3">
+                  <CheckCircle2 />
                   <div>
                     <h4 className="font-semibold text-gray-900 dark:text-gray-100 mb-1">
                       Hiring manager approved
@@ -629,139 +325,106 @@ export default function Home() {
       </section>
 
       {/* How It Works Section */}
-      <section className="py-32 bg-gray-50 dark:bg-gray-900/50 border-b border-gray-100 dark:border-gray-800">
+      <section className="py-20 bg-gray-50 dark:bg-gray-900/50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-10">
-            <div className="inline-block px-3 py-1 bg-blue-50 text-blue-600 text-[10px] font-bold uppercase tracking-widest rounded-full mb-4">
-              Simple Process
-            </div>
-            <h2 className="text-2xl lg:text-3xl font-bold text-gray-900 mb-4 tracking-tight uppercase">
-              How It <span className="italic text-blue-600">Works</span>
+          <div className="text-center mb-16">
+            <h2 className="text-4xl lg:text-5xl font-bold text-gray-900 dark:text-gray-100 mb-4">
+              How It Works
             </h2>
-            <p className="text-base text-gray-500 max-w-2xl mx-auto font-normal">
+            <p className="text-lg text-gray-600 dark:text-gray-400">
               Get started in minutes with our seamless workflow
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative">
-            {/* Connection Lines */}
-            <div className="hidden md:block absolute top-1/4 left-1/3 right-1/3 h-0.5 bg-gradient-to-r from-blue-200 via-indigo-200 to-blue-200" />
-
-            {/* Step 1 */}
-            <div className="relative">
-              <div className="bg-white dark:bg-gray-900 p-5 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm hover:shadow-lg transition-all relative z-10">
-                <div className="absolute -top-4 left-6 w-8 h-8 bg-blue-600 text-white rounded-xl flex items-center justify-center font-bold text-base shadow-md">
-                  1
-                </div>
-                <div className="mt-4 mb-4">
-                  <div className="w-10 h-10 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded-xl flex items-center justify-center mx-auto">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      strokeWidth={2}
-                      stroke="currentColor"
-                      className="w-8 h-8"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z"
-                      />
-                    </svg>
-                  </div>
-                </div>
-                <h3 className="text-2xl font-black text-gray-900 dark:text-gray-100 mb-4 text-center uppercase tracking-tight">
-                  Create Resume
-                </h3>
-                <p className="text-gray-500 dark:text-gray-400 text-center font-normal leading-relaxed text-sm">
-                  Build your professional resume on{" "}
-                  <span className="font-bold text-gray-900 dark:text-white">
-                    LetsMakeCV.com
-                  </span>{" "}
-                  with our easy-to-use builder
-                </p>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
+            {/* Step 1: Get Your Link */}
+            <div className="bg-white dark:bg-gray-900 p-8 rounded-2xl shadow-sm hover:shadow-md transition-all">
+              <div className="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-6">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth={2}
+                  stroke="currentColor"
+                  className="w-8 h-8 text-gray-600 dark:text-gray-400"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M13.19 8.688a4.5 4.5 0 0 1 1.242 7.244l-4.5 4.5a4.5 4.5 0 0 1-6.364-6.364l1.757-1.757m13.35-.622 1.757-1.757a4.5 4.5 0 0 0-6.364-6.364l-4.5 4.5a4.5 4.5 0 0 0 1.242 7.244"
+                  />
+                </svg>
               </div>
+              <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-3 text-center">
+                Get Your Link
+              </h3>
+              <p className="text-gray-600 dark:text-gray-400 text-center leading-relaxed">
+                Receive your unique PreviewCV link automatically - same login on
+                both platformsr
+              </p>
             </div>
 
-            {/* Step 2 */}
-            <div className="relative">
-              <div className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm hover:shadow-lg transition-all relative z-10">
-                <div className="absolute -top-4 left-6 w-8 h-8 bg-indigo-600 text-white rounded-xl flex items-center justify-center font-bold text-base shadow-md">
-                  2
-                </div>
-                <div className="mt-4 mb-4">
-                  <div className="w-10 h-10 bg-indigo-50 text-indigo-600 rounded-xl flex items-center justify-center mx-auto">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      strokeWidth={2}
-                      stroke="currentColor"
-                      className="w-8 h-8"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M13.19 8.688a4.5 4.5 0 0 1 1.242 7.244l-4.5 4.5a4.5 4.5 0 0 1-6.364-6.364l1.757-1.757m13.35-.622 1.757-1.757a4.5 4.5 0 0 0-6.364-6.364l-4.5 4.5a4.5 4.5 0 0 0 1.242 7.244"
-                      />
-                    </svg>
-                  </div>
-                </div>
-                <h3 className="text-2xl font-black text-gray-900 dark:text-gray-100 mb-4 text-center uppercase tracking-tight">
-                  Get Your Link
-                </h3>
-                <p className="text-gray-500 text-center font-normal leading-relaxed text-sm">
-                  Receive your unique{" "}
-                  <span className="font-bold text-gray-900 dark:text-gray-100">
-                    PreviewCV link
-                  </span>{" "}
-                  automatically - same login on both platforms
-                </p>
+            {/* Step 2: Create Resume */}
+            <div className="bg-white dark:bg-gray-900 p-8 rounded-2xl shadow-sm hover:shadow-md transition-all">
+              <div className="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-6">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth={2}
+                  stroke="currentColor"
+                  className="w-8 h-8 text-gray-600 dark:text-gray-400"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m3.75 9v6m3-3H9m1.5-12H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z"
+                  />
+                </svg>
               </div>
+              <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-3 text-center">
+                Create Resume
+              </h3>
+              <p className="text-gray-600 dark:text-gray-400 text-center leading-relaxed">
+                Build your professional resume on LetsMakeCV.com with our
+                easy-to-use builder
+              </p>
             </div>
 
-            {/* Step 3 */}
-            <div className="relative">
-              <div className="bg-white dark:bg-gray-900 p-5 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm hover:shadow-lg transition-all relative z-10">
-                <div className="absolute -top-4 left-6 w-8 h-8 bg-blue-600 text-white rounded-xl flex items-center justify-center font-bold text-base shadow-md">
-                  3
-                </div>
-                <div className="mt-4 mb-4">
-                  <div className="w-10 h-10 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center mx-auto">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      strokeWidth={2}
-                      stroke="currentColor"
-                      className="w-8 h-8"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M6 12 3.269 3.125A59.769 59.769 0 0 1 21.485 12 59.768 59.768 0 0 1 3.27 20.875L5.999 12Zm0 0h7.5"
-                      />
-                    </svg>
-                  </div>
-                </div>
-                <h3 className="text-2xl font-black text-gray-900 dark:text-gray-100 mb-4 text-center uppercase tracking-tight">
-                  Share & Track
-                </h3>
-                <p className="text-gray-500 text-center font-normal leading-relaxed text-sm">
-                  Share your link anywhere - email, LinkedIn, applications.
-                  Updates automatically when you edit
-                </p>
+            {/* Step 3: Share & Track */}
+            <div className="bg-white dark:bg-gray-900 p-8 rounded-2xl shadow-sm hover:shadow-md transition-all">
+              <div className="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-6">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth={2}
+                  stroke="currentColor"
+                  className="w-8 h-8 text-gray-600 dark:text-gray-400"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M7.217 10.907a2.25 2.25 0 1 0 0 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186 9.566-5.314m-9.566 7.5 9.566 5.314m0 0a2.25 2.25 0 1 0 3.935 2.186 2.25 2.25 0 0 0-3.935-2.186Zm0-12.814a2.25 2.25 0 1 0 3.933-2.185 2.25 2.25 0 0 0-3.933 2.185Z"
+                  />
+                </svg>
               </div>
+              <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-3 text-center">
+                Share & Track
+              </h3>
+              <p className="text-gray-600 dark:text-gray-400 text-center leading-relaxed">
+                Share your link anywhere - email, LinkedIn, applications.
+                Updates automatically when you edit
+              </p>
             </div>
           </div>
 
-          <div className="mt-16 text-center">
+          <div className="text-center">
             <Link
-              href="/candidate"
-              className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-all shadow-md shadow-blue-200 uppercase tracking-wide text-base"
+              href="/candidate/signup"
+              className="inline-flex items-center justify-center px-12 py-4 bg-black dark:bg-white text-white dark:text-black font-semibold rounded-lg hover:bg-gray-800 dark:hover:bg-gray-100 transition-all text-lg"
             >
-              Get Started Free →
+              Get Started
             </Link>
           </div>
         </div>
