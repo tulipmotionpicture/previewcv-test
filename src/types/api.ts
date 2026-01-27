@@ -225,11 +225,29 @@ export interface AuthResponse {
 
 export interface PaginatedResponse<T> {
   items?: T[];
-  jobs?: [];
+  jobs?: T[];
   total: number;
+  data?: T[];
   page: number;
   size: number;
   pages: number;
+}
+
+export interface MyJobPostingResponse<T> {
+  success: boolean;
+  data: {
+    jobs: T[];
+    pagination: {
+      total: number;
+      page: number;
+      per_page: number;
+      total_pages: number;
+      has_next: boolean;
+      has_previous: boolean;
+      offset: number;
+      limit: number;
+    };
+  };
 }
 
 export interface ApiResponse {

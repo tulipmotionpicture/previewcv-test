@@ -28,6 +28,14 @@ import {
 } from "@/components/recruiter";
 import type { DashboardTab, JobFormState } from "@/components/recruiter";
 
+interface JobFilters {
+  is_active?: boolean | null;
+  posted_date_from?: string;
+  posted_date_to?: string;
+  application_deadline_from?: string;
+  application_deadline_to?: string;
+}
+
 export default function RecruiterDashboard() {
   const router = useRouter();
   const {
@@ -39,6 +47,10 @@ export default function RecruiterDashboard() {
   const toast = useToast();
   const [activeTab, setActiveTab] = useState<DashboardTab>("jobs");
   const [jobs, setJobs] = useState<Job[]>([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalJobs, setTotalJobs] = useState(0);
+  const jobsPerPage = 10;
   const [applications, setApplications] = useState<Application[]>([]);
   const [dashboardStats, setDashboardStats] = useState<{
     total_jobs: number;
@@ -56,6 +68,7 @@ export default function RecruiterDashboard() {
 
   const [selectedJobId, setSelectedJobId] = useState<number | null>(null);
   const [statusFilter, setStatusFilter] = useState<string>("All");
+  const [jobFilters, setJobFilters] = useState<JobFilters>({});
 
   // Detail Modal State
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
@@ -99,19 +112,61 @@ export default function RecruiterDashboard() {
     }
   }, [selectedJobId, statusFilter]);
 
-  const fetchJobs = useCallback(async () => {
-    setLoadingJobs(true);
-    try {
-      const response = await api.getMyJobPostings();
-      const jobList = response.items || response.jobs || [];
-      setJobs(jobList);
-    } catch (error) {
-      console.error("Failed to fetch jobs:", error);
-      toast?.error("Failed to load jobs");
-    } finally {
-      setLoadingJobs(false);
-    }
-  }, [toast]);
+  const fetchJobs = useCallback(
+    async (page: number = 1, filters?: typeof jobFilters) => {
+      setLoadingJobs(true);
+      try {
+        const params = new URLSearchParams({
+          page: page.toString(),
+          limit: jobsPerPage.toString(),
+        });
+
+        // Apply filters if provided
+        const currentFilters = filters || jobFilters;
+        if (
+          currentFilters.is_active !== undefined &&
+          currentFilters.is_active !== null
+        ) {
+          params.append("is_active", currentFilters.is_active.toString());
+        }
+        if (currentFilters.posted_date_from) {
+          params.append("posted_date_from", currentFilters.posted_date_from);
+        }
+        if (currentFilters.posted_date_to) {
+          params.append("posted_date_to", currentFilters.posted_date_to);
+        }
+        if (currentFilters.application_deadline_from) {
+          params.append(
+            "application_deadline_from",
+            currentFilters.application_deadline_from,
+          );
+        }
+        if (currentFilters.application_deadline_to) {
+          params.append(
+            "application_deadline_to",
+            currentFilters.application_deadline_to,
+          );
+        }
+
+        const response = await api.getMyJobPostings(params);
+
+        // Handle new nested response structure
+        const jobList = response.data?.jobs || [];
+        const pagination = response.data?.pagination || {};
+
+        setJobs(jobList);
+        setTotalPages(pagination.total_pages);
+        setTotalJobs(pagination.total || jobList.length);
+        setCurrentPage(pagination.page || page);
+      } catch (error) {
+        console.error("Failed to fetch jobs:", error);
+        toast?.error("Failed to load jobs");
+      } finally {
+        setLoadingJobs(false);
+      }
+    },
+    [toast, jobsPerPage],
+  );
 
   const fetchDashboardStats = useCallback(async () => {
     setLoadingStats(true);
@@ -128,14 +183,15 @@ export default function RecruiterDashboard() {
   }, []);
 
   useEffect(() => {
-    fetchJobs();
+    fetchJobs(1, jobFilters);
     fetchDashboardStats();
-  }, [fetchJobs, fetchDashboardStats]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Only run on mount
 
   const handleJobFormChange = (
     event: React.ChangeEvent<
       HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-    >
+    >,
   ) => {
     const element = event.target as
       | HTMLInputElement
@@ -158,7 +214,7 @@ export default function RecruiterDashboard() {
     try {
       const response: JobApplicationsResponse = await api.getJobApplications(
         jobId,
-        status
+        status,
       );
       if (response.success && response.applications) {
         setApplications(response.applications);
@@ -282,8 +338,8 @@ export default function RecruiterDashboard() {
         prev.map((app) =>
           app.id === appId
             ? { ...app, status: newStatus as Application["status"] }
-            : app
-        )
+            : app,
+        ),
       );
       // Update the detail modal if it's showing this application
       if (selectedApplicationDetail?.application.id === appId) {
@@ -296,7 +352,7 @@ export default function RecruiterDashboard() {
                   status: newStatus as Application["status"],
                 },
               }
-            : null
+            : null,
         );
       }
       toast.success(`Status updated to ${newStatus.replace("_", " ")}`);
@@ -314,6 +370,16 @@ export default function RecruiterDashboard() {
     setActiveTab("ats");
   };
 
+  const handlePageChange = (page: number) => {
+    fetchJobs(page, jobFilters);
+  };
+
+  const handleFiltersChange = (newFilters: JobFilters) => {
+    setJobFilters(newFilters);
+    setCurrentPage(1); // Reset to first page when filters change
+    fetchJobs(1, newFilters); // Apply filters immediately
+  };
+
   const handleViewApplicationDetail = async (app: Application) => {
     setIsDetailModalOpen(true);
     setLoadingApplicationDetail(true);
@@ -329,7 +395,7 @@ export default function RecruiterDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 flex transition-colors duration-300">
+    <div className="min-h-screen flex transition-colors duration-300">
       {/* Sidebar */}
       <RecruiterSidebar
         recruiter={recruiter}
@@ -339,7 +405,7 @@ export default function RecruiterDashboard() {
       />
 
       {/* Main Content */}
-      <main className="flex-1 p-10 max-w-6xl mx-auto overflow-x-hidden">
+      <main className="flex-1 p-10 max-w-7xl mx-auto overflow-x-hidden">
         {activeTab === "stats" && (
           <DashboardStats stats={dashboardStats} loading={loadingStats} />
         )}
@@ -350,6 +416,12 @@ export default function RecruiterDashboard() {
             loadingJobs={loadingJobs}
             jobForm={jobForm}
             creatingJob={creatingJob}
+            totalJobs={totalJobs}
+            currentPage={currentPage}
+            totalPages={totalPages}
+            filters={jobFilters}
+            onPageChange={handlePageChange}
+            onFiltersChange={handleFiltersChange}
             onJobFormChange={handleJobFormChange}
             onCreateJob={handleCreateJob}
             onEditJob={handleEditJob}

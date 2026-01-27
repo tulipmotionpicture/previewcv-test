@@ -7,7 +7,9 @@ export default function Footer() {
 
   // Hide footer on login and signup pages
   const hideFooter =
-    pathname?.includes("/login") || pathname?.includes("/signup");
+    pathname?.includes("/login") ||
+    pathname?.includes("/signup") ||
+    pathname?.includes("/recruiter/dashboard");
 
   if (hideFooter) {
     return null;

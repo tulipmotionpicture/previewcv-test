@@ -1,6 +1,13 @@
 "use client";
 
 import Image from "next/image";
+import {
+  Briefcase,
+  FileText,
+  Image as ImageIcon,
+  Calendar,
+  User,
+} from "lucide-react";
 import config from "@/config";
 import { Recruiter } from "@/types/api";
 
@@ -25,18 +32,39 @@ export default function RecruiterSidebar({
   onTabChange,
   onLogout,
 }: RecruiterSidebarProps) {
-  const navItems: { key: DashboardTab; label: string }[] = [
-    // { key: "stats", label: "Dashboard Stats" },
-    { key: "jobs", label: "Manage Jobs" },
-    { key: "ats", label: "Application Review" },
-    { key: "gallery", label: "Company Gallery" },
-    { key: "galleryEvents", label: "Gallery Events" },
-    { key: "profile", label: "Profile" },
+  const navItems: {
+    key: DashboardTab;
+    label: string;
+    icon: React.ReactNode;
+  }[] = [
+    // { key: "stats", label: "Dashboard Stats", icon: <BarChart3 className="w-5 h-5" /> },
+    {
+      key: "jobs",
+      label: "Manage Jobs",
+      icon: <Briefcase className="w-5 h-5" />,
+    },
+    {
+      key: "ats",
+      label: "Application Review",
+      icon: <FileText className="w-5 h-5" />,
+    },
+    {
+      key: "gallery",
+      label: "Company Gallery",
+      icon: <ImageIcon className="w-5 h-5" />,
+    },
+    {
+      key: "galleryEvents",
+      label: "Gallery Events",
+      icon: <Calendar className="w-5 h-5" />,
+    },
+    { key: "profile", label: "Profile", icon: <User className="w-5 h-5" /> },
   ];
 
   return (
-    <aside className="w-64 bg-white dark:bg-gray-900 border-r border-gray-100 dark:border-gray-800 text-gray-900 dark:text-gray-100 min-h-screen p-6 sticky top-0 h-screen shadow-sm">
-      <div className="mb-10 flex items-center justify-center">
+    <aside className="w-64 bg-[#1a1a1a] text-white min-h-screen p-6 sticky top-0 h-screen flex flex-col">
+      {/* Logo Section */}
+      <div className="mb-8 flex items-center gap-3">
         <Image
           src={config.app.logoUrl}
           alt={config.app.name}
@@ -45,35 +73,48 @@ export default function RecruiterSidebar({
           className="rounded-3xl"
         />
       </div>
-      <nav className="space-y-2">
+
+      {/* Navigation */}
+      <nav className="space-y-1 flex-1">
         {navItems.map((item) => (
           <button
             key={item.key}
             onClick={() => onTabChange(item.key)}
-            className={`w-full text-left px-4 py-3 rounded-xl transition-all font-black text-xs uppercase tracking-tight ${
+            className={`w-full text-left px-4 py-3 rounded-lg transition-all text-sm flex items-center gap-3 ${
               activeTab === item.key
-                ? "bg-indigo-600 text-white shadow-lg shadow-indigo-200 dark:shadow-indigo-900/50"
-                : "text-gray-400 dark:text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800"
+                ? "bg-black text-white"
+                : "text-gray-400 hover:bg-gray-800/50"
             }`}
           >
-            {item.label}
+            {item.icon}
+            <span>{item.label}</span>
           </button>
         ))}
       </nav>
-      <div className="absolute bottom-10 left-6 right-6">
-        <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700">
-          <p className="text-[10px] text-gray-400 dark:text-gray-500 mb-1 font-black uppercase tracking-widest">
-            Signed in as
-          </p>
-          <p className="font-bold text-sm truncate text-gray-900 dark:text-gray-100">
-            {recruiter?.full_name}
-          </p>
-          <button
-            onClick={onLogout}
-            className="text-[10px] text-indigo-600 dark:text-indigo-400 hover:underline mt-4 block font-black uppercase tracking-tight"
-          >
-            Sign out
-          </button>
+
+      {/* User Profile Section */}
+      <div className="mt-auto pt-6 border-t border-gray-800">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-full bg-gray-600 overflow-hidden flex items-center justify-center">
+            {recruiter?.full_name ? (
+              <span className="text-sm font-semibold text-white">
+                {recruiter.full_name.charAt(0).toUpperCase()}
+              </span>
+            ) : (
+              <User className="w-5 h-5 text-gray-300" />
+            )}
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-medium text-white truncate">
+              {recruiter?.full_name}
+            </p>
+            <button
+              onClick={onLogout}
+              className="text-xs text-gray-400 hover:text-white transition-colors"
+            >
+              Sign out
+            </button>
+          </div>
         </div>
       </div>
     </aside>
