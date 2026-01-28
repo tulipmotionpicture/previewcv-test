@@ -32,6 +32,7 @@ export default function Header({
 }: HeaderProps) {
   const pathname = usePathname();
   const router = useRouter();
+  const [scrolled, setScrolled] = useState(false);
 
   // Auth contexts
   const {
@@ -70,6 +71,19 @@ export default function Header({
     isLoading,
   ]);
 
+  // Handle scroll effect
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 20);
+    };
+
+    // Check initial scroll
+    handleScroll();
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
   const handleLogout = async () => {
     try {
       if (isCandidateAuth) {
@@ -98,7 +112,7 @@ export default function Header({
           className="flex items-center gap-3 hover:opacity-90 transition-opacity"
         >
           <Image
-            src="/preview-cv-logo.png"
+            src={config.app.logoUrl}
             alt={config.app.name}
             width={120}
             height={120}
