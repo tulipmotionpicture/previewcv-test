@@ -79,7 +79,7 @@ export default async function SEOJobsPage({
         }}
         showAuthButtons={true}
       />
-      <div className="pt-24">
+      <div className="pt-20">
         <SEOJobsListWithLayout slug={slug} limit={20} />
       </div>
     </div>

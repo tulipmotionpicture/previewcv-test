@@ -100,11 +100,10 @@ export default function Header({
 
   return (
     <nav
-      className={`fixed top-0 w-full z-50 transition-all duration-300 border-b ${
-        scrolled
+      className={`fixed top-0 w-full z-50 transition-all duration-300 border-b ${scrolled
           ? "bg-white/90 dark:bg-gray-900/90 backdrop-blur-md border-gray-100 dark:border-gray-800 shadow-sm py-3"
-          : "bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm border-transparent py-5"
-      }`}
+          : "bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm border-transparent py-2"
+        }`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
         {/* Logo */}
@@ -133,11 +132,10 @@ export default function Header({
                   <Link
                     key="/candidate/dashboard"
                     href="/candidate/dashboard"
-                    className={`text-sm font-bold uppercase tracking-widest transition-colors ${
-                      pathname === "/candidate/dashboard"
+                    className={`text-sm font-bold uppercase tracking-widest transition-colors ${pathname === "/candidate/dashboard"
                         ? "text-blue-600 dark:text-blue-400"
                         : "text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
-                    }`}
+                      }`}
                   >
                     Dashboard
                   </Link>
@@ -150,11 +148,10 @@ export default function Header({
                   <Link
                     key="/recruiter/dashboard"
                     href="/recruiter/dashboard"
-                    className={`text-sm font-bold uppercase tracking-widest transition-colors ${
-                      pathname === "/recruiter/dashboard"
+                    className={`text-sm font-bold uppercase tracking-widest transition-colors ${pathname === "/recruiter/dashboard"
                         ? "text-blue-600 dark:text-blue-400"
                         : "text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
-                    }`}
+                      }`}
                   >
                     Dashboard
                   </Link>
@@ -177,11 +174,10 @@ export default function Header({
               <Link
                 key={link.href}
                 href={link.href}
-                className={`text-sm font-bold uppercase tracking-widest transition-colors ${
-                  isActive
+                className={`text-sm font-bold uppercase tracking-widest transition-colors ${isActive
                     ? "text-blue-600 dark:text-blue-400"
                     : "text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
-                }`}
+                  }`}
               >
                 {link.label}
               </Link>
@@ -203,15 +199,14 @@ export default function Header({
                   {cta && (
                     <Link
                       href={cta.href}
-                      className={`px-6 py-3 text-white text-sm font-bold rounded-xl transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 ${
-                        cta.variant === "primary"
+                      className={`px-6 py-3 text-white text-sm font-bold rounded-xl transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 ${cta.variant === "primary"
                           ? "bg-blue-600 hover:bg-blue-700 shadow-blue-500/20"
                           : cta.variant === "dark"
-                          ? "bg-gray-900 hover:bg-gray-800 shadow-gray-900/20"
-                          : cta.variant === "secondary"
-                          ? "bg-indigo-600 hover:bg-indigo-700 shadow-indigo-500/20"
-                          : "bg-blue-600"
-                      }`}
+                            ? "bg-gray-900 hover:bg-gray-800 shadow-gray-900/20"
+                            : cta.variant === "secondary"
+                              ? "bg-indigo-600 hover:bg-indigo-700 shadow-indigo-500/20"
+                              : "bg-blue-600"
+                        }`}
                     >
                       {cta.label}
                     </Link>
@@ -228,15 +223,14 @@ export default function Header({
           {!showAuthButtons && cta && (
             <Link
               href={cta.href}
-              className={`px-6 py-3 text-white text-sm font-bold rounded-xl transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 ${
-                cta.variant === "primary"
+              className={`px-6 py-3 text-white text-sm font-bold rounded-xl transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 ${cta.variant === "primary"
                   ? "bg-blue-600 hover:bg-blue-700 shadow-blue-500/20"
                   : cta.variant === "dark"
-                  ? "bg-gray-900 hover:bg-gray-800 shadow-gray-900/20"
-                  : cta.variant === "secondary"
-                  ? "bg-indigo-600 hover:bg-indigo-700 shadow-indigo-500/20"
-                  : "bg-blue-600"
-              }`}
+                    ? "bg-gray-900 hover:bg-gray-800 shadow-gray-900/20"
+                    : cta.variant === "secondary"
+                      ? "bg-indigo-600 hover:bg-indigo-700 shadow-indigo-500/20"
+                      : "bg-blue-600"
+                }`}
             >
               {cta.label}
             </Link>

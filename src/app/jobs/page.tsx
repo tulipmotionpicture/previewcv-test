@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState, useCallback } from "react";
+import { useSearchParams } from "next/navigation";
 import JobsLayout from "@/components/JobsLayout";
 import JobsFilters from "@/components/JobsFilters";
 import JobList from "@/components/JobList";
@@ -11,6 +12,8 @@ import type { CardsSummaryResponse } from "@/types/jobs";
 import { useInfiniteScroll } from "@/hooks/useInfiniteScroll";
 
 export default function JobsPage() {
+  const searchParams = useSearchParams();
+  const initialKeyword = searchParams.get("keyword") || "";
   const [jobs, setJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
@@ -22,13 +25,27 @@ export default function JobsPage() {
     Record<string, string[]>
   >({});
   // State for search bar
-  const [keyword, setKeyword] = useState("");
+  const [keyword, setKeyword] = useState(initialKeyword);
   const [location, setLocation] = useState("");
   // Pagination state
   const [offset, setOffset] = useState(0);
   const [hasMore, setHasMore] = useState(true);
   const [total, setTotal] = useState(0);
-  const limit = 45;
+  const limit = 10;
+
+  // On mount, if keyword is present in URL, set it in filters as well
+  // Track if filters are initialized from URL
+  const [filtersInitialized, setFiltersInitialized] = useState(false);
+  useEffect(() => {
+    if (initialKeyword) {
+      setSelectedFilters((prev) => ({
+        ...prev,
+        skill_search: [initialKeyword],
+      }));
+    }
+    setFiltersInitialized(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialKeyword]);
 
   // Helper to build params from selectedFilters
   const buildJobFilterParams = useCallback(
@@ -124,10 +141,11 @@ export default function JobsPage() {
 
   // Initial load and filter change
   useEffect(() => {
+    if (!filtersInitialized) return;
     setOffset(0);
     setHasMore(true);
     fetchJobs(0, false);
-  }, [selectedFilters, fetchJobs]);
+  }, [selectedFilters, fetchJobs, filtersInitialized]);
 
   // Load more handler
   const handleLoadMore = useCallback(() => {
@@ -202,7 +220,7 @@ export default function JobsPage() {
         }}
         showAuthButtons={true}
       />
-      <div className="pt-24">
+      <div className="pt-20">
         {/* Horizontal Search Bar */}
         <div className="w-full flex justify-center mb-4 px-4">
           <form
@@ -210,21 +228,22 @@ export default function JobsPage() {
               e.preventDefault();
               setSelectedFilters((prev) => ({
                 ...prev,
-                keyword: keyword ? [keyword] : [],
+                skill_search: keyword ? [keyword] : [],
                 location: location ? [location] : [],
               }));
             }}
-            className="w-full max-w-7xl bg-white dark:bg-gray-900 
-              border border-gray-300 dark:border-gray-800 rounded-lg"
+            className="w-full max-w-7xl bg-white dark:bg-gray-800 
+              border-2 border-gray-200 dark:border-gray-700 rounded-xl
+              shadow-md hover:shadow-lg transition-shadow duration-200"
           >
-            <div className="flex flex-col md:flex-row items-stretch">
+            <div className="flex flex-col md:flex-row items-stretch gap-0">
               {/* Keyword */}
-              <div className="flex-1 p-1 pl-4">
+              <div className="flex-1 px-4 py-2.5 flex flex-col justify-center">
                 <label
                   htmlFor="job-keywords"
-                  className="block text-[11px] font-semibold"
+                  className="block text-[10px] font-bold text-gray-500 dark:text-gray-400 mb-1 uppercase tracking-wide"
                 >
-                  KEYWORDS
+                  Keywords
                 </label>
                 <input
                   id="job-keywords"
@@ -233,21 +252,23 @@ export default function JobsPage() {
                   value={keyword}
                   onChange={(e) => setKeyword(e.target.value)}
                   className="w-full bg-transparent outline-none 
-                     text-gray-800 dark:text-gray-100 
-                     placeholder-gray-400 font-medium text-sm"
+                     text-gray-900 dark:text-gray-100 
+                     placeholder-gray-400 dark:placeholder-gray-500 
+                     font-medium text-sm
+                     focus:ring-0 border-0 p-0"
                 />
               </div>
 
               {/* Divider */}
-              <div className="hidden md:block w-px bg-gray-200 dark:bg-gray-800" />
+              <div className="hidden md:block w-px bg-gray-200 dark:bg-gray-700 my-2" />
 
               {/* Location */}
-              <div className="flex-1 p-1">
+              <div className="flex-1 px-4 py-2.5 flex flex-col justify-center border-t md:border-t-0 border-gray-200 dark:border-gray-700">
                 <label
                   htmlFor="job-location"
-                  className="block text-[11px] font-semibold"
+                  className="block text-[10px] font-bold text-gray-500 dark:text-gray-400 mb-1 uppercase tracking-wide"
                 >
-                  LOCATION
+                  Location
                 </label>
                 <input
                   id="job-location"
@@ -256,20 +277,24 @@ export default function JobsPage() {
                   value={location}
                   onChange={(e) => setLocation(e.target.value)}
                   className="w-full bg-transparent outline-none 
-                     text-gray-800 dark:text-gray-100 
-                     placeholder-gray-400 font-medium text-sm"
+                     text-gray-900 dark:text-gray-100 
+                     placeholder-gray-400 dark:placeholder-gray-500 
+                     font-medium text-sm
+                     focus:ring-0 border-0 p-0"
                 />
               </div>
 
               {/* Button */}
-              <div className="p-1 flex items-center">
+              <div className="px-2 py-2 flex items-center justify-center border-t md:border-t-0 border-gray-200 dark:border-gray-700">
                 <button
                   type="submit"
-                  className="w-full md:w-auto px-8 h-10
-                     bg-blue-600 hover:bg-blue-700 
-                     text-white font-medium text-xs
-                     rounded-xl shadow-md transition-all
-                     focus:outline-none focus:ring-2 focus:ring-blue-400"
+                  className="w-full md:w-auto px-8 py-2.5
+                     bg-blue-600 hover:bg-blue-700 active:bg-blue-800
+                     text-white font-semibold text-sm
+                     rounded-lg shadow-md hover:shadow-lg 
+                     transition-all duration-200
+                     focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
+                     transform hover:scale-105"
                 >
                   Search Jobs
                 </button>

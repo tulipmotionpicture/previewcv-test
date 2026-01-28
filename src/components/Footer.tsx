@@ -9,7 +9,8 @@ export default function Footer() {
   const hideFooter =
     pathname?.includes("/login") ||
     pathname?.includes("/signup") ||
-    pathname?.includes("/recruiter/dashboard");
+    pathname?.includes("/recruiter/dashboard") ||
+    pathname?.includes("/jobs");
 
   if (hideFooter) {
     return null;

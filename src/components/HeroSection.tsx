@@ -1,5 +1,8 @@
+"use client";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 interface HeroSectionProps {
   title?: string;
@@ -41,6 +44,8 @@ export default function HeroSection({
   stats,
   backgroundColor = "bg-mint dark:bg-gray-900",
 }: HeroSectionProps) {
+  const router = useRouter();
+  const [searchValue, setSearchValue] = useState("");
   return (
     <section
       className={`relative pt-24 pb-16 lg:pt-32 lg:pb-20 overflow-hidden ${backgroundColor} transition-colors duration-300`}
@@ -74,19 +79,33 @@ export default function HeroSection({
                   Jobs
                 </h2>
 
-                <div className="flex relative">
+                <form
+                  className="flex relative"
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    if (searchValue.trim()) {
+                      router.push(
+                        `/jobs?keyword=${encodeURIComponent(searchValue.trim())}`,
+                      );
+                    } else {
+                      router.push("/jobs");
+                    }
+                  }}
+                >
                   <input
                     type="text"
                     placeholder={searchPlaceholder}
+                    value={searchValue}
+                    onChange={(e) => setSearchValue(e.target.value)}
                     className="flex-1 px-6 py-4 bg-white dark:bg-gray-800 rounded-full border border-gray-200 dark:border-gray-700 outline-none focus:border-teal-dark dark:focus:border-mint text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 shadow-sm p-2"
                   />
-                  <Link
-                    href="/jobs"
+                  <button
+                    type="submit"
                     className="px-8 py-4 bg-teal-dark hover:bg-teal-dark/90 text-white font-semibold rounded-full transition-all shadow-md whitespace-nowrap absolute right-0"
                   >
                     Search job
-                  </Link>
-                </div>
+                  </button>
+                </form>
               </>
             ) : (
               <div className="space-y-8">
