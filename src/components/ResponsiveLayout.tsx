@@ -3,12 +3,12 @@
  * Provides adaptive layout with mobile-first design
  */
 
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import Image from 'next/image';
-import config from '@/config';
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import Image from "next/image";
+import config from "@/config";
 
 interface ResponsiveLayoutProps {
   children: React.ReactNode;
@@ -23,27 +23,29 @@ export default function ResponsiveLayout({
   title,
   showHeader = true,
   showFooter = true,
-  className = ''
+  className = "",
 }: ResponsiveLayoutProps) {
   const router = useRouter();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [screenSize, setScreenSize] = useState<'mobile' | 'tablet' | 'desktop'>('desktop');
+  const [screenSize, setScreenSize] = useState<"mobile" | "tablet" | "desktop">(
+    "desktop",
+  );
 
   useEffect(() => {
     const handleResize = () => {
       const width = window.innerWidth;
       if (width < 768) {
-        setScreenSize('mobile');
+        setScreenSize("mobile");
       } else if (width < 1024) {
-        setScreenSize('tablet');
+        setScreenSize("tablet");
       } else {
-        setScreenSize('desktop');
+        setScreenSize("desktop");
       }
     };
 
     handleResize(); // Initial check
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
   }, []);
 
   const toggleMobileMenu = () => {
@@ -51,11 +53,11 @@ export default function ResponsiveLayout({
   };
 
   const handleLogoClick = () => {
-    router.push('/');
+    router.push("/");
   };
 
   return (
-    <div className={`min-h-screen bg-gray-50 flex flex-col ${className}`}>
+    <div className={`min-h-screen flex flex-col ${className}`}>
       {/* Header */}
       {showHeader && (
         <header className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50">
@@ -88,7 +90,7 @@ export default function ResponsiveLayout({
                   </>
                 )}
               </div>
-              
+
               {/* Desktop Actions */}
               <div className="hidden sm:flex items-center space-x-2 md:space-x-4">
                 <span className="text-xs text-gray-500 px-2 py-1 bg-gray-100 rounded">
@@ -103,8 +105,22 @@ export default function ResponsiveLayout({
                   onClick={toggleMobileMenu}
                   className="text-gray-500 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded p-1"
                 >
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={isMobileMenuOpen ? "M6 18L18 6M6 6l12 12" : "M4 6h16M4 12h16M4 18h16"} />
+                  <svg
+                    className="w-6 h-6"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d={
+                        isMobileMenuOpen
+                          ? "M6 18L18 6M6 6l12 12"
+                          : "M4 6h16M4 12h16M4 18h16"
+                      }
+                    />
                   </svg>
                 </button>
               </div>
@@ -128,9 +144,7 @@ export default function ResponsiveLayout({
       )}
 
       {/* Main Content */}
-      <main className="flex-1 relative">
-        {children}
-      </main>
+      <main className="flex-1 relative">{children}</main>
 
       {/* Footer */}
       {showFooter && (
@@ -142,7 +156,7 @@ export default function ResponsiveLayout({
                 <span className="hidden sm:inline">•</span>
                 <span className="hidden sm:inline">Secure PDF Viewer</span>
               </div>
-              
+
               <div className="flex items-center space-x-4">
                 <span>Screen: {screenSize}</span>
                 <span className="text-gray-300">•</span>
@@ -161,23 +175,25 @@ export default function ResponsiveLayout({
  */
 export function ResponsiveContainer({
   children,
-  size = 'full',
-  className = ''
+  size = "full",
+  className = "",
 }: {
   children: React.ReactNode;
-  size?: 'sm' | 'md' | 'lg' | 'xl' | 'full';
+  size?: "sm" | "md" | "lg" | "xl" | "full";
   className?: string;
 }) {
   const sizeClasses = {
-    sm: 'max-w-sm',
-    md: 'max-w-md',
-    lg: 'max-w-lg',
-    xl: 'max-w-xl',
-    full: 'max-w-full'
+    sm: "max-w-sm",
+    md: "max-w-md",
+    lg: "max-w-lg",
+    xl: "max-w-xl",
+    full: "max-w-full",
   };
 
   return (
-    <div className={`${sizeClasses[size]} mx-auto px-4 sm:px-6 lg:px-8 ${className}`}>
+    <div
+      className={`${sizeClasses[size]} mx-auto px-4 sm:px-6 lg:px-8 ${className}`}
+    >
       {children}
     </div>
   );
@@ -190,7 +206,7 @@ export function ResponsiveGrid({
   children,
   cols = 1,
   gap = 4,
-  className = ''
+  className = "",
 }: {
   children: React.ReactNode;
   cols?: number | { sm?: number; md?: number; lg?: number; xl?: number };
@@ -198,8 +214,8 @@ export function ResponsiveGrid({
   className?: string;
 }) {
   let gridClasses = `grid gap-${gap}`;
-  
-  if (typeof cols === 'number') {
+
+  if (typeof cols === "number") {
     gridClasses += ` grid-cols-1 sm:grid-cols-${Math.min(cols, 2)} md:grid-cols-${Math.min(cols, 3)} lg:grid-cols-${cols}`;
   } else {
     const { sm = 1, md = 2, lg = 3, xl = 4 } = cols;
@@ -210,11 +226,7 @@ export function ResponsiveGrid({
     if (xl) gridClasses += ` xl:grid-cols-${xl}`;
   }
 
-  return (
-    <div className={`${gridClasses} ${className}`}>
-      {children}
-    </div>
-  );
+  return <div className={`${gridClasses} ${className}`}>{children}</div>;
 }
 
 /**
@@ -222,63 +234,61 @@ export function ResponsiveGrid({
  */
 export function ResponsiveText({
   children,
-  size = 'base',
-  className = ''
+  size = "base",
+  className = "",
 }: {
   children: React.ReactNode;
-  size?: 'xs' | 'sm' | 'base' | 'lg' | 'xl' | '2xl' | '3xl';
+  size?: "xs" | "sm" | "base" | "lg" | "xl" | "2xl" | "3xl";
   className?: string;
 }) {
   const sizeClasses = {
-    xs: 'text-xs sm:text-sm',
-    sm: 'text-sm sm:text-base',
-    base: 'text-base sm:text-lg',
-    lg: 'text-lg sm:text-xl',
-    xl: 'text-xl sm:text-2xl',
-    '2xl': 'text-2xl sm:text-3xl',
-    '3xl': 'text-3xl sm:text-4xl'
+    xs: "text-xs sm:text-sm",
+    sm: "text-sm sm:text-base",
+    base: "text-base sm:text-lg",
+    lg: "text-lg sm:text-xl",
+    xl: "text-xl sm:text-2xl",
+    "2xl": "text-2xl sm:text-3xl",
+    "3xl": "text-3xl sm:text-4xl",
   };
 
-  return (
-    <div className={`${sizeClasses[size]} ${className}`}>
-      {children}
-    </div>
-  );
+  return <div className={`${sizeClasses[size]} ${className}`}>{children}</div>;
 }
 
 /**
  * Hook for responsive breakpoints
  */
 export function useResponsive() {
-  const [breakpoint, setBreakpoint] = useState<'mobile' | 'tablet' | 'desktop'>('desktop');
+  const [breakpoint, setBreakpoint] = useState<"mobile" | "tablet" | "desktop">(
+    "desktop",
+  );
   const [windowSize, setWindowSize] = useState({ width: 0, height: 0 });
 
   useEffect(() => {
     const handleResize = () => {
       const width = window.innerWidth;
       const height = window.innerHeight;
-      
+
       setWindowSize({ width, height });
-      
+
       if (width < 768) {
-        setBreakpoint('mobile');
+        setBreakpoint("mobile");
       } else if (width < 1024) {
-        setBreakpoint('tablet');
+        setBreakpoint("tablet");
       } else {
-        setBreakpoint('desktop');
+        setBreakpoint("desktop");
       }
     };
 
     handleResize();
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
   }, []);
 
   return {
     breakpoint,
     windowSize,
-    isMobile: breakpoint === 'mobile',
-    isTablet: breakpoint === 'tablet',
-    isDesktop: breakpoint === 'desktop'
+    isMobile: breakpoint === "mobile",
+    isTablet: breakpoint === "tablet",
+    isDesktop: breakpoint === "desktop",
   };
 }

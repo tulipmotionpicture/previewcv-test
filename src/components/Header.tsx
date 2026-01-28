@@ -86,7 +86,10 @@ export default function Header({
 
   return (
     <nav
-      className="absolute top-0 w-full z-50 transition-all duration-300 border-b bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm border-transparent py-5"
+      className={`fixed top-0 w-full z-50 transition-all duration-300 border-b ${scrolled
+        ? "bg-white/90 dark:bg-gray-900/90 backdrop-blur-md border-gray-100 dark:border-gray-800 shadow-sm py-3"
+        : "bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm border-transparent py-2"
+        }`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
         {/* Logo */}

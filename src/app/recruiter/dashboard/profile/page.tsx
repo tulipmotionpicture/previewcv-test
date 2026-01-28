@@ -108,7 +108,7 @@ export default function RecruiterProfileEdit() {
   const handleChange = (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
-    >
+    >,
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -147,7 +147,7 @@ export default function RecruiterProfileEdit() {
       toast.success("Profile updated successfully!");
     } catch (error) {
       toast.error(
-        error instanceof Error ? error.message : "Failed to update profile"
+        error instanceof Error ? error.message : "Failed to update profile",
       );
     } finally {
       setIsSaving(false);
@@ -169,7 +169,7 @@ export default function RecruiterProfileEdit() {
       });
     } catch (error) {
       toast.error(
-        error instanceof Error ? error.message : "Failed to change password"
+        error instanceof Error ? error.message : "Failed to change password",
       );
     } finally {
       setPasswordLoading(false);
@@ -201,10 +201,10 @@ export default function RecruiterProfileEdit() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 selection:bg-indigo-100">
+    <div className="min-h-screen">
       <div className="max-w-5xl mx-auto space-y-8">
         {/* Public Profile URL */}
-        <div className="bg-gradient-to-br from-indigo-50 to-blue-50 border border-indigo-100 p-6 rounded-[32px]">
+        <div className=" p-6 rounded-[32px] dark:bg-gray-900">
           <div className="flex items-start justify-between gap-6">
             <div className="flex-1">
               <h3 className="text-sm font-black text-gray-900 uppercase tracking-tight mb-2">
@@ -215,16 +215,16 @@ export default function RecruiterProfileEdit() {
                   type="text"
                   value={`http://localhost:3000${recruiter?.profile_url}`}
                   readOnly
-                  className="flex-1 px-4 py-3 bg-white border border-gray-200 rounded-xl font-medium text-gray-700 text-sm normal-case"
+                  className="flex-1 px-4 py-3 bg-gray-50 dark:bg-gray-800 border-none rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
                 />
                 <button
                   onClick={() => {
                     navigator.clipboard.writeText(
-                      `http://localhost:3000${recruiter?.profile_url}`
+                      `http://localhost:3000${recruiter?.profile_url}`,
                     );
                     toast.success("Link copied to clipboard!");
                   }}
-                  className="px-6 py-3 bg-indigo-600 text-white font-black rounded-xl hover:bg-indigo-700 transition-all uppercase tracking-tight text-sm whitespace-nowrap"
+                  className="px-6 py-3 bg-teal-dark dark:bg-teal-dark text-white hover:bg-teal-700 dark:hover:bg-teal-800 rounded-xl transition-all uppercase tracking-tight text-sm whitespace-nowrap"
                 >
                   Copy Link
                 </button>
@@ -236,7 +236,7 @@ export default function RecruiterProfileEdit() {
         {/* Profile Information */}
         <form
           onSubmit={handleSubmit}
-          className="bg-white border border-gray-100 rounded-[40px] p-10 shadow-sm"
+          className="bg-white border border-gray-100 rounded-[40px] p-10 shadow-sm dark:bg-gray-900 dark:text-white"
         >
           <h2 className="text-xl font-bold text-gray-900 mb-6">
             Profile Information
@@ -251,7 +251,7 @@ export default function RecruiterProfileEdit() {
                   type="text"
                   name="display_name"
                   required
-                  className="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-indigo-600 outline-none hover:bg-gray-100 transition-all font-medium text-gray-900"
+                  className="w-full px-6 py-4 bg-gray-50 dark:bg-gray-800 border-none rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
                   value={formData.display_name}
                   onChange={handleChange}
                 />
@@ -268,7 +268,7 @@ export default function RecruiterProfileEdit() {
                 <input
                   type="text"
                   name="username"
-                  className="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-indigo-600 outline-none hover:bg-gray-100 transition-all font-medium text-gray-900"
+                  className="w-full px-6 py-4 bg-gray-50 dark:bg-gray-800 border-none rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
                   value={formData.username}
                   onChange={handleChange}
                   placeholder="your username"
@@ -284,7 +284,7 @@ export default function RecruiterProfileEdit() {
                 <input
                   type="text"
                   name="company_name"
-                  className="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-indigo-600 outline-none hover:bg-gray-100 transition-all font-medium text-gray-900"
+                  className="w-full px-6 py-4 bg-gray-50 dark:bg-gray-800 border-none rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
                   value={formData.company_name}
                   onChange={handleChange}
                   placeholder="Your Company Name"
@@ -298,7 +298,7 @@ export default function RecruiterProfileEdit() {
                   type="email"
                   value={recruiter?.email || ""}
                   disabled
-                  className="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl outline-none font-medium text-gray-500"
+                  className="w-full px-6 py-4 bg-gray-50 dark:bg-gray-800 border-none rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
                 />
                 <p className="text-xs text-gray-500 mt-2 ml-1">
                   Email cannot be changed
@@ -313,7 +313,7 @@ export default function RecruiterProfileEdit() {
               <textarea
                 name="bio"
                 rows={4}
-                className="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-indigo-600 outline-none hover:bg-gray-100 transition-all font-medium text-gray-900 resize-none"
+                className="w-full px-6 py-4 bg-gray-50 dark:bg-gray-800 border-none rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 resize-none"
                 value={formData.bio}
                 onChange={handleChange}
                 placeholder="Tell candidates about yourself or your company..."
@@ -328,7 +328,7 @@ export default function RecruiterProfileEdit() {
                 <input
                   type="tel"
                   name="phone"
-                  className="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-indigo-600 outline-none hover:bg-gray-100 transition-all font-medium text-gray-900"
+                  className="w-full px-6 py-4 bg-gray-50 dark:bg-gray-800 border-none rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
                   value={formData.phone}
                   onChange={handleChange}
                 />
@@ -340,7 +340,7 @@ export default function RecruiterProfileEdit() {
                 <input
                   type="text"
                   name="location"
-                  className="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-indigo-600 outline-none hover:bg-gray-100 transition-all font-medium text-gray-900"
+                  className="w-full px-6 py-4 bg-gray-50 dark:bg-gray-800 border-none rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
                   value={formData.location}
                   onChange={handleChange}
                 />
@@ -355,7 +355,7 @@ export default function RecruiterProfileEdit() {
                 <input
                   type="url"
                   name="company_website"
-                  className="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-indigo-600 outline-none hover:bg-gray-100 transition-all font-medium text-gray-900"
+                  className="w-full px-6 py-4 bg-gray-50 dark:bg-gray-800 border-none rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
                   value={formData.company_website}
                   onChange={handleChange}
                   placeholder="https://yourcompany.com"
@@ -368,7 +368,7 @@ export default function RecruiterProfileEdit() {
                 <input
                   type="url"
                   name="linkedin_url"
-                  className="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-indigo-600 outline-none hover:bg-gray-100 transition-all font-medium text-gray-900"
+                  className="w-full px-6 py-4 bg-gray-50 dark:bg-gray-800 border-none rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
                   value={formData.linkedin_url}
                   onChange={handleChange}
                   placeholder="https://linkedin.com/in/yourprofile"
@@ -383,7 +383,7 @@ export default function RecruiterProfileEdit() {
                 </label>
                 <select
                   name="company_size"
-                  className="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-indigo-600 outline-none hover:bg-gray-100 transition-all font-medium text-gray-900"
+                  className="w-full px-6 py-4 bg-gray-50 dark:bg-gray-800 border-none rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
                   value={formData.company_size}
                   onChange={handleChange}
                 >
@@ -403,7 +403,7 @@ export default function RecruiterProfileEdit() {
                 <input
                   type="text"
                   name="industry"
-                  className="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-indigo-600 outline-none hover:bg-gray-100 transition-all font-medium text-gray-900"
+                  className="w-full px-6 py-4 bg-gray-50 dark:bg-gray-800 border-none rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
                   value={formData.industry}
                   onChange={handleChange}
                   placeholder="e.g., Technology, Healthcare"
@@ -419,7 +419,7 @@ export default function RecruiterProfileEdit() {
                 <input
                   type="text"
                   name="specialization"
-                  className="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-indigo-600 outline-none hover:bg-gray-100 transition-all font-medium text-gray-900"
+                  className="w-full px-6 py-4 bg-gray-50 dark:bg-gray-800 border-none rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
                   value={formData.specialization}
                   onChange={handleChange}
                   placeholder="e.g., Technical Recruiting, Executive Search"
@@ -434,7 +434,7 @@ export default function RecruiterProfileEdit() {
                   name="years_experience"
                   min="0"
                   max="50"
-                  className="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-indigo-600 outline-none hover:bg-gray-100 transition-all font-medium text-gray-900"
+                  className="w-full px-6 py-4 bg-gray-50 dark:bg-gray-800 border-none rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
                   value={formData.years_experience}
                   onChange={handleChange}
                   placeholder="e.g., 5"
@@ -449,7 +449,7 @@ export default function RecruiterProfileEdit() {
               <input
                 type="url"
                 name="company_logo_url"
-                className="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-indigo-600 outline-none hover:bg-gray-100 transition-all font-medium text-gray-900"
+                className="w-full px-6 py-4 bg-gray-50 dark:bg-gray-800 border-none rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
                 value={formData.company_logo_url}
                 onChange={handleChange}
                 placeholder="https://yourcompany.com/logo.png"
@@ -463,7 +463,7 @@ export default function RecruiterProfileEdit() {
               <Button
                 type="submit"
                 loading={isSaving}
-                className="bg-indigo-600 hover:bg-indigo-700 shadow-lg shadow-indigo-200"
+                className="bg-teal-dark dark:bg-teal-dark text-white hover:bg-teal-700 dark:hover:bg-teal-800 shadow-none"
               >
                 Save Changes
               </Button>
@@ -474,7 +474,7 @@ export default function RecruiterProfileEdit() {
         {/* Password Change */}
         <form
           onSubmit={handlePasswordChange}
-          className="bg-white border border-gray-100 rounded-[40px] p-10 shadow-sm"
+          className="bg-white border border-gray-100 rounded-[40px] p-10 shadow-sm dark:bg-gray-900"
         >
           <h2 className="text-xl font-bold text-gray-900 mb-6">
             Change Password
@@ -493,7 +493,7 @@ export default function RecruiterProfileEdit() {
                     current_password: e.target.value,
                   })
                 }
-                className="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-indigo-600 outline-none hover:bg-gray-100 transition-all font-medium text-gray-900"
+                className="w-full px-6 py-4 bg-gray-50 dark:bg-gray-800 border-none rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
                 placeholder="••••••••"
               />
               {errors.current_password && (
@@ -516,7 +516,7 @@ export default function RecruiterProfileEdit() {
                       new_password: e.target.value,
                     })
                   }
-                  className="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-indigo-600 outline-none hover:bg-gray-100 transition-all font-medium text-gray-900"
+                  className="w-full px-6 py-4 bg-gray-50 dark:bg-gray-800 border-none rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
                   placeholder="••••••••"
                 />
                 {errors.new_password && (
@@ -541,7 +541,7 @@ export default function RecruiterProfileEdit() {
                       confirm_password: e.target.value,
                     })
                   }
-                  className="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-indigo-600 outline-none hover:bg-gray-100 transition-all font-medium text-gray-900"
+                  className="w-full px-6 py-4 bg-gray-50 dark:bg-gray-800 border-none rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
                   placeholder="••••••••"
                 />
                 {errors.confirm_password && (
@@ -555,7 +555,7 @@ export default function RecruiterProfileEdit() {
               <Button
                 type="submit"
                 loading={passwordLoading}
-                className="bg-indigo-600 hover:bg-indigo-700 shadow-lg shadow-indigo-200"
+                className="bg-teal-dark dark:bg-teal-dark text-white hover:bg-teal-700 dark:hover:bg-teal-800 shadow-none"
               >
                 Update Password
               </Button>
@@ -564,12 +564,12 @@ export default function RecruiterProfileEdit() {
         </form>
 
         {/* Danger Zone */}
-        <div className="bg-white border border-red-200 rounded-[40px] p-10 shadow-sm">
+        <div className="bg-white border border-red-200 rounded-[40px] p-10 shadow-sm dark:bg-gray-900">
           <h2 className="text-xl font-bold text-red-600 mb-2">Danger Zone</h2>
           <p className="text-gray-600 mb-6">
             Irreversible actions that affect your account
           </p>
-          <div className="flex items-center justify-between p-4 bg-red-50 rounded-2xl">
+          <div className="flex items-center justify-between p-4 bg-red-50 rounded-2xl dark:bg-gray-800">
             <div>
               <h3 className="font-bold text-gray-900">
                 Logout from all devices
@@ -578,7 +578,11 @@ export default function RecruiterProfileEdit() {
                 This will sign you out from all active sessions
               </p>
             </div>
-            <Button variant="danger" onClick={() => setShowLogoutDialog(true)}>
+            <Button
+              variant="danger"
+              onClick={() => setShowLogoutDialog(true)}
+              className="shadow-none"
+            >
               Logout
             </Button>
           </div>

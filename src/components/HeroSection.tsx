@@ -1,3 +1,4 @@
+"use client";
 import Image from "next/image";
 import Link from "next/link";
 interface HeroSectionProps {
@@ -40,6 +41,7 @@ export default function HeroSection({
   stats,
   backgroundColor = "bg-mint dark:bg-gray-900",
 }: HeroSectionProps) {
+
   return (
     <section
       className={`relative pt-24 pb-16 lg:pt-32 lg:pb-24 overflow-hidden bg-[#EAF6F6] dark:bg-gray-900 transition-colors duration-300 h-[400px] rounded-bl-[100px] mb-14`}
@@ -81,10 +83,10 @@ export default function HeroSection({
                 Search job
               </Link>
             </div>
-          </div>
+          </div >
 
           {/* Right Side - Resume Text & CTA */}
-          <div className="lg:col-span-6 order-2 lg:pl-12">
+          < div className="lg:col-span-6 order-2 lg:pl-12" >
             <div className="space-y-6">
               <h1 className="text-3xl text-base/18 lg:text-4xl font-medium text-gray-900 dark:text-gray-100 leading-[1.15]">
                 {title}
@@ -111,9 +113,9 @@ export default function HeroSection({
                 )}
               </div>
             </div>
-          </div>
-        </div>
-      </div>
-    </section>
+          </div >
+        </div >
+      </div >
+    </section >
   );
 }

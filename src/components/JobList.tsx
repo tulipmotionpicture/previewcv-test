@@ -12,9 +12,8 @@ interface JobListProps {
 
 function formatSalary(job: Job) {
   if (job.salary_min && job.salary_max) {
-    return `${job.salary_currency || "USD"} ${job.salary_min} - ${
-      job.salary_max
-    }`;
+    return `${job.salary_currency || "USD"} ${job.salary_min} - ${job.salary_max
+      }`;
   }
   return "Competitive Salary";
 }
@@ -46,17 +45,17 @@ export default function JobList({ jobs, loading, error }: JobListProps) {
       ) : jobsState.length === 0 && !loading ? (
         <div className="text-center py-12 text-gray-400">No jobs found.</div>
       ) : (
-        <div className="grid grid-cols-1 gap-2">
+        <div className="grid grid-cols-1 gap-3">
           {jobsState.map((job) => (
             <div
               key={job.id}
-              className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-6 md:p-8 hover:shadow-xl hover:border-blue-300 dark:hover:border-blue-700 transition-all duration-300 group"
+              className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-5 hover:shadow-lg hover:border-blue-300 dark:hover:border-blue-700 transition-all duration-200 group"
             >
               {/* Header: Title, Company, Bookmark */}
-              <div className="flex items-start justify-between gap-4 mb-4">
+              <div className="flex items-start justify-between gap-4 mb-3">
                 <div className="flex-1">
                   <a href={`/job/${job.slug}`} className="block group/title">
-                    <h3 className="text-xl md:text-2xl font-bold text-gray-900 dark:text-gray-100 group-hover/title:text-blue-600 dark:group-hover/title:text-blue-400 transition-colors">
+                    <h3 className="text-lg md:text-xl font-bold text-gray-900 dark:text-gray-100 group-hover/title:text-blue-600 dark:group-hover/title:text-blue-400 transition-colors mb-1">
                       {job.title}
                     </h3>
                   </a>
@@ -67,7 +66,7 @@ export default function JobList({ jobs, loading, error }: JobListProps) {
                         job.recruiter_profile_url ||
                         `/recruiter/${job.recruiter_username}`
                       }
-                      className="inline-flex items-center gap-2 text-sm font-semibold text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                      className="inline-flex items-center gap-2 text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
                     >
                       {/* <span className="text-lg">🏢</span> */}
                       {job.company_name}
@@ -87,7 +86,7 @@ export default function JobList({ jobs, loading, error }: JobListProps) {
               </div>
 
               {/* Meta Info: Location, Remote, Experience */}
-              <div className="flex flex-wrap items-center gap-3 mb-4">
+              <div className="flex flex-wrap items-center gap-2 mb-3">
                 <span className="inline-flex items-center gap-1.5 text-sm text-gray-600 dark:text-gray-400">
                   <svg
                     className="w-4 h-4 text-blue-500 dark:text-blue-400"
@@ -131,13 +130,13 @@ export default function JobList({ jobs, loading, error }: JobListProps) {
               </div>
 
               {/* Description */}
-              <p className="text-gray-700 dark:text-gray-300 text-sm leading-relaxed mb-4 line-clamp-2">
+              <p className="text-gray-600 dark:text-gray-400 text-sm leading-relaxed mb-3 line-clamp-2">
                 {job.description}
               </p>
 
               {/* Skills */}
               {job.required_skills && job.required_skills.length > 0 && (
-                <div className="mb-4">
+                <div className="mb-3">
                   <div className="flex flex-wrap gap-2">
                     {job.required_skills.slice(0, 6).map((skill) => (
                       <span

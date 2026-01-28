@@ -1,12 +1,12 @@
-'use client';
+"use client";
 
 /**
  * Error Boundary Component
  * Catches and handles unexpected React errors gracefully
  */
 
-import React, { Component, ErrorInfo, ReactNode } from 'react';
-import ErrorDisplay from './ErrorDisplay';
+import React, { Component, ErrorInfo, ReactNode } from "react";
+import ErrorDisplay from "./ErrorDisplay";
 
 interface Props {
   children: ReactNode;
@@ -29,16 +29,16 @@ export default class ErrorBoundary extends Component<Props, State> {
   static getDerivedStateFromError(error: Error): State {
     return {
       hasError: true,
-      error
+      error,
     };
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    console.error('ErrorBoundary caught an error:', error, errorInfo);
-    
+    console.error("ErrorBoundary caught an error:", error, errorInfo);
+
     this.setState({
       error,
-      errorInfo
+      errorInfo,
     });
 
     // Call optional error handler
@@ -47,7 +47,7 @@ export default class ErrorBoundary extends Component<Props, State> {
     }
 
     // In production, you might want to log to an error reporting service
-    if (process.env.NODE_ENV === 'production') {
+    if (process.env.NODE_ENV === "production") {
       // Example: LogRocket, Sentry, etc.
       // logErrorToService(error, errorInfo);
     }
@@ -57,7 +57,7 @@ export default class ErrorBoundary extends Component<Props, State> {
     this.setState({
       hasError: false,
       error: undefined,
-      errorInfo: undefined
+      errorInfo: undefined,
     });
   };
 
@@ -70,7 +70,7 @@ export default class ErrorBoundary extends Component<Props, State> {
 
       // Default error UI
       return (
-        <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+        <div className="min-h-screen bg-gray-50 dark:bg-gray-800 flex items-center justify-center p-4">
           <ErrorDisplay
             title="Something went wrong"
             message="An unexpected error occurred while loading this page. Please try again."
@@ -91,13 +91,13 @@ export default class ErrorBoundary extends Component<Props, State> {
  */
 export function useErrorHandler() {
   return (error: Error, errorInfo?: ErrorInfo) => {
-    console.error('Error caught by error handler:', error, errorInfo);
-    
+    console.error("Error caught by error handler:", error, errorInfo);
+
     // In a real app, you might want to:
     // 1. Log to error reporting service
     // 2. Show user-friendly error message
     // 3. Attempt recovery
-    
+
     throw error; // Re-throw to be caught by ErrorBoundary
   };
 }
@@ -107,7 +107,7 @@ export function useErrorHandler() {
  */
 export function withErrorBoundary<P extends object>(
   Component: React.ComponentType<P>,
-  fallback?: ReactNode
+  fallback?: ReactNode,
 ) {
   const WrappedComponent = (props: P) => (
     <ErrorBoundary fallback={fallback}>
@@ -116,6 +116,6 @@ export function withErrorBoundary<P extends object>(
   );
 
   WrappedComponent.displayName = `withErrorBoundary(${Component.displayName || Component.name})`;
-  
+
   return WrappedComponent;
 }

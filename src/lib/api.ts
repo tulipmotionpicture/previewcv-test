@@ -11,6 +11,7 @@ import {
   TopHiringPartnersResponse,
   JobApplicationsResponse,
   ApplicationDetailResponse,
+  MyJobPostingResponse,
 } from "@/types/api";
 import { ReviewedResumeMetadata } from "@/types";
 import type {
@@ -365,9 +366,9 @@ export class ApiClient {
 
   async getMyJobPostings(
     params?: URLSearchParams,
-  ): Promise<PaginatedResponse<Job>> {
+  ): Promise<MyJobPostingResponse<Job>> {
     const queryString = params ? `?${params.toString()}` : "";
-    return this.request<PaginatedResponse<Job>>(
+    return this.request<MyJobPostingResponse<Job>>(
       `/api/v1/recruiters/jobs/my-postings${queryString}`,
       {},
       true,

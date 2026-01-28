@@ -11,7 +11,7 @@ function CompanyGallerySection({
   toast: { error: (msg: string) => void; success: (msg: string) => void };
 }) {
   const [logoUrl, setLogoUrl] = useState<string | null>(
-    recruiter?.company_logo_url || null
+    recruiter?.company_logo_url || null,
   );
   const [gallery, setGallery] = useState<string[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
@@ -75,7 +75,7 @@ function CompanyGallerySection({
 
   /* ------------------ GALLERY UPLOAD ------------------ */
   const handleGalleryUpload = async (
-    e: React.ChangeEvent<HTMLInputElement>
+    e: React.ChangeEvent<HTMLInputElement>,
   ) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -120,7 +120,7 @@ function CompanyGallerySection({
       </div>
 
       {/* Logo Section */}
-      <div className="bg-white rounded-2xl border shadow-sm p-6 mb-10">
+      <div className="bg-white rounded-2xl border shadow-sm p-6 mb-10 dark:bg-gray-900">
         <h2 className="text-lg font-semibold mb-4">Company Logo</h2>
 
         <div className="flex items-center gap-6">
@@ -157,8 +157,8 @@ function CompanyGallerySection({
               {uploadingLogo
                 ? "Uploading..."
                 : logoUrl
-                ? "Change Logo"
-                : "Upload Logo"}
+                  ? "Change Logo"
+                  : "Upload Logo"}
             </button>
 
             <p className="text-xs text-gray-400 mt-2">PNG, JPG up to 5MB</p>
@@ -175,7 +175,7 @@ function CompanyGallerySection({
       </div>
 
       {/* Gallery Section */}
-      <div className="bg-white rounded-2xl border shadow-sm p-6">
+      <div className="bg-white rounded-2xl border shadow-sm p-6 dark:bg-gray-900">
         <div className="flex items-center justify-between mb-6">
           <div>
             <h2 className="text-lg font-semibold">Office Gallery</h2>
