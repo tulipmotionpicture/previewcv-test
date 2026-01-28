@@ -52,7 +52,7 @@ export default function HeroSection({
   const [searchValue, setSearchValue] = useState("");
   return (
     <section
-      className={`relative pt-24 pb-16 lg:pt-32 lg:pb-20 overflow-hidden ${backgroundColor} transition-colors duration-300 `}
+      className={`relative pt-24 pb-20 lg:pt-32 lg:pb-28 overflow-hidden ${backgroundColor} rounded-bl-[60px] lg:rounded-bl-[100px] mb-10 transition-colors duration-300`}
     >
       {/* Background Image (only for home page) */}
       {!showImage && (
@@ -60,7 +60,7 @@ export default function HeroSection({
           src={"/profile-gradient-image.D-RjEL1Q 2.png"}
           alt="Background gradient image"
           fill
-          className="object-cover"
+          className="object-cover opacity-50 dark:opacity-20"
           priority
         />
       )}
@@ -70,21 +70,21 @@ export default function HeroSection({
           {/* Left Side - Content or Search Section */}
           <div
             className={
-              showImage ? "order-1" : showJobSearch ? "order-2 lg:order-1" : ""
+              showImage ? "order-1" : showJobSearch ? "order-1 lg:order-1" : ""
             }
           >
             {showJobSearch ? (
               <>
-                <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-gray-100 mb-8">
+                <h2 className="text-lg lg:text-xl font-medium text-gray-800 dark:text-gray-200  ml-4 leading-tight">
                   Search through{" "}
-                  <span className="text-gray-900 dark:text-gray-100">
+                  <span className="">
                     {jobCount}
                   </span>{" "}
                   Jobs
                 </h2>
 
                 <form
-                  className="flex relative"
+                  className="flex relative max-w-xl"
                   onSubmit={(e) => {
                     e.preventDefault();
                     if (searchValue.trim()) {
@@ -101,11 +101,11 @@ export default function HeroSection({
                     placeholder={searchPlaceholder}
                     value={searchValue}
                     onChange={(e) => setSearchValue(e.target.value)}
-                    className="flex-1 px-6 py-4 bg-white dark:bg-gray-800 rounded-full border border-gray-200 dark:border-gray-700 outline-none focus:border-teal-dark dark:focus:border-mint text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 shadow-sm p-2"
+                    className="w-full px-6 py-5 bg-white dark:bg-gray-800 rounded-full border border-gray-200 dark:border-gray-700 outline-none  dark:focus:border-mint text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500  pr-[140px] text-sm md:text-base"
                   />
                   <button
                     type="submit"
-                    className="px-8 py-4 bg-teal-dark hover:bg-teal-dark/90 text-white font-semibold rounded-full transition-all shadow-md whitespace-nowrap absolute right-0"
+                    className="absolute right-1 top-1.5 bottom-1.5 px-6 md:px-8 bg-[#1F4E4F] hover:bg-[#163c3d] text-white font-medium rounded-full transition-all text-sm"
                   >
                     Search job
                   </button>
@@ -118,7 +118,7 @@ export default function HeroSection({
                     {subtitle}
                   </div>
                 )}
-                <h1 className="text-4xl lg:text-5xl xl:text-6xl font-black text-gray-900 dark:text-gray-100 leading-tight tracking-tighter">
+                <h1 className="text-3xl text-base/18 lg:text-4xl font-medium text-gray-900 dark:text-gray-100 leading-[1.15]">
                   {title}
                 </h1>
                 <p className="text-lg lg:text-xl text-gray-600 dark:text-gray-400 font-medium leading-relaxed">
@@ -165,7 +165,7 @@ export default function HeroSection({
           {/* Right Side - Main Hero Content or Image */}
           <div
             className={
-              showImage ? "order-2" : showJobSearch ? "order-1 lg:order-2" : ""
+              showImage ? "order-2" : showJobSearch ? "order-2 lg:order-2" : ""
             }
           >
             {showImage && imageSrc ? (
@@ -191,11 +191,11 @@ export default function HeroSection({
             ) : !showJobSearch ? (
               <div className="space-y-8">
                 {subtitle && (
-                  <div className="inline-block px-4 py-2 bg-mint dark:bg-teal-dark/20 text-teal-dark dark:text-mint text-[10px] font-black uppercase tracking-[0.2em] rounded-full">
+                  <div className="text-2xl lg:text-xl font-medium text-gray-900 dark:text-gray-100 mb-2 ml-3">
                     {subtitle}
                   </div>
                 )}
-                <h1 className="text-4xl lg:text-5xl xl:text-6xl font-black text-gray-900 dark:text-gray-100 leading-tight tracking-tighter">
+                <h1 className="text-3xl text-base/18 lg:text-4xl font-medium text-gray-900 dark:text-gray-100 leading-[1.15]">
                   {title}
                 </h1>
                 <p className="text-lg lg:text-xl text-gray-600 dark:text-gray-400 font-medium leading-relaxed">
@@ -238,10 +238,10 @@ export default function HeroSection({
               </div>
             ) : (
               <div className="space-y-8">
-                <h1 className="text-4xl lg:text-6xl font-bold text-gray-900 dark:text-gray-100 mb-6 leading-tight">
+                <h1 className="text-3xl lg:text-4xl xl:text-5xl font-medium text-gray-900 dark:text-gray-100 mb-6 leading-snug tracking-tight">
                   {title}
                 </h1>
-                <p className="text-lg text-gray-600 dark:text-gray-400 mb-10 leading-relaxed">
+                <p className="text-sm lg:text-base text-gray-600 dark:text-gray-400 mb-10 leading-relaxed max-w-lg">
                   {description}
                 </p>
 
@@ -249,14 +249,14 @@ export default function HeroSection({
                 <div className="flex flex-col sm:flex-row gap-4">
                   <Link
                     href={ctaButtons.primary.href}
-                    className="px-10 py-4 bg-teal-dark hover:bg-teal-dark/90 text-white font-semibold rounded-full transition-all shadow-md text-center"
+                    className="px-8 py-3 bg-[#1F4E4F] hover:bg-[#163c3d] text-white font-medium rounded-full transition-all shadow-md text-center text-sm lg:text-base"
                   >
                     {ctaButtons.primary.label}
                   </Link>
                   {ctaButtons.secondary && (
                     <Link
                       href={ctaButtons.secondary.href}
-                      className="px-10 py-4 bg-transparent border-2 border-teal-dark dark:border-mint text-teal-dark dark:text-mint hover:bg-teal-dark/10 dark:hover:bg-mint/10 font-semibold rounded-full transition-all text-center"
+                      className="px-8 py-3 bg-transparent border border-[#1F4E4F] dark:border-mint text-[#1F4E4F] dark:text-mint hover:bg-[#1F4E4F] hover:text-white dark:hover:bg-mint/10 font-medium rounded-full transition-all text-center text-sm lg:text-base"
                     >
                       {ctaButtons.secondary.label}
                     </Link>
@@ -267,6 +267,6 @@ export default function HeroSection({
           </div>
         </div>
       </div>
-    </section>
+    </section >
   );
 }
