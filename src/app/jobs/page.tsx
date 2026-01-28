@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import JobsLayout from "@/components/JobsLayout";
 import JobsFilters from "@/components/JobsFilters";
@@ -11,7 +11,7 @@ import { Job } from "@/types/api";
 import type { CardsSummaryResponse } from "@/types/jobs";
 import { useInfiniteScroll } from "@/hooks/useInfiniteScroll";
 
-export default function JobsPage() {
+function JobsPageContent() {
   const searchParams = useSearchParams();
   const initialKeyword = searchParams.get("keyword") || "";
   const [jobs, setJobs] = useState<Job[]>([]);
@@ -343,5 +343,20 @@ export default function JobsPage() {
         />
       </div>
     </div>
+  );
+}
+
+export default function JobsPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600 dark:text-gray-400">Loading jobs...</p>
+        </div>
+      </div>
+    }>
+      <JobsPageContent />
+    </Suspense>
   );
 }
