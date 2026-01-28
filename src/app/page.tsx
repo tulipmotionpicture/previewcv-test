@@ -118,7 +118,7 @@ export default function Home() {
 
       <section className="mt-16">
         {/* Hero Section */}
-        <HeroSection />
+        <HeroSection height="h-[100px]" minHeight="min-h-[250px]" />
       </section>
 
       {/* Company Logos & Job Cards Section */}

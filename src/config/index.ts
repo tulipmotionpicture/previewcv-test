@@ -43,7 +43,7 @@ const config: Config = {
   app: {
     name: process.env.NEXT_PUBLIC_APP_NAME || 'PreviewCV',
     nodeEnv: process.env.NODE_ENV || 'development',
-    logoUrl: process.env.NEXT_PUBLIC_LOGO_URL || 'https://img.icons8.com/fluency/96/cv.png',
+    logoUrl: process.env.NEXT_PUBLIC_LOGO_URL || '/preview-cv-main-logo.png',
   },
 };
 
