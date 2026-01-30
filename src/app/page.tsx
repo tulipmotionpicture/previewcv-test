@@ -123,11 +123,12 @@ export default function Home() {
         {/* Hero Section */}
         <HeroSection height="auto" minHeight="min-h-[300px]">
           {/* Cards */}
-          <div className="hidden lg:grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
+          <div className="hidden lg:grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 pt-10">
 
             {/* Jobs By Location */}
-            <div className="bg-white dark:bg-gray-800 rounded-[24px] p-5 lg:p-6 shadow-sm">
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+            <div className="bg-white/60 dark:bg-gray-800/60 backdrop-blur-xl rounded-[24px] p-4 lg:p-5 shadow-xl border border-white/50 dark:border-gray-700/50 hover:bg-white/80 dark:hover:bg-gray-800/80 transition-all duration-300">
+              <h2 className="text-sm font-bold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
+                <span className="w-1 h-4 bg-teal-600 rounded-full"></span>
                 Jobs By Location
               </h2>
 
@@ -136,7 +137,7 @@ export default function Home() {
                   <Link
                     key={city.slug}
                     href={`/jobs/${city.slug}`}
-                    className="px-4 py-1.5 border border-gray-200 dark:border-gray-700 rounded-full text-gray-600 dark:text-gray-300 hover:border-gray-400 dark:hover:border-gray-500 hover:text-gray-900 dark:hover:text-white transition text-xs font-medium"
+                    className="px-3 py-1.5 bg-white dark:bg-gray-700 rounded-lg text-gray-700 dark:text-gray-200 font-semibold shadow-sm hover:shadow-md hover:translate-y-[-1px] transition-all duration-300 text-[11px] border border-transparent hover:border-teal-100"
                   >
                     {city.city}
                   </Link>
@@ -145,7 +146,7 @@ export default function Home() {
                 {cardsData?.cities && cardsData.cities.length > 7 && (
                   <Link
                     href="/jobs"
-                    className="px-4 py-1.5 border border-blue-100 bg-blue-50 text-blue-600 rounded-full font-semibold hover:bg-blue-100 transition text-xs"
+                    className="px-3 py-1.5 bg-teal-50 dark:bg-teal-900/30 text-teal-700 dark:text-teal-300 rounded-lg font-bold hover:bg-teal-100 dark:hover:bg-teal-900/50 transition-all duration-300 text-[11px] shadow-sm"
                   >
                     {cardsData.cities.length}+ more
                   </Link>
@@ -154,8 +155,9 @@ export default function Home() {
             </div>
 
             {/* Jobs By Category */}
-            <div className="bg-white dark:bg-gray-800 rounded-[24px] p-5 lg:p-6 shadow-sm">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+            <div className="bg-white/60 dark:bg-gray-800/60 backdrop-blur-xl rounded-[24px] p-4 lg:p-5 shadow-xl border border-white/50 dark:border-gray-700/50 hover:bg-white/80 dark:hover:bg-gray-800/80 transition-all duration-300">
+              <h3 className="text-sm font-bold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
+                <span className="w-1 h-4 bg-purple-600 rounded-full"></span>
                 Jobs By Category
               </h3>
 
@@ -164,7 +166,7 @@ export default function Home() {
                   <Link
                     key={ind.slug}
                     href={`/jobs/${ind.slug}`}
-                    className="px-4 py-1.5 border border-gray-200 dark:border-gray-700 rounded-full text-gray-600 dark:text-gray-300 hover:border-gray-400 dark:hover:border-gray-500 hover:text-gray-900 dark:hover:text-white transition text-xs font-medium"
+                    className="px-3 py-1.5 bg-white dark:bg-gray-700 rounded-lg text-gray-700 dark:text-gray-200 font-semibold shadow-sm hover:shadow-md hover:translate-y-[-1px] transition-all duration-300 text-[11px] border border-transparent hover:border-purple-100"
                   >
                     {ind.industry}
                   </Link>
@@ -173,7 +175,7 @@ export default function Home() {
                 {cardsData?.industries && cardsData.industries.length > 5 && (
                   <Link
                     href="/jobs"
-                    className="px-4 py-1.5 border border-blue-100 bg-blue-50 text-blue-600 rounded-full font-semibold hover:bg-blue-100 transition text-xs"
+                    className="px-3 py-1.5 bg-purple-50 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded-lg font-bold hover:bg-purple-100 dark:hover:bg-purple-900/50 transition-all duration-300 text-[11px] shadow-sm"
                   >
                     {cardsData.industries.length}+ more
                   </Link>
@@ -186,49 +188,96 @@ export default function Home() {
       </section>
 
       {/* Jobs By Top Employers */}
-      <section className="py-10 lg:py-16 bg-white dark:bg-black">
+      <section className="py-6 lg:py-8 bg-white dark:bg-black">
         <div className="max-w-7xl mx-auto px-4 lg:px-6">
-          <h2 className="text-left text-lg lg:text-xl font-bold text-gray-900 dark:text-gray-100 mb-8">
+          <h2 className="text-left text-lg lg:text-xl pt-6 font-bold text-gray-900 dark:text-gray-100 mb-4">
             Jobs By Top Employers
           </h2>
 
-          <div className="grid grid-rows-2 grid-flow-col gap-3 lg:gap-4 overflow-x-auto pb-6 auto-cols-[160px] lg:auto-cols-[200px] no-scrollbar">
-            {[
-              { name: "Imtiaz", src: "/logos/logo-1.png" },
-              { name: "Thumbay", src: "/logos/logo-2.png" },
-              { name: "Duncan & Ross", src: "/logos/logo-3.png" },
-              { name: "Raqmiyat", src: "/logos/logo-4.png" },
-              { name: "Reportage", src: "/logos/logo-1.png" },
-              { name: "UBS", src: "/logos/logo-2.png" },
-              { name: "SK Overseas", src: "/logos/logo-3.png" },
-              { name: "Ektifa", src: "/logos/logo-4.png" },
-              { name: "NMC", src: "/logos/logo-1.png" },
-              { name: "Robt Stone", src: "/logos/logo-2.png" },
-              { name: "Tarrad", src: "/logos/logo-3.png" },
-              { name: "ABC", src: "/logos/logo-4.png" },
-              { name: "NMDC", src: "/logos/logo-1.png" },
-              { name: "BNW", src: "/logos/logo-2.png" },
-              { name: "HCLTech", src: "/logos/logo-3.png" },
-              { name: "Wipro", src: "/logos/logo-4.png" },
-              { name: "Fisher", src: "/logos/logo-1.png" },
-              { name: "KBC", src: "/logos/logo-2.png" },
-              { name: "Zulekha Hospital", src: "/logos/logo-3.png" },
-              { name: "Sundus", src: "/logos/logo-4.png" },
-              { name: "Salam", src: "/logos/logo-1.png" },
-              { name: "Sharaf Group", src: "/logos/logo-2.png" },
-              { name: "Binghatti", src: "/logos/logo-3.png" },
-              { name: "Innovations Group", src: "/logos/logo-4.png" },
-            ].map((employer, i) => (
-              <div key={i} className="bg-white p-4 border border-gray-200 rounded-lg flex items-center justify-center hover:shadow-md transition-shadow h-20">
-                <Image src={employer.src} alt={employer.name} width={100} height={40} className="object-contain max-h-12" />
+          <div className="flex flex-col gap-4 overflow-hidden py-4">
+            {/* Row 1 - Scroll Left */}
+            <div className="relative w-full overflow-hidden h-16 md:h-20">
+              <div className="absolute top-0 left-0 h-full flex animate-scroll-left w-max">
+                {[
+                  { name: "Imtiaz", src: "/logos/logo-1.png" },
+                  { name: "Thumbay", src: "/logos/logo-2.png" },
+                  { name: "Duncan & Ross", src: "/logos/logo-3.png" },
+                  { name: "Raqmiyat", src: "/logos/logo-4.png" },
+                  { name: "Reportage", src: "/logos/logo-1.png" },
+                  { name: "UBS", src: "/logos/logo-2.png" },
+                  { name: "SK Overseas", src: "/logos/logo-3.png" },
+                  { name: "Ektifa", src: "/logos/logo-4.png" },
+                  { name: "NMC", src: "/logos/logo-1.png" },
+                  { name: "Robt Stone", src: "/logos/logo-2.png" },
+                  { name: "Tarrad", src: "/logos/logo-3.png" },
+                  { name: "ABC", src: "/logos/logo-4.png" },
+                  // Duplicates
+                  { name: "Imtiaz", src: "/logos/logo-1.png" },
+                  { name: "Thumbay", src: "/logos/logo-2.png" },
+                  { name: "Duncan & Ross", src: "/logos/logo-3.png" },
+                  { name: "Raqmiyat", src: "/logos/logo-4.png" },
+                  { name: "Reportage", src: "/logos/logo-1.png" },
+                  { name: "UBS", src: "/logos/logo-2.png" },
+                  { name: "SK Overseas", src: "/logos/logo-3.png" },
+                  { name: "Ektifa", src: "/logos/logo-4.png" },
+                  { name: "NMC", src: "/logos/logo-1.png" },
+                  { name: "Robt Stone", src: "/logos/logo-2.png" },
+                  { name: "Tarrad", src: "/logos/logo-3.png" },
+                  { name: "ABC", src: "/logos/logo-4.png" },
+                ].map((employer, i) => (
+                  <div key={i} className="px-2 w-[120px] md:w-[160px] lg:w-[200px] h-full flex-shrink-0">
+                    <div className="bg-white p-2 md:p-4 border border-gray-200 rounded-lg flex items-center justify-center hover:shadow-md transition-shadow h-full w-full">
+                      <Image src={employer.src} alt={employer.name} width={100} height={40} className="object-contain max-h-12" />
+                    </div>
+                  </div>
+                ))}
               </div>
-            ))}
+            </div>
+
+            {/* Row 2 - Scroll Right */}
+            <div className="relative w-full overflow-hidden h-16 md:h-20">
+              <div className="absolute top-0 left-0 h-full flex animate-scroll-right w-max">
+                {[
+                  { name: "NMDC", src: "/logos/logo-1.png" },
+                  { name: "BNW", src: "/logos/logo-2.png" },
+                  { name: "HCLTech", src: "/logos/logo-3.png" },
+                  { name: "Wipro", src: "/logos/logo-4.png" },
+                  { name: "Fisher", src: "/logos/logo-1.png" },
+                  { name: "KBC", src: "/logos/logo-2.png" },
+                  { name: "Zulekha Hospital", src: "/logos/logo-3.png" },
+                  { name: "Sundus", src: "/logos/logo-4.png" },
+                  { name: "Salam", src: "/logos/logo-1.png" },
+                  { name: "Sharaf Group", src: "/logos/logo-2.png" },
+                  { name: "Binghatti", src: "/logos/logo-3.png" },
+                  { name: "Innovations Group", src: "/logos/logo-4.png" },
+                  // Duplicates
+                  { name: "NMDC", src: "/logos/logo-1.png" },
+                  { name: "BNW", src: "/logos/logo-2.png" },
+                  { name: "HCLTech", src: "/logos/logo-3.png" },
+                  { name: "Wipro", src: "/logos/logo-4.png" },
+                  { name: "Fisher", src: "/logos/logo-1.png" },
+                  { name: "KBC", src: "/logos/logo-2.png" },
+                  { name: "Zulekha Hospital", src: "/logos/logo-3.png" },
+                  { name: "Sundus", src: "/logos/logo-4.png" },
+                  { name: "Salam", src: "/logos/logo-1.png" },
+                  { name: "Sharaf Group", src: "/logos/logo-2.png" },
+                  { name: "Binghatti", src: "/logos/logo-3.png" },
+                  { name: "Innovations Group", src: "/logos/logo-4.png" },
+                ].map((employer, i) => (
+                  <div key={i} className="px-2 w-[120px] md:w-[160px] lg:w-[200px] h-full flex-shrink-0">
+                    <div className="bg-white p-2 md:p-4 border border-gray-200 rounded-lg flex items-center justify-center hover:shadow-md transition-shadow h-full w-full">
+                      <Image src={employer.src} alt={employer.name} width={100} height={40} className="object-contain max-h-12" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
       {/* Career Reads Section */}
-      <section className="py-10 bg-white dark:bg-black border-t border-gray-100 dark:border-gray-800">
+      <section className="py-6 bg-white dark:bg-black border-t border-gray-100 dark:border-gray-800">
         <div className="max-w-7xl mx-auto px-4 lg:px-6">
           <div className="flex justify-between items-center mb-8">
             <h2 className="text-lg lg:text-xl font-bold text-gray-900 dark:text-gray-100">
@@ -324,7 +373,7 @@ export default function Home() {
 
 
       {/* Create CV Section */}
-      <section className="w-full max-w-7xl mx-auto px-4 lg:px-6 mb-12 lg:mb-16 mt-12">
+      <section className="w-full max-w-7xl mx-auto px-4 lg:px-6 mb-6 lg:mb-8 mt-2">
         <div className="bg-[#FAF9FF] dark:bg-gray-800 rounded-[32px] p-6 lg:p-10 flex flex-col lg:flex-row items-center justify-between gap-8 lg:gap-16 overflow-hidden relative border border-purple-50 dark:border-gray-700">
 
           {/* Left Content */}
@@ -416,7 +465,7 @@ export default function Home() {
 
 
       {/* Cover Letter Section - Redesigned to Match */}
-      <section className="w-full max-w-7xl mx-auto px-4 lg:px-6 mb-12 lg:mb-16">
+      <section className="w-full max-w-7xl mx-auto px-4 lg:px-6 mb-6 lg:mb-8">
         <div className="bg-[#F2F5FF] dark:bg-gray-800 rounded-[32px] p-6 lg:p-10 flex flex-col lg:flex-row items-center justify-between gap-8 lg:gap-16 overflow-hidden relative border border-blue-50 dark:border-gray-700">
 
           {/* Left Content */}
@@ -511,7 +560,7 @@ export default function Home() {
 
 
       {/* How It Works Section */}
-      <section className="w-full max-w-7xl mx-auto px-4 lg:px-6 mb-12 lg:mb-16">
+      <section className="w-full max-w-7xl mx-auto px-4 lg:px-6 mb-6 lg:mb-8">
         <div className="bg-[#FAF9FF] dark:bg-gray-800 rounded-[32px] p-6 lg:p-10 relative overflow-hidden border border-purple-50 dark:border-gray-700">
 
           <div className="mb-8 lg:mb-12 text-left w-full">
@@ -568,7 +617,7 @@ export default function Home() {
       {/* Why PreviewCV Section */}
       {/* Why PreviewCV Section */}
       {/* Why PreviewCV Section */}
-      <section className="w-full max-w-7xl mx-auto px-4 lg:px-6 mb-12 lg:mb-16">
+      <section className="w-full max-w-7xl mx-auto px-4 lg:px-6 mb-6 lg:mb-8">
         <div className="bg-[#FAF9FF] dark:bg-gray-800 rounded-[32px] p-6 lg:p-10 relative overflow-hidden border border-purple-50 dark:border-gray-700">
 
           {/* Decorative Background Elements */}
@@ -636,7 +685,7 @@ export default function Home() {
       </section>
       {/* Direct Market Pulse Section */}
       {/* Direct Market Pulse Section */}
-      <section className="w-full max-w-7xl mx-auto px-4 lg:px-6 mb-12 lg:mb-16">
+      <section className="w-full max-w-7xl mx-auto px-4 lg:px-6 mb-6 lg:mb-8">
         <div className="bg-[#FAF9FF] dark:bg-gray-800 rounded-[32px] p-6 lg:p-10 relative overflow-hidden border border-purple-50 dark:border-gray-700 animate-in fade-in duration-700">
 
           {/* Page Header */}
@@ -676,18 +725,18 @@ export default function Home() {
                   ].map((job, index) => (
                     <div
                       key={index}
-                      className="flex flex-col md:flex-row md:items-center justify-between py-4 lg:py-6 border-b border-zinc-100 dark:border-zinc-700 last:border-0 last:pb-0 first:pt-0 gap-4 lg:gap-6"
+                      className="flex items-center justify-between py-6 border-b border-gray-100 dark:border-gray-700 last:border-0 last:pb-0 first:pt-0"
                     >
-                      <div className="space-y-1 lg:space-y-1">
-                        <h3 className="text-sm lg:text-base font-bold text-zinc-900 dark:text-gray-100">{job.title}</h3>
-                        <p className="text-zinc-500 dark:text-gray-400 font-medium text-xs lg:text-sm">{job.company}</p>
+                      <div className="space-y-1">
+                        <h3 className="text-base font-bold text-gray-900 dark:text-gray-100">{job.title}</h3>
+                        <p className="text-gray-500 dark:text-gray-400 font-medium text-sm">{job.company}</p>
                       </div>
 
-                      <div className="flex flex-col items-start md:items-end gap-2 lg:gap-3 shrink-0">
-                        <button className="flex items-center gap-2 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 px-3 py-1.5 lg:px-5 lg:py-2 rounded-lg text-xs lg:text-sm font-semibold hover:bg-zinc-800 dark:hover:bg-gray-200 transition-all hover:gap-3 group">
-                          Apply <ArrowRight className="w-3 h-3 lg:w-4 lg:h-4 group-hover:translate-x-0.5 transition-transform" />
+                      <div className="flex flex-col items-end gap-3">
+                        <button className="flex items-center gap-1 bg-black dark:bg-white text-white dark:text-black px-4 py-1.5 rounded-full text-xs font-semibold hover:opacity-90 transition-opacity">
+                          Apply <ArrowRight className="w-3 h-3" />
                         </button>
-                        <span className="bg-zinc-100 dark:bg-zinc-700 text-zinc-600 dark:text-zinc-300 px-2 py-0.5 lg:px-3 lg:py-1 rounded-md text-[10px] lg:text-xs font-semibold">
+                        <span className="bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 px-3 py-1 rounded-md text-[10px] font-semibold">
                           {job.location}
                         </span>
                       </div>
@@ -727,31 +776,31 @@ export default function Home() {
                 ].map((talent, index) => (
                   <div
                     key={index}
-                    className="bg-white dark:bg-gray-700/50 rounded-2xl p-4 lg:p-5 shadow-sm border border-zinc-200/60 dark:border-zinc-700 hover:shadow-md transition-shadow"
+                    className="bg-white dark:bg-gray-700/50 rounded-2xl p-5 shadow-sm border border-zinc-200/60 dark:border-zinc-700 hover:shadow-md transition-shadow"
                   >
-                    <div className="flex items-start gap-3 lg:gap-4">
+                    <div className="flex items-start gap-4">
                       {/* Avatar */}
                       <img
                         src={talent.avatar}
                         alt={talent.name}
-                        className="w-10 h-10 lg:w-12 lg:h-12 rounded-full object-cover border-2 border-white dark:border-gray-700 shadow-sm"
+                        className="w-12 h-12 rounded-full object-cover"
                       />
 
                       <div className="flex-1 min-w-0">
                         <div className="flex justify-between items-start mb-1">
                           <div>
-                            <h3 className="text-sm lg:text-base font-bold text-zinc-900 dark:text-gray-100">{talent.name}</h3>
-                            <p className="text-zinc-500 dark:text-gray-400 font-medium text-xs lg:text-sm">{talent.role}</p>
+                            <h3 className="text-base font-bold text-gray-900 dark:text-gray-100">{talent.name}</h3>
+                            <p className="text-gray-500 dark:text-gray-400 font-medium text-sm">{talent.role}</p>
                           </div>
-                          <span className="text-xs font-semibold text-zinc-900 dark:text-gray-100 shrink-0 mt-1">{talent.experience}</span>
+                          <span className="text-xs font-semibold text-gray-900 dark:text-gray-100 shrink-0">{talent.experience}</span>
                         </div>
 
                         {/* Skills Tags */}
-                        <div className="flex flex-wrap gap-1.5 lg:gap-2 mt-2">
+                        <div className="flex flex-wrap gap-2 mt-3">
                           {talent.skills.map((skill, i) => (
                             <span
                               key={i}
-                              className="bg-zinc-100 dark:bg-zinc-700 text-zinc-600 dark:text-zinc-300 px-2 py-0.5 rounded-md text-[10px] font-semibold tracking-wide"
+                              className="bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 px-3 py-1 rounded-md text-[10px] font-bold"
                             >
                               {skill}
                             </span>

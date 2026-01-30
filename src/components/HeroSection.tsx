@@ -44,7 +44,7 @@ export default function HeroSection({
   imageAlt,
   imageStyle = "cover",
   stats,
-  backgroundColor = "bg-[#EEF7F7] dark:bg-gray-900",
+  backgroundColor = "bg-[#E5F1EF] dark:bg-gray-900",
   height = "",
   minHeight = "min-h-[450px]",
   children
@@ -72,12 +72,12 @@ export default function HeroSection({
             <div className={showImage ? "order-1" : showJobSearch ? "order-1 lg:order-1" : ""}>
               {showJobSearch ? (
                 <div className="flex flex-col justify-center h-full">
-                  <h2 className="text-lg lg:text-xl font-medium text-gray-900 dark:text-gray-100 mb-1 ml-4">
+                  <h2 className="text-lg lg:text-xl font-medium text-gray-900 dark:text-gray-100 mb-1 ml-4 ">
                     Search through <span className="">{jobCount}</span> Jobs
                   </h2>
 
                   <form
-                    className="flex relative w-full max-w-lg shadow-md rounded-full"
+                    className="flex relative w-full max-w-lg  rounded-full"
                     onSubmit={(e) => {
                       e.preventDefault();
                       if (searchValue.trim()) {
@@ -94,7 +94,7 @@ export default function HeroSection({
                       placeholder={searchPlaceholder}
                       value={searchValue}
                       onChange={(e) => setSearchValue(e.target.value)}
-                      className="w-full px-6 py-4 bg-white dark:bg-gray-800 rounded-full border-0 outline-none text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 pr-[120px] text-sm shadow-sm"
+                      className="w-full px-6 py-4 bg-white dark:bg-gray-800 rounded-full border-0 outline-none text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 pr-[120px] text-[11px] shadow-sm"
                     />
                     <button
                       type="submit"
@@ -141,7 +141,7 @@ export default function HeroSection({
             <div className={showImage ? "order-2" : showJobSearch ? "order-2 lg:order-2" : ""}>
               {showJobSearch ? (
                 <div className="flex flex-col justify-center h-full space-y-4">
-                  <h1 className="text-2xl lg:text-4xl font-medium text-gray-900 dark:text-gray-100 leading-[1.2] tracking-tight">
+                  <h1 className="text-2xl lg:text-4xl font-medium text-gray-900 dark:text-gray-100 leading-[1.2] tracking-tight pt-10">
                     {title}
                   </h1>
                   <p className="text-sm lg:text-base text-gray-600 dark:text-gray-400 leading-relaxed max-w-lg">

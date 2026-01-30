@@ -134,7 +134,7 @@ export default function Header({
                   <Link
                     key="/candidate/dashboard"
                     href="/candidate/dashboard"
-                    className={`text-sm font-bold uppercase tracking-widest transition-colors ${pathname === "/candidate/dashboard"
+                    className={`text-sm font-semibold transition-colors ${pathname === "/candidate/dashboard"
                       ? "text-blue-600 dark:text-blue-400"
                       : "text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
                       }`}
@@ -150,7 +150,7 @@ export default function Header({
                   <Link
                     key="/recruiter/dashboard"
                     href="/recruiter/dashboard"
-                    className={`text-sm font-bold uppercase tracking-widest transition-colors ${pathname === "/recruiter/dashboard"
+                    className={`text-sm font-semibold transition-colors ${pathname === "/recruiter/dashboard"
                       ? "text-blue-600 dark:text-blue-400"
                       : "text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
                       }`}
@@ -176,7 +176,7 @@ export default function Header({
               <Link
                 key={link.href}
                 href={link.href}
-                className={`text-sm font-bold uppercase tracking-widest transition-colors ${isActive
+                className={`text-sm font-semibold transition-colors ${isActive
                   ? "text-blue-600 dark:text-blue-400"
                   : "text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
                   }`}
@@ -192,7 +192,7 @@ export default function Header({
               {!isLoading && isAuthenticated ? (
                 <button
                   onClick={handleLogout}
-                  className="px-6 py-3 bg-red-600 hover:bg-red-700 text-white text-sm font-bold rounded-xl transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+                  className="px-6 py-3 bg-red-600 hover:bg-red-700 text-white text-sm font-bold rounded-full transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
                 >
                   Logout
                 </button>
@@ -201,13 +201,13 @@ export default function Header({
                   {cta && (
                     <Link
                       href={cta.href}
-                      className={`px-6 py-3 text-white text-sm font-bold rounded-xl transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 ${cta.variant === "primary"
-                        ? "bg-blue-600 hover:bg-blue-700 shadow-blue-500/20"
+                      className={`px-6 py-3 text-white text-sm font-bold rounded-full transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 ${cta.variant === "primary"
+                        ? "bg-[#0CA0E8] hover:bg-[#0b8rcd] shadow-sky-500/20"
                         : cta.variant === "dark"
                           ? "bg-gray-900 hover:bg-gray-800 shadow-gray-900/20"
                           : cta.variant === "secondary"
                             ? "bg-indigo-600 hover:bg-indigo-700 shadow-indigo-500/20"
-                            : "bg-blue-600"
+                            : "bg-[#0CA0E8]"
                         }`}
                     >
                       {cta.label}
@@ -225,13 +225,13 @@ export default function Header({
           {!showAuthButtons && cta && (
             <Link
               href={cta.href}
-              className={`px-6 py-3 text-white text-sm font-bold rounded-xl transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 ${cta.variant === "primary"
-                ? "bg-blue-600 hover:bg-blue-700 shadow-blue-500/20"
+              className={`px-6 py-3 text-white text-sm font-bold rounded-full transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 ${cta.variant === "primary"
+                ? "bg-[#0CA0E8] hover:bg-[#0b8rcd] shadow-sky-500/20"
                 : cta.variant === "dark"
                   ? "bg-gray-900 hover:bg-gray-800 shadow-gray-900/20"
                   : cta.variant === "secondary"
                     ? "bg-indigo-600 hover:bg-indigo-700 shadow-indigo-500/20"
-                    : "bg-blue-600"
+                    : "bg-[#0CA0E8]"
                 }`}
             >
               {cta.label}
@@ -263,7 +263,7 @@ export default function Header({
                     key="/candidate/dashboard"
                     href="/candidate/dashboard"
                     onClick={() => setIsMobileMenuOpen(false)}
-                    className={`text-base font-bold uppercase tracking-widest transition-colors py-2 ${pathname === "/candidate/dashboard"
+                    className={`text-base font-semibold transition-colors py-2 ${pathname === "/candidate/dashboard"
                       ? "text-blue-600 dark:text-blue-400"
                       : "text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
                       }`}
@@ -280,7 +280,7 @@ export default function Header({
                     key="/recruiter/dashboard"
                     href="/recruiter/dashboard"
                     onClick={() => setIsMobileMenuOpen(false)}
-                    className={`text-base font-bold uppercase tracking-widest transition-colors py-2 ${pathname === "/recruiter/dashboard"
+                    className={`text-base font-semibold transition-colors py-2 ${pathname === "/recruiter/dashboard"
                       ? "text-blue-600 dark:text-blue-400"
                       : "text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
                       }`}
@@ -307,7 +307,7 @@ export default function Header({
                 key={link.href}
                 href={link.href}
                 onClick={() => setIsMobileMenuOpen(false)}
-                className={`text-base font-bold uppercase tracking-widest transition-colors py-2 ${isActive
+                className={`text-base font-semibold transition-colors py-2 ${isActive
                   ? "text-blue-600 dark:text-blue-400"
                   : "text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
                   }`}
@@ -326,7 +326,7 @@ export default function Header({
                     handleLogout();
                     setIsMobileMenuOpen(false);
                   }}
-                  className="w-full px-6 py-3 bg-red-600 hover:bg-red-700 text-white text-sm font-bold rounded-xl transition-all shadow-md"
+                  className="w-full px-6 py-3 bg-red-600 hover:bg-red-700 text-white text-sm font-bold rounded-full transition-all shadow-md"
                 >
                   Logout
                 </button>
@@ -336,13 +336,13 @@ export default function Header({
                     <Link
                       href={cta.href}
                       onClick={() => setIsMobileMenuOpen(false)}
-                      className={`w-full text-center px-6 py-3 text-white text-sm font-bold rounded-xl transition-all shadow-md ${cta.variant === "primary"
-                        ? "bg-blue-600 hover:bg-blue-700"
+                      className={`w-full text-center px-6 py-3 text-white text-sm font-bold rounded-full transition-all shadow-md ${cta.variant === "primary"
+                        ? "bg-[#0CA0E8] hover:bg-[#0b8rcd]"
                         : cta.variant === "dark"
                           ? "bg-gray-900 hover:bg-gray-800"
                           : cta.variant === "secondary"
                             ? "bg-indigo-600 hover:bg-indigo-700"
-                            : "bg-blue-600"
+                            : "bg-[#0CA0E8]"
                         }`}
                     >
                       {cta.label}
@@ -361,13 +361,13 @@ export default function Header({
               <Link
                 href={cta.href}
                 onClick={() => setIsMobileMenuOpen(false)}
-                className={`w-full block text-center px-6 py-3 text-white text-sm font-bold rounded-xl transition-all shadow-md ${cta.variant === "primary"
-                  ? "bg-blue-600 hover:bg-blue-700"
+                className={`w-full block text-center px-6 py-3 text-white text-sm font-bold rounded-full transition-all shadow-md ${cta.variant === "primary"
+                  ? "bg-[#0CA0E8] hover:bg-[#0b8rcd]"
                   : cta.variant === "dark"
                     ? "bg-gray-900 hover:bg-gray-800"
                     : cta.variant === "secondary"
                       ? "bg-indigo-600 hover:bg-indigo-700"
-                      : "bg-blue-600"
+                      : "bg-[#0CA0E8]"
                   }`}
               >
                 {cta.label}
