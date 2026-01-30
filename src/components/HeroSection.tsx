@@ -44,7 +44,7 @@ export default function HeroSection({
   imageAlt,
   imageStyle = "cover",
   stats,
-  backgroundColor = "bg-[#E5F1EF] dark:bg-gray-900",
+  backgroundColor = "bg-[#E5F1EF] dark:bg-[#000000]",
   height = "",
   minHeight = "min-h-[450px]",
   children
@@ -89,19 +89,21 @@ export default function HeroSection({
                       }
                     }}
                   >
-                    <input
-                      type="text"
-                      placeholder={searchPlaceholder}
-                      value={searchValue}
-                      onChange={(e) => setSearchValue(e.target.value)}
-                      className="w-full px-6 py-4 bg-white dark:bg-gray-800 rounded-full border-0 outline-none text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 pr-[120px] text-[11px] shadow-sm"
-                    />
-                    <button
-                      type="submit"
-                      className="absolute right-1.5 top-1.5 bottom-1.5 px-6 bg-[#1F4E4F] hover:bg-[#163c3d] text-white font-medium rounded-full transition-all text-xs lg:text-sm"
-                    >
-                      Search job
-                    </button>
+                    <div className="relative w-full">
+                      <input
+                        type="text"
+                        placeholder={searchPlaceholder}
+                        value={searchValue}
+                        onChange={(e) => setSearchValue(e.target.value)}
+                        className="w-full px-6 py-4 bg-white dark:bg-[#0a0a0a] rounded-full border border-transparent dark:border-[#262626] outline-none text-gray-900 dark:text-[#a1a1a1] placeholder-gray-400 dark:placeholder-[#a1a1a1] pr-[120px] text-[11px] shadow-sm"
+                      />
+                      <button
+                        type="submit"
+                        className="absolute right-1.5 top-1.5 bottom-1.5 px-6 bg-[#1F4E4F] hover:bg-[#163c3d] text-white font-medium rounded-full transition-all text-xs lg:text-sm"
+                      >
+                        Search job
+                      </button>
+                    </div>
                   </form>
                 </div>
               ) : (
@@ -114,7 +116,7 @@ export default function HeroSection({
                   <h1 className="text-2xl lg:text-3xl font-medium text-gray-900 dark:text-gray-100 leading-[1.15]">
                     {title}
                   </h1>
-                  <p className="text-sm lg:text-base text-gray-600 dark:text-gray-400 font-medium leading-relaxed">
+                  <p className="text-sm lg:text-base text-gray-600 dark:text-[#a1a1a1] font-medium leading-relaxed">
                     {description}
                   </p>
                   <div className="flex flex-wrap gap-3">
@@ -144,7 +146,7 @@ export default function HeroSection({
                   <h1 className="text-2xl lg:text-4xl font-medium text-gray-900 dark:text-gray-100 leading-[1.2] tracking-tight pt-10">
                     {title}
                   </h1>
-                  <p className="text-sm lg:text-base text-gray-600 dark:text-gray-400 leading-relaxed max-w-lg">
+                  <p className="text-sm lg:text-base text-gray-600 dark:text-[#a1a1a1] leading-relaxed max-w-lg">
                     {description}
                   </p>
 

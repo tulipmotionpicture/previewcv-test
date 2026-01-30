@@ -126,7 +126,7 @@ export default function Home() {
           <div className="hidden lg:grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 pt-10">
 
             {/* Jobs By Location */}
-            <div className="bg-white/60 dark:bg-gray-800/60 backdrop-blur-xl rounded-[24px] p-4 lg:p-5 shadow-xl border border-white/50 dark:border-gray-700/50 hover:bg-white/80 dark:hover:bg-gray-800/80 transition-all duration-300">
+            <div className="bg-white/60 dark:bg-[#0a0a0a] backdrop-blur-xl rounded-[24px] p-4 lg:p-5 shadow-xl border border-white/50 dark:border-gray-800/50 hover:bg-white/80 dark:hover:bg-[#0a0a0a] transition-all duration-300">
               <h2 className="text-sm font-bold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
                 <span className="w-1 h-4 bg-teal-600 rounded-full"></span>
                 Jobs By Location
@@ -137,7 +137,7 @@ export default function Home() {
                   <Link
                     key={city.slug}
                     href={`/jobs/${city.slug}`}
-                    className="px-3 py-1.5 bg-white dark:bg-gray-700 rounded-lg text-gray-700 dark:text-gray-200 font-semibold shadow-sm hover:shadow-md hover:translate-y-[-1px] transition-all duration-300 text-[11px] border border-transparent hover:border-teal-100"
+                    className="px-3 py-1.5 bg-white dark:bg-[#1a1a1a] rounded-lg text-gray-700 dark:text-[#a1a1a1] font-semibold shadow-sm hover:shadow-md hover:translate-y-[-1px] transition-all duration-300 text-[11px] border border-transparent hover:border-teal-100"
                   >
                     {city.city}
                   </Link>
@@ -155,7 +155,7 @@ export default function Home() {
             </div>
 
             {/* Jobs By Category */}
-            <div className="bg-white/60 dark:bg-gray-800/60 backdrop-blur-xl rounded-[24px] p-4 lg:p-5 shadow-xl border border-white/50 dark:border-gray-700/50 hover:bg-white/80 dark:hover:bg-gray-800/80 transition-all duration-300">
+            <div className="bg-white/60 dark:bg-[#0a0a0a] backdrop-blur-xl rounded-[24px] p-4 lg:p-5 shadow-xl border border-white/50 dark:border-gray-800/50 hover:bg-white/80 dark:hover:bg-[#0a0a0a] transition-all duration-300">
               <h3 className="text-sm font-bold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
                 <span className="w-1 h-4 bg-purple-600 rounded-full"></span>
                 Jobs By Category
@@ -166,7 +166,7 @@ export default function Home() {
                   <Link
                     key={ind.slug}
                     href={`/jobs/${ind.slug}`}
-                    className="px-3 py-1.5 bg-white dark:bg-gray-700 rounded-lg text-gray-700 dark:text-gray-200 font-semibold shadow-sm hover:shadow-md hover:translate-y-[-1px] transition-all duration-300 text-[11px] border border-transparent hover:border-purple-100"
+                    className="px-3 py-1.5 bg-white dark:bg-[#1a1a1a] rounded-lg text-gray-700 dark:text-[#a1a1a1] font-semibold shadow-sm hover:shadow-md hover:translate-y-[-1px] transition-all duration-300 text-[11px] border border-transparent hover:border-purple-100"
                   >
                     {ind.industry}
                   </Link>
