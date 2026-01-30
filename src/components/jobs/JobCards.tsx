@@ -1,5 +1,6 @@
 import React from "react";
 import Link from "next/link";
+import { ChevronRight } from "lucide-react";
 import type {
   CountryCard,
   CityCard,
@@ -32,28 +33,28 @@ export default function JobCards({
 }: JobCardsProps) {
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-12">
-        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
+      <div className="flex items-center justify-center py-20">
+        <div className="animate-spin rounded-full h-12 w-12 border-2 border-[#0369A1] border-t-transparent"></div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="text-center py-12 text-red-500 font-semibold">
+      <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 p-8 rounded-lg text-center text-red-700 dark:text-red-400 font-bold">
         {error}
       </div>
     );
   }
 
   return (
-    <div className="space-y-12">
+    <div className="space-y-16">
       {/* Country Cards */}
       {countries && countries.length > 0 && (
         <CardSection title="Jobs by Country">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {countries.map((country) => (
-              <CountryCardItem key={country.slug} country={country} />
+              <GenericCardItem key={country.slug} title={country.country} href={`/jobs/${country.slug}`} />
             ))}
           </div>
         </CardSection>
@@ -64,7 +65,12 @@ export default function JobCards({
         <CardSection title="Jobs by City">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {cities.map((city) => (
-              <CityCardItem key={city.slug} city={city} />
+              <GenericCardItem
+                key={city.slug}
+                title={city.city}
+                subtitle={city.country ?? undefined}
+                href={`/jobs/${city.slug}`}
+              />
             ))}
           </div>
         </CardSection>
@@ -75,7 +81,7 @@ export default function JobCards({
         <CardSection title="Jobs by Industry">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {industries.map((industry) => (
-              <IndustryCardItem key={industry.slug} industry={industry} />
+              <GenericCardItem key={industry.slug} title={industry.industry} href={`/jobs/${industry.slug}`} />
             ))}
           </div>
         </CardSection>
@@ -86,7 +92,7 @@ export default function JobCards({
         <CardSection title="Jobs by Type">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {jobTypes.map((jobType) => (
-              <JobTypeCardItem key={jobType.slug} jobType={jobType} />
+              <GenericCardItem key={jobType.slug} title={jobType.label} href={`/jobs/${jobType.slug}`} />
             ))}
           </div>
         </CardSection>
@@ -97,10 +103,7 @@ export default function JobCards({
         <CardSection title="Jobs by Experience Level">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {experiences.map((experience) => (
-              <ExperienceCardItem
-                key={experience.slug}
-                experience={experience}
-              />
+              <GenericCardItem key={experience.slug} title={experience.label} href={`/jobs/${experience.slug}`} />
             ))}
           </div>
         </CardSection>
@@ -111,7 +114,7 @@ export default function JobCards({
         <CardSection title="Remote vs On-Site">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {remote.map((remoteType) => (
-              <RemoteCardItem key={remoteType.slug} remote={remoteType} />
+              <GenericCardItem key={remoteType.slug} title={remoteType.label} href={`/jobs/${remoteType.slug}`} />
             ))}
           </div>
         </CardSection>
@@ -128,111 +131,43 @@ interface CardSectionProps {
 function CardSection({ title, children }: CardSectionProps) {
   return (
     <section>
-      <div className="mb-6">
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+      <div className="mb-8 flex items-center gap-4">
+        <div className="w-1.5 h-8 bg-[#0369A1] rounded-full"></div>
+        <h2 className="text-2xl font-bold text-[#0C4A6E] dark:text-gray-100 italic tracking-tight">
           {title}
         </h2>
-        <div className="h-1 w-20 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full"></div>
       </div>
       {children}
     </section>
   );
 }
 
-function CountryCardItem({ country }: { country: CountryCard }) {
+function GenericCardItem({
+  title,
+  subtitle,
+  href
+}: {
+  title: string;
+  subtitle?: string;
+  href: string
+}) {
   return (
     <Link
-      href={`/jobs/${country.slug}`}
-      className="group relative bg-white dark:bg-gray-900 rounded-lg border-2 border-gray-200 dark:border-gray-800 p-5 hover:shadow-xl hover:border-blue-500 dark:hover:border-blue-500 hover:-translate-y-1 transition-all duration-300"
+      href={href}
+      className="group bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-800 p-6 transition-all duration-150 hover:border-[#0369A1] dark:hover:border-[#0EA5E9] cursor-pointer"
     >
-      <div className="flex flex-col">
-        <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors mb-2">
-          {country.country}
-        </h3>
-      </div>
-    </Link>
-  );
-}
-
-function CityCardItem({ city }: { city: CityCard }) {
-  return (
-    <Link
-      href={`/jobs/${city.slug}`}
-      className="group relative bg-white dark:bg-gray-900 rounded-lg border-2 border-gray-200 dark:border-gray-800 p-5 hover:shadow-xl hover:border-blue-500 dark:hover:border-blue-500 hover:-translate-y-1 transition-all duration-300"
-    >
-      <div className="flex flex-col">
-        <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors mb-1">
-          {city.city}
-        </h3>
-        {city.country && (
-          <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">
-            {city.country}
+      <div className="flex flex-col h-full">
+        <div className="flex items-center justify-between mb-1">
+          <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 group-hover:text-[#0369A1] dark:group-hover:text-[#0EA5E9] transition-colors duration-150 truncate">
+            {title}
+          </h3>
+          <ChevronRight className="w-4 h-4 text-gray-300 group-hover:text-[#0369A1] transition-colors duration-150" />
+        </div>
+        {subtitle && (
+          <p className="text-sm font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">
+            {subtitle}
           </p>
         )}
-      </div>
-    </Link>
-  );
-}
-
-function IndustryCardItem({ industry }: { industry: IndustryCard }) {
-  return (
-    <Link
-      href={`/jobs/${industry.slug}`}
-      className="group bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-4 hover:shadow-lg hover:border-blue-300 dark:hover:border-blue-700 transition-all duration-300"
-    >
-      <div className="flex flex-col">
-        <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors mb-2">
-          {industry.industry}
-        </h3>
-      </div>
-    </Link>
-  );
-}
-
-function JobTypeCardItem({ jobType }: { jobType: JobTypeCard }) {
-  return (
-    <Link
-      href={`/jobs/${jobType.slug}`}
-      className="group bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-4 hover:shadow-lg hover:border-blue-300 dark:hover:border-blue-700 transition-all duration-300"
-    >
-      <div className="flex flex-col">
-        <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors mb-2">
-          {jobType.label}
-        </h3>
-      </div>
-    </Link>
-  );
-}
-
-function ExperienceCardItem({ experience }: { experience: ExperienceCard }) {
-  return (
-    <Link
-      href={`/jobs/${experience.slug}`}
-      className="group bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-4 hover:shadow-lg hover:border-blue-300 dark:hover:border-blue-700 transition-all duration-300"
-    >
-      <div className="frelative bg-white dark:bg-gray-900 rounded-lg border-2 border-gray-200 dark:border-gray-800 p-5 hover:shadow-xl hover:border-blue-500 dark:hover:border-blue-500 hover:-translate-y-1 transition-all duration-300">
-        <div className="flex flex-col">
-          <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors mb-2">
-            {experience.label}
-          </h3>
-        </div>
-      </div>
-    </Link>
-  );
-}
-
-function RemoteCardItem({ remote }: { remote: RemoteCard }) {
-  return (
-    <Link
-      href={`/jobs/${remote.slug}`}
-      className="group bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-4 hover:shadow-lg hover:border-blue-300 dark:hover:border-blue-700 transition-all duration-300"
-    >
-      <div className="frelative bg-white dark:bg-gray-900 rounded-lg border-2 border-gray-200 dark:border-gray-800 p-5 hover:shadow-xl hover:border-blue-500 dark:hover:border-blue-500 hover:-translate-y-1 transition-all duration-300">
-        <div className="flex flex-col">
-          <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors mb-2">
-            {remote.label}
-          </h3>
-        </div>
       </div>
     </Link>
   );

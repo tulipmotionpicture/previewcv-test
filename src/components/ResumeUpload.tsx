@@ -4,21 +4,21 @@ import { useState } from "react";
 import { useResumeParser } from "@/hooks/useResumeParser";
 import ResumeParsingProgress from "./ResumeParsingProgress";
 import ResumeReview from "./ResumeReview";
-import { Upload, FileText, AlertCircle, Sparkles, X } from "lucide-react";
+import { Upload, FileText, AlertCircle, Sparkles, X, Shield } from "lucide-react";
 import { ResumeMetadata } from "@/lib/api";
 
 type Step = "idle" | "parsing" | "review";
 
 interface ResumeUploadProps {
   onUploadSuccess: (resumeId: number, metadata?: ResumeMetadata) => void;
-  existingResumeId?: number; // Optional: if provided, parse this resume instead of uploading
+  existingResumeId?: number;
 }
 
 export default function ResumeUpload({ onUploadSuccess, existingResumeId }: ResumeUploadProps) {
   const [step, setStep] = useState<Step>(existingResumeId ? "parsing" : "idle");
   const [currentResumeId, setCurrentResumeId] = useState<number | null>(existingResumeId || null);
   const [isDragging, setIsDragging] = useState(false);
-  
+
   const { uploadResume, uploading, error } = useResumeParser();
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -70,18 +70,17 @@ export default function ResumeUpload({ onUploadSuccess, existingResumeId }: Resu
 
   return (
     <div className="w-full">
-      {/* Upload Zone (Always visible in idle step) */}
+      {/* Upload Zone - Flat Design */}
       {step === "idle" && (
         <div
           onDragEnter={handleDrag}
           onDragLeave={handleDrag}
           onDragOver={handleDrag}
           onDrop={handleDrop}
-          className={`relative group overflow-hidden rounded-[2rem] border-2 border-dashed transition-all duration-500 ${
-            isDragging
-              ? "border-blue-500 bg-blue-50 dark:bg-blue-900/10"
-              : "border-gray-200 dark:border-gray-800 hover:border-blue-400 dark:hover:border-blue-600 bg-white dark:bg-gray-900"
-          }`}
+          className={`relative group overflow-hidden rounded-lg border-2 border-dashed transition-all duration-150 cursor-pointer ${isDragging
+              ? "border-[#0369A1] bg-[#F0F9FF] dark:bg-blue-900/10"
+              : "border-gray-300 dark:border-gray-700 hover:border-[#0369A1] dark:hover:border-[#0EA5E9] bg-white dark:bg-gray-900"
+            }`}
         >
           <input
             type="file"
@@ -91,89 +90,90 @@ export default function ResumeUpload({ onUploadSuccess, existingResumeId }: Resu
             onChange={handleFileChange}
             disabled={uploading}
           />
-          
+
           <label
             htmlFor="resume-upload"
             className="cursor-pointer flex flex-col items-center justify-center py-12 px-8"
           >
+            {/* Icon - Flat Design */}
             <div className="relative mb-6">
-              <div className={`w-20 h-20 rounded-[2rem] flex items-center justify-center transition-all duration-500 ${
-                isDragging ? "bg-blue-600 rotate-12 scale-110" : "bg-gray-100 dark:bg-gray-800 group-hover:bg-blue-100 dark:group-hover:bg-blue-900/30 group-hover:-rotate-6"
-              }`}>
+              <div className={`w-16 h-16 rounded-lg flex items-center justify-center transition-all duration-150 ${isDragging ? "bg-[#0369A1] scale-105" : "bg-gray-100 dark:bg-gray-800 group-hover:bg-[#0369A1]/10"
+                }`}>
                 {uploading ? (
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 dark:border-white" />
+                  <div className="animate-spin rounded-full h-8 w-8 border-2 border-[#0369A1] border-t-transparent" />
                 ) : (
-                  <Upload className={`w-8 h-8 transition-colors ${isDragging ? "text-white" : "text-gray-400 group-hover:text-blue-600"}`} />
+                  <Upload className={`w-8 h-8 transition-colors duration-150 ${isDragging ? "text-white" : "text-gray-400 group-hover:text-[#0369A1]"}`} />
                 )}
               </div>
               {!uploading && (
-                <div className="absolute -bottom-2 -right-2 bg-white dark:bg-gray-800 p-2 rounded-xl shadow-lg border border-gray-100 dark:border-gray-700 group-hover:scale-110 transition-all">
-                  <FileText className="w-4 h-4 text-blue-600" />
+                <div className="absolute -bottom-1 -right-1 bg-white dark:bg-gray-800 p-1.5 rounded-lg border border-gray-200 dark:border-gray-700 group-hover:scale-110 transition-all duration-150">
+                  <FileText className="w-4 h-4 text-[#0369A1]" />
                 </div>
               )}
             </div>
 
+            {/* Text Content */}
             <div className="text-center space-y-2">
-              <h3 className="text-xl font-black text-gray-900 dark:text-gray-100 italic">
+              <h3 className="text-xl font-bold text-[#0C4A6E] dark:text-gray-100">
                 {uploading ? "Uploading Resume..." : "Drop your Resume here"}
               </h3>
               <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">
-                We'll use AI to magically extract your experience
+                We'll use AI to extract your experience
               </p>
             </div>
 
-            <div className="mt-8 flex items-center gap-6 text-[10px] font-black uppercase tracking-widest text-gray-400 dark:text-gray-500">
-               <div className="flex items-center gap-2">
-                 <div className="w-1.5 h-1.5 rounded-full bg-blue-500" />
-                 PDF Only
-               </div>
-               <div className="flex items-center gap-2">
-                 <div className="w-1.5 h-1.5 rounded-full bg-indigo-500" />
-                 Max 5MB
-               </div>
-               <div className="flex items-center gap-2">
-                 <div className="w-1.5 h-1.5 rounded-full bg-purple-500" />
-                 AI Powered
-               </div>
+            {/* Features - Flat Design */}
+            <div className="mt-8 flex items-center gap-6 text-xs font-bold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+              <div className="flex items-center gap-2">
+                <div className="w-1.5 h-1.5 rounded-full bg-[#0369A1]" />
+                PDF Only
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-1.5 h-1.5 rounded-full bg-[#0EA5E9]" />
+                Max 5MB
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-1.5 h-1.5 rounded-full bg-[#22C55E]" />
+                AI Powered
+              </div>
             </div>
           </label>
         </div>
       )}
 
-      {/* Modal / Overlay for Parsing and Review */}
+      {/* Modal - Flat Design */}
       {(step === "parsing" || step === "review") && currentResumeId && (
-        <div 
-          className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-8 animate-in fade-in duration-300"
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-8 animate-in fade-in duration-200"
           onClick={(e) => {
-            // Only close if clicking the backdrop, not the modal content
             if (e.target === e.currentTarget) {
               handleCancel();
             }
           }}
         >
-          <div 
-            className="absolute inset-0 bg-gray-900/60 backdrop-blur-md -z-10" 
+          <div
+            className="absolute inset-0 bg-black/50 backdrop-blur-sm -z-10"
           />
-          
-          <div 
-            className="relative w-full max-w-5xl bg-white dark:bg-gray-950 rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col max-h-[90vh] animate-in slide-in-from-bottom-4 duration-500 border border-white/20 dark:border-gray-800/50"
+
+          <div
+            className="relative w-full max-w-5xl bg-white dark:bg-gray-950 rounded-lg border border-gray-200 dark:border-gray-800 overflow-hidden flex flex-col max-h-[90vh] animate-in slide-in-from-bottom-4 duration-200"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Modal Header */}
-            <div className="flex items-center justify-between px-8 py-6 border-b border-gray-100 dark:border-gray-800">
+            {/* Modal Header - Flat Design */}
+            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-800 bg-[#F0F9FF] dark:bg-gray-900">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-600/20">
+                <div className="w-10 h-10 bg-[#0369A1] rounded-lg flex items-center justify-center">
                   <Sparkles className="w-5 h-5 text-white" />
                 </div>
-                <h2 className="text-xl font-black text-gray-900 dark:text-gray-100 italic tracking-tight">
+                <h2 className="text-xl font-bold text-[#0C4A6E] dark:text-gray-100">
                   {step === "parsing" ? "AI Extraction Progress" : "Confirm Extracted Data"}
                 </h2>
               </div>
-              <button 
+              <button
                 onClick={handleCancel}
-                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors group"
+                className="p-2 hover:bg-gray-200 dark:hover:bg-gray-800 rounded-lg transition-colors duration-150 group cursor-pointer"
               >
-                <X className="w-6 h-6 text-gray-400 group-hover:text-gray-900 dark:group-hover:text-gray-100" />
+                <X className="w-5 h-5 text-gray-400 group-hover:text-gray-900 dark:group-hover:text-gray-100" />
               </button>
             </div>
 
@@ -188,7 +188,7 @@ export default function ResumeUpload({ onUploadSuccess, existingResumeId }: Resu
                   />
                 </div>
               ) : (
-                <div className="p-8">
+                <div className="p-6">
                   <ResumeReview
                     resumeId={currentResumeId}
                     onSaveComplete={(result) => {
@@ -203,19 +203,21 @@ export default function ResumeUpload({ onUploadSuccess, existingResumeId }: Resu
         </div>
       )}
 
+      {/* Error Message - Flat Design */}
       {error && step === "idle" && (
-        <div className="mt-4 p-4 bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-900/30 rounded-2xl flex items-center gap-3 text-red-600 dark:text-red-400 font-bold text-sm animate-shake">
-           <AlertCircle className="w-5 h-5 flex-shrink-0" />
-           <p>{error}</p>
+        <div className="mt-4 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-900/30 rounded-lg flex items-center gap-3 text-red-600 dark:text-red-400 font-medium text-sm">
+          <AlertCircle className="w-5 h-5 flex-shrink-0" />
+          <p>{error}</p>
         </div>
       )}
 
+      {/* Privacy Notice - Flat Design */}
       {step === "idle" && (
-        <div className="mt-6 flex items-center gap-3 px-4 py-3 bg-gradient-to-r from-blue-50/50 to-indigo-50/50 dark:from-blue-900/10 dark:to-indigo-900/10 rounded-2xl border border-blue-100/50 dark:border-blue-900/20">
-           <Sparkles className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-           <p className="text-xs font-bold text-gray-600 dark:text-gray-400 italic leading-snug">
-             Your data is processed using local-first privacy. We only extract what you approve.
-           </p>
+        <div className="mt-4 flex items-center gap-3 px-4 py-3 bg-[#F0F9FF] dark:bg-blue-900/10 rounded-lg border border-[#0EA5E9]/20 dark:border-blue-900/20">
+          <Shield className="w-4 h-4 text-[#0369A1] dark:text-[#0EA5E9] flex-shrink-0" />
+          <p className="text-xs font-medium text-gray-600 dark:text-gray-400 leading-snug">
+            Your data is processed with privacy-first principles. We only extract what you approve.
+          </p>
         </div>
       )}
     </div>

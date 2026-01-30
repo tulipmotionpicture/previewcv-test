@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { api } from "@/lib/api";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
+import { Bookmark } from "lucide-react";
 
 interface BookmarkButtonProps {
   jobId: number;
@@ -27,7 +28,7 @@ export default function BookmarkButton({
   const [isBookmarked, setIsBookmarked] = useState(initialBookmarked);
   const [isLoading, setIsLoading] = useState(false);
 
-  // Sync state when prop changes (e.g., after fetching bookmark status)
+  // Sync state when prop changes
   useEffect(() => {
     setIsBookmarked(initialBookmarked);
   }, [initialBookmarked]);
@@ -66,7 +67,6 @@ export default function BookmarkButton({
       }
     } catch (error) {
       console.error("Failed to update bookmark:", error);
-      // Optionally show a toast notification here
     } finally {
       setIsLoading(false);
     }
@@ -76,49 +76,20 @@ export default function BookmarkButton({
     <button
       onClick={handleBookmark}
       disabled={isLoading}
-      className={`${sizeClasses[size]} flex items-center justify-center rounded-lg transition-all cursor-pointer ${
-        isBookmarked
-          ? "bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 hover:bg-blue-200 dark:hover:bg-blue-900/50"
-          : "bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700"
-      } disabled:opacity-50 disabled:cursor-not-allowed ${className}`}
+      className={`${sizeClasses[size]} flex items-center justify-center rounded-lg transition-all duration-150 cursor-pointer ${isBookmarked
+          ? "bg-[#0369A1] text-white border border-[#0369A1]"
+          : "bg-white dark:bg-gray-800 text-gray-400 dark:text-gray-500 border border-gray-200 dark:border-gray-700 hover:border-[#0369A1] hover:text-[#0369A1] dark:hover:text-[#0EA5E9]"
+        } disabled:opacity-50 disabled:cursor-not-allowed ${className}`}
       title={isBookmarked ? "Remove bookmark" : "Bookmark this job"}
       aria-label={isBookmarked ? "Remove bookmark" : "Bookmark this job"}
     >
       {isLoading ? (
-        <svg
-          className={`${iconSizes[size]} animate-spin`}
-          xmlns="http://www.w3.org/2000/svg"
-          fill="none"
-          viewBox="0 0 24 24"
-        >
-          <circle
-            className="opacity-25"
-            cx="12"
-            cy="12"
-            r="10"
-            stroke="currentColor"
-            strokeWidth="4"
-          ></circle>
-          <path
-            className="opacity-75"
-            fill="currentColor"
-            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-          ></path>
-        </svg>
+        <div className={`${iconSizes[size]} animate-spin rounded-full border-2 border-current border-t-transparent`} />
       ) : (
-        <svg
+        <Bookmark
           className={iconSizes[size]}
           fill={isBookmarked ? "currentColor" : "none"}
-          stroke="currentColor"
-          strokeWidth={isBookmarked ? "0" : "2"}
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"
-          />
-        </svg>
+        />
       )}
     </button>
   );

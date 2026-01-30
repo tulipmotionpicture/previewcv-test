@@ -716,6 +716,7 @@ export class ApiClient {
       string,
       { name: string; value: string; count: number; [key: string]: any }[]
     >;
+    location_hierarchy?: Record<string, any>;
   }> {
     return this.request<{
       success: boolean;
@@ -723,6 +724,7 @@ export class ApiClient {
         string,
         { name: string; value: string; count: number; [key: string]: any }[]
       >;
+      location_hierarchy?: Record<string, any>;
     }>("/api/v1/jobs/filters", {}, false, false);
   }
 
