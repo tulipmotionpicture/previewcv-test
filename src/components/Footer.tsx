@@ -11,6 +11,7 @@ export default function Footer() {
     pathname?.includes("/login") ||
     pathname?.includes("/signup") ||
     pathname?.includes("/recruiter/dashboard") ||
+    pathname?.includes("/candidate/dashboard") ||
     pathname?.includes("/jobs");
 
   if (hideFooter) {
