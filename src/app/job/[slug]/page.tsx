@@ -248,9 +248,9 @@ export default async function JobDetailsPage({
                       </svg>
                       {job.salary_min
                         ? formatCurrency(
-                            job.salary_min,
-                            job.salary_currency || "USD",
-                          )
+                          job.salary_min,
+                          job.salary_currency || "USD",
+                        )
                         : ""}
                       {job.salary_max
                         ? ` - ${formatCurrency(job.salary_max, job.salary_currency || "USD")}`

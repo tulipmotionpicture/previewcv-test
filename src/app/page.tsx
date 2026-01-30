@@ -8,7 +8,26 @@ import HeroSection from "@/components/HeroSection";
 import { useEffect, useState } from "react";
 import { CardsSummaryResponse } from "@/types/jobs";
 import { api } from "@/lib/api";
-import { CheckCircle2 } from "lucide-react";
+import {
+  CheckCircle2,
+  Link as LinkIcon,
+  FilePlus2,
+  Share2,
+  FileX2,
+  RefreshCw,
+  BarChart3,
+  Smartphone,
+  ShieldCheck,
+  Zap,
+  Star,
+  Quote,
+  ArrowRight,
+  PlusCircle,
+  MinusCircle,
+  ScanEye,
+  Sparkles,
+  Eye
+} from "lucide-react";
 
 const LockClosedIcon = () => (
   <svg
@@ -62,6 +81,7 @@ const TargetIcon = () => (
 );
 
 export default function Home() {
+  const [openIndex, setOpenIndex] = useState<number | null>(0);
   const [cardsData, setCardsData] = useState<CardsSummaryResponse | null>(null);
   const [cardsLoading, setCardsLoading] = useState(true);
 
@@ -99,683 +119,643 @@ export default function Home() {
         showAuthButtons={true}
       />
 
-      <section className="mt-16">
+      <section>
         {/* Hero Section */}
-        <HeroSection />
+        <HeroSection height="auto" minHeight="min-h-[300px]">
+          {/* Cards */}
+          <div className="hidden lg:grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
+
+            {/* Jobs By Location */}
+            <div className="bg-white dark:bg-gray-800 rounded-[24px] p-5 lg:p-6 shadow-sm">
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                Jobs By Location
+              </h2>
+
+              <div className="flex flex-wrap gap-2">
+                {cardsData?.cities?.slice(0, 7).map((city) => (
+                  <Link
+                    key={city.slug}
+                    href={`/jobs/${city.slug}`}
+                    className="px-4 py-1.5 border border-gray-200 dark:border-gray-700 rounded-full text-gray-600 dark:text-gray-300 hover:border-gray-400 dark:hover:border-gray-500 hover:text-gray-900 dark:hover:text-white transition text-xs font-medium"
+                  >
+                    {city.city}
+                  </Link>
+                ))}
+
+                {cardsData?.cities && cardsData.cities.length > 7 && (
+                  <Link
+                    href="/jobs"
+                    className="px-4 py-1.5 border border-blue-100 bg-blue-50 text-blue-600 rounded-full font-semibold hover:bg-blue-100 transition text-xs"
+                  >
+                    {cardsData.cities.length}+ more
+                  </Link>
+                )}
+              </div>
+            </div>
+
+            {/* Jobs By Category */}
+            <div className="bg-white dark:bg-gray-800 rounded-[24px] p-5 lg:p-6 shadow-sm">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                Jobs By Category
+              </h3>
+
+              <div className="flex flex-wrap gap-2">
+                {cardsData?.industries?.slice(0, 5).map((ind) => (
+                  <Link
+                    key={ind.slug}
+                    href={`/jobs/${ind.slug}`}
+                    className="px-4 py-1.5 border border-gray-200 dark:border-gray-700 rounded-full text-gray-600 dark:text-gray-300 hover:border-gray-400 dark:hover:border-gray-500 hover:text-gray-900 dark:hover:text-white transition text-xs font-medium"
+                  >
+                    {ind.industry}
+                  </Link>
+                ))}
+
+                {cardsData?.industries && cardsData.industries.length > 5 && (
+                  <Link
+                    href="/jobs"
+                    className="px-4 py-1.5 border border-blue-100 bg-blue-50 text-blue-600 rounded-full font-semibold hover:bg-blue-100 transition text-xs"
+                  >
+                    {cardsData.industries.length}+ more
+                  </Link>
+                )}
+              </div>
+            </div>
+
+          </div>
+        </HeroSection>
       </section>
 
-      {/* Company Logos Section */}
-      <section className="py-12 bg-white dark:bg-gray-900 border-y border-gray-100 dark:border-gray-800">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <p className="text-center text-sm text-gray-500 dark:text-gray-400 font-medium mb-8">
-            Career Opportunities With Top Companies
-          </p>
-          <div className="flex flex-wrap items-center justify-center gap-8 lg:gap-12">
-            <div className="text-gray-600 dark:text-gray-400 font-bold text-xl lg:text-2xl opacity-70 hover:opacity-100 transition-opacity">
-              Google
-            </div>
-            <div className="text-gray-600 dark:text-gray-400 font-bold text-xl lg:text-2xl opacity-70 hover:opacity-100 transition-opacity">
-              ORACLE
-            </div>
-            <div className="text-gray-600 dark:text-gray-400 font-bold text-xl lg:text-2xl opacity-70 hover:opacity-100 transition-opacity">
-              Bloomberg
-            </div>
-            <div className="text-gray-600 dark:text-gray-400 font-bold text-xl lg:text-2xl opacity-70 hover:opacity-100 transition-opacity">
-              Microsoft
-            </div>
-            <div className="text-gray-600 dark:text-gray-400 font-bold text-xl lg:text-2xl opacity-70 hover:opacity-100 transition-opacity">
-              DocuSign
-            </div>
-            <div className="text-gray-600 dark:text-gray-400 font-bold text-xl lg:text-2xl opacity-70 hover:opacity-100 transition-opacity">
-              Dropbox
-            </div>
-            <div className="text-gray-600 dark:text-gray-400 font-bold text-xl lg:text-2xl opacity-70 hover:opacity-100 transition-opacity">
-              TWO SIGMA
-            </div>
-            <div className="text-gray-600 dark:text-gray-400 font-bold text-xl lg:text-2xl opacity-70 hover:opacity-100 transition-opacity">
-              Apple
-            </div>
+      {/* Jobs By Top Employers */}
+      <section className="py-10 lg:py-16 bg-white dark:bg-black">
+        <div className="max-w-7xl mx-auto px-4 lg:px-6">
+          <h2 className="text-left text-lg lg:text-xl font-bold text-gray-900 dark:text-gray-100 mb-8">
+            Jobs By Top Employers
+          </h2>
+
+          <div className="grid grid-rows-2 grid-flow-col gap-3 lg:gap-4 overflow-x-auto pb-6 auto-cols-[160px] lg:auto-cols-[200px] no-scrollbar">
+            {[
+              { name: "Imtiaz", src: "/logos/logo-1.png" },
+              { name: "Thumbay", src: "/logos/logo-2.png" },
+              { name: "Duncan & Ross", src: "/logos/logo-3.png" },
+              { name: "Raqmiyat", src: "/logos/logo-4.png" },
+              { name: "Reportage", src: "/logos/logo-1.png" },
+              { name: "UBS", src: "/logos/logo-2.png" },
+              { name: "SK Overseas", src: "/logos/logo-3.png" },
+              { name: "Ektifa", src: "/logos/logo-4.png" },
+              { name: "NMC", src: "/logos/logo-1.png" },
+              { name: "Robt Stone", src: "/logos/logo-2.png" },
+              { name: "Tarrad", src: "/logos/logo-3.png" },
+              { name: "ABC", src: "/logos/logo-4.png" },
+              { name: "NMDC", src: "/logos/logo-1.png" },
+              { name: "BNW", src: "/logos/logo-2.png" },
+              { name: "HCLTech", src: "/logos/logo-3.png" },
+              { name: "Wipro", src: "/logos/logo-4.png" },
+              { name: "Fisher", src: "/logos/logo-1.png" },
+              { name: "KBC", src: "/logos/logo-2.png" },
+              { name: "Zulekha Hospital", src: "/logos/logo-3.png" },
+              { name: "Sundus", src: "/logos/logo-4.png" },
+              { name: "Salam", src: "/logos/logo-1.png" },
+              { name: "Sharaf Group", src: "/logos/logo-2.png" },
+              { name: "Binghatti", src: "/logos/logo-3.png" },
+              { name: "Innovations Group", src: "/logos/logo-4.png" },
+            ].map((employer, i) => (
+              <div key={i} className="bg-white p-4 border border-gray-200 rounded-lg flex items-center justify-center hover:shadow-md transition-shadow h-20">
+                <Image src={employer.src} alt={employer.name} width={100} height={40} className="object-contain max-h-12" />
+              </div>
+            ))}
           </div>
         </div>
       </section>
 
-      <div className="flex flex-row  bg-[#F0F6F5] p-16 itmes-center justify-around gap-6 ">
-        {/* Jobs by Location Section */}
-        <section className="shadow-lg rounded-2xl p-4  bg-white">
-          <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-gray-100 mb-8">
-            Jobs By Location
-          </h2>
-          <div className="flex flex-wrap gap-3 justify-center">
-            {cardsData?.cities?.slice(0, 7).map((city) => (
-              <Link
-                key={city.slug}
-                href={`/jobs/${city.slug}`}
-                className="px-6 py-3 bg-white dark:bg-gray-800 hover:bg-teal-50 dark:hover:bg-teal-900/20 text-gray-900 dark:text-gray-100 font-medium rounded-full border border-gray-300 dark:border-gray-700 hover:border-teal-600 dark:hover:border-teal-500 transition-all shadow-sm hover:shadow-md"
-              >
-                {city.city}
-              </Link>
-            ))}
-            {cardsData?.cities && cardsData.cities.length > 7 && (
-              <Link
-                href="/jobs"
-                className="px-6 py-3 bg-white dark:bg-gray-800 hover:bg-teal-50 dark:hover:bg-teal-900/20 text-teal-600 dark:text-teal-400 font-semibold rounded-full border border-gray-300 dark:border-gray-700 hover:border-teal-600 dark:hover:border-teal-500 transition-all shadow-sm hover:shadow-md"
-              >
-                {cardsData.cities.length + 7}+ more
-              </Link>
-            )}
+      {/* Career Reads Section */}
+      <section className="py-10 bg-white dark:bg-black border-t border-gray-100 dark:border-gray-800">
+        <div className="max-w-7xl mx-auto px-4 lg:px-6">
+          <div className="flex justify-between items-center mb-8">
+            <h2 className="text-lg lg:text-xl font-bold text-gray-900 dark:text-gray-100">
+              All Articles
+            </h2>
+            <Link href="/blogs" className="text-blue-500 hover:text-blue-600 text-sm font-medium">
+              View All
+            </Link>
           </div>
-        </section>
 
-        {/* Jobs by Category Section */}
-        <section className="shadow-lg rounded-2xl p-4 bg-white">
-          <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-gray-100 mb-8">
-            Jobs By Category
-          </h2>
-          <div className="flex flex-wrap gap-3 justify-center">
-            {cardsData?.industries?.slice(0, 5).map((ind) => (
-              <Link
-                key={ind.slug}
-                href={`/jobs/${ind.slug}`}
-                className="px-6 py-3 bg-white dark:bg-gray-800 hover:bg-teal-50 dark:hover:bg-teal-900/20 text-gray-900 dark:text-gray-100 font-medium rounded-full border border-gray-300 dark:border-gray-700 hover:border-teal-600 dark:hover:border-teal-500 transition-all shadow-sm hover:shadow-md"
-              >
-                {ind.industry}
-              </Link>
-            ))}
-            {cardsData?.industries && cardsData.industries.length > 5 && (
-              <Link
-                href="/jobs"
-                className="px-6 py-3 bg-white dark:bg-gray-800 hover:bg-teal-50 dark:hover:bg-teal-900/20 text-teal-600 dark:text-teal-400 font-semibold rounded-full border border-gray-300 dark:border-gray-700 hover:border-teal-600 dark:hover:border-teal-500 transition-all shadow-sm hover:shadow-md"
-              >
-                {cardsData.industries.length + 5}+ more
-              </Link>
-            )}
+          <div className="grid grid-flow-col auto-cols-[280px] lg:auto-cols-[320px] gap-6 overflow-x-auto pb-6 no-scrollbar">
+            {/* Card 1 */}
+            <div className="group cursor-pointer bg-white dark:bg-gray-900 rounded-2xl p-3 border border-gray-100 dark:border-gray-800 hover:shadow-lg transition-all duration-300">
+              <div className="relative h-40 w-full rounded-xl overflow-hidden mb-4 bg-gray-100 dark:bg-gray-800">
+                <Image src="/blog-1.jpg" alt="Personal branding" fill className="object-cover group-hover:scale-105 transition-transform duration-500" />
+              </div>
+              <h3 className="text-sm font-bold text-gray-900 dark:text-white leading-tight mb-2 line-clamp-2">
+                Personal branding basics for professionals...
+              </h3>
+              <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed mb-3 line-clamp-3">
+                Personal branding is often misunderstood as self-promotion or online visibility alone. In reality, personal branding is much ... <span className="text-blue-500 font-medium">Read More</span>
+              </p>
+              <div className="flex items-center justify-between text-[10px] text-gray-400 mt-auto">
+                <div className="flex items-center gap-1">
+                  <Eye className="w-3 h-3" /> 204 Views
+                </div>
+                <span>27 Jan 2026</span>
+              </div>
+            </div>
+
+            {/* Card 2 */}
+            <div className="group cursor-pointer bg-white dark:bg-gray-900 rounded-2xl p-3 border border-gray-100 dark:border-gray-800 hover:shadow-lg transition-all duration-300">
+              <div className="relative h-40 w-full rounded-xl overflow-hidden mb-4 bg-gray-100 dark:bg-gray-800">
+                <Image src="/blog-2.jpg" alt="Recruiters struggle" fill className="object-cover group-hover:scale-105 transition-transform duration-500" />
+              </div>
+              <h3 className="text-sm font-bold text-gray-900 dark:text-white leading-tight mb-2 line-clamp-2">
+                Why GCC recruiters struggle to build talent pipelines...
+              </h3>
+              <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed mb-3 line-clamp-3">
+                In many GCC companies, hiring doesn't feel like a process—it feels like an emergency response system. A resignation drops, a ... <span className="text-blue-500 font-medium">Read More</span>
+              </p>
+              <div className="flex items-center justify-between text-[10px] text-gray-400 mt-auto">
+                <div className="flex items-center gap-1">
+                  <Eye className="w-3 h-3" /> 271 Views
+                </div>
+                <span>27 Jan 2026</span>
+              </div>
+            </div>
+
+            {/* Card 3 */}
+            <div className="group cursor-pointer bg-white dark:bg-gray-900 rounded-2xl p-3 border border-gray-100 dark:border-gray-800 hover:shadow-lg transition-all duration-300">
+              <div className="relative h-40 w-full rounded-xl overflow-hidden mb-4 bg-gray-100 dark:bg-gray-800">
+                <Image src="/blog-3.jpg" alt="Highlight skills" fill className="object-cover group-hover:scale-105 transition-transform duration-500" />
+              </div>
+              <h3 className="text-sm font-bold text-gray-900 dark:text-white leading-tight mb-2 line-clamp-2">
+                How to highlight skills when you lack work experience...
+              </h3>
+              <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed mb-3 line-clamp-3">
+                Not having formal work experience can feel like a disadvantage when applying for roles. Many jobseekers worry that without a ... <span className="text-blue-500 font-medium">Read More</span>
+              </p>
+              <div className="flex items-center justify-between text-[10px] text-gray-400 mt-auto">
+                <div className="flex items-center gap-1">
+                  <Eye className="w-3 h-3" /> 201 Views
+                </div>
+                <span>27 Jan 2026</span>
+              </div>
+            </div>
+
+            {/* Card 4 */}
+            <div className="group cursor-pointer bg-white dark:bg-gray-900 rounded-2xl p-3 border border-gray-100 dark:border-gray-800 hover:shadow-lg transition-all duration-300">
+              <div className="relative h-40 w-full rounded-xl overflow-hidden mb-4 bg-gray-100 dark:bg-gray-800">
+                <Image src="/blog-4.png" alt="MoHRE" fill className="object-cover group-hover:scale-105 transition-transform duration-500" />
+              </div>
+              <h3 className="text-sm font-bold text-gray-900 dark:text-white leading-tight mb-2 line-clamp-2">
+                MoHRE launches new Private Sector Emiratisation...
+              </h3>
+              <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed mb-3 line-clamp-3">
+                The Ministry of Human Resources and Emiratisation (MoHRE) has announced new targets for its partners in the private sector govern... <span className="text-blue-500 font-medium">Read More</span>
+              </p>
+              <div className="flex items-center justify-between text-[10px] text-gray-400 mt-auto">
+                <div className="flex items-center gap-1">
+                  <Eye className="w-3 h-3" /> 529 Views
+                </div>
+                <span>27 Jan 2026</span>
+              </div>
+            </div>
+
           </div>
-        </section>
-      </div>
+        </div>
+      </section>
+
+
+
 
       {/* Create CV Section */}
-      <section className="py-20 bg-[#E8DFF5] dark:bg-gray-900 overflow-hidden">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-            {/* Left: Content */}
-            <div className="space-y-8">
-              <div>
-                <h2 className="text-3xl lg:text-4xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
-                  Create your CV with us
-                </h2>
-                <p className="text-xl text-gray-600 dark:text-gray-400">
-                  It is{" "}
-                  <span className="text-purple-600 font-bold">AI enabled</span>{" "}
-                  & faster!
-                </p>
-              </div>
+      <section className="w-full max-w-7xl mx-auto px-4 lg:px-6 mb-12 lg:mb-16 mt-12">
+        <div className="bg-[#FAF9FF] dark:bg-gray-800 rounded-[32px] p-6 lg:p-10 flex flex-col lg:flex-row items-center justify-between gap-8 lg:gap-16 overflow-hidden relative border border-purple-50 dark:border-gray-700">
 
-              <ul className="space-y-4">
-                <li className="flex items-center gap-3">
-                  <CheckCircle2 />
-                  <span className="text-gray-800 dark:text-gray-200 font-medium text-lg">
-                    Choose from multiple templates
-                  </span>
-                </li>
-                <li className="flex items-center gap-3">
-                  <CheckCircle2 />
-                  <span className="text-gray-800 dark:text-gray-200 font-medium text-lg">
-                    Fill in your details & let AI assist you
-                  </span>
-                </li>
-                <li className="flex items-center gap-3">
-                  <CheckCircle2 />
-                  <span className="text-gray-800 dark:text-gray-200 font-medium text-lg">
-                    Download in PDF format
-                  </span>
-                </li>
-              </ul>
-
-              <Link
-                href="/candidate/signup"
-                className="inline-flex items-center gap-2 px-10 py-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl transition-all shadow-lg text-lg"
-              >
-                Create CV ✨
-              </Link>
-            </div>
-
-            {/* Right: Resume Templates Grid with Creative Layout */}
-            <div className="relative w-full h-full flex items-center justify-center">
-              {/* Template 1 - Far left, rotated */}
-              <Image
-                src="/Group 8.png"
-                alt="Resume template 1"
-                fill
-                className="object-contain h-[600px] w-100 "
-                priority
-              />
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Cover Letter Section */}
-      <section className="py-20 bg-blue-50/30 dark:bg-gray-950">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-4xl lg:text-5xl font-bold text-gray-900 dark:text-gray-100 mb-4">
-              Create a Professional{" "}
-              <span className="text-blue-600">Cover Letter</span>
+          {/* Left Content */}
+          <div className="w-full lg:max-w-[40%] z-10">
+            <h2 className="text-xl lg:text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+              Create your CV with us
             </h2>
-          </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-start">
-            {/* Left: Cover Letter Mockup */}
-            <div className="w-full h-full relative">
-              <Image
-                src="/Group 5.png"
-                alt="Resume template 1"
-                fill
-                className="object-contain w-[804px] "
-                priority
-              />
-            </div>
-
-            {/* Right: Features */}
-            <div className="lg:pl-8">
-              <ul className="space-y-6 mb-8">
-                <li className="flex items-start gap-3">
-                  <CheckCircle2 />
-                  <div>
-                    <h4 className="font-semibold text-gray-900 dark:text-gray-100 mb-1">
-                      Automated Cover Letter Maker
-                    </h4>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
-                      Generate professional cover letters in seconds
-                    </p>
-                  </div>
-                </li>
-                <li className="flex items-start gap-3">
-                  <CheckCircle2 />
-                  <div>
-                    <h4 className="font-semibold text-gray-900 dark:text-gray-100 mb-1">
-                      Integrated with your resume
-                    </h4>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
-                      Maintains consistency with your CV design
-                    </p>
-                  </div>
-                </li>
-                <li className="flex items-start gap-3">
-                  <CheckCircle2 />
-                  <div>
-                    <h4 className="font-semibold text-gray-900 dark:text-gray-100 mb-1">
-                      Hiring manager approved
-                    </h4>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
-                      Templates designed by recruitment experts
-                    </p>
-                  </div>
-                </li>
-              </ul>
-              <Link
-                href="/candidate/signup"
-                className="inline-flex items-center gap-2 px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl transition-all shadow-md"
-              >
-                Create Cover Letter →
-              </Link>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* How It Works Section */}
-      <section className="py-20 bg-gray-50 dark:bg-gray-900/50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl lg:text-5xl font-bold text-gray-900 dark:text-gray-100 mb-4">
-              How It Works
-            </h2>
-            <p className="text-lg text-gray-600 dark:text-gray-400">
-              Get started in minutes with our seamless workflow
+            <p className="text-xs lg:text-sm text-gray-600 dark:text-gray-400 mb-6">
+              It is <span className="text-purple-600 font-semibold">AI enabled</span> & faster!
             </p>
-          </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
-            {/* Step 1: Get Your Link */}
-            <div className="bg-white dark:bg-gray-900 p-8 rounded-2xl shadow-sm hover:shadow-md transition-all">
-              <div className="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-6">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  strokeWidth={2}
-                  stroke="currentColor"
-                  className="w-8 h-8 text-gray-600 dark:text-gray-400"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M13.19 8.688a4.5 4.5 0 0 1 1.242 7.244l-4.5 4.5a4.5 4.5 0 0 1-6.364-6.364l1.757-1.757m13.35-.622 1.757-1.757a4.5 4.5 0 0 0-6.364-6.364l-4.5 4.5a4.5 4.5 0 0 0 1.242 7.244"
-                  />
-                </svg>
-              </div>
-              <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-3 text-center">
-                Get Your Link
-              </h3>
-              <p className="text-gray-600 dark:text-gray-400 text-center leading-relaxed">
-                Receive your unique PreviewCV link automatically - same login on
-                both platformsr
-              </p>
-            </div>
+            <ul className="space-y-3 mb-6">
+              <li className="flex items-center gap-3">
+                <div className="flex-shrink-0 w-5 h-5 rounded-full border border-purple-400 flex items-center justify-center">
+                  <CheckCircle2 className="text-purple-600 w-3 h-3" />
+                </div>
+                <span className="text-gray-700 dark:text-gray-300 text-xs lg:text-sm font-medium">
+                  Choose from multiple templates
+                </span>
+              </li>
 
-            {/* Step 2: Create Resume */}
-            <div className="bg-white dark:bg-gray-900 p-8 rounded-2xl shadow-sm hover:shadow-md transition-all">
-              <div className="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-6">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  strokeWidth={2}
-                  stroke="currentColor"
-                  className="w-8 h-8 text-gray-600 dark:text-gray-400"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m3.75 9v6m3-3H9m1.5-12H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z"
-                  />
-                </svg>
-              </div>
-              <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-3 text-center">
-                Create Resume
-              </h3>
-              <p className="text-gray-600 dark:text-gray-400 text-center leading-relaxed">
-                Build your professional resume on LetsMakeCV.com with our
-                easy-to-use builder
-              </p>
-            </div>
+              <li className="flex items-center gap-3">
+                <div className="flex-shrink-0 w-5 h-5 rounded-full border border-purple-400 flex items-center justify-center">
+                  <CheckCircle2 className="text-purple-600 w-3 h-3" />
+                </div>
+                <span className="text-gray-700 dark:text-gray-300 text-xs lg:text-sm font-medium">
+                  Fill in your details & let AI assist you
+                </span>
+              </li>
 
-            {/* Step 3: Share & Track */}
-            <div className="bg-white dark:bg-gray-900 p-8 rounded-2xl shadow-sm hover:shadow-md transition-all">
-              <div className="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-6">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  strokeWidth={2}
-                  stroke="currentColor"
-                  className="w-8 h-8 text-gray-600 dark:text-gray-400"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M7.217 10.907a2.25 2.25 0 1 0 0 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186 9.566-5.314m-9.566 7.5 9.566 5.314m0 0a2.25 2.25 0 1 0 3.935 2.186 2.25 2.25 0 0 0-3.935-2.186Zm0-12.814a2.25 2.25 0 1 0 3.933-2.185 2.25 2.25 0 0 0-3.933 2.185Z"
-                  />
-                </svg>
-              </div>
-              <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-3 text-center">
-                Share & Track
-              </h3>
-              <p className="text-gray-600 dark:text-gray-400 text-center leading-relaxed">
-                Share your link anywhere - email, LinkedIn, applications.
-                Updates automatically when you edit
-              </p>
-            </div>
-          </div>
+              <li className="flex items-center gap-3">
+                <div className="flex-shrink-0 w-5 h-5 rounded-full border border-purple-400 flex items-center justify-center">
+                  <CheckCircle2 className="text-purple-600 w-3 h-3" />
+                </div>
+                <span className="text-gray-700 dark:text-gray-300 text-xs lg:text-sm font-medium">
+                  Download in PDF format
+                </span>
+              </li>
+            </ul>
 
-          <div className="text-center">
             <Link
               href="/candidate/signup"
-              className="inline-flex items-center justify-center px-12 py-4 bg-black dark:bg-white text-white dark:text-black font-semibold rounded-lg hover:bg-gray-800 dark:hover:bg-gray-100 transition-all text-lg"
+              className="inline-flex items-center gap-2 px-6 py-2.5 bg-[#0CA0E8] hover:bg-[#0b8rcd] text-white font-semibold rounded-full transition-all shadow-lg hover:shadow-xl text-xs lg:text-sm"
             >
+              Create CV
+              <Image src="/sparkle-icon.png" alt="icon" width={14} height={14} className="object-contain" />
+            </Link>
+          </div>
+
+          {/* Right Resume Row View */}
+          <div className="w-full lg:w-[60%] relative flex justify-center lg:justify-end items-end h-[200px] lg:h-[260px]">
+            <div className="relative w-full h-full flex items-end justify-center lg:justify-end gap-2 lg:gap-4 translate-y-6 lg:translate-x-6">
+
+              {/* Resume 1 */}
+              <div className="relative w-[120px] lg:w-[160px] h-[180px] lg:h-[240px] shadow-2xl rounded-t-xl overflow-hidden transform translate-y-4">
+                <Image
+                  src="/resume-joshua.png"
+                  alt="Resume template 1"
+                  fill
+                  className="object-cover object-top"
+                />
+              </div>
+
+              {/* Resume 2 */}
+              <div className="relative w-[120px] lg:w-[160px] h-[200px] lg:h-[270px] shadow-2xl rounded-t-xl overflow-hidden z-20 -mx-6 lg:-mx-8 mb-0">
+                <Image
+                  src="/resume-jessica.png"
+                  alt="Resume template 2"
+                  fill
+                  className="object-cover object-top"
+                />
+              </div>
+
+              {/* Resume 3 */}
+              <div className="relative w-[120px] lg:w-[160px] h-[180px] lg:h-[240px] shadow-2xl rounded-t-xl overflow-hidden transform translate-y-4">
+                <Image
+                  src="/resume-mariana.png"
+                  alt="Resume template 3"
+                  fill
+                  className="object-cover object-top"
+                />
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </section>
+
+
+      {/* Cover Letter Section - Redesigned to Match */}
+      <section className="w-full max-w-7xl mx-auto px-4 lg:px-6 mb-12 lg:mb-16">
+        <div className="bg-[#F2F5FF] dark:bg-gray-800 rounded-[32px] p-6 lg:p-10 flex flex-col lg:flex-row items-center justify-between gap-8 lg:gap-16 overflow-hidden relative border border-blue-50 dark:border-gray-700">
+
+          {/* Left Content */}
+          <div className="w-full lg:max-w-[40%] z-10">
+            <h2 className="text-xl lg:text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+              Create a Professional <span className="text-blue-600">Cover Letter</span>
+            </h2>
+
+            <p className="text-xs lg:text-sm text-gray-600 dark:text-gray-400 mb-6">
+              Stand out with a <span className="text-blue-600 font-semibold">customized</span> cover letter.
+            </p>
+
+            <ul className="space-y-3 mb-6">
+              <li className="flex items-center gap-3">
+                <div className="flex-shrink-0 w-5 h-5 rounded-full border border-blue-400 flex items-center justify-center">
+                  <CheckCircle2 className="text-blue-600 w-3 h-3" />
+                </div>
+                <span className="text-gray-700 dark:text-gray-300 text-xs lg:text-sm font-medium">
+                  Automated Cover Letter Maker
+                </span>
+              </li>
+
+              <li className="flex items-center gap-3">
+                <div className="flex-shrink-0 w-5 h-5 rounded-full border border-blue-400 flex items-center justify-center">
+                  <CheckCircle2 className="text-blue-600 w-3 h-3" />
+                </div>
+                <span className="text-gray-700 dark:text-gray-300 text-xs lg:text-sm font-medium">
+                  Integrated with your resume
+                </span>
+              </li>
+
+              <li className="flex items-center gap-3">
+                <div className="flex-shrink-0 w-5 h-5 rounded-full border border-blue-400 flex items-center justify-center">
+                  <CheckCircle2 className="text-blue-600 w-3 h-3" />
+                </div>
+                <span className="text-gray-700 dark:text-gray-300 text-xs lg:text-sm font-medium">
+                  Hiring manager approved templates
+                </span>
+              </li>
+            </ul>
+
+            <Link
+              href="/candidate/signup"
+              className="inline-flex items-center gap-2 px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-full transition-all shadow-lg hover:shadow-xl text-xs lg:text-sm"
+            >
+              Create Cover Letter
+              <Image src="/sparkle-icon.png" alt="icon" width={14} height={14} className="object-contain" />
+            </Link>
+          </div>
+
+          {/* Right Cover Letter Row View */}
+          <div className="w-full lg:w-[60%] relative flex justify-center lg:justify-end items-end h-[200px] lg:h-[260px]">
+            <div className="relative w-full h-full flex items-end justify-center lg:justify-end gap-2 lg:gap-4 translate-y-6 lg:translate-x-6">
+
+              {/* CL 1 */}
+              <div className="relative w-[120px] lg:w-[160px] h-[180px] lg:h-[240px] shadow-2xl rounded-t-xl overflow-hidden transform translate-y-4">
+                <Image
+                  src="/cover-letter-antonnette.png"
+                  alt="Cover Letter 1"
+                  fill
+                  className="object-cover object-top"
+                />
+              </div>
+
+              {/* CL 2 */}
+              <div className="relative w-[120px] lg:w-[160px] h-[200px] lg:h-[270px] shadow-2xl rounded-t-xl overflow-hidden z-20 -mx-6 lg:-mx-8 mb-0">
+                <Image
+                  src="/cover-letter-danielle.png"
+                  alt="Cover Letter 2"
+                  fill
+                  className="object-cover object-top"
+                />
+              </div>
+
+              {/* CL 3 */}
+              <div className="relative w-[120px] lg:w-[160px] h-[180px] lg:h-[240px] shadow-2xl rounded-t-xl overflow-hidden transform translate-y-4">
+                <Image
+                  src="/cover-letter-lauren.png"
+                  alt="Cover Letter 3"
+                  fill
+                  className="object-cover object-top"
+                />
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </section>
+
+
+
+
+
+      {/* How It Works Section */}
+      <section className="w-full max-w-7xl mx-auto px-4 lg:px-6 mb-12 lg:mb-16">
+        <div className="bg-[#FAF9FF] dark:bg-gray-800 rounded-[32px] p-6 lg:p-10 relative overflow-hidden border border-purple-50 dark:border-gray-700">
+
+          <div className="mb-8 lg:mb-12 text-left w-full">
+            <h1 className="text-xl lg:text-3xl font-bold text-zinc-900 dark:text-gray-100 tracking-tight text-left mb-2 lg:mb-4">How It Works</h1>
+            <p className="text-sm text-zinc-500 dark:text-gray-400 font-medium text-left max-w-2xl">Get started in minutes with our seamless workflow</p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 lg:gap-6 mb-8 lg:mb-12">
+            {/* Card 1 */}
+            <div className="bg-white dark:bg-gray-700/50 p-5 lg:p-6 rounded-2xl shadow-sm border border-zinc-100 dark:border-gray-600 flex flex-col items-center text-center group hover:shadow-xl hover:shadow-indigo-500/10 hover:border-indigo-100 dark:hover:border-indigo-900 transition-all duration-300 relative overflow-hidden">
+              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-indigo-500 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+              <div className="mb-4 lg:mb-6 w-12 h-12 lg:w-14 lg:h-14 rounded-2xl bg-indigo-50 dark:bg-indigo-900/30 flex items-center justify-center text-indigo-600 dark:text-indigo-400 group-hover:scale-110 group-hover:bg-indigo-600 group-hover:text-white transition-all duration-300">
+                <LinkIcon className="w-5 h-5 lg:w-6 lg:h-6" strokeWidth={2} />
+              </div>
+              <h3 className="text-base lg:text-lg font-bold text-zinc-900 dark:text-gray-100 mb-2">Get Your Link</h3>
+              <p className="text-zinc-500 dark:text-gray-400 leading-relaxed text-xs lg:text-sm">
+                Receive your unique PreviewCV link automatically - same login on both platforms
+              </p>
+            </div>
+
+            {/* Card 2 */}
+            <div className="bg-white dark:bg-gray-700/50 p-5 lg:p-6 rounded-2xl shadow-sm border border-zinc-100 dark:border-gray-600 flex flex-col items-center text-center group hover:shadow-xl hover:shadow-purple-500/10 hover:border-purple-100 dark:hover:border-purple-900 transition-all duration-300 relative overflow-hidden">
+              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-purple-500 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+              <div className="mb-4 lg:mb-6 w-12 h-12 lg:w-14 lg:h-14 rounded-2xl bg-purple-50 dark:bg-purple-900/30 flex items-center justify-center text-purple-600 dark:text-purple-400 group-hover:scale-110 group-hover:bg-purple-600 group-hover:text-white transition-all duration-300">
+                <FilePlus2 className="w-5 h-5 lg:w-6 lg:h-6" strokeWidth={2} />
+              </div>
+              <h3 className="text-base lg:text-lg font-bold text-zinc-900 dark:text-gray-100 mb-2">Create Resume</h3>
+              <p className="text-zinc-500 dark:text-gray-400 leading-relaxed text-xs lg:text-sm">
+                Build your professional resume on LetsMakeCV.com with our easy-to-use builder
+              </p>
+            </div>
+
+            {/* Card 3 */}
+            <div className="bg-white dark:bg-gray-700/50 p-5 lg:p-6 rounded-2xl shadow-sm border border-zinc-100 dark:border-gray-600 flex flex-col items-center text-center group hover:shadow-xl hover:shadow-pink-500/10 hover:border-pink-100 dark:hover:border-pink-900 transition-all duration-300 relative overflow-hidden">
+              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-pink-500 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+              <div className="mb-4 lg:mb-6 w-12 h-12 lg:w-14 lg:h-14 rounded-2xl bg-pink-50 dark:bg-pink-900/30 flex items-center justify-center text-pink-600 dark:text-pink-400 group-hover:scale-110 group-hover:bg-pink-600 group-hover:text-white transition-all duration-300">
+                <Share2 className="w-5 h-5 lg:w-6 lg:h-6" strokeWidth={2} />
+              </div>
+              <h3 className="text-base lg:text-lg font-bold text-zinc-900 dark:text-gray-100 mb-2">Share & Track</h3>
+              <p className="text-zinc-500 dark:text-gray-400 leading-relaxed text-xs lg:text-sm">
+                Share your link anywhere - email, LinkedIn, applications. Updates automatically when you edit
+              </p>
+            </div>
+          </div>
+
+          <div className="flex justify-center">
+            <Link href="/candidate/signup" className="bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 px-12 py-3 rounded-xl text-sm lg:text-base font-medium hover:bg-zinc-800 dark:hover:bg-gray-200 transition-all shadow-xl shadow-zinc-900/5 hover:shadow-zinc-900/10 active:scale-95 flex items-center gap-2">
               Get Started
             </Link>
           </div>
         </div>
       </section>
 
-      {/* Expanded Benefits Section */}
-      <section className="py-32 bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-20">
-            <h2 className="text-5xl lg:text-6xl font-black text-gray-900 dark:text-gray-100 mb-6 tracking-tighter uppercase">
-              Why <span className="italic text-indigo-600">PreviewCV?</span>
-            </h2>
-            <p className="text-xl text-gray-500 max-w-3xl mx-auto font-medium">
-              The modern way to share your professional profile
-            </p>
+      {/* Why PreviewCV Section */}
+      {/* Why PreviewCV Section */}
+      {/* Why PreviewCV Section */}
+      <section className="w-full max-w-7xl mx-auto px-4 lg:px-6 mb-12 lg:mb-16">
+        <div className="bg-[#FAF9FF] dark:bg-gray-800 rounded-[32px] p-6 lg:p-10 relative overflow-hidden border border-purple-50 dark:border-gray-700">
+
+          {/* Decorative Background Elements */}
+          <div className="absolute top-0 left-0 -z-10 w-full h-full overflow-hidden pointer-events-none">
+            <div className="absolute top-[10%] left-[-5%] w-[600px] h-[600px] rounded-[100px] border-[40px] border-zinc-200 dark:border-zinc-800 opacity-40 -rotate-12 blur-3xl"></div>
+            <div className="absolute bottom-[0%] right-[0%] w-[500px] h-[500px] rounded-full border-[20px] border-blue-50/50 dark:border-blue-900/10 opacity-40 blur-3xl"></div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {/* Benefit 1 */}
-            <div className="bg-gray-50 dark:bg-gray-950 p-8 rounded-[40px] border border-gray-100 dark:border-gray-800 hover:border-blue-200 transition-all">
-              <div className="w-12 h-12 bg-blue-600 text-white rounded-xl flex items-center justify-center mb-6">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  strokeWidth={2}
-                  stroke="currentColor"
-                  className="w-6 h-6"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 0 0 2.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 0 0-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 0 0 .75-.75 2.25 2.25 0 0 0-.1-.664m-5.8 0A2.251 2.251 0 0 1 13.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25ZM6.75 12h.008v.008H6.75V12Zm0 3h.008v.008H6.75V15Zm0 3h.008v.008H6.75V18Z"
-                  />
-                </svg>
-              </div>
-              <h4 className="text-xl font-black text-gray-900 dark:text-gray-100 mb-3 uppercase tracking-tight">
-                No More PDFs
-              </h4>
-              <p className="text-gray-600 font-medium leading-relaxed">
-                Stop attaching bulky PDF files. Share a clean, professional link
-                instead.
-              </p>
-            </div>
+          <div className="mb-8 lg:mb-16">
+            <h1 className="text-xl lg:text-3xl font-bold text-zinc-900 dark:text-gray-100 mb-4 leading-snug tracking-tight text-left">Why PreviewCV?</h1>
+            <p className="text-sm text-zinc-600 dark:text-gray-400 font-medium max-w-2xl text-left leading-relaxed">The modern way to share your professional profile</p>
+          </div>
 
-            {/* Benefit 2 */}
-            <div className="bg-gray-50 dark:bg-gray-950 p-8 rounded-[40px] border border-gray-100 dark:border-gray-800 hover:border-indigo-200 transition-all">
-              <div className="w-12 h-12 bg-indigo-600 text-white rounded-xl flex items-center justify-center mb-6">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  strokeWidth={2}
-                  stroke="currentColor"
-                  className="w-6 h-6"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99"
-                  />
-                </svg>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-12">
+            {[
+              {
+                icon: <FileX2 className="w-5 h-5 lg:w-6 lg:h-6" strokeWidth={1.5} />,
+                title: "No More PDFs",
+                description: "Stop attaching bulky PDF files. Share a clean, professional link instead.",
+                color: "text-red-600 dark:text-red-400"
+              },
+              {
+                icon: <RefreshCw className="w-5 h-5 lg:w-6 lg:h-6" strokeWidth={1.5} />,
+                title: "Always Up-to-Date",
+                description: "Edit your resume once on LetsMakeCV - your PreviewCV link updates automatically.",
+                color: "text-blue-600 dark:text-blue-400"
+              },
+              {
+                icon: <BarChart3 className="w-5 h-5 lg:w-6 lg:h-6" strokeWidth={1.5} />,
+                title: "Track Views",
+                description: "See who's viewing your resume and when they're engaging with your profile.",
+                color: "text-purple-600 dark:text-purple-400"
+              },
+              {
+                icon: <Smartphone className="w-5 h-5 lg:w-6 lg:h-6" strokeWidth={1.5} />,
+                title: "Mobile Optimized",
+                description: "Perfect viewing experience on any device - desktop, tablet, or mobile.",
+                color: "text-emerald-600 dark:text-emerald-400"
+              },
+              {
+                icon: <ShieldCheck className="w-5 h-5 lg:w-6 lg:h-6" strokeWidth={1.5} />,
+                title: "Secure & Private",
+                description: "Your data is encrypted and secure. Control who sees your information.",
+                color: "text-indigo-600 dark:text-indigo-400"
+              },
+              {
+                icon: <Zap className="w-5 h-5 lg:w-6 lg:h-6" strokeWidth={1.5} />,
+                title: "Instant Loading",
+                description: "Lightning-fast preview with our optimized rendering engine. No downloads needed.",
+                color: "text-amber-600 dark:text-amber-400"
+              }
+            ].map((feature, index) => (
+              <div key={index} className="flex flex-col items-start hover:translate-y-[-4px] transition-transform duration-300">
+                <div className={`w-12 h-12 lg:w-14 lg:h-14 rounded-2xl bg-white dark:bg-zinc-800 shadow-sm flex items-center justify-center mb-4 lg:mb-6 ${feature.color}`}>
+                  {feature.icon}
+                </div>
+                <h3 className="text-lg lg:text-xl font-medium text-zinc-900 dark:text-gray-100 mb-2">{feature.title}</h3>
+                <p className="text-zinc-600 dark:text-gray-400 leading-relaxed text-xs lg:text-sm">
+                  {feature.description}
+                </p>
               </div>
-              <h4 className="text-xl font-black text-gray-900 dark:text-gray-100 mb-3 uppercase tracking-tight">
-                Always Up-to-Date
-              </h4>
-              <p className="text-gray-600 font-medium leading-relaxed">
-                Edit your resume once on LetsMakeCV - your PreviewCV link
-                updates automatically.
-              </p>
-            </div>
-
-            {/* Benefit 3 */}
-            <div className="bg-gray-50 dark:bg-gray-950 p-8 rounded-[40px] border border-gray-100 dark:border-gray-800 hover:border-blue-200 transition-all">
-              <div className="w-12 h-12 bg-blue-600 text-white rounded-xl flex items-center justify-center mb-6">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  strokeWidth={2}
-                  stroke="currentColor"
-                  className="w-6 h-6"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z"
-                  />
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"
-                  />
-                </svg>
-              </div>
-              <h4 className="text-xl font-black text-gray-900 dark:text-gray-100 mb-3 uppercase tracking-tight">
-                Track Views
-              </h4>
-              <p className="text-gray-600 font-medium leading-relaxed">
-                See who&apos;s viewing your resume and when they&apos;re
-                engaging with your profile.
-              </p>
-            </div>
-
-            {/* Benefit 4 */}
-            <div className="bg-gray-50 dark:bg-gray-950 p-8 rounded-[40px] border border-gray-100 dark:border-gray-800 hover:border-indigo-200 transition-all">
-              <div className="w-12 h-12 bg-indigo-600 text-white rounded-xl flex items-center justify-center mb-6">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  strokeWidth={2}
-                  stroke="currentColor"
-                  className="w-6 h-6"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M10.5 1.5H8.25A2.25 2.25 0 0 0 6 3.75v16.5a2.25 2.25 0 0 0 2.25 2.25h7.5A2.25 2.25 0 0 0 18 20.25V3.75a2.25 2.25 0 0 0-2.25-2.25H13.5m-3 0V3h3V1.5m-3 0h3m-3 18.75h3"
-                  />
-                </svg>
-              </div>
-              <h4 className="text-xl font-black text-gray-900 dark:text-gray-100 mb-3 uppercase tracking-tight">
-                Mobile Optimized
-              </h4>
-              <p className="text-gray-600 font-medium leading-relaxed">
-                Perfect viewing experience on any device - desktop, tablet, or
-                mobile.
-              </p>
-            </div>
-
-            {/* Benefit 5 */}
-            <div className="bg-gray-50 dark:bg-gray-950 p-8 rounded-[40px] border border-gray-100 dark:border-gray-800 hover:border-blue-200 transition-all">
-              <div className="w-12 h-12 bg-blue-600 text-white rounded-xl flex items-center justify-center mb-6">
-                <LockClosedIcon />
-              </div>
-              <h4 className="text-xl font-black text-gray-900 dark:text-gray-100 mb-3 uppercase tracking-tight">
-                Secure & Private
-              </h4>
-              <p className="text-gray-600 font-medium leading-relaxed">
-                Your data is encrypted and secure. Control who sees your
-                information.
-              </p>
-            </div>
-
-            {/* Benefit 6 */}
-            <div className="bg-gray-50 dark:bg-gray-950 p-8 rounded-[40px] border border-gray-100 dark:border-gray-800 hover:border-indigo-200 transition-all">
-              <div className="w-12 h-12 bg-indigo-600 text-white rounded-xl flex items-center justify-center mb-6">
-                <LightningBoltIcon />
-              </div>
-              <h4 className="text-xl font-black text-gray-900 dark:text-gray-100 mb-3 uppercase tracking-tight">
-                Instant Loading
-              </h4>
-              <p className="text-gray-600 font-medium leading-relaxed">
-                Lightning-fast preview with our optimized rendering engine. No
-                downloads needed.
-              </p>
-            </div>
+            ))}
           </div>
         </div>
       </section>
+      {/* Direct Market Pulse Section */}
+      {/* Direct Market Pulse Section */}
+      <section className="w-full max-w-7xl mx-auto px-4 lg:px-6 mb-12 lg:mb-16">
+        <div className="bg-[#FAF9FF] dark:bg-gray-800 rounded-[32px] p-6 lg:p-10 relative overflow-hidden border border-purple-50 dark:border-gray-700 animate-in fade-in duration-700">
 
-      {/* Social Proof Section */}
-      <section className="py-24 bg-gradient-to-br from-blue-50 to-indigo-50 border-y border-gray-100 dark:border-gray-800">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <div className="inline-flex items-center gap-3 px-6 py-3 bg-white dark:bg-gray-900 rounded-full shadow-sm border border-gray-100 dark:border-gray-800 mb-8">
-              <div className="flex -space-x-2">
-                <div className="w-8 h-8 rounded-full bg-blue-600 border-2 border-white" />
-                <div className="w-8 h-8 rounded-full bg-indigo-600 border-2 border-white" />
-                <div className="w-8 h-8 rounded-full bg-blue-500 border-2 border-white" />
-              </div>
-              <span className="text-sm font-black text-gray-900 dark:text-gray-100 uppercase tracking-tight">
-                Trusted by Professionals
-              </span>
-            </div>
-            <h2 className="text-4xl lg:text-5xl font-black text-gray-900 dark:text-gray-100 mb-6 tracking-tighter uppercase">
-              Join Thousands of{" "}
-              <span className="italic text-blue-600">Happy Users</span>
-            </h2>
+          {/* Page Header */}
+          <div className="mb-8 lg:mb-12">
+            <h1 className="text-xl lg:text-3xl font-bold text-zinc-900 dark:text-gray-100 tracking-tight text-left mb-2 lg:mb-4">Direct Market Pulse</h1>
+            <p className="text-sm text-zinc-500 dark:text-gray-400 font-medium text-left max-w-2xl">Live activity from our recruitment engine. Verified matching in progress.</p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {/* Testimonial 1 */}
-            <div className="bg-white dark:bg-gray-900 p-8 rounded-[40px] shadow-sm border border-gray-100 dark:border-gray-800">
-              <div className="flex gap-1 mb-4">
-                {[1, 2, 3, 4, 5].map((i) => (
-                  <svg
-                    key={i}
-                    className="w-5 h-5 text-yellow-400"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                  >
-                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                  </svg>
-                ))}
-              </div>
-              <p className="text-gray-600 font-medium mb-6 leading-relaxed">
-                &quot;PreviewCV made sharing my resume so much easier. No more
-                worrying about outdated PDFs!&quot;
-              </p>
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-indigo-600" />
-                <div>
-                  <p className="font-black text-gray-900 dark:text-gray-100 text-sm uppercase tracking-tight">
-                    Sarah Chen
-                  </p>
-                  <p className="text-xs text-gray-500 font-bold uppercase tracking-wider">
-                    Software Engineer
-                  </p>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16">
+
+            {/* Left Column: Trending Roles */}
+            <div>
+              <h2 className="text-lg lg:text-xl font-semibold text-zinc-900 dark:text-gray-100 mb-4 lg:mb-6 tracking-tight text-left ml-2 lg:ml-0">Trending Roles</h2>
+
+              <div className="space-y-4 lg:space-y-6">
+                {/* Wrapper Card for all roles */}
+                <div className="bg-white dark:bg-gray-700/50 rounded-2xl p-4 lg:p-6 shadow-sm border border-zinc-200/60 dark:border-zinc-700">
+                  {[
+                    {
+                      title: "Senior React Developer",
+                      company: "TechCorp",
+                      location: "Remote",
+                      type: "Full Time"
+                    },
+                    {
+                      title: "UI/UX Designer",
+                      company: "Creative Studio",
+                      location: "New York",
+                      type: "On-site"
+                    },
+                    {
+                      title: "Backend Engineer",
+                      company: "FastData",
+                      location: "Austin",
+                      type: "Hybrid"
+                    }
+                  ].map((job, index) => (
+                    <div
+                      key={index}
+                      className="flex flex-col md:flex-row md:items-center justify-between py-4 lg:py-6 border-b border-zinc-100 dark:border-zinc-700 last:border-0 last:pb-0 first:pt-0 gap-4 lg:gap-6"
+                    >
+                      <div className="space-y-1 lg:space-y-1">
+                        <h3 className="text-sm lg:text-base font-bold text-zinc-900 dark:text-gray-100">{job.title}</h3>
+                        <p className="text-zinc-500 dark:text-gray-400 font-medium text-xs lg:text-sm">{job.company}</p>
+                      </div>
+
+                      <div className="flex flex-col items-start md:items-end gap-2 lg:gap-3 shrink-0">
+                        <button className="flex items-center gap-2 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 px-3 py-1.5 lg:px-5 lg:py-2 rounded-lg text-xs lg:text-sm font-semibold hover:bg-zinc-800 dark:hover:bg-gray-200 transition-all hover:gap-3 group">
+                          Apply <ArrowRight className="w-3 h-3 lg:w-4 lg:h-4 group-hover:translate-x-0.5 transition-transform" />
+                        </button>
+                        <span className="bg-zinc-100 dark:bg-zinc-700 text-zinc-600 dark:text-zinc-300 px-2 py-0.5 lg:px-3 lg:py-1 rounded-md text-[10px] lg:text-xs font-semibold">
+                          {job.location}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>
 
-            {/* Testimonial 2 */}
-            <div className="bg-white dark:bg-gray-900 p-8 rounded-[40px] shadow-sm border border-gray-100 dark:border-gray-800">
-              <div className="flex gap-1 mb-4">
-                {[1, 2, 3, 4, 5].map((i) => (
-                  <svg
-                    key={i}
-                    className="w-5 h-5 text-yellow-400"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                  >
-                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                  </svg>
-                ))}
-              </div>
-              <p className="text-gray-600 font-medium mb-6 leading-relaxed">
-                &quot;As a recruiter, I love how quickly I can view candidate
-                profiles. Game changer!&quot;
-              </p>
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-400 to-blue-600" />
-                <div>
-                  <p className="font-black text-gray-900 dark:text-gray-100 text-sm uppercase tracking-tight">
-                    Michael Torres
-                  </p>
-                  <p className="text-xs text-gray-500 font-bold uppercase tracking-wider">
-                    Talent Acquisition Lead
-                  </p>
-                </div>
-              </div>
-            </div>
+            {/* Right Column: Featured Talent */}
+            <div>
+              <h2 className="text-lg lg:text-xl font-semibold text-zinc-900 dark:text-gray-100 mb-4 lg:mb-6 tracking-tight text-left ml-2 lg:ml-0">Featured Talent</h2>
 
-            {/* Testimonial 3 */}
-            <div className="bg-white dark:bg-gray-900 p-8 rounded-[40px] shadow-sm border border-gray-100 dark:border-gray-800">
-              <div className="flex gap-1 mb-4">
-                {[1, 2, 3, 4, 5].map((i) => (
-                  <svg
-                    key={i}
-                    className="w-5 h-5 text-yellow-400"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                  >
-                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                  </svg>
-                ))}
-              </div>
-              <p className="text-gray-600 font-medium mb-6 leading-relaxed">
-                &quot;The integration with LetsMakeCV is seamless. One account,
-                two powerful tools!&quot;
-              </p>
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-indigo-500" />
-                <div>
-                  <p className="font-black text-gray-900 dark:text-gray-100 text-sm uppercase tracking-tight">
-                    Priya Patel
-                  </p>
-                  <p className="text-xs text-gray-500 font-bold uppercase tracking-wider">
-                    UX Designer
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* NEW: Marketing Pulse Teaser Section */}
-      <section className="py-24 bg-white dark:bg-gray-900 relative overflow-hidden">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-black text-gray-900 dark:text-gray-100 tracking-tight mb-4 italic uppercase">
-              Direct Market Pulse
-            </h2>
-            <p className="text-gray-500 font-medium">
-              Live activity from our recruitment engine. Verified matching in
-              progress.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-            {/* Jobs Teaser */}
-            <div className="bg-blue-50/50 rounded-[40px] p-8 border border-blue-100">
-              <div className="flex items-center justify-between mb-8">
-                <h3 className="text-xl font-black text-blue-900 uppercase tracking-tight">
-                  Trending Roles
-                </h3>
-                <Link
-                  href="/jobs"
-                  className="text-sm font-bold text-blue-600 hover:underline"
-                >
-                  View All Jobs →
-                </Link>
-              </div>
-              <div className="space-y-4">
+              <div className="space-y-3 lg:space-y-4">
                 {[
                   {
-                    title: "Senior React Developer",
-                    company: "TechCorp",
-                    loc: "Remote",
-                    salary: "$120k - $160k",
+                    name: "John Deo",
+                    role: "Senior React Developer",
+                    experience: "5 Years",
+                    skills: ["React", "Java", "Python", "HTML", "SQL", "Docker"],
+                    avatar: "https://i.pravatar.cc/150?u=john1"
                   },
                   {
-                    title: "UI/UX Designer",
-                    company: "Creative Studio",
-                    loc: "New York",
-                    salary: "$80/hr - $100/hr",
+                    name: "John Deo",
+                    role: "Senior React Developer",
+                    experience: "5 Years",
+                    skills: ["React", "Java", "Python", "HTML", "SQL", "Docker"],
+                    avatar: "https://i.pravatar.cc/150?u=john2"
                   },
                   {
-                    title: "Backend Engineer",
-                    company: "FastData",
-                    loc: "Austin",
-                    salary: "$130k - $170k",
-                  },
-                ].map((job, i) => (
+                    name: "John Deo",
+                    role: "Senior React Developer",
+                    experience: "5 Years",
+                    skills: ["React", "Java", "Python", "HTML"],
+                    avatar: "https://i.pravatar.cc/150?u=john3"
+                  }
+                ].map((talent, index) => (
                   <div
-                    key={i}
-                    className="bg-white dark:bg-gray-900 p-5 rounded-3xl border border-blue-100 shadow-sm hover:shadow-md transition-all group"
+                    key={index}
+                    className="bg-white dark:bg-gray-700/50 rounded-2xl p-4 lg:p-5 shadow-sm border border-zinc-200/60 dark:border-zinc-700 hover:shadow-md transition-shadow"
                   >
-                    <div className="flex justify-between items-start mb-2">
-                      <h4 className="font-bold text-gray-900 dark:text-gray-100 uppercase text-sm tracking-tight">
-                        {job.title}
-                      </h4>
-                      <span className="text-[10px] bg-blue-100 text-blue-700 px-2 py-1 rounded-full font-black uppercase tracking-widest">
-                        {job.loc}
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <p className="text-xs text-gray-500 font-bold uppercase tracking-wider">
-                        {job.company}
-                      </p>
-                      <div className="relative">
-                        <span className="text-sm font-black text-gray-900 dark:text-gray-100 blur-[4px] select-none">
-                          {job.salary}
-                        </span>
-                        <div className="absolute inset-0 bg-white dark:bg-gray-900/40 backdrop-blur-[2px] flex items-center justify-center">
-                          <span className="text-[10px] font-black text-blue-600 uppercase tracking-tighter">
-                            Sign in to view
-                          </span>
+                    <div className="flex items-start gap-3 lg:gap-4">
+                      {/* Avatar */}
+                      <img
+                        src={talent.avatar}
+                        alt={talent.name}
+                        className="w-10 h-10 lg:w-12 lg:h-12 rounded-full object-cover border-2 border-white dark:border-gray-700 shadow-sm"
+                      />
+
+                      <div className="flex-1 min-w-0">
+                        <div className="flex justify-between items-start mb-1">
+                          <div>
+                            <h3 className="text-sm lg:text-base font-bold text-zinc-900 dark:text-gray-100">{talent.name}</h3>
+                            <p className="text-zinc-500 dark:text-gray-400 font-medium text-xs lg:text-sm">{talent.role}</p>
+                          </div>
+                          <span className="text-xs font-semibold text-zinc-900 dark:text-gray-100 shrink-0 mt-1">{talent.experience}</span>
+                        </div>
+
+                        {/* Skills Tags */}
+                        <div className="flex flex-wrap gap-1.5 lg:gap-2 mt-2">
+                          {talent.skills.map((skill, i) => (
+                            <span
+                              key={i}
+                              className="bg-zinc-100 dark:bg-zinc-700 text-zinc-600 dark:text-zinc-300 px-2 py-0.5 rounded-md text-[10px] font-semibold tracking-wide"
+                            >
+                              {skill}
+                            </span>
+                          ))}
                         </div>
                       </div>
                     </div>
@@ -784,363 +764,244 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Candidates Teaser */}
-            <div className="bg-indigo-50/50 rounded-[40px] p-8 border border-indigo-100">
-              <div className="flex items-center justify-between mb-8">
-                <h3 className="text-xl font-black text-indigo-900 uppercase tracking-tight">
-                  Featured Talent
-                </h3>
-                <Link
-                  href="/recruiter/login"
-                  className="text-sm font-bold text-indigo-600 hover:underline"
-                >
-                  Source Talent →
-                </Link>
-              </div>
-              <div className="space-y-4">
-                {[
-                  {
-                    role: "Fullstack Developer",
-                    exp: "5 years",
-                    skills: ["React", "Go"],
-                    img: "/images/profile1.png",
-                  },
-                  {
-                    role: "Product Designer",
-                    exp: "7 years",
-                    skills: ["Figma", "UX"],
-                    img: "/images/profile2.png",
-                  },
-                  {
-                    role: "Mobile Engineer",
-                    exp: "4 years",
-                    skills: ["Swift", "Native"],
-                    img: "/images/profile3.png",
-                  },
-                ].map((can, i) => (
-                  <div
-                    key={i}
-                    className="bg-white dark:bg-gray-900 p-5 rounded-3xl border border-indigo-100 shadow-sm hover:shadow-md transition-all"
-                  >
-                    <div className="flex items-center gap-4 mb-3">
-                      <div className="w-12 h-12 bg-gray-100 rounded-2xl relative overflow-hidden border border-gray-100 dark:border-gray-800">
-                        <Image
-                          src={can.img}
-                          alt={can.role}
-                          fill
-                          className="object-cover"
-                        />
-                      </div>
-                      <div>
-                        <div className="h-4 w-32 bg-gray-100 rounded-full mb-2 blur-[2px]" />
-                        <h4 className="font-bold text-gray-900 dark:text-gray-100 text-xs uppercase tracking-tight">
-                          {can.role}
-                        </h4>
-                      </div>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <div className="flex gap-2">
-                        {can.skills.map((s) => (
-                          <span
-                            key={s}
-                            className="text-[10px] bg-gray-50 dark:bg-gray-950 text-gray-500 px-2 py-1 rounded-lg border border-gray-100 dark:border-gray-800 font-black uppercase tracking-tighter"
-                          >
-                            {s}
-                          </span>
-                        ))}
-                      </div>
-                      <span className="text-xs font-black text-indigo-600 italic uppercase">
-                        {can.exp}
-                      </span>
-                    </div>
-                  </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Social Proof Section */}
+      <section className="w-full bg-[#164863] py-6 lg:py-16 relative overflow-hidden">
+        <div className="w-full max-w-7xl mx-auto px-4 animate-in fade-in duration-700 relative ">
+          {/* Decorative Background Elements */}
+          <div className="absolute top-0 right-0 -z-10 w-full h-full overflow-hidden pointer-events-none">
+            <div className="absolute top-[20%] right-[-10%] w-[600px] h-[600px] rounded-[100px] border-[40px] border-white/5 opacity-40 rotate-45 blur-3xl"></div>
+            <div className="absolute bottom-[-10%] left-[10%] w-[500px] h-[500px] rounded-full border-[30px] border-white/5 opacity-30 blur-3xl"></div>
+          </div>
+
+          <div className="mb-8 lg:mb-24 w-full">
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full mb-6 text-zinc-100 font-medium text-sm border border-white/10">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+              </span>
+              Trusted by Professionals
+            </div>
+            <h1 className="text-2xl lg:text-4xl font-bold text-white tracking-tight mb-4 lg:mb-6 text-left">
+              Join Thousands of Happy Users
+            </h1>
+            <p className="text-base text-zinc-300 font-medium text-left max-w-2xl">
+              See what professionals are saying about their PreviewCV experience
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 lg:gap-8">
+            {/* Testimonial 1 */}
+            <div className="bg-white dark:bg-gray-800 p-6 lg:p-8 rounded-2xl shadow-sm border border-zinc-100 dark:border-gray-700 flex flex-col relative group hover:shadow-xl transition-all duration-300">
+              <Quote className="absolute top-8 right-8 text-indigo-100 dark:text-indigo-900/30 w-12 h-12" />
+              <div className="flex gap-1 mb-4 lg:mb-6">
+                {[1, 2, 3, 4, 5].map((i) => (
+                  <Star key={i} size={18} className="fill-yellow-400 text-yellow-400" />
                 ))}
+              </div>
+              <p className="text-zinc-600 dark:text-gray-300 font-medium mb-4 lg:mb-8 leading-relaxed text-base lg:text-lg relative z-10">
+                "PreviewCV made sharing my resume so much easier. No more worrying about outdated PDFs! It's been a game changer for my job search."
+              </p>
+              <div className="mt-auto flex items-center gap-4">
+                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-400 to-indigo-600 ring-4 ring-indigo-50 dark:ring-indigo-900/20"></div>
+                <div>
+                  <p className="font-bold text-zinc-900 dark:text-gray-100">Sarah Chen</p>
+                  <p className="text-sm text-zinc-500 dark:text-gray-400 font-medium">Software Engineer</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Testimonial 2 */}
+            <div className="bg-white dark:bg-gray-800 p-6 lg:p-8 rounded-2xl shadow-sm border border-zinc-100 dark:border-gray-700 flex flex-col relative group hover:shadow-xl transition-all duration-300">
+              <Quote className="absolute top-8 right-8 text-purple-100 dark:text-purple-900/30 w-12 h-12" />
+              <div className="flex gap-1 mb-4 lg:mb-6">
+                {[1, 2, 3, 4, 5].map((i) => (
+                  <Star key={i} size={18} className="fill-yellow-400 text-yellow-400" />
+                ))}
+              </div>
+              <p className="text-zinc-600 dark:text-gray-300 font-medium mb-4 lg:mb-8 leading-relaxed text-base lg:text-lg relative z-10">
+                "As a recruiter, I love how quickly I can view candidate profiles. It saves me so much time and the layout is always perfect."
+              </p>
+              <div className="mt-auto flex items-center gap-4">
+                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-indigo-400 to-purple-600 ring-4 ring-purple-50 dark:ring-purple-900/20"></div>
+                <div>
+                  <p className="font-bold text-zinc-900 dark:text-gray-100">Michael Torres</p>
+                  <p className="text-sm text-zinc-500 dark:text-gray-400 font-medium">Talent Acquisition Lead</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Testimonial 3 */}
+            <div className="bg-white dark:bg-gray-800 p-6 lg:p-8 rounded-2xl shadow-sm border border-zinc-100 dark:border-gray-700 flex flex-col relative group hover:shadow-xl transition-all duration-300">
+              <Quote className="absolute top-8 right-8 text-pink-100 dark:text-pink-900/30 w-12 h-12" />
+              <div className="flex gap-1 mb-4 lg:mb-6">
+                {[1, 2, 3, 4, 5].map((i) => (
+                  <Star key={i} size={18} className="fill-yellow-400 text-yellow-400" />
+                ))}
+              </div>
+              <p className="text-zinc-600 dark:text-gray-300 font-medium mb-4 lg:mb-8 leading-relaxed text-base lg:text-lg relative z-10">
+                "The integration with LetsMakeCV is seamless. One account, two powerful tools! I can update my CV and it reflects instantly here."
+              </p>
+              <div className="mt-auto flex items-center gap-4">
+                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-400 to-pink-600 ring-4 ring-pink-50 dark:ring-pink-900/20"></div>
+                <div>
+                  <p className="font-bold text-zinc-900 dark:text-gray-100">Priya Patel</p>
+                  <p className="text-sm text-zinc-500 dark:text-gray-400 font-medium">UX Designer</p>
+                </div>
               </div>
             </div>
           </div>
         </div>
-        <div className="absolute top-1/2 left-0 w-64 h-64 bg-blue-100/30 rounded-full blur-[100px] -z-10" />
-        <div className="absolute bottom-0 right-0 w-96 h-96 bg-indigo-100/20 rounded-full blur-[120px] -z-10" />
       </section>
 
-      {/* Features Section */}
-      <section className="py-24 bg-gray-50 dark:bg-gray-950 border-y border-gray-100 dark:border-gray-800">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
-            <div className="bg-white dark:bg-gray-900 p-10 rounded-[40px] shadow-sm border border-gray-100 dark:border-gray-800 hover:scale-[1.02] transition-transform">
-              <div className="w-14 h-14 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center mb-8 shadow-inner">
-                <LockClosedIcon />
+
+
+      {/* Core Features Section */}
+      <section className="py-12 lg:py-24 bg-zinc-900 relative overflow-hidden">
+        {/* Background Noise & Gradients */}
+        <div className="absolute inset-0 -z-10">
+          <div className="absolute inset-0 opacity-[0.03] bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]"></div>
+          <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-zinc-800/50 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
+        </div>
+
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 w-full">
+          <div className="text-left w-full mb-8 lg:mb-16">
+            <h2 className="text-2xl lg:text-4xl font-bold text-white mb-4 lg:mb-6 tracking-tight text-left">Platform Capabilities</h2>
+            <p className="text-base text-zinc-400 font-medium text-left max-w-2xl">
+              Engineered for speed, security, and seamless connections.
+            </p>
+          </div>
+
+          {/* Main Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
+
+            {/* Card 1: Secure Sharing */}
+            <div className="group relative bg-zinc-800/40 hover:bg-zinc-800/60 backdrop-blur-md rounded-2xl p-6 lg:p-8 border border-white/5 hover:border-white/10 transition-all duration-300">
+              <div className="w-12 h-12 bg-zinc-900 rounded-xl flex items-center justify-center border border-white/10 mb-4 lg:mb-6 text-white group-hover:scale-110 group-hover:bg-zinc-950 transition-all duration-300 shadow-lg shadow-black/20">
+                <LinkIcon size={22} strokeWidth={2} />
               </div>
-              <h3 className="text-xl font-black mb-4 uppercase tracking-tighter leading-none">
-                Secure Sharing
-              </h3>
-              <p className="text-gray-500 font-medium text-sm leading-relaxed">
-                Encrypted token-based access ensures only the right eyes see
-                your professional profile.
+              <h3 className="text-lg lg:text-xl font-bold text-white mb-2 lg:mb-3">Secure Sharing</h3>
+              <p className="text-zinc-400 leading-relaxed text-sm">
+                Encrypted token-based access ensures only the right eyes see your professional profile.
               </p>
             </div>
-            <div className="bg-white dark:bg-gray-900 p-10 rounded-[40px] shadow-sm border border-gray-100 dark:border-gray-800 hover:scale-[1.02] transition-transform">
-              <div className="w-14 h-14 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center mb-8 shadow-inner">
-                <LightningBoltIcon />
+
+            {/* Card 2: Live Preview */}
+            <div className="group relative bg-zinc-800/40 hover:bg-zinc-800/60 backdrop-blur-md rounded-2xl p-6 lg:p-8 border border-white/5 hover:border-white/10 transition-all duration-300">
+              <div className="w-12 h-12 bg-zinc-900 rounded-xl flex items-center justify-center border border-white/10 mb-4 lg:mb-6 text-white group-hover:scale-110 group-hover:bg-zinc-950 transition-all duration-300 shadow-lg shadow-black/20">
+                <ScanEye size={22} strokeWidth={2} />
               </div>
-              <h3 className="text-xl font-black mb-4 uppercase tracking-tighter leading-none">
-                Live Preview
-              </h3>
-              <p className="text-gray-500 font-medium text-sm leading-relaxed">
-                Proprietary PDF rendering engine for a seamless, fast viewing
-                experience on any device.
+              <h3 className="text-lg lg:text-xl font-bold text-white mb-2 lg:mb-3">Live Preview</h3>
+              <p className="text-zinc-400 leading-relaxed text-sm">
+                Proprietary PDF rendering engine for a seamless, fast viewing experience on any device.
               </p>
             </div>
-            <div className="bg-white dark:bg-gray-900 p-10 rounded-[40px] shadow-sm border border-gray-100 dark:border-gray-800 hover:scale-[1.02] transition-transform">
-              <div className="w-14 h-14 bg-blue-50 text-blue-900 rounded-2xl flex items-center justify-center mb-8 shadow-inner">
-                <TargetIcon />
+
+            {/* Card 3: Smart Matching */}
+            <div className="group relative bg-zinc-800/40 hover:bg-zinc-800/60 backdrop-blur-md rounded-2xl p-6 lg:p-8 border border-white/5 hover:border-white/10 transition-all duration-300">
+              <div className="w-12 h-12 bg-zinc-900 rounded-xl flex items-center justify-center border border-white/10 mb-4 lg:mb-6 text-white group-hover:scale-110 group-hover:bg-zinc-950 transition-all duration-300 shadow-lg shadow-black/20">
+                <Sparkles size={22} strokeWidth={2} />
               </div>
-              <h3 className="text-xl font-black mb-4 uppercase tracking-tighter leading-none">
-                Smart Matching
-              </h3>
-              <p className="text-gray-500 font-medium text-sm leading-relaxed">
-                Integrated with letsmakecv.com to match candidates with their
-                dream jobs instantly.
+              <h3 className="text-lg lg:text-xl font-bold text-white mb-2 lg:mb-3">Smart Matching</h3>
+              <p className="text-zinc-400 leading-relaxed text-sm">
+                Integrated with letsmakecv.com to match candidates with their dream jobs instantly.
               </p>
             </div>
+
           </div>
         </div>
       </section>
 
       {/* FAQ Section */}
-      <section className="py-32 bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-20">
-            <div className="inline-block px-4 py-2 bg-indigo-50 text-indigo-600 text-[10px] font-black uppercase tracking-[0.2em] rounded-full mb-6">
-              Got Questions?
+      {/* FAQ Section */}
+      <section className="w-full max-w-7xl mx-auto px-4 lg:px-6 mb-12 lg:mb-16">
+        <div className="bg-[#FAF9FF] dark:bg-gray-800 rounded-[32px] p-6 lg:p-10 relative overflow-hidden border border-purple-50 dark:border-gray-700">
+
+          {/* Background Noise & Gradients */}
+          <div className="absolute inset-0 -z-10">
+            <div className="absolute inset-0 opacity-[0.03] bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]"></div>
+            <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-zinc-200/50 dark:bg-zinc-800/50 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
+          </div>
+
+          <div className="w-full max-w-4xl mx-auto px-0 lg:px-4 relative z-10">
+
+            {/* Header */}
+            <div className="mb-8 lg:mb-12 w-full">
+              <h1 className="text-xl lg:text-3xl font-bold text-zinc-900 dark:text-white tracking-tight text-left mb-2 lg:mb-4">Frequently Asked Questions</h1>
+              <p className="text-sm text-zinc-500 dark:text-zinc-400 font-medium text-left max-w-2xl">Everything you need to know about PreviewCV.</p>
             </div>
-            <h2 className="text-5xl lg:text-6xl font-black text-gray-900 dark:text-gray-100 mb-6 tracking-tighter uppercase">
-              Frequently Asked{" "}
-              <span className="italic text-indigo-600">Questions</span>
-            </h2>
-            <p className="text-xl text-gray-500 font-medium">
-              Everything you need to know about PreviewCV
-            </p>
-          </div>
 
-          <div className="space-y-6">
-            {/* FAQ 1 */}
-            <details className="group bg-gray-50 dark:bg-gray-950 rounded-[32px] border border-gray-100 dark:border-gray-800 overflow-hidden hover:border-blue-200 transition-all">
-              <summary className="flex items-center justify-between p-8 cursor-pointer list-none">
-                <h3 className="text-xl font-black text-gray-900 dark:text-gray-100 uppercase tracking-tight">
-                  Is PreviewCV free to use?
-                </h3>
-                <svg
-                  className="w-6 h-6 text-gray-400 group-open:rotate-180 transition-transform"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
+            {/* Accordion List */}
+            <div className="space-y-3 lg:space-y-4">
+              {[
+                {
+                  question: "Is PreviewCV free to use?",
+                  answer: "Yes! PreviewCV is completely free for candidates. Create your resume on LetsMakeCV and share your PreviewCV link at no cost. Recruiters can access basic features for free as well."
+                },
+                {
+                  question: "Do I need a LetsMakeCV account?",
+                  answer: "Yes, PreviewCV is the sharing platform for resumes built on LetsMakeCV. You'll need an account to create and manage your resume content, which automatically syncs here."
+                },
+                {
+                  question: "How do I get my PreviewCV link?",
+                  answer: "Once you publish your resume on LetsMakeCV, a unique PreviewCV link is automatically generated for you. You can find this on your dashboard or sharing settings."
+                },
+                {
+                  question: "What happens when I update my resume?",
+                  answer: "Any changes you make on LetsMakeCV are instantly reflected on your PreviewCV link. No need to re-upload files or send new links to recruiters."
+                },
+                {
+                  question: "Is my data secure?",
+                  answer: "Absolutely. We use industry-standard encryption to protect your personal information. You also have granular control over who can view your profile."
+                },
+                {
+                  question: "Can I track who views my resume?",
+                  answer: "Yes, our analytics dashboard shows you when your resume was viewed, allowing you to gauge interest from recruiters and follow up effectively."
+                }
+              ].map((item, index) => (
+                <div
+                  key={index}
+                  onClick={() => setOpenIndex(openIndex === index ? null : index)}
+                  className={`
+                    group cursor-pointer transition-all duration-300 ease-in-out border border-zinc-200 dark:border-white/5
+                    ${openIndex === index
+                      ? 'bg-white dark:bg-zinc-900 p-5 lg:p-6 rounded-2xl shadow-lg shadow-black/5 dark:shadow-black/20'
+                      : 'bg-white/50 dark:bg-zinc-900/30 py-3 lg:py-4 px-5 lg:px-6 hover:bg-white dark:hover:bg-zinc-800 rounded-xl hover:shadow-sm'
+                    }
+                  `}
                 >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M19 9l-7 7-7-7"
-                  />
-                </svg>
-              </summary>
-              <div className="px-8 pb-8">
-                <p className="text-gray-600 font-medium leading-relaxed">
-                  Yes! PreviewCV is completely free for candidates. Create your
-                  resume on LetsMakeCV and share your PreviewCV link at no cost.
-                  Recruiters can access basic features for free as well.
-                </p>
-              </div>
-            </details>
+                  <div className="flex justify-between items-center gap-4">
+                    <h3 className={`text-sm lg:text-lg font-medium transition-colors ${openIndex === index ? 'text-zinc-900 dark:text-gray-100' : 'text-zinc-800 dark:text-gray-300'}`}>
+                      {item.question}
+                    </h3>
 
-            {/* FAQ 2 */}
-            <details className="group bg-gray-50 dark:bg-gray-950 rounded-[32px] border border-gray-100 dark:border-gray-800 overflow-hidden hover:border-blue-200 transition-all">
-              <summary className="flex items-center justify-between p-8 cursor-pointer list-none">
-                <h3 className="text-xl font-black text-gray-900 dark:text-gray-100 uppercase tracking-tight">
-                  Do I need a LetsMakeCV account?
-                </h3>
-                <svg
-                  className="w-6 h-6 text-gray-400 group-open:rotate-180 transition-transform"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M19 9l-7 7-7-7"
-                  />
-                </svg>
-              </summary>
-              <div className="px-8 pb-8">
-                <p className="text-gray-600 font-medium leading-relaxed">
-                  Yes, you&apos;ll need to create your resume on LetsMakeCV.com
-                  first. Once you have a LetsMakeCV account, you automatically
-                  get a PreviewCV link. Both platforms use the same login
-                  credentials for seamless access.
-                </p>
-              </div>
-            </details>
+                    <div className={`shrink-0 transition-transform duration-300 ${openIndex === index ? 'rotate-180' : ''}`}>
+                      {openIndex === index ? (
+                        <MinusCircle className="w-5 h-5 text-emerald-600/70 dark:text-emerald-400" strokeWidth={1.5} />
+                      ) : (
+                        <PlusCircle className="w-5 h-5 text-zinc-400 dark:text-gray-500 group-hover:text-zinc-600 dark:group-hover:text-gray-300" strokeWidth={1.5} />
+                      )}
+                    </div>
+                  </div>
 
-            {/* FAQ 3 */}
-            <details className="group bg-gray-50 dark:bg-gray-950 rounded-[32px] border border-gray-100 dark:border-gray-800 overflow-hidden hover:border-blue-200 transition-all">
-              <summary className="flex items-center justify-between p-8 cursor-pointer list-none">
-                <h3 className="text-xl font-black text-gray-900 dark:text-gray-100 uppercase tracking-tight">
-                  How do I get my PreviewCV link?
-                </h3>
-                <svg
-                  className="w-6 h-6 text-gray-400 group-open:rotate-180 transition-transform"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M19 9l-7 7-7-7"
-                  />
-                </svg>
-              </summary>
-              <div className="px-8 pb-8">
-                <p className="text-gray-600 font-medium leading-relaxed">
-                  After creating your resume on LetsMakeCV, your unique
-                  PreviewCV link is generated automatically. You can find it in
-                  your candidate dashboard and share it anywhere - email,
-                  LinkedIn, job applications, or your portfolio.
-                </p>
-              </div>
-            </details>
-
-            {/* FAQ 4 */}
-            <details className="group bg-gray-50 dark:bg-gray-950 rounded-[32px] border border-gray-100 dark:border-gray-800 overflow-hidden hover:border-blue-200 transition-all">
-              <summary className="flex items-center justify-between p-8 cursor-pointer list-none">
-                <h3 className="text-xl font-black text-gray-900 dark:text-gray-100 uppercase tracking-tight">
-                  What happens when I update my resume?
-                </h3>
-                <svg
-                  className="w-6 h-6 text-gray-400 group-open:rotate-180 transition-transform"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M19 9l-7 7-7-7"
-                  />
-                </svg>
-              </summary>
-              <div className="px-8 pb-8">
-                <p className="text-gray-600 font-medium leading-relaxed">
-                  Your PreviewCV link updates automatically whenever you edit
-                  your resume on LetsMakeCV. No need to send new files -
-                  everyone who has your link will always see the latest version.
-                </p>
-              </div>
-            </details>
-
-            {/* FAQ 5 */}
-            <details className="group bg-gray-50 dark:bg-gray-950 rounded-[32px] border border-gray-100 dark:border-gray-800 overflow-hidden hover:border-blue-200 transition-all">
-              <summary className="flex items-center justify-between p-8 cursor-pointer list-none">
-                <h3 className="text-xl font-black text-gray-900 dark:text-gray-100 uppercase tracking-tight">
-                  Is my data secure?
-                </h3>
-                <svg
-                  className="w-6 h-6 text-gray-400 group-open:rotate-180 transition-transform"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M19 9l-7 7-7-7"
-                  />
-                </svg>
-              </summary>
-              <div className="px-8 pb-8">
-                <p className="text-gray-600 font-medium leading-relaxed">
-                  Absolutely. We use industry-standard encryption and secure
-                  token-based access. Your resume is only accessible via your
-                  unique link, and you maintain full control over your data at
-                  all times.
-                </p>
-              </div>
-            </details>
-
-            {/* FAQ 6 */}
-            <details className="group bg-gray-50 dark:bg-gray-950 rounded-[32px] border border-gray-100 dark:border-gray-800 overflow-hidden hover:border-blue-200 transition-all">
-              <summary className="flex items-center justify-between p-8 cursor-pointer list-none">
-                <h3 className="text-xl font-black text-gray-900 dark:text-gray-100 uppercase tracking-tight">
-                  Can I track who views my resume?
-                </h3>
-                <svg
-                  className="w-6 h-6 text-gray-400 group-open:rotate-180 transition-transform"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M19 9l-7 7-7-7"
-                  />
-                </svg>
-              </summary>
-              <div className="px-8 pb-8">
-                <p className="text-gray-600 font-medium leading-relaxed">
-                  Yes! You can see analytics on who&apos;s viewing your resume,
-                  when they viewed it, and how long they spent on your profile.
-                  This helps you understand recruiter engagement and follow up
-                  effectively.
-                </p>
-              </div>
-            </details>
-          </div>
-
-          <div className="mt-16 text-center">
-            <p className="text-gray-500 font-medium mb-6">
-              Still have questions?
-            </p>
-            <Link
-              href="/candidate"
-              className="inline-flex items-center gap-2 px-8 py-4 bg-gray-900 text-white font-black rounded-2xl hover:bg-gray-800 transition-all shadow-lg uppercase tracking-tight"
-            >
-              Get Started Now →
-            </Link>
+                  <div
+                    className={`grid transition-[grid-template-rows] duration-500 ease-in-out ${openIndex === index ? 'grid-rows-[1fr] opacity-100 mt-2 lg:mt-3' : 'grid-rows-[0fr] opacity-0'}`}
+                  >
+                    <div className="overflow-hidden">
+                      <p className="text-zinc-600 dark:text-gray-400 leading-relaxed text-xs lg:text-sm pr-4 lg:pr-8">
+                        {item.answer}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </section>
-
-      {/* Footer */}
-      <footer className="py-12 border-t border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-6">
-          <p className="text-gray-500 text-sm font-bold uppercase tracking-widest">
-            © 2025 {config.app.name}.
-          </p>
-          <div className="flex gap-8 text-[10px] text-gray-400 font-black uppercase tracking-widest">
-            <a href="#" className="hover:text-blue-600 transition-colors">
-              Privacy Policy
-            </a>
-            <a href="#" className="hover:text-blue-600 transition-colors">
-              Terms of Service
-            </a>
-          </div>
-        </div>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-10 border-t border-gray-100 dark:border-gray-800 mt-10">
-          <Link
-            href="/resume/view/test-token"
-            className="text-sm font-black text-blue-600 hover:underline uppercase tracking-tight"
-          >
-            View Sample Live Resume Profile →
-          </Link>
-        </div>
-      </footer>
     </div>
   );
 }

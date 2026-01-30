@@ -1,5 +1,6 @@
 "use client";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 
 export default function Footer() {
@@ -22,9 +23,15 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
           {/* Brand Column */}
           <div className="col-span-1 md:col-span-1">
-            <h3 className="text-gray-900 dark:text-white font-bold text-lg mb-4">
-              PreviewCV
-            </h3>
+            <div className="mb-4">
+              <Image
+                src="https://letsmakecv.b-cdn.net/assets_previewcv/logo.png"
+                alt="PreviewCV Logo"
+                width={120}
+                height={40}
+                className="h-8 w-auto"
+              />
+            </div>
             <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
               Share your professional resume with a link. Modern, simple, and
               always up-to-date.
