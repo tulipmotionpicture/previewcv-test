@@ -630,6 +630,30 @@ export default function ResumeReview({ resumeId, onSaveComplete, portfolioId, pe
                           value={edu.university}
                           onChange={(e) => updateItem('education', idx, 'university', e.target.value)}
                         />
+                        <div className="flex gap-2">
+                          <input
+                            placeholder="Start Year"
+                            className="w-full px-3 py-1 bg-gray-50 dark:bg-gray-800 rounded-lg outline-none font-bold text-xs"
+                            value={edu.start_year || ''}
+                            onChange={(e) => updateItem('education', idx, 'start_year', e.target.value)}
+                          />
+                          <input
+                            placeholder="End Year"
+                            disabled={edu.is_currently_studying}
+                            className="w-full px-3 py-1 bg-gray-50 dark:bg-gray-800 rounded-lg outline-none font-bold text-xs"
+                            value={edu.is_currently_studying ? 'Present' : (edu.end_year || '')}
+                            onChange={(e) => updateItem('education', idx, 'end_year', e.target.value)}
+                          />
+                        </div>
+                        <div className="flex items-center gap-2 px-2">
+                          <input
+                            type="checkbox"
+                            checked={edu.is_currently_studying}
+                            onChange={(e) => updateItem('education', idx, 'is_currently_studying', e.target.checked)}
+                            className="w-3 h-3 text-emerald-600"
+                          />
+                          <span className="text-[10px] font-bold text-gray-500">Currently studying</span>
+                        </div>
                       </div>
                     ) : (
                       <div>
@@ -712,11 +736,28 @@ export default function ResumeReview({ resumeId, onSaveComplete, portfolioId, pe
                   </button>
                   <div className="flex-1 min-w-0">
                     {isEditing ? (
-                      <input
-                        className="w-full bg-white dark:bg-gray-800 px-2 py-1 rounded-lg border-none outline-none font-bold text-xs"
-                        value={skill.skill_name}
-                        onChange={(e) => updateItem('skills', idx, 'skill_name', e.target.value)}
-                      />
+                      <div className="space-y-2">
+                        <input
+                          className="w-full bg-white dark:bg-gray-800 px-2 py-1 rounded-lg border-none outline-none font-bold text-xs"
+                          value={skill.skill_name}
+                          onChange={(e) => updateItem('skills', idx, 'skill_name', e.target.value)}
+                          placeholder="Skill name"
+                        />
+                        <div className="space-y-1">
+                          <div className="flex items-center justify-between">
+                            <label className="text-[9px] font-bold text-gray-400 uppercase">Proficiency</label>
+                            <span className="text-[10px] font-black text-amber-600">{skill.proficiency_level}/10</span>
+                          </div>
+                          <input
+                            type="range"
+                            min="1"
+                            max="10"
+                            value={skill.proficiency_level}
+                            onChange={(e) => updateItem('skills', idx, 'proficiency_level', parseInt(e.target.value))}
+                            className="w-full h-1.5 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer accent-amber-600"
+                          />
+                        </div>
+                      </div>
                     ) : (
                       <div className="flex items-center justify-between">
                         <span className="font-bold text-gray-800 dark:text-gray-200 truncate">{skill.skill_name}</span>
@@ -793,11 +834,25 @@ export default function ResumeReview({ resumeId, onSaveComplete, portfolioId, pe
                   </button>
                   <div className="flex-1 min-w-0">
                     {isEditing ? (
-                      <input
-                        className="w-full bg-white dark:bg-gray-800 px-2 py-1 rounded-lg border-none outline-none font-bold text-xs"
-                        value={lang.language}
-                        onChange={(e) => updateItem('languages', idx, 'language', e.target.value)}
-                      />
+                      <div className="space-y-2">
+                        <input
+                          className="w-full bg-white dark:bg-gray-800 px-2 py-1 rounded-lg border-none outline-none font-bold text-xs"
+                          value={lang.language}
+                          onChange={(e) => updateItem('languages', idx, 'language', e.target.value)}
+                          placeholder="Language"
+                        />
+                        <select
+                          className="w-full bg-white dark:bg-gray-800 px-2 py-1 rounded-lg border-none outline-none font-bold text-[10px] text-purple-600 uppercase cursor-pointer"
+                          value={lang.proficiency_level}
+                          onChange={(e) => updateItem('languages', idx, 'proficiency_level', e.target.value)}
+                        >
+                          <option value="beginner">Beginner</option>
+                          <option value="intermediate">Intermediate</option>
+                          <option value="advanced">Advanced</option>
+                          <option value="expert">Expert</option>
+                          <option value="native">Native</option>
+                        </select>
+                      </div>
                     ) : (
                       <div className="flex items-center justify-between">
                         <span className="font-bold text-gray-800 dark:text-gray-200 truncate">{lang.language}</span>
