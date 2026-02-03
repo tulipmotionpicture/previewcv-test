@@ -15,7 +15,9 @@ export default function CandidateProfilePage() {
   const [pdfResumes, setPdfResumes] = useState<PdfResume[]>([]);
   const [builderResumes, setBuilderResumes] = useState<Resume[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<"profile" | "applications" | "resumes">("profile");
+  const [activeTab, setActiveTab] = useState<
+    "profile" | "applications" | "resumes"
+  >("profile");
 
   // Edit mode states
   const [isEditing, setIsEditing] = useState(false);
@@ -38,7 +40,13 @@ export default function CandidateProfilePage() {
     try {
       const [userRes, appsRes, pdfRes, builderRes] = await Promise.all([
         api.getCandidateProfile(),
-        api.getMyApplications().catch(() => ({ success: false, applications: [] })),
+        api
+          .getMyApplications()
+          .catch(() => ({
+            success: false,
+            applications: [],
+            pagination: null,
+          })),
         api.getPdfResumes().catch(() => ({ total: 0, resumes: [] })),
         api.getResumes().catch(() => []),
       ]);
@@ -100,12 +108,27 @@ export default function CandidateProfilePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <Link href="/" className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100">
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+              <Link
+                href="/"
+                className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100"
+              >
+                <svg
+                  className="w-6 h-6"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M10 19l-7-7m0 0l7-7m-7 7h18"
+                  />
                 </svg>
               </Link>
-              <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">My Profile</h1>
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+                My Profile
+              </h1>
             </div>
             <button
               onClick={handleLogout}
@@ -126,22 +149,27 @@ export default function CandidateProfilePage() {
               <div className="w-24 h-24 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center text-white text-3xl font-bold">
                 {user.full_name?.charAt(0).toUpperCase() || "U"}
               </div>
-              
+
               {/* User Info */}
               <div>
                 <h2 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">
                   {user.full_name}
                 </h2>
-                <p className="text-gray-600 dark:text-gray-400 mb-1">{user.email}</p>
+                <p className="text-gray-600 dark:text-gray-400 mb-1">
+                  {user.email}
+                </p>
                 {user.phone && (
-                  <p className="text-gray-600 dark:text-gray-400">{user.phone}</p>
+                  <p className="text-gray-600 dark:text-gray-400">
+                    {user.phone}
+                  </p>
                 )}
                 {user.created_at && (
                   <p className="text-sm text-gray-500 dark:text-gray-500 mt-2">
-                    Member since {new Date(user.created_at).toLocaleDateString("en-US", {
+                    Member since{" "}
+                    {new Date(user.created_at).toLocaleDateString("en-US", {
                       year: "numeric",
                       month: "long",
-                      day: "numeric"
+                      day: "numeric",
                     })}
                   </p>
                 )}
@@ -153,8 +181,18 @@ export default function CandidateProfilePage() {
                 onClick={() => setIsEditing(true)}
                 className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors flex items-center gap-2"
               >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                  />
                 </svg>
                 Edit Profile
               </button>
@@ -163,7 +201,10 @@ export default function CandidateProfilePage() {
 
           {/* Edit Form */}
           {isEditing && (
-            <form onSubmit={handleUpdateProfile} className="border-t border-gray-200 dark:border-gray-800 pt-6 mt-6">
+            <form
+              onSubmit={handleUpdateProfile}
+              className="border-t border-gray-200 dark:border-gray-800 pt-6 mt-6"
+            >
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -172,7 +213,9 @@ export default function CandidateProfilePage() {
                   <input
                     type="text"
                     value={editForm.full_name}
-                    onChange={(e) => setEditForm({ ...editForm, full_name: e.target.value })}
+                    onChange={(e) =>
+                      setEditForm({ ...editForm, full_name: e.target.value })
+                    }
                     className="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     required
                   />
@@ -184,7 +227,9 @@ export default function CandidateProfilePage() {
                   <input
                     type="tel"
                     value={editForm.phone}
-                    onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })}
+                    onChange={(e) =>
+                      setEditForm({ ...editForm, phone: e.target.value })
+                    }
                     className="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
                 </div>
@@ -219,13 +264,27 @@ export default function CandidateProfilePage() {
           <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-6">
             <div className="flex items-center gap-4">
               <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
-                <svg className="w-6 h-6 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                <svg
+                  className="w-6 h-6 text-blue-600 dark:text-blue-400"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                  />
                 </svg>
               </div>
               <div>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Total Resumes</p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{totalResumes}</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  Total Resumes
+                </p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+                  {totalResumes}
+                </p>
               </div>
             </div>
           </div>
@@ -233,13 +292,27 @@ export default function CandidateProfilePage() {
           <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-6">
             <div className="flex items-center gap-4">
               <div className="w-12 h-12 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center">
-                <svg className="w-6 h-6 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                <svg
+                  className="w-6 h-6 text-green-600 dark:text-green-400"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
                 </svg>
               </div>
               <div>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Applications</p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{applications.length}</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  Applications
+                </p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+                  {applications.length}
+                </p>
               </div>
             </div>
           </div>
@@ -247,13 +320,27 @@ export default function CandidateProfilePage() {
           <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-6">
             <div className="flex items-center gap-4">
               <div className="w-12 h-12 bg-purple-100 dark:bg-purple-900/30 rounded-lg flex items-center justify-center">
-                <svg className="w-6 h-6 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+                <svg
+                  className="w-6 h-6 text-purple-600 dark:text-purple-400"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"
+                  />
                 </svg>
               </div>
               <div>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Saved Jobs</p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">0</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  Saved Jobs
+                </p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+                  0
+                </p>
               </div>
             </div>
           </div>
@@ -294,18 +381,42 @@ export default function CandidateProfilePage() {
               <div>
                 {applications.length === 0 ? (
                   <div className="text-center py-12">
-                    <svg className="w-16 h-16 mx-auto text-gray-400 dark:text-gray-600 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    <svg
+                      className="w-16 h-16 mx-auto text-gray-400 dark:text-gray-600 mb-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                      />
                     </svg>
-                    <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">No applications yet</h3>
-                    <p className="text-gray-600 dark:text-gray-400 mb-4">Start applying to jobs to see them here</p>
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
+                      No applications yet
+                    </h3>
+                    <p className="text-gray-600 dark:text-gray-400 mb-4">
+                      Start applying to jobs to see them here
+                    </p>
                     <Link
                       href="/jobs"
                       className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors"
                     >
                       Browse Jobs
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      <svg
+                        className="w-4 h-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M9 5l7 7-7 7"
+                        />
                       </svg>
                     </Link>
                   </div>
@@ -358,18 +469,34 @@ export default function CandidateProfilePage() {
               <div>
                 {totalResumes === 0 ? (
                   <div className="text-center py-12">
-                    <svg className="w-16 h-16 mx-auto text-gray-400 dark:text-gray-600 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    <svg
+                      className="w-16 h-16 mx-auto text-gray-400 dark:text-gray-600 mb-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                      />
                     </svg>
-                    <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">No resumes uploaded</h3>
-                    <p className="text-gray-600 dark:text-gray-400 mb-4">Upload your resume to start applying for jobs</p>
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
+                      No resumes uploaded
+                    </h3>
+                    <p className="text-gray-600 dark:text-gray-400 mb-4">
+                      Upload your resume to start applying for jobs
+                    </p>
                   </div>
                 ) : (
                   <div className="space-y-6">
                     {/* PDF Resumes */}
                     {pdfResumes.length > 0 && (
                       <div>
-                        <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Uploaded Resumes</h3>
+                        <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
+                          Uploaded Resumes
+                        </h3>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           {pdfResumes.map((resume) => (
                             <div
@@ -378,8 +505,16 @@ export default function CandidateProfilePage() {
                             >
                               <div className="flex items-start gap-3">
                                 <div className="w-10 h-10 bg-red-100 dark:bg-red-900/30 rounded-lg flex items-center justify-center flex-shrink-0">
-                                  <svg className="w-5 h-5 text-red-600 dark:text-red-400" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clipRule="evenodd" />
+                                  <svg
+                                    className="w-5 h-5 text-red-600 dark:text-red-400"
+                                    fill="currentColor"
+                                    viewBox="0 0 20 20"
+                                  >
+                                    <path
+                                      fillRule="evenodd"
+                                      d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z"
+                                      clipRule="evenodd"
+                                    />
                                   </svg>
                                 </div>
                                 <div className="flex-1 min-w-0">
@@ -387,7 +522,10 @@ export default function CandidateProfilePage() {
                                     {resume.resume_name}
                                   </h4>
                                   <p className="text-sm text-gray-600 dark:text-gray-400">
-                                    Uploaded {new Date(resume.created_at).toLocaleDateString()}
+                                    Uploaded{" "}
+                                    {new Date(
+                                      resume.created_at,
+                                    ).toLocaleDateString()}
                                   </p>
                                 </div>
                               </div>
@@ -400,7 +538,9 @@ export default function CandidateProfilePage() {
                     {/* Builder Resumes */}
                     {builderResumes.length > 0 && (
                       <div>
-                        <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">LetsMakeCV Resumes</h3>
+                        <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
+                          LetsMakeCV Resumes
+                        </h3>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           {builderResumes.map((resume) => (
                             <div
@@ -409,8 +549,16 @@ export default function CandidateProfilePage() {
                             >
                               <div className="flex items-start gap-3">
                                 <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center flex-shrink-0">
-                                  <svg className="w-5 h-5 text-blue-600 dark:text-blue-400" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clipRule="evenodd" />
+                                  <svg
+                                    className="w-5 h-5 text-blue-600 dark:text-blue-400"
+                                    fill="currentColor"
+                                    viewBox="0 0 20 20"
+                                  >
+                                    <path
+                                      fillRule="evenodd"
+                                      d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z"
+                                      clipRule="evenodd"
+                                    />
                                   </svg>
                                 </div>
                                 <div className="flex-1 min-w-0">
@@ -418,7 +566,10 @@ export default function CandidateProfilePage() {
                                     {resume.name}
                                   </h4>
                                   <p className="text-sm text-gray-600 dark:text-gray-400">
-                                    Created {new Date(resume.created_at).toLocaleDateString()}
+                                    Created{" "}
+                                    {new Date(
+                                      resume.created_at,
+                                    ).toLocaleDateString()}
                                   </p>
                                 </div>
                               </div>

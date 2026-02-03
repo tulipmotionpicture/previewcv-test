@@ -12,6 +12,7 @@ import {
   JobApplicationsResponse,
   ApplicationDetailResponse,
   MyJobPostingResponse,
+  MyApplicationsResponse,
 } from "@/types/api";
 import { ReviewedResumeMetadata } from "@/types";
 import type {
@@ -526,16 +527,20 @@ export class ApiClient {
     );
   }
 
-  async getMyApplications(): Promise<{
-    success: boolean;
-    applications: Application[];
-  }> {
-    return this.request<{ success: boolean; applications: Application[] }>(
-      "/api/v1/jobs/my-applications",
-      {},
-      true,
-      false,
-    );
+  async getMyApplications(params?: {
+    status_filter?: string;
+    limit?: number;
+    offset?: number;
+  }): Promise<MyApplicationsResponse> {
+    const queryParams = new URLSearchParams();
+    if (params?.status_filter)
+      queryParams.append("status_filter", params.status_filter);
+    if (params?.limit) queryParams.append("limit", params.limit.toString());
+    if (params?.offset) queryParams.append("offset", params.offset.toString());
+
+    const url = `/api/v1/jobs/my-applications${queryParams.toString() ? "?" + queryParams.toString() : ""}`;
+
+    return this.request<MyApplicationsResponse>(url, {}, true, false);
   }
 
   // --- Job Bookmarks ---

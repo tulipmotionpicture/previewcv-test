@@ -170,6 +170,7 @@ export interface Application {
     | "withdrawn"
     | "declined";
   applied_at: string;
+  updated_at: string;
   created_at?: string;
   custom_message?: string | null;
   cover_letter?: string;
@@ -182,6 +183,24 @@ export interface Application {
   job_title?: string;
   company_name?: string;
   job_slug?: string;
+  company_logo_url?: string;
+  location?: string;
+  is_remote?: boolean;
+  job_type?: string;
+  experience_level?: string;
+  salary_min?: number | null;
+  salary_max?: number | null;
+  salary_currency?: string;
+  is_job_active?: boolean;
+  posted_date?: string;
+  application_deadline?: string | null;
+  total_applicants?: number;
+  recruiter_viewed?: boolean;
+  recruiter_viewed_at?: string | null;
+  recruiter_view_count?: number;
+  recruiter_message?: string | null;
+  recruiter_message_at?: string | null;
+  interview?: any | null;
 }
 
 export interface JobApplicationsResponse {
@@ -189,6 +208,21 @@ export interface JobApplicationsResponse {
   job_id: number;
   job_title: string;
   total_applications: number;
+  applications: Application[];
+}
+
+export interface MyApplicationsResponse {
+  success: boolean;
+  total: number;
+  pagination: {
+    total: number;
+    limit: number;
+    offset: number;
+    page: number;
+    total_pages: number;
+    has_more: boolean;
+    has_previous: boolean;
+  };
   applications: Application[];
 }
 

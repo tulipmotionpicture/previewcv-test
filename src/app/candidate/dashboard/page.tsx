@@ -16,19 +16,39 @@ import {
   CandidateSettings,
   RelevantJobs,
   CandidateDashboardTab,
-  DashboardHeader,
 } from "@/components/candidate";
-import { Search, FileText, Sparkles, Eye, Link2, Trash2, Share2, ExternalLink, Calendar, File, Globe } from "lucide-react";
+import {
+  Search,
+  FileText,
+  Sparkles,
+  Eye,
+  Link2,
+  Trash2,
+  Share2,
+  ExternalLink,
+  Calendar,
+  File,
+  Globe,
+} from "lucide-react";
 
 function CandidateDashboardContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { isAuthenticated, loading: authLoading, logout } = useAuth();
   const toast = useToast();
-  const [activeTab, setActiveTab] = useState<CandidateDashboardTab>(
-    "applications",
-  );
+  const [activeTab, setActiveTab] =
+    useState<CandidateDashboardTab>("applications");
   const [applications, setApplications] = useState<Application[]>([]);
+  const [applicationsPagination, setApplicationsPagination] = useState<{
+    total: number;
+    limit: number;
+    offset: number;
+    page: number;
+    total_pages: number;
+    has_more: boolean;
+    has_previous: boolean;
+  } | null>(null);
+  const [statusFilter, setStatusFilter] = useState<string>("");
   const [jobs, setJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState(false);
   const [jobsLoading, setJobsLoading] = useState(false);
@@ -65,18 +85,25 @@ function CandidateDashboardContent() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTab]);
 
-  const fetchApplications = async () => {
+  const fetchApplications = async (params?: {
+    status_filter?: string;
+    limit?: number;
+    offset?: number;
+  }) => {
     setLoading(true);
     try {
-      const response = await api.getMyApplications();
+      const response = await api.getMyApplications(params);
       if (response.success && response.applications) {
         setApplications(response.applications);
+        setApplicationsPagination(response.pagination);
       } else {
         setApplications([]);
+        setApplicationsPagination(null);
       }
     } catch (error) {
       console.error("Failed to fetch applications", error);
       setApplications([]);
+      setApplicationsPagination(null);
       const errorMsg =
         error instanceof Error ? error.message : "Failed to load applications";
       if (!errorMsg.includes("Database service error")) {
@@ -165,13 +192,9 @@ function CandidateDashboardContent() {
         onLogout={logout}
       />
 
-
-
       {/* Main Content */}
       <div className="flex-1 flex flex-col">
         <main className="flex-1 p-8 max-w-7xl w-full mx-auto">
-
-
           {/* Applications Tab */}
           {activeTab === "applications" && (
             <div className="animate-in fade-in duration-200">
@@ -197,7 +220,89 @@ function CandidateDashboardContent() {
               </div>
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
                 <div className="col-span-2">
-                  <ApplicationsList applications={applications} loading={loading} />
+                  {/* Status Filter */}
+                  <div className="mb-4 flex items-center gap-4">
+                    <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                      Filter by status:
+                    </label>
+                    <select
+                      value={statusFilter}
+                      onChange={(e) => {
+                        setStatusFilter(e.target.value);
+                        fetchApplications({
+                          status_filter: e.target.value || undefined,
+                        });
+                      }}
+                      className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:border-[#0369A1] dark:focus:border-[#0EA5E9] transition-colors"
+                    >
+                      <option value="">All Applications</option>
+                      <option value="applied">Applied</option>
+                      <option value="under_review">Under Review</option>
+                      <option value="interview_scheduled">
+                        Interview Scheduled
+                      </option>
+                      <option value="offered">Offered</option>
+                      <option value="accepted">Accepted</option>
+                      <option value="rejected">Rejected</option>
+                    </select>
+                  </div>
+
+                  <ApplicationsList
+                    applications={applications}
+                    loading={loading}
+                  />
+
+                  {/* Pagination Controls */}
+                  {applicationsPagination &&
+                    applicationsPagination.total_pages > 1 && (
+                      <div className="mt-6 flex items-center justify-between">
+                        <div className="text-sm text-gray-600 dark:text-gray-400">
+                          Showing {applicationsPagination.offset + 1} to{" "}
+                          {Math.min(
+                            applicationsPagination.offset +
+                              applicationsPagination.limit,
+                            applicationsPagination.total,
+                          )}{" "}
+                          of {applicationsPagination.total} applications
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() =>
+                              fetchApplications({
+                                offset: Math.max(
+                                  0,
+                                  applicationsPagination.offset -
+                                    applicationsPagination.limit,
+                                ),
+                                status_filter: statusFilter || undefined,
+                              })
+                            }
+                            disabled={!applicationsPagination.has_previous}
+                            className="px-3 py-2 text-sm font-medium text-gray-600 dark:text-gray-400 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                          >
+                            Previous
+                          </button>
+                          <span className="text-sm text-gray-600 dark:text-gray-400">
+                            Page {applicationsPagination.page} of{" "}
+                            {applicationsPagination.total_pages}
+                          </span>
+                          <button
+                            onClick={() =>
+                              fetchApplications({
+                                offset:
+                                  applicationsPagination.offset +
+                                  applicationsPagination.limit,
+                                status_filter: statusFilter || undefined,
+                              })
+                            }
+                            disabled={!applicationsPagination.has_more}
+                            className="px-3 py-2 text-sm font-medium text-gray-600 dark:text-gray-400 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                          >
+                            Next
+                          </button>
+                        </div>
+                      </div>
+                    )}
                 </div>
                 <div className="col-span-1 p-4 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg shadow-sm">
                   <h1 className="text-xl font-bold text-[#0C4A6E] dark:text-gray-100 mb-4 flex items-center gap-2">
@@ -208,7 +313,6 @@ function CandidateDashboardContent() {
                     <RelevantJobs jobs={jobs} loading={jobsLoading} />
                   </div>
                 </div>
-
               </div>
             </div>
           )}
@@ -265,7 +369,9 @@ function CandidateDashboardContent() {
                                 <div className="flex flex-wrap items-center gap-3 text-xs text-gray-500 dark:text-gray-400">
                                   <span className="flex items-center gap-1">
                                     <Calendar className="w-3 h-3" />
-                                    {new Date(resume.created_at).toLocaleDateString("en-US", {
+                                    {new Date(
+                                      resume.created_at,
+                                    ).toLocaleDateString("en-US", {
                                       month: "short",
                                       day: "numeric",
                                       year: "numeric",
@@ -290,10 +396,11 @@ function CandidateDashboardContent() {
                           <div className="px-4 py-2 bg-gray-50 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 flex items-center justify-between">
                             <div className="flex items-center gap-2">
                               <span
-                                className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${resume.is_active
-                                  ? "bg-[#22C55E] text-white"
-                                  : "bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-400"
-                                  }`}
+                                className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
+                                  resume.is_active
+                                    ? "bg-[#22C55E] text-white"
+                                    : "bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-400"
+                                }`}
                               >
                                 {resume.is_active ? "Active" : "Inactive"}
                               </span>
@@ -384,7 +491,7 @@ function CandidateDashboardContent() {
                             <div className="flex items-start gap-3">
                               {/* Icon - Flat Design */}
                               <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-[#0EA5E9] flex items-center justify-center text-white">
-                                <Sparkles className="w-5 h-5" />
+                                <FileText className="w-5 h-5" />
                               </div>
 
                               {/* Resume Details */}
@@ -397,14 +504,17 @@ function CandidateDashboardContent() {
                                 <div className="flex flex-wrap items-center gap-3 text-xs text-gray-500 dark:text-gray-400">
                                   <span className="flex items-center gap-1">
                                     <Calendar className="w-3 h-3" />
-                                    {new Date(resume.created_at).toLocaleDateString("en-US", {
+                                    {new Date(
+                                      resume.created_at,
+                                    ).toLocaleDateString("en-US", {
                                       month: "short",
                                       day: "numeric",
                                       year: "numeric",
                                     })}
                                   </span>
                                   <span>
-                                    Template: {resume.template_name || "Standard"}
+                                    Template:{" "}
+                                    {resume.template_name || "Standard"}
                                   </span>
                                   {resume.language && (
                                     <span>{resume.language.toUpperCase()}</span>
@@ -424,54 +534,58 @@ function CandidateDashboardContent() {
                           <div className="px-4 py-2 bg-gray-50 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 flex items-center justify-between">
                             <div className="flex items-center gap-2">
                               <span
-                                className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${resume.is_active
-                                  ? "bg-[#22C55E] text-white"
-                                  : "bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-400"
-                                  }`}
+                                className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
+                                  resume.is_active
+                                    ? "bg-[#22C55E] text-white"
+                                    : "bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-400"
+                                }`}
                               >
                                 {resume.is_active ? "Active" : "Inactive"}
                               </span>
                             </div>
                             <div className="flex items-center gap-1">
-                              {resume.has_permanent_link && resume.share_url && (
-                                <>
-                                  <button
-                                    onClick={() => {
-                                      const modalData: PdfResume = {
-                                        id: resume.id,
-                                        resume_name: resume.name,
-                                        original_filename: resume.name,
-                                        file_size_mb: 0,
-                                        is_active: resume.is_active,
-                                        is_public: true,
-                                        created_at: resume.created_at,
-                                        updated_at: resume.updated_at,
-                                        permanent_link: {
-                                          token: resume.permanent_token || "",
-                                          share_url: resume.share_url || "",
-                                          qr_code_base64: resume.qr_code_base64 || "",
-                                          view_count: resume.view_count || 0,
-                                          access_count: resume.access_count || 0,
-                                        },
-                                      };
-                                      setShareModalResume(modalData);
-                                    }}
-                                    className="p-1.5 text-[#0EA5E9] hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded transition-colors duration-150 cursor-pointer"
-                                    title="Share Resume"
-                                  >
-                                    <Share2 className="w-4 h-4" />
-                                  </button>
-                                  <a
-                                    href={resume.share_url}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="p-1.5 text-[#0EA5E9] hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded transition-colors duration-150 cursor-pointer"
-                                    title="View Resume"
-                                  >
-                                    <ExternalLink className="w-4 h-4" />
-                                  </a>
-                                </>
-                              )}
+                              {resume.has_permanent_link &&
+                                resume.share_url && (
+                                  <>
+                                    <button
+                                      onClick={() => {
+                                        const modalData: PdfResume = {
+                                          id: resume.id,
+                                          resume_name: resume.name,
+                                          original_filename: resume.name,
+                                          file_size_mb: 0,
+                                          is_active: resume.is_active,
+                                          is_public: true,
+                                          created_at: resume.created_at,
+                                          updated_at: resume.updated_at,
+                                          permanent_link: {
+                                            token: resume.permanent_token || "",
+                                            share_url: resume.share_url || "",
+                                            qr_code_base64:
+                                              resume.qr_code_base64 || "",
+                                            view_count: resume.view_count || 0,
+                                            access_count:
+                                              resume.access_count || 0,
+                                          },
+                                        };
+                                        setShareModalResume(modalData);
+                                      }}
+                                      className="p-1.5 text-[#0EA5E9] hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded transition-colors duration-150 cursor-pointer"
+                                      title="Share Resume"
+                                    >
+                                      <Share2 className="w-4 h-4" />
+                                    </button>
+                                    <a
+                                      href={resume.share_url}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="p-1.5 text-[#0EA5E9] hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded transition-colors duration-150 cursor-pointer"
+                                      title="View Resume"
+                                    >
+                                      <ExternalLink className="w-4 h-4" />
+                                    </a>
+                                  </>
+                                )}
                             </div>
                           </div>
                         </div>
