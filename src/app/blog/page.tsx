@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
@@ -18,7 +18,7 @@ import {
   ChevronRight,
 } from "lucide-react";
 
-export default function BlogListingPage() {
+function BlogListingContent() {
   const searchParams = useSearchParams();
   const categoryParam = searchParams?.get("category");
   const tagParam = searchParams?.get("tag");
@@ -341,5 +341,22 @@ export default function BlogListingPage() {
         </div>
       </section>
     </div>
+  );
+}
+
+export default function BlogListingPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
+          <Header />
+          <div className="flex items-center justify-center min-h-[60vh]">
+            <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+          </div>
+        </div>
+      }
+    >
+      <BlogListingContent />
+    </Suspense>
   );
 }

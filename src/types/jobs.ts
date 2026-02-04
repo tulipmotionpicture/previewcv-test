@@ -24,6 +24,27 @@ export interface Job {
   is_applied: boolean;
   is_bookmarked: boolean;
   recruiter_profile_url: string | null;
+  matchScore?: number;
+  reasoning?: JobReasoning;
+  why_recommended?: string[];
+  relevance_score?: number;
+  days_since_posted?: number;
+}
+
+export interface JobReasoning {
+  skillsMatch: number;
+  experienceMatch: number;
+  salaryMatch: number;
+  locationMatch: number;
+  keyHighlights: string[];
+  skillsBreakdown: SkillMatch[];
+  missingSkills: string[];
+}
+
+export interface SkillMatch {
+  name: string;
+  matched: boolean;
+  importance: "Required" | "Preferred" | "Nice to have";
 }
 
 export type JobType =
@@ -220,6 +241,24 @@ export interface RelevantJob extends Job {
 
 export interface RelevantJobsResponse {
   success: boolean;
+  user_profile_completeness?: number;
+  profile_completeness_message?: string;
+  profile_improvement_tips?: string[] | null;
+  showing_generic_jobs?: boolean;
+  matching_criteria?: {
+    total_skills: number;
+    skills: string[];
+    years_experience: number;
+    experience_level: string;
+    preferred_locations: string[];
+    job_types: string[];
+    categories: string[];
+    salary_range: {
+      min: number;
+      max: number;
+      currency: string;
+    } | null;
+  };
   profile_completeness: {
     score: number;
     improvement_tips: string[];

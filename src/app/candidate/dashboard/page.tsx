@@ -4,7 +4,13 @@ import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
 import { api } from "@/lib/api";
-import { Application, PdfResume, Resume, Job } from "@/types/api";
+import {
+  Application,
+  PdfResume,
+  Resume,
+  Job,
+  ApplicationStatsResponse,
+} from "@/types/api";
 import { RelevantJobsResponse } from "@/types/jobs";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/context/ToastContext";
@@ -18,6 +24,7 @@ import {
   RelevantJobs,
   CandidateDashboardTab,
 } from "@/components/candidate";
+import { MatchAnalysis } from "@/components/jobs";
 import {
   Search,
   FileText,
@@ -30,6 +37,11 @@ import {
   Calendar,
   File,
   Globe,
+  TrendingUp,
+  CheckCircle,
+  Gift,
+  Bell,
+  Filter,
 } from "lucide-react";
 
 function CandidateDashboardContent() {
@@ -59,6 +71,8 @@ function CandidateDashboardContent() {
     useState(false);
   const [loading, setLoading] = useState(false);
   const [jobsLoading, setJobsLoading] = useState(false);
+  const [applicationStats, setApplicationStats] =
+    useState<ApplicationStatsResponse | null>(null);
 
   // Resume state
   const [pdfResumes, setPdfResumes] = useState<PdfResume[]>([]);
@@ -82,10 +96,22 @@ function CandidateDashboardContent() {
     }
   }, [isAuthenticated, authLoading, router]);
 
+  const fetchApplicationStats = async () => {
+    try {
+      const stats = await api.getApplicationStats();
+      setApplicationStats(stats);
+    } catch (error) {
+      // Silently fail if stats endpoint is not available yet
+      // The UI will gracefully fall back to local counts
+      console.debug("Application stats API not available:", error);
+    }
+  };
+
   useEffect(() => {
     if (activeTab === "applications") {
       fetchApplications();
       fetchJobs();
+      fetchApplicationStats();
     } else if (activeTab === "resumes") {
       fetchResumes();
     }
@@ -239,100 +265,182 @@ function CandidateDashboardContent() {
             <div className="animate-in fade-in duration-200">
               <div className="mb-6 flex justify-between items-center">
                 <div>
-                  <h1 className="text-3xl font-bold text-[#0C4A6E] dark:text-gray-100 mb-1">
+                  <h1 className="text-3xl font-bold text-slate-900 dark:text-gray-100 mb-1">
                     My Applications
                   </h1>
-                  <p className="text-sm text-[#0369A1] dark:text-gray-400">
-                    Track your job application status
+                  <p className="text-sm text-slate-500 dark:text-gray-400">
+                    Track and manage your job hunting progress
                   </p>
                 </div>
+                <button className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                  <Bell className="w-5 h-5 text-slate-600 dark:text-gray-400" />
+                </button>
               </div>
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-2 mb-8">
-                <div className="col-span-2">
-                  {/* Filters and Search Section */}
-                  <div className="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-800 p-4 mb-2">
-                    <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
-                      {/* Status Filter */}
-                      <div className="flex items-center gap-3 min-w-0 flex-1 sm:flex-initial">
-                        <label className="text-sm font-semibold text-gray-700 dark:text-gray-300 whitespace-nowrap">
-                          Filter by status:
-                        </label>
-                        <div className="relative">
-                          <select
-                            value={statusFilter}
-                            onChange={(e) => {
-                              setStatusFilter(e.target.value);
-                              fetchApplications({
-                                status_filter: e.target.value || undefined,
-                              });
-                            }}
-                            className="appearance-none px-4 py-2 pr-8 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-[#0369A1] focus:border-[#0369A1] dark:focus:ring-[#0EA5E9] dark:focus:border-[#0EA5E9] transition-all duration-150 text-sm"
-                          >
-                            <option value="">All Applications</option>
-                            <option value="applied">Applied</option>
-                            <option value="under_review">Under Review</option>
-                            <option value="interview_scheduled">
-                              Interview Scheduled
-                            </option>
-                            <option value="offered">Offered</option>
-                            <option value="accepted">Accepted</option>
-                            <option value="rejected">Rejected</option>
-                          </select>
-                          <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
-                            <svg
-                              className="w-4 h-4 text-gray-400"
-                              fill="none"
-                              stroke="currentColor"
-                              viewBox="0 0 24 24"
+
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 mb-8">
+                <div className="col-span-2 space-y-2">
+                  {/* Search and Filter Section */}
+                  <div className="flex flex-col gap-3 mb-2">
+                    {/* Stats Cards */}
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-2">
+                      <div className="bg-white dark:bg-gray-900 rounded-xl p-5 border border-slate-200 dark:border-gray-800">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-sm text-slate-500 dark:text-gray-400">
+                            Total Applications
+                          </span>
+                          <FileText className="w-4 h-4 text-slate-400" />
+                        </div>
+                        <div className="flex items-baseline gap-2">
+                          <span className="text-4xl font-bold text-slate-900 dark:text-white">
+                            {applicationStats?.total_applications?.total ||
+                              applicationsPagination?.total ||
+                              applications.length}
+                          </span>
+                          {applicationStats?.total_applications
+                            ?.weekly_change !== undefined && (
+                            <span
+                              className={`text-sm font-semibold flex items-center gap-1 ${
+                                applicationStats.total_applications
+                                  .weekly_change >= 0
+                                  ? "text-emerald-600 dark:text-emerald-400"
+                                  : "text-red-600 dark:text-red-400"
+                              }`}
                             >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M19 9l-7 7-7-7"
-                              />
-                            </svg>
-                          </div>
+                              <TrendingUp className="w-3 h-3" />
+                              {applicationStats.total_applications
+                                .weekly_change >= 0
+                                ? "+"
+                                : ""}
+                              {
+                                applicationStats.total_applications
+                                  .weekly_change
+                              }{" "}
+                              this week
+                            </span>
+                          )}
                         </div>
                       </div>
 
-                      {/* Search Bar */}
-                      <div className="flex-1 max-w-md">
-                        <div className="relative">
-                          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-                          <input
-                            type="text"
-                            placeholder="Search applications by job title or company..."
-                            className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#0369A1] focus:border-[#0369A1] dark:focus:ring-[#0EA5E9] dark:focus:border-[#0EA5E9] transition-all duration-150 text-sm"
-                          />
+                      <div className="bg-white dark:bg-gray-900 rounded-xl p-5 border border-slate-200 dark:border-gray-800">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-sm text-slate-500 dark:text-gray-400">
+                            Interview Invites
+                          </span>
+                          <CheckCircle className="w-4 h-4 text-slate-400" />
+                        </div>
+                        <div className="flex items-baseline gap-2">
+                          <span className="text-4xl font-bold text-slate-900 dark:text-white">
+                            {applicationStats?.interview_invites?.total ||
+                              applications.filter(
+                                (app) => app.status === "interview_scheduled",
+                              ).length}
+                          </span>
+                          {applicationStats?.interview_invites
+                            ?.weekly_change !== undefined && (
+                            <span
+                              className={`text-sm font-semibold flex items-center gap-1 ${
+                                applicationStats.interview_invites
+                                  .weekly_change >= 0
+                                  ? "text-emerald-600 dark:text-emerald-400"
+                                  : "text-red-600 dark:text-red-400"
+                              }`}
+                            >
+                              <TrendingUp className="w-3 h-3" />
+                              {applicationStats.interview_invites
+                                .weekly_change >= 0
+                                ? "+"
+                                : ""}
+                              {applicationStats.interview_invites.weekly_change}{" "}
+                              this week
+                            </span>
+                          )}
                         </div>
                       </div>
 
-                      {/* Clear Filters Button */}
-                      {statusFilter && (
-                        <button
-                          onClick={() => {
-                            setStatusFilter("");
-                            fetchApplications({});
+                      <div className="bg-white dark:bg-gray-900 rounded-xl p-5 border border-slate-200 dark:border-gray-800">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-sm text-slate-500 dark:text-gray-400">
+                            Offers Received
+                          </span>
+                          <Gift className="w-4 h-4 text-slate-400" />
+                        </div>
+                        <div className="flex items-baseline gap-2">
+                          <span className="text-4xl font-bold text-slate-900 dark:text-white">
+                            {applicationStats?.offers_received?.total ||
+                              applications.filter(
+                                (app) =>
+                                  app.status === "offered" ||
+                                  app.status === "accepted",
+                              ).length}
+                          </span>
+                          {applicationStats?.offers_received?.weekly_change !==
+                            undefined && (
+                            <span
+                              className={`text-sm font-semibold flex items-center gap-1 ${
+                                applicationStats.offers_received
+                                  .weekly_change >= 0
+                                  ? "text-emerald-600 dark:text-emerald-400"
+                                  : "text-red-600 dark:text-red-400"
+                              }`}
+                            >
+                              <TrendingUp className="w-3 h-3" />
+                              {applicationStats.offers_received.weekly_change >=
+                              0
+                                ? "+"
+                                : ""}
+                              {applicationStats.offers_received.weekly_change}{" "}
+                              this week
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex gap-2">
+                      <div className="flex-1 relative">
+                        <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-slate-400" />
+                        <input
+                          type="text"
+                          placeholder="Search applications by role, company..."
+                          className="w-full pl-10 pr-2 py-2 border border-slate-200 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-slate-900 dark:text-gray-100 placeholder-slate-400 transition-all"
+                        />
+                      </div>
+                      <div className="relative">
+                        <select
+                          value={statusFilter}
+                          onChange={(e) => {
+                            setStatusFilter(e.target.value);
+                            fetchApplications({
+                              status_filter: e.target.value || undefined,
+                            });
                           }}
-                          className="px-3 py-2 text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors duration-150 flex items-center gap-1"
+                          className="appearance-none px-8 py-2 border border-slate-200 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-slate-700 dark:text-gray-300 transition-all "
                         >
-                          <svg
-                            className="w-4 h-4"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M6 18L18 6M6 6l12 12"
-                            />
-                          </svg>
-                          Clear
-                        </button>
-                      )}
+                          <option value="">All Statuses</option>
+                          <option value="applied">Applied</option>
+                          <option value="under_review">Under Review</option>
+                          <option value="interview_scheduled">
+                            Interview Scheduled
+                          </option>
+                          <option value="offered">Offered</option>
+                          <option value="accepted">Accepted</option>
+                          <option value="rejected">Rejected</option>
+                        </select>
+                        <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                        <svg
+                          className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M19 9l-7 7-7-7"
+                          />
+                        </svg>
+                      </div>
                     </div>
                   </div>
 
@@ -393,18 +501,102 @@ function CandidateDashboardContent() {
                       </div>
                     )}
                 </div>
-                <div className="col-span-1 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg shadow-sm">
-                  <h1 className="text-xl font-bold text-[#0C4A6E] dark:text-gray-100 mb-1 flex items-center gap-2  p-3">
-                    <Sparkles className="w-5 h-5 text-[#0369A1]" />
-                    Relevant Jobs
-                  </h1>
-                  <RelevantJobs
-                    relevantJobsData={relevantJobsData}
-                    loading={jobsLoading}
-                    onLoadMore={loadMoreJobs}
-                    hasMore={relevantJobsHasMore}
-                    infiniteScrollLoading={relevantJobsInfiniteLoading}
-                  />
+                <div className="col-span-1 space-y-3">
+                  {/* AI Match Insight Panel */}
+                  {relevantJobsData && relevantJobsData.jobs.length > 0 && (
+                    <div>
+                      <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-4">
+                        AI Match Insight
+                      </h2>
+                      <MatchAnalysis
+                        job={{
+                          ...relevantJobsData.jobs[0],
+                          matchScore: Math.round(
+                            relevantJobsData.jobs[0].relevance_score,
+                          ),
+                          reasoning: {
+                            skillsMatch: Math.round(
+                              relevantJobsData.jobs[0].score_breakdown
+                                .skills_match,
+                            ),
+                            experienceMatch: Math.round(
+                              relevantJobsData.jobs[0].score_breakdown
+                                .experience_match,
+                            ),
+                            salaryMatch: Math.round(
+                              relevantJobsData.jobs[0].score_breakdown
+                                .salary_match || 0,
+                            ),
+                            locationMatch: Math.round(
+                              relevantJobsData.jobs[0].score_breakdown
+                                .location_match,
+                            ),
+                            keyHighlights:
+                              relevantJobsData.jobs[0].why_recommended || [],
+                            skillsBreakdown: [
+                              ...(
+                                relevantJobsData.jobs[0]
+                                  .matched_required_skills || []
+                              ).map((skill) => ({
+                                name: skill,
+                                matched: true,
+                                importance: "Required" as const,
+                              })),
+                              ...(
+                                relevantJobsData.jobs[0]
+                                  .missing_required_skills || []
+                              ).map((skill) => ({
+                                name: skill,
+                                matched: false,
+                                importance: "Required" as const,
+                              })),
+                              ...(
+                                relevantJobsData.jobs[0]
+                                  .matched_preferred_skills || []
+                              )
+                                .slice(0, 3)
+                                .map((skill) => ({
+                                  name: skill,
+                                  matched: true,
+                                  importance: "Preferred" as const,
+                                })),
+                              ...(
+                                relevantJobsData.jobs[0]
+                                  .missing_preferred_skills || []
+                              )
+                                .slice(0, 2)
+                                .map((skill) => ({
+                                  name: skill,
+                                  matched: false,
+                                  importance: "Nice to have" as const,
+                                })),
+                            ],
+                            missingSkills:
+                              relevantJobsData.jobs[0]
+                                .missing_required_skills || [],
+                          },
+                        }}
+                        matchingCriteria={relevantJobsData.matching_criteria}
+                      />
+                    </div>
+                  )}
+
+                  {/* Relevant Jobs Section */}
+                  <div className="bg-white dark:bg-gray-900 border border-slate-200 dark:border-gray-800 rounded-xl shadow-sm overflow-hidden">
+                    <div className="p-4 border-b border-slate-100 dark:border-gray-800">
+                      <h2 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                        <Sparkles className="w-5 h-5 text-blue-600" />
+                        Relevant Jobs
+                      </h2>
+                    </div>
+                    <RelevantJobs
+                      relevantJobsData={relevantJobsData}
+                      loading={jobsLoading}
+                      onLoadMore={loadMoreJobs}
+                      hasMore={relevantJobsHasMore}
+                      infiniteScrollLoading={relevantJobsInfiniteLoading}
+                    />
+                  </div>
                 </div>
               </div>
             </div>

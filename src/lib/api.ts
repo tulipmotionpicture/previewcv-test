@@ -13,6 +13,7 @@ import {
   ApplicationDetailResponse,
   MyJobPostingResponse,
   MyApplicationsResponse,
+  ApplicationStatsResponse,
 } from "@/types/api";
 import {
   ReviewedResumeMetadata,
@@ -583,6 +584,15 @@ export class ApiClient {
     const url = `/api/v1/jobs/my-applications${queryParams.toString() ? "?" + queryParams.toString() : ""}`;
 
     return this.request<MyApplicationsResponse>(url, {}, true, false);
+  }
+
+  async getApplicationStats(): Promise<ApplicationStatsResponse> {
+    return this.request<ApplicationStatsResponse>(
+      `/api/v1/jobs/applications/stats`,
+      {},
+      true,
+      false,
+    );
   }
 
   // --- Job Bookmarks ---

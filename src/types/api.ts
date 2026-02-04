@@ -226,6 +226,25 @@ export interface MyApplicationsResponse {
   applications: Application[];
 }
 
+export interface ApplicationStatsResponse {
+  success: boolean;
+  total_applications: {
+    total: number;
+    weekly_change: number;
+    percentage_change?: number;
+  };
+  interview_invites: {
+    total: number;
+    weekly_change: number;
+    percentage_change?: number;
+  };
+  offers_received: {
+    total: number;
+    weekly_change: number;
+    percentage_change?: number;
+  };
+}
+
 export interface ApplicationDetailResponse {
   success: boolean;
   application: {

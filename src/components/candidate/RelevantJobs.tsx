@@ -2,20 +2,17 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import {
-  Briefcase,
-  Building2,
-  MapPin,
-  ChevronRight,
-  Sparkles,
-  Star,
-  CheckCircle,
-  XCircle,
-  Loader2,
-  Lightbulb,
-} from "lucide-react";
+import { Sparkles, Loader2 } from "lucide-react";
 import { RelevantJobsResponse } from "@/types/jobs";
-import Tooltip from "@/components/ui/Tooltip";
+import RelevantJobItem from "./RelevantJobItem";
+
+interface RelevantJobsProps {
+  relevantJobsData: RelevantJobsResponse | null;
+  loading: boolean;
+  onLoadMore?: () => void;
+  hasMore?: boolean;
+  infiniteScrollLoading?: boolean;
+}
 
 interface RelevantJobsProps {
   relevantJobsData: RelevantJobsResponse | null;
@@ -131,94 +128,7 @@ export default function RelevantJobs({
         style={{ scrollbarWidth: "thin" }}
       >
         {jobs.map((job) => (
-          <Link
-            key={job.id}
-            href={`/job/${job.slug}`}
-            className="group block p-2 border-b border-teal-300 hover:bg-teal-50 dark:hover:bg-teal-900/20"
-          >
-            <div className="flex items-start gap-3 relative">
-              {/* Company Logo */}
-              <div className="w-10 h-10 rounded-lg bg-[#F0F9FF] dark:bg-gray-800 flex items-center justify-center text-[#0369A1] group-hover:bg-[#0369A1] group-hover:text-white transition-colors duration-150 flex-shrink-0 overflow-hidden">
-                {job.company_logo_url ? (
-                  <img
-                    src={job.company_logo_url}
-                    alt={job.company_name}
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <Building2 className="w-5 h-5" />
-                )}
-              </div>
-
-              <div className="flex-1 min-w-0">
-                <div className="flex items-start justify-between mb-1">
-                  <h4 className="text-sm font-bold text-gray-900 dark:text-gray-100 truncate group-hover:text-[#0369A1] dark:group-hover:text-[#0EA5E9] transition-colors duration-150 pr-2">
-                    {job.title}
-                  </h4>
-                  {job.why_recommended && job.why_recommended.length > 0 && (
-                    <Tooltip
-                      content={
-                        <div className="space-y-1">
-                          <div className="font-semibold mb-2">
-                            Why Recommended:
-                          </div>
-                          {job.why_recommended.map((reason, index) => (
-                            <div key={index} className="text-xs">
-                              • {reason}
-                            </div>
-                          ))}
-                        </div>
-                      }
-                      position="top"
-                      className="max-w-xs"
-                    >
-                      <span className="inline-flex">
-                        <Lightbulb className="w-4 h-4 text-yellow-500 dark:text-yellow-400 cursor-help" />
-                      </span>
-                    </Tooltip>
-                  )}
-                </div>
-
-                <p className="text-xs text-gray-600 dark:text-gray-400 font-medium mb-2 truncate">
-                  {job.company_name}
-                </p>
-
-                <p className="text-xs text-gray-600 dark:text-gray-400 font-medium mb-2 truncate">
-                  {job.categories.slice(0, 3).map((category, index) => (
-                    <span key={index} className="mr-1">
-                      {category}
-                      {index < 2 && ","}
-                    </span>
-                  ))}
-                </p>
-
-                <div className="flex items-center gap-3 mb-2">
-                  <span className="flex items-center gap-1 text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase">
-                    <MapPin className="w-3 h-3" />
-                    {job.location}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <div className="flex gap-4 items-center ">
-                    <span className="flex items-center gap-1 text-[10px] font-bold text-[#0369A1] dark:text-[#0EA5E9] uppercase">
-                      <Briefcase className="w-3 h-3" />
-                      {job.job_type.replace("_", " ")}
-                    </span>
-                    {job.days_since_posted !== undefined && (
-                      <span className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase">
-                        {job.days_since_posted === 0
-                          ? "Today"
-                          : `${job.days_since_posted}d ago`}
-                      </span>
-                    )}
-                  </div>
-                  <span className="text-xs font-semibold text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/20 px-2 py-0.5 rounded-full flex-shrink-0">
-                    {Math.round(job.relevance_score)}% match
-                  </span>
-                </div>
-              </div>
-            </div>
-          </Link>
+          <RelevantJobItem key={job.id} job={job} />
         ))}
 
         {/* Infinite Scroll Loading Indicator */}
