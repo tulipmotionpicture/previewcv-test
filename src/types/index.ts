@@ -105,3 +105,74 @@ export interface ReviewedResumeMetadata {
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface RecruiterUser {}
+
+// ============================================================================
+// Blog Types
+// ============================================================================
+
+export interface BlogAuthor {
+  id: number;
+  username: string;
+  full_name: string;
+  bio: string | null;
+  avatar: string | null;
+}
+
+export interface BlogCategory {
+  id: number;
+  name: string;
+  slug: string;
+  description: string | null;
+  post_count: number;
+}
+
+export interface BlogTag {
+  id: number;
+  name: string;
+  slug: string;
+}
+
+export interface BlogPost {
+  id: number;
+  title: string;
+  slug: string;
+  excerpt: string;
+  content?: string;
+  featured_image: string | null;
+  author: BlogAuthor;
+  category: BlogCategory;
+  tags: BlogTag[];
+  view_count: number;
+  reading_time: number;
+  word_count: number;
+  is_featured: boolean;
+  published_at: string;
+  seo_title?: string | null;
+  seo_description?: string | null;
+  seo_keywords?: string | null;
+}
+
+export interface BlogPostsResponse {
+  posts: BlogPost[];
+  total: number;
+  page: number;
+  limit: number;
+  total_pages: number;
+  has_next: boolean;
+  has_prev: boolean;
+}
+
+export interface BlogPostDetailResponse extends BlogPost {}
+
+export interface BlogCategoriesResponse {
+  categories: BlogCategory[];
+  total: number;
+}
+
+export interface BlogSearchResponse {
+  results: BlogPost[];
+  total: number;
+  query: string;
+  page: number;
+  limit: number;
+}

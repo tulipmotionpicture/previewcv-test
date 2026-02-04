@@ -14,7 +14,13 @@ import {
   MyJobPostingResponse,
   MyApplicationsResponse,
 } from "@/types/api";
-import { ReviewedResumeMetadata } from "@/types";
+import {
+  ReviewedResumeMetadata,
+  BlogPostsResponse,
+  BlogPostDetailResponse,
+  BlogCategoriesResponse,
+  BlogSearchResponse,
+} from "@/types";
 import type {
   SEOJobsResponse,
   SEOPatternsResponse,
@@ -30,14 +36,18 @@ import type {
 
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_URL || "https://letsmakecv.tulip-software.com";
+const BLOG_BASE_URL =
+  process.env.NEXT_PUBLIC_BLOG_API_URL || "https://blog.tulip-software.com";
 
 export class ApiClient {
   private baseUrl: string;
+  private blogBaseUrl: string;
   private isRefreshing: boolean = false;
   private refreshSubscribers: Array<(token: string) => void> = [];
 
   constructor() {
     this.baseUrl = API_BASE_URL;
+    this.blogBaseUrl = BLOG_BASE_URL;
   }
 
   private getHeaders(
@@ -123,6 +133,7 @@ export class ApiClient {
     options: RequestInit = {},
     includeAuth: boolean = false,
     isRecruiter: boolean = false,
+    customBaseUrl?: string,
   ): Promise<T> {
     // Get base headers, but skip Content-Type for FormData (browser sets it with boundary)
     const baseHeaders = this.getHeaders(includeAuth, isRecruiter);
@@ -130,7 +141,8 @@ export class ApiClient {
       delete (baseHeaders as Record<string, string>)["Content-Type"];
     }
 
-    const response = await fetch(`${this.baseUrl}${endpoint}`, {
+    const baseUrl = customBaseUrl || this.baseUrl;
+    const response = await fetch(`${baseUrl}${endpoint}`, {
       ...options,
       headers: {
         ...baseHeaders,
@@ -1289,6 +1301,178 @@ export class ApiClient {
       {},
       false,
       false,
+    );
+  }
+
+  /**
+   * Fetch blog posts from the public blog API
+   * @param params - Query parameters for filtering and pagination
+   */
+  async getBlogPosts(params?: {
+    page?: number;
+    limit?: number;
+    category?: string;
+    search?: string;
+    tags?: string;
+    sort_by?: "published_at" | "title" | "view_count";
+    sort_order?: "asc" | "desc";
+    featured?: boolean;
+  }): Promise<BlogPostsResponse> {
+    const queryParams = new URLSearchParams();
+
+    if (params?.page) queryParams.append("page", params.page.toString());
+    if (params?.limit) queryParams.append("limit", params.limit.toString());
+    if (params?.category) queryParams.append("category", params.category);
+    if (params?.search) queryParams.append("search", params.search);
+    if (params?.tags) queryParams.append("tags", params.tags);
+    if (params?.sort_by) queryParams.append("sort_by", params.sort_by);
+    if (params?.sort_order) queryParams.append("sort_order", params.sort_order);
+    if (params?.featured !== undefined)
+      queryParams.append("featured", params.featured.toString());
+
+    const queryString = queryParams.toString();
+    const endpoint = `/api/public/blog/posts${queryString ? `?${queryString}` : ""}`;
+
+    return this.request<BlogPostsResponse>(
+      endpoint,
+      { method: "GET" },
+      false,
+      false,
+      this.blogBaseUrl,
+    );
+  }
+
+  /**
+   * Get featured blog posts
+   */
+  async getFeaturedBlogPosts(limit?: number): Promise<BlogPostsResponse> {
+    const queryParams = new URLSearchParams();
+    if (limit) queryParams.append("limit", limit.toString());
+
+    const endpoint = `/api/public/blog/posts/featured${queryParams.toString() ? `?${queryParams.toString()}` : ""}`;
+
+    return this.request<BlogPostsResponse>(
+      endpoint,
+      { method: "GET" },
+      false,
+      false,
+      this.blogBaseUrl,
+    );
+  }
+
+  /**
+   * Get blog post by slug
+   * @param slug - The blog post slug
+   */
+  async getBlogPostBySlug(slug: string): Promise<BlogPostDetailResponse> {
+    return this.request<BlogPostDetailResponse>(
+      `/api/public/blog/posts/${slug}`,
+      { method: "GET" },
+      false,
+      false,
+      this.blogBaseUrl,
+    );
+  }
+
+  /**
+   * Get related blog posts
+   * @param slug - The blog post slug
+   */
+  async getRelatedBlogPosts(
+    slug: string,
+    limit?: number,
+  ): Promise<BlogPostsResponse> {
+    const queryParams = new URLSearchParams();
+    if (limit) queryParams.append("limit", limit.toString());
+
+    const endpoint = `/api/public/blog/posts/${slug}/related${queryParams.toString() ? `?${queryParams.toString()}` : ""}`;
+
+    return this.request<BlogPostsResponse>(
+      endpoint,
+      { method: "GET" },
+      false,
+      false,
+      this.blogBaseUrl,
+    );
+  }
+
+  /**
+   * Record a blog post view
+   * @param slug - The blog post slug
+   */
+  async recordBlogPostView(
+    slug: string,
+  ): Promise<{ success: boolean; view_count: number }> {
+    return this.request<{ success: boolean; view_count: number }>(
+      `/api/public/blog/posts/${slug}/view`,
+      { method: "POST" },
+      false,
+      false,
+      this.blogBaseUrl,
+    );
+  }
+
+  /**
+   * Get all blog categories
+   */
+  async getBlogCategories(): Promise<BlogCategoriesResponse> {
+    return this.request<BlogCategoriesResponse>(
+      `/api/public/blog/categories`,
+      { method: "GET" },
+      false,
+      false,
+      this.blogBaseUrl,
+    );
+  }
+
+  /**
+   * Get blog posts by category
+   * @param slug - The category slug
+   */
+  async getBlogPostsByCategory(
+    slug: string,
+    params?: {
+      page?: number;
+      limit?: number;
+    },
+  ): Promise<BlogPostsResponse> {
+    const queryParams = new URLSearchParams();
+    if (params?.page) queryParams.append("page", params.page.toString());
+    if (params?.limit) queryParams.append("limit", params.limit.toString());
+
+    const endpoint = `/api/public/blog/categories/${slug}${queryParams.toString() ? `?${queryParams.toString()}` : ""}`;
+
+    return this.request<BlogPostsResponse>(
+      endpoint,
+      { method: "GET" },
+      false,
+      false,
+      this.blogBaseUrl,
+    );
+  }
+
+  /**
+   * Search blog content
+   * @param query - Search query
+   */
+  async searchBlog(
+    query: string,
+    params?: {
+      page?: number;
+      limit?: number;
+    },
+  ): Promise<BlogSearchResponse> {
+    const queryParams = new URLSearchParams();
+    queryParams.append("q", query);
+    if (params?.page) queryParams.append("page", params.page.toString());
+    if (params?.limit) queryParams.append("limit", params.limit.toString());
+
+    return this.request<BlogSearchResponse>(
+      `/api/public/blog/search?${queryParams.toString()}`,
+      { method: "GET" },
+      false,
+      false,
+      this.blogBaseUrl,
     );
   }
 }

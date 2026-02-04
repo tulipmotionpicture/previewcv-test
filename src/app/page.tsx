@@ -7,6 +7,7 @@ import Header from "@/components/Header";
 import HeroSection from "@/components/HeroSection";
 import { useEffect, useState } from "react";
 import { CardsSummaryResponse } from "@/types/jobs";
+import { BlogPostsResponse } from "@/types";
 import { api } from "@/lib/api";
 import {
   CheckCircle2,
@@ -26,7 +27,7 @@ import {
   MinusCircle,
   ScanEye,
   Sparkles,
-  Eye
+  Eye,
 } from "lucide-react";
 
 const LockClosedIcon = () => (
@@ -84,6 +85,8 @@ export default function Home() {
   const [openIndex, setOpenIndex] = useState<number | null>(0);
   const [cardsData, setCardsData] = useState<CardsSummaryResponse | null>(null);
   const [cardsLoading, setCardsLoading] = useState(true);
+  const [blogPosts, setBlogPosts] = useState<BlogPostsResponse | null>(null);
+  const [blogLoading, setBlogLoading] = useState(true);
 
   // Fetch job cards data
   useEffect(() => {
@@ -99,6 +102,26 @@ export default function Home() {
       }
     };
     fetchCards();
+  }, []);
+
+  // Fetch blog posts data
+  useEffect(() => {
+    const fetchBlogPosts = async () => {
+      setBlogLoading(true);
+      try {
+        const response = await api.getBlogPosts({
+          limit: 8,
+          sort_by: "published_at",
+          sort_order: "desc",
+        });
+        setBlogPosts(response);
+      } catch (err) {
+        console.error("Failed to load blog posts:", err);
+      } finally {
+        setBlogLoading(false);
+      }
+    };
+    fetchBlogPosts();
   }, []);
 
   console.log(cardsData);
@@ -124,7 +147,6 @@ export default function Home() {
         <HeroSection height="auto" minHeight="min-h-[300px]">
           {/* Cards */}
           <div className="hidden lg:grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 pt-10">
-
             {/* Jobs By Location */}
             <div className="bg-white/60 dark:bg-[#0a0a0a] backdrop-blur-xl rounded-[24px] p-4 lg:p-5 shadow-xl border border-white/50 dark:border-gray-800/50 hover:bg-white/80 dark:hover:bg-[#0a0a0a] transition-all duration-300">
               <h2 className="text-sm font-bold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
@@ -182,7 +204,6 @@ export default function Home() {
                 )}
               </div>
             </div>
-
           </div>
         </HeroSection>
       </section>
@@ -225,9 +246,18 @@ export default function Home() {
                   { name: "Tarrad", src: "/logos/logo-3.png" },
                   { name: "ABC", src: "/logos/logo-4.png" },
                 ].map((employer, i) => (
-                  <div key={i} className="px-2 w-[120px] md:w-[160px] lg:w-[200px] h-full flex-shrink-0">
+                  <div
+                    key={i}
+                    className="px-2 w-[120px] md:w-[160px] lg:w-[200px] h-full flex-shrink-0"
+                  >
                     <div className="bg-white p-2 md:p-4 border border-gray-200 rounded-lg flex items-center justify-center hover:shadow-md transition-shadow h-full w-full">
-                      <Image src={employer.src} alt={employer.name} width={100} height={40} className="object-contain max-h-12" />
+                      <Image
+                        src={employer.src}
+                        alt={employer.name}
+                        width={100}
+                        height={40}
+                        className="object-contain max-h-12"
+                      />
                     </div>
                   </div>
                 ))}
@@ -264,9 +294,18 @@ export default function Home() {
                   { name: "Binghatti", src: "/logos/logo-3.png" },
                   { name: "Innovations Group", src: "/logos/logo-4.png" },
                 ].map((employer, i) => (
-                  <div key={i} className="px-2 w-[120px] md:w-[160px] lg:w-[200px] h-full flex-shrink-0">
+                  <div
+                    key={i}
+                    className="px-2 w-[120px] md:w-[160px] lg:w-[200px] h-full flex-shrink-0"
+                  >
                     <div className="bg-white p-2 md:p-4 border border-gray-200 rounded-lg flex items-center justify-center hover:shadow-md transition-shadow h-full w-full">
-                      <Image src={employer.src} alt={employer.name} width={100} height={40} className="object-contain max-h-12" />
+                      <Image
+                        src={employer.src}
+                        alt={employer.name}
+                        width={100}
+                        height={40}
+                        className="object-contain max-h-12"
+                      />
                     </div>
                   </div>
                 ))}
@@ -283,99 +322,87 @@ export default function Home() {
             <h2 className="text-lg lg:text-xl font-bold text-gray-900 dark:text-gray-100">
               All Articles
             </h2>
-            <Link href="/blogs" className="text-blue-500 hover:text-blue-600 text-sm font-medium">
+            <Link
+              href="/blogs"
+              className="text-blue-500 hover:text-blue-600 text-sm font-medium"
+            >
               View All
             </Link>
           </div>
 
-          <div className="grid grid-flow-col auto-cols-[280px] lg:auto-cols-[320px] gap-6 overflow-x-auto pb-6 no-scrollbar">
-            {/* Card 1 */}
-            <div className="group cursor-pointer bg-white dark:bg-gray-900 rounded-2xl p-3 border border-gray-100 dark:border-gray-800 hover:shadow-lg transition-all duration-300">
-              <div className="relative h-40 w-full rounded-xl overflow-hidden mb-4 bg-gray-100 dark:bg-gray-800">
-                <Image src="/blog-1.jpg" alt="Personal branding" fill className="object-cover group-hover:scale-105 transition-transform duration-500" />
-              </div>
-              <h3 className="text-sm font-bold text-gray-900 dark:text-white leading-tight mb-2 line-clamp-2">
-                Personal branding basics for professionals...
-              </h3>
-              <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed mb-3 line-clamp-3">
-                Personal branding is often misunderstood as self-promotion or online visibility alone. In reality, personal branding is much ... <span className="text-blue-500 font-medium">Read More</span>
-              </p>
-              <div className="flex items-center justify-between text-[10px] text-gray-400 mt-auto">
-                <div className="flex items-center gap-1">
-                  <Eye className="w-3 h-3" /> 204 Views
+          {blogLoading ? (
+            <div className="grid grid-flow-col auto-cols-[280px] lg:auto-cols-[320px] gap-6 overflow-x-auto pb-6 no-scrollbar">
+              {[1, 2, 3, 4].map((i) => (
+                <div
+                  key={i}
+                  className="bg-white dark:bg-gray-900 rounded-2xl p-3 border border-gray-100 dark:border-gray-800 animate-pulse"
+                >
+                  <div className="relative h-40 w-full rounded-xl bg-gray-100 dark:bg-gray-800 mb-4" />
+                  <div className="h-4 bg-gray-100 dark:bg-gray-800 rounded mb-2" />
+                  <div className="h-3 bg-gray-100 dark:bg-gray-800 rounded mb-3" />
+                  <div className="flex justify-between">
+                    <div className="h-3 bg-gray-100 dark:bg-gray-800 rounded w-20" />
+                    <div className="h-3 bg-gray-100 dark:bg-gray-800 rounded w-20" />
+                  </div>
                 </div>
-                <span>27 Jan 2026</span>
-              </div>
+              ))}
             </div>
-
-            {/* Card 2 */}
-            <div className="group cursor-pointer bg-white dark:bg-gray-900 rounded-2xl p-3 border border-gray-100 dark:border-gray-800 hover:shadow-lg transition-all duration-300">
-              <div className="relative h-40 w-full rounded-xl overflow-hidden mb-4 bg-gray-100 dark:bg-gray-800">
-                <Image src="/blog-2.jpg" alt="Recruiters struggle" fill className="object-cover group-hover:scale-105 transition-transform duration-500" />
-              </div>
-              <h3 className="text-sm font-bold text-gray-900 dark:text-white leading-tight mb-2 line-clamp-2">
-                Why GCC recruiters struggle to build talent pipelines...
-              </h3>
-              <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed mb-3 line-clamp-3">
-                In many GCC companies, hiring doesn't feel like a process—it feels like an emergency response system. A resignation drops, a ... <span className="text-blue-500 font-medium">Read More</span>
-              </p>
-              <div className="flex items-center justify-between text-[10px] text-gray-400 mt-auto">
-                <div className="flex items-center gap-1">
-                  <Eye className="w-3 h-3" /> 271 Views
-                </div>
-                <span>27 Jan 2026</span>
-              </div>
+          ) : blogPosts && blogPosts.posts.length > 0 ? (
+            <div className="grid grid-flow-col auto-cols-[280px] lg:auto-cols-[320px] gap-6 overflow-x-auto pb-6 no-scrollbar">
+              {blogPosts.posts.map((post) => (
+                <Link
+                  key={post.id}
+                  href={`/blog/${post.slug}`}
+                  className="group cursor-pointer bg-white dark:bg-gray-900 rounded-2xl p-3 border border-gray-100 dark:border-gray-800 hover:shadow-lg transition-all duration-300"
+                >
+                  <div className="relative h-40 w-full rounded-xl overflow-hidden mb-4 bg-gray-100 dark:bg-gray-800">
+                    {post.featured_image ? (
+                      <Image
+                        src={post.featured_image}
+                        alt={post.title}
+                        fill
+                        className="object-cover group-hover:scale-105 transition-transform duration-500"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-gray-400">
+                        <Sparkles className="w-10 h-10" />
+                      </div>
+                    )}
+                  </div>
+                  <h3 className="text-sm font-bold text-gray-900 dark:text-white leading-tight mb-2 line-clamp-2">
+                    {post.title}
+                  </h3>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed mb-3 line-clamp-3">
+                    {post.excerpt}{" "}
+                    <span className="text-blue-500 font-medium">Read More</span>
+                  </p>
+                  <div className="flex items-center justify-between text-[10px] text-gray-400 mt-auto">
+                    <div className="flex items-center gap-1">
+                      <Eye className="w-3 h-3" /> {post.view_count} Views
+                    </div>
+                    <span>
+                      {new Date(post.published_at).toLocaleDateString("en-GB", {
+                        day: "numeric",
+                        month: "short",
+                        year: "numeric",
+                      })}
+                    </span>
+                  </div>
+                </Link>
+              ))}
             </div>
-
-            {/* Card 3 */}
-            <div className="group cursor-pointer bg-white dark:bg-gray-900 rounded-2xl p-3 border border-gray-100 dark:border-gray-800 hover:shadow-lg transition-all duration-300">
-              <div className="relative h-40 w-full rounded-xl overflow-hidden mb-4 bg-gray-100 dark:bg-gray-800">
-                <Image src="/blog-3.jpg" alt="Highlight skills" fill className="object-cover group-hover:scale-105 transition-transform duration-500" />
-              </div>
-              <h3 className="text-sm font-bold text-gray-900 dark:text-white leading-tight mb-2 line-clamp-2">
-                How to highlight skills when you lack work experience...
-              </h3>
-              <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed mb-3 line-clamp-3">
-                Not having formal work experience can feel like a disadvantage when applying for roles. Many jobseekers worry that without a ... <span className="text-blue-500 font-medium">Read More</span>
-              </p>
-              <div className="flex items-center justify-between text-[10px] text-gray-400 mt-auto">
-                <div className="flex items-center gap-1">
-                  <Eye className="w-3 h-3" /> 201 Views
-                </div>
-                <span>27 Jan 2026</span>
-              </div>
+          ) : (
+            <div className="text-center py-12 text-gray-500 dark:text-gray-400">
+              <Sparkles className="w-12 h-12 mx-auto mb-4 opacity-50" />
+              <p>No blog posts available at the moment.</p>
             </div>
-
-            {/* Card 4 */}
-            <div className="group cursor-pointer bg-white dark:bg-gray-900 rounded-2xl p-3 border border-gray-100 dark:border-gray-800 hover:shadow-lg transition-all duration-300">
-              <div className="relative h-40 w-full rounded-xl overflow-hidden mb-4 bg-gray-100 dark:bg-gray-800">
-                <Image src="/blog-4.png" alt="MoHRE" fill className="object-cover group-hover:scale-105 transition-transform duration-500" />
-              </div>
-              <h3 className="text-sm font-bold text-gray-900 dark:text-white leading-tight mb-2 line-clamp-2">
-                MoHRE launches new Private Sector Emiratisation...
-              </h3>
-              <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed mb-3 line-clamp-3">
-                The Ministry of Human Resources and Emiratisation (MoHRE) has announced new targets for its partners in the private sector govern... <span className="text-blue-500 font-medium">Read More</span>
-              </p>
-              <div className="flex items-center justify-between text-[10px] text-gray-400 mt-auto">
-                <div className="flex items-center gap-1">
-                  <Eye className="w-3 h-3" /> 529 Views
-                </div>
-                <span>27 Jan 2026</span>
-              </div>
-            </div>
-
-          </div>
+          )}
         </div>
       </section>
-
-
-
 
       {/* Create CV Section */}
       <section className="w-full max-w-7xl mx-auto px-4 lg:px-6 mb-6 lg:mb-8 mt-2">
         <div className="bg-[#FAF9FF] dark:bg-gray-800 rounded-[32px] p-6 lg:p-10 flex flex-col lg:flex-row items-center justify-between gap-8 lg:gap-16 overflow-hidden relative border border-purple-50 dark:border-gray-700">
-
           {/* Left Content */}
           <div className="w-full lg:max-w-[40%] z-10">
             <h2 className="text-xl lg:text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
@@ -383,7 +410,9 @@ export default function Home() {
             </h2>
 
             <p className="text-xs lg:text-sm text-gray-600 dark:text-gray-400 mb-6">
-              It is <span className="text-purple-600 font-semibold">AI enabled</span> & faster!
+              It is{" "}
+              <span className="text-purple-600 font-semibold">AI enabled</span>{" "}
+              & faster!
             </p>
 
             <ul className="space-y-3 mb-6">
@@ -420,14 +449,19 @@ export default function Home() {
               className="inline-flex items-center gap-2 px-6 py-2.5 bg-[#0CA0E8] hover:bg-[#0b8rcd] text-white font-semibold rounded-full transition-all shadow-lg hover:shadow-xl text-xs lg:text-sm"
             >
               Create CV
-              <Image src="/sparkle-icon.png" alt="icon" width={14} height={14} className="object-contain" />
+              <Image
+                src="/sparkle-icon.png"
+                alt="icon"
+                width={14}
+                height={14}
+                className="object-contain"
+              />
             </Link>
           </div>
 
           {/* Right Resume Row View */}
           <div className="w-full lg:w-[60%] relative flex justify-center lg:justify-end items-end h-[200px] lg:h-[260px]">
             <div className="relative w-full h-full flex items-end justify-center lg:justify-end gap-2 lg:gap-4 translate-y-6 lg:translate-x-6">
-
               {/* Resume 1 */}
               <div className="relative w-[120px] lg:w-[160px] h-[180px] lg:h-[240px] shadow-2xl rounded-t-xl overflow-hidden transform translate-y-4">
                 <Image
@@ -457,25 +491,25 @@ export default function Home() {
                   className="object-cover object-top"
                 />
               </div>
-
             </div>
           </div>
         </div>
       </section>
 
-
       {/* Cover Letter Section - Redesigned to Match */}
       <section className="w-full max-w-7xl mx-auto px-4 lg:px-6 mb-6 lg:mb-8">
         <div className="bg-[#F2F5FF] dark:bg-gray-800 rounded-[32px] p-6 lg:p-10 flex flex-col lg:flex-row items-center justify-between gap-8 lg:gap-16 overflow-hidden relative border border-blue-50 dark:border-gray-700">
-
           {/* Left Content */}
           <div className="w-full lg:max-w-[40%] z-10">
             <h2 className="text-xl lg:text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
-              Create a Professional <span className="text-blue-600">Cover Letter</span>
+              Create a Professional{" "}
+              <span className="text-blue-600">Cover Letter</span>
             </h2>
 
             <p className="text-xs lg:text-sm text-gray-600 dark:text-gray-400 mb-6">
-              Stand out with a <span className="text-blue-600 font-semibold">customized</span> cover letter.
+              Stand out with a{" "}
+              <span className="text-blue-600 font-semibold">customized</span>{" "}
+              cover letter.
             </p>
 
             <ul className="space-y-3 mb-6">
@@ -512,14 +546,19 @@ export default function Home() {
               className="inline-flex items-center gap-2 px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-full transition-all shadow-lg hover:shadow-xl text-xs lg:text-sm"
             >
               Create Cover Letter
-              <Image src="/sparkle-icon.png" alt="icon" width={14} height={14} className="object-contain" />
+              <Image
+                src="/sparkle-icon.png"
+                alt="icon"
+                width={14}
+                height={14}
+                className="object-contain"
+              />
             </Link>
           </div>
 
           {/* Right Cover Letter Row View */}
           <div className="w-full lg:w-[60%] relative flex justify-center lg:justify-end items-end h-[200px] lg:h-[260px]">
             <div className="relative w-full h-full flex items-end justify-center lg:justify-end gap-2 lg:gap-4 translate-y-6 lg:translate-x-6">
-
               {/* CL 1 */}
               <div className="relative w-[120px] lg:w-[160px] h-[180px] lg:h-[240px] shadow-2xl rounded-t-xl overflow-hidden transform translate-y-4">
                 <Image
@@ -549,23 +588,21 @@ export default function Home() {
                   className="object-cover object-top"
                 />
               </div>
-
             </div>
           </div>
         </div>
       </section>
 
-
-
-
-
       {/* How It Works Section */}
       <section className="w-full max-w-7xl mx-auto px-4 lg:px-6 mb-6 lg:mb-8">
         <div className="bg-[#FAF9FF] dark:bg-gray-800 rounded-[32px] p-6 lg:p-10 relative overflow-hidden border border-purple-50 dark:border-gray-700">
-
           <div className="mb-8 lg:mb-12 text-left w-full">
-            <h1 className="text-xl lg:text-3xl font-bold text-zinc-900 dark:text-gray-100 tracking-tight text-left mb-2 lg:mb-4">How It Works</h1>
-            <p className="text-sm text-zinc-500 dark:text-gray-400 font-medium text-left max-w-2xl">Get started in minutes with our seamless workflow</p>
+            <h1 className="text-xl lg:text-3xl font-bold text-zinc-900 dark:text-gray-100 tracking-tight text-left mb-2 lg:mb-4">
+              How It Works
+            </h1>
+            <p className="text-sm text-zinc-500 dark:text-gray-400 font-medium text-left max-w-2xl">
+              Get started in minutes with our seamless workflow
+            </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 lg:gap-6 mb-8 lg:mb-12">
@@ -575,9 +612,12 @@ export default function Home() {
               <div className="mb-4 lg:mb-6 w-12 h-12 lg:w-14 lg:h-14 rounded-2xl bg-indigo-50 dark:bg-indigo-900/30 flex items-center justify-center text-indigo-600 dark:text-indigo-400 group-hover:scale-110 group-hover:bg-indigo-600 group-hover:text-white transition-all duration-300">
                 <LinkIcon className="w-5 h-5 lg:w-6 lg:h-6" strokeWidth={2} />
               </div>
-              <h3 className="text-base lg:text-lg font-bold text-zinc-900 dark:text-gray-100 mb-2">Get Your Link</h3>
+              <h3 className="text-base lg:text-lg font-bold text-zinc-900 dark:text-gray-100 mb-2">
+                Get Your Link
+              </h3>
               <p className="text-zinc-500 dark:text-gray-400 leading-relaxed text-xs lg:text-sm">
-                Receive your unique PreviewCV link automatically - same login on both platforms
+                Receive your unique PreviewCV link automatically - same login on
+                both platforms
               </p>
             </div>
 
@@ -587,9 +627,12 @@ export default function Home() {
               <div className="mb-4 lg:mb-6 w-12 h-12 lg:w-14 lg:h-14 rounded-2xl bg-purple-50 dark:bg-purple-900/30 flex items-center justify-center text-purple-600 dark:text-purple-400 group-hover:scale-110 group-hover:bg-purple-600 group-hover:text-white transition-all duration-300">
                 <FilePlus2 className="w-5 h-5 lg:w-6 lg:h-6" strokeWidth={2} />
               </div>
-              <h3 className="text-base lg:text-lg font-bold text-zinc-900 dark:text-gray-100 mb-2">Create Resume</h3>
+              <h3 className="text-base lg:text-lg font-bold text-zinc-900 dark:text-gray-100 mb-2">
+                Create Resume
+              </h3>
               <p className="text-zinc-500 dark:text-gray-400 leading-relaxed text-xs lg:text-sm">
-                Build your professional resume on LetsMakeCV.com with our easy-to-use builder
+                Build your professional resume on LetsMakeCV.com with our
+                easy-to-use builder
               </p>
             </div>
 
@@ -599,15 +642,21 @@ export default function Home() {
               <div className="mb-4 lg:mb-6 w-12 h-12 lg:w-14 lg:h-14 rounded-2xl bg-pink-50 dark:bg-pink-900/30 flex items-center justify-center text-pink-600 dark:text-pink-400 group-hover:scale-110 group-hover:bg-pink-600 group-hover:text-white transition-all duration-300">
                 <Share2 className="w-5 h-5 lg:w-6 lg:h-6" strokeWidth={2} />
               </div>
-              <h3 className="text-base lg:text-lg font-bold text-zinc-900 dark:text-gray-100 mb-2">Share & Track</h3>
+              <h3 className="text-base lg:text-lg font-bold text-zinc-900 dark:text-gray-100 mb-2">
+                Share & Track
+              </h3>
               <p className="text-zinc-500 dark:text-gray-400 leading-relaxed text-xs lg:text-sm">
-                Share your link anywhere - email, LinkedIn, applications. Updates automatically when you edit
+                Share your link anywhere - email, LinkedIn, applications.
+                Updates automatically when you edit
               </p>
             </div>
           </div>
 
           <div className="flex justify-center">
-            <Link href="/candidate/signup" className="bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 px-12 py-3 rounded-xl text-sm lg:text-base font-medium hover:bg-zinc-800 dark:hover:bg-gray-200 transition-all shadow-xl shadow-zinc-900/5 hover:shadow-zinc-900/10 active:scale-95 flex items-center gap-2">
+            <Link
+              href="/candidate/signup"
+              className="bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 px-12 py-3 rounded-xl text-sm lg:text-base font-medium hover:bg-zinc-800 dark:hover:bg-gray-200 transition-all shadow-xl shadow-zinc-900/5 hover:shadow-zinc-900/10 active:scale-95 flex items-center gap-2"
+            >
               Get Started
             </Link>
           </div>
@@ -619,7 +668,6 @@ export default function Home() {
       {/* Why PreviewCV Section */}
       <section className="w-full max-w-7xl mx-auto px-4 lg:px-6 mb-6 lg:mb-8">
         <div className="bg-[#FAF9FF] dark:bg-gray-800 rounded-[32px] p-6 lg:p-10 relative overflow-hidden border border-purple-50 dark:border-gray-700">
-
           {/* Decorative Background Elements */}
           <div className="absolute top-0 left-0 -z-10 w-full h-full overflow-hidden pointer-events-none">
             <div className="absolute top-[10%] left-[-5%] w-[600px] h-[600px] rounded-[100px] border-[40px] border-zinc-200 dark:border-zinc-800 opacity-40 -rotate-12 blur-3xl"></div>
@@ -627,54 +675,95 @@ export default function Home() {
           </div>
 
           <div className="mb-8 lg:mb-16">
-            <h1 className="text-xl lg:text-3xl font-bold text-zinc-900 dark:text-gray-100 mb-4 leading-snug tracking-tight text-left">Why PreviewCV?</h1>
-            <p className="text-sm text-zinc-600 dark:text-gray-400 font-medium max-w-2xl text-left leading-relaxed">The modern way to share your professional profile</p>
+            <h1 className="text-xl lg:text-3xl font-bold text-zinc-900 dark:text-gray-100 mb-4 leading-snug tracking-tight text-left">
+              Why PreviewCV?
+            </h1>
+            <p className="text-sm text-zinc-600 dark:text-gray-400 font-medium max-w-2xl text-left leading-relaxed">
+              The modern way to share your professional profile
+            </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-12">
             {[
               {
-                icon: <FileX2 className="w-5 h-5 lg:w-6 lg:h-6" strokeWidth={1.5} />,
+                icon: (
+                  <FileX2 className="w-5 h-5 lg:w-6 lg:h-6" strokeWidth={1.5} />
+                ),
                 title: "No More PDFs",
-                description: "Stop attaching bulky PDF files. Share a clean, professional link instead.",
-                color: "text-red-600 dark:text-red-400"
+                description:
+                  "Stop attaching bulky PDF files. Share a clean, professional link instead.",
+                color: "text-red-600 dark:text-red-400",
               },
               {
-                icon: <RefreshCw className="w-5 h-5 lg:w-6 lg:h-6" strokeWidth={1.5} />,
+                icon: (
+                  <RefreshCw
+                    className="w-5 h-5 lg:w-6 lg:h-6"
+                    strokeWidth={1.5}
+                  />
+                ),
                 title: "Always Up-to-Date",
-                description: "Edit your resume once on LetsMakeCV - your PreviewCV link updates automatically.",
-                color: "text-blue-600 dark:text-blue-400"
+                description:
+                  "Edit your resume once on LetsMakeCV - your PreviewCV link updates automatically.",
+                color: "text-blue-600 dark:text-blue-400",
               },
               {
-                icon: <BarChart3 className="w-5 h-5 lg:w-6 lg:h-6" strokeWidth={1.5} />,
+                icon: (
+                  <BarChart3
+                    className="w-5 h-5 lg:w-6 lg:h-6"
+                    strokeWidth={1.5}
+                  />
+                ),
                 title: "Track Views",
-                description: "See who's viewing your resume and when they're engaging with your profile.",
-                color: "text-purple-600 dark:text-purple-400"
+                description:
+                  "See who's viewing your resume and when they're engaging with your profile.",
+                color: "text-purple-600 dark:text-purple-400",
               },
               {
-                icon: <Smartphone className="w-5 h-5 lg:w-6 lg:h-6" strokeWidth={1.5} />,
+                icon: (
+                  <Smartphone
+                    className="w-5 h-5 lg:w-6 lg:h-6"
+                    strokeWidth={1.5}
+                  />
+                ),
                 title: "Mobile Optimized",
-                description: "Perfect viewing experience on any device - desktop, tablet, or mobile.",
-                color: "text-emerald-600 dark:text-emerald-400"
+                description:
+                  "Perfect viewing experience on any device - desktop, tablet, or mobile.",
+                color: "text-emerald-600 dark:text-emerald-400",
               },
               {
-                icon: <ShieldCheck className="w-5 h-5 lg:w-6 lg:h-6" strokeWidth={1.5} />,
+                icon: (
+                  <ShieldCheck
+                    className="w-5 h-5 lg:w-6 lg:h-6"
+                    strokeWidth={1.5}
+                  />
+                ),
                 title: "Secure & Private",
-                description: "Your data is encrypted and secure. Control who sees your information.",
-                color: "text-indigo-600 dark:text-indigo-400"
+                description:
+                  "Your data is encrypted and secure. Control who sees your information.",
+                color: "text-indigo-600 dark:text-indigo-400",
               },
               {
-                icon: <Zap className="w-5 h-5 lg:w-6 lg:h-6" strokeWidth={1.5} />,
+                icon: (
+                  <Zap className="w-5 h-5 lg:w-6 lg:h-6" strokeWidth={1.5} />
+                ),
                 title: "Instant Loading",
-                description: "Lightning-fast preview with our optimized rendering engine. No downloads needed.",
-                color: "text-amber-600 dark:text-amber-400"
-              }
+                description:
+                  "Lightning-fast preview with our optimized rendering engine. No downloads needed.",
+                color: "text-amber-600 dark:text-amber-400",
+              },
             ].map((feature, index) => (
-              <div key={index} className="flex flex-col items-start hover:translate-y-[-4px] transition-transform duration-300">
-                <div className={`w-12 h-12 lg:w-14 lg:h-14 rounded-2xl bg-white dark:bg-zinc-800 shadow-sm flex items-center justify-center mb-4 lg:mb-6 ${feature.color}`}>
+              <div
+                key={index}
+                className="flex flex-col items-start hover:translate-y-[-4px] transition-transform duration-300"
+              >
+                <div
+                  className={`w-12 h-12 lg:w-14 lg:h-14 rounded-2xl bg-white dark:bg-zinc-800 shadow-sm flex items-center justify-center mb-4 lg:mb-6 ${feature.color}`}
+                >
                   {feature.icon}
                 </div>
-                <h3 className="text-lg lg:text-xl font-medium text-zinc-900 dark:text-gray-100 mb-2">{feature.title}</h3>
+                <h3 className="text-lg lg:text-xl font-medium text-zinc-900 dark:text-gray-100 mb-2">
+                  {feature.title}
+                </h3>
                 <p className="text-zinc-600 dark:text-gray-400 leading-relaxed text-xs lg:text-sm">
                   {feature.description}
                 </p>
@@ -687,18 +776,23 @@ export default function Home() {
       {/* Direct Market Pulse Section */}
       <section className="w-full max-w-7xl mx-auto px-4 lg:px-6 mb-6 lg:mb-8">
         <div className="bg-[#FAF9FF] dark:bg-gray-800 rounded-[32px] p-6 lg:p-10 relative overflow-hidden border border-purple-50 dark:border-gray-700 animate-in fade-in duration-700">
-
           {/* Page Header */}
           <div className="mb-8 lg:mb-12">
-            <h1 className="text-xl lg:text-3xl font-bold text-zinc-900 dark:text-gray-100 tracking-tight text-left mb-2 lg:mb-4">Direct Market Pulse</h1>
-            <p className="text-sm text-zinc-500 dark:text-gray-400 font-medium text-left max-w-2xl">Live activity from our recruitment engine. Verified matching in progress.</p>
+            <h1 className="text-xl lg:text-3xl font-bold text-zinc-900 dark:text-gray-100 tracking-tight text-left mb-2 lg:mb-4">
+              Direct Market Pulse
+            </h1>
+            <p className="text-sm text-zinc-500 dark:text-gray-400 font-medium text-left max-w-2xl">
+              Live activity from our recruitment engine. Verified matching in
+              progress.
+            </p>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16">
-
             {/* Left Column: Trending Roles */}
             <div>
-              <h2 className="text-lg lg:text-xl font-semibold text-zinc-900 dark:text-gray-100 mb-4 lg:mb-6 tracking-tight text-left ml-2 lg:ml-0">Trending Roles</h2>
+              <h2 className="text-lg lg:text-xl font-semibold text-zinc-900 dark:text-gray-100 mb-4 lg:mb-6 tracking-tight text-left ml-2 lg:ml-0">
+                Trending Roles
+              </h2>
 
               <div className="space-y-4 lg:space-y-6">
                 {/* Wrapper Card for all roles */}
@@ -708,28 +802,32 @@ export default function Home() {
                       title: "Senior React Developer",
                       company: "TechCorp",
                       location: "Remote",
-                      type: "Full Time"
+                      type: "Full Time",
                     },
                     {
                       title: "UI/UX Designer",
                       company: "Creative Studio",
                       location: "New York",
-                      type: "On-site"
+                      type: "On-site",
                     },
                     {
                       title: "Backend Engineer",
                       company: "FastData",
                       location: "Austin",
-                      type: "Hybrid"
-                    }
+                      type: "Hybrid",
+                    },
                   ].map((job, index) => (
                     <div
                       key={index}
                       className="flex items-center justify-between py-6 border-b border-gray-100 dark:border-gray-700 last:border-0 last:pb-0 first:pt-0"
                     >
                       <div className="space-y-1">
-                        <h3 className="text-base font-bold text-gray-900 dark:text-gray-100">{job.title}</h3>
-                        <p className="text-gray-500 dark:text-gray-400 font-medium text-sm">{job.company}</p>
+                        <h3 className="text-base font-bold text-gray-900 dark:text-gray-100">
+                          {job.title}
+                        </h3>
+                        <p className="text-gray-500 dark:text-gray-400 font-medium text-sm">
+                          {job.company}
+                        </p>
                       </div>
 
                       <div className="flex flex-col items-end gap-3">
@@ -748,7 +846,9 @@ export default function Home() {
 
             {/* Right Column: Featured Talent */}
             <div>
-              <h2 className="text-lg lg:text-xl font-semibold text-zinc-900 dark:text-gray-100 mb-4 lg:mb-6 tracking-tight text-left ml-2 lg:ml-0">Featured Talent</h2>
+              <h2 className="text-lg lg:text-xl font-semibold text-zinc-900 dark:text-gray-100 mb-4 lg:mb-6 tracking-tight text-left ml-2 lg:ml-0">
+                Featured Talent
+              </h2>
 
               <div className="space-y-3 lg:space-y-4">
                 {[
@@ -756,23 +856,37 @@ export default function Home() {
                     name: "John Deo",
                     role: "Senior React Developer",
                     experience: "5 Years",
-                    skills: ["React", "Java", "Python", "HTML", "SQL", "Docker"],
-                    avatar: "https://i.pravatar.cc/150?u=john1"
+                    skills: [
+                      "React",
+                      "Java",
+                      "Python",
+                      "HTML",
+                      "SQL",
+                      "Docker",
+                    ],
+                    avatar: "https://i.pravatar.cc/150?u=john1",
                   },
                   {
                     name: "John Deo",
                     role: "Senior React Developer",
                     experience: "5 Years",
-                    skills: ["React", "Java", "Python", "HTML", "SQL", "Docker"],
-                    avatar: "https://i.pravatar.cc/150?u=john2"
+                    skills: [
+                      "React",
+                      "Java",
+                      "Python",
+                      "HTML",
+                      "SQL",
+                      "Docker",
+                    ],
+                    avatar: "https://i.pravatar.cc/150?u=john2",
                   },
                   {
                     name: "John Deo",
                     role: "Senior React Developer",
                     experience: "5 Years",
                     skills: ["React", "Java", "Python", "HTML"],
-                    avatar: "https://i.pravatar.cc/150?u=john3"
-                  }
+                    avatar: "https://i.pravatar.cc/150?u=john3",
+                  },
                 ].map((talent, index) => (
                   <div
                     key={index}
@@ -789,10 +903,16 @@ export default function Home() {
                       <div className="flex-1 min-w-0">
                         <div className="flex justify-between items-start mb-1">
                           <div>
-                            <h3 className="text-base font-bold text-gray-900 dark:text-gray-100">{talent.name}</h3>
-                            <p className="text-gray-500 dark:text-gray-400 font-medium text-sm">{talent.role}</p>
+                            <h3 className="text-base font-bold text-gray-900 dark:text-gray-100">
+                              {talent.name}
+                            </h3>
+                            <p className="text-gray-500 dark:text-gray-400 font-medium text-sm">
+                              {talent.role}
+                            </p>
                           </div>
-                          <span className="text-xs font-semibold text-gray-900 dark:text-gray-100 shrink-0">{talent.experience}</span>
+                          <span className="text-xs font-semibold text-gray-900 dark:text-gray-100 shrink-0">
+                            {talent.experience}
+                          </span>
                         </div>
 
                         {/* Skills Tags */}
@@ -812,7 +932,6 @@ export default function Home() {
                 ))}
               </div>
             </div>
-
           </div>
         </div>
       </section>
@@ -848,17 +967,27 @@ export default function Home() {
               <Quote className="absolute top-8 right-8 text-indigo-100 dark:text-indigo-900/30 w-12 h-12" />
               <div className="flex gap-1 mb-4 lg:mb-6">
                 {[1, 2, 3, 4, 5].map((i) => (
-                  <Star key={i} size={18} className="fill-yellow-400 text-yellow-400" />
+                  <Star
+                    key={i}
+                    size={18}
+                    className="fill-yellow-400 text-yellow-400"
+                  />
                 ))}
               </div>
               <p className="text-zinc-600 dark:text-gray-300 font-medium mb-4 lg:mb-8 leading-relaxed text-base lg:text-lg relative z-10">
-                "PreviewCV made sharing my resume so much easier. No more worrying about outdated PDFs! It's been a game changer for my job search."
+                "PreviewCV made sharing my resume so much easier. No more
+                worrying about outdated PDFs! It's been a game changer for my
+                job search."
               </p>
               <div className="mt-auto flex items-center gap-4">
                 <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-400 to-indigo-600 ring-4 ring-indigo-50 dark:ring-indigo-900/20"></div>
                 <div>
-                  <p className="font-bold text-zinc-900 dark:text-gray-100">Sarah Chen</p>
-                  <p className="text-sm text-zinc-500 dark:text-gray-400 font-medium">Software Engineer</p>
+                  <p className="font-bold text-zinc-900 dark:text-gray-100">
+                    Sarah Chen
+                  </p>
+                  <p className="text-sm text-zinc-500 dark:text-gray-400 font-medium">
+                    Software Engineer
+                  </p>
                 </div>
               </div>
             </div>
@@ -868,17 +997,27 @@ export default function Home() {
               <Quote className="absolute top-8 right-8 text-purple-100 dark:text-purple-900/30 w-12 h-12" />
               <div className="flex gap-1 mb-4 lg:mb-6">
                 {[1, 2, 3, 4, 5].map((i) => (
-                  <Star key={i} size={18} className="fill-yellow-400 text-yellow-400" />
+                  <Star
+                    key={i}
+                    size={18}
+                    className="fill-yellow-400 text-yellow-400"
+                  />
                 ))}
               </div>
               <p className="text-zinc-600 dark:text-gray-300 font-medium mb-4 lg:mb-8 leading-relaxed text-base lg:text-lg relative z-10">
-                "As a recruiter, I love how quickly I can view candidate profiles. It saves me so much time and the layout is always perfect."
+                "As a recruiter, I love how quickly I can view candidate
+                profiles. It saves me so much time and the layout is always
+                perfect."
               </p>
               <div className="mt-auto flex items-center gap-4">
                 <div className="w-12 h-12 rounded-full bg-gradient-to-br from-indigo-400 to-purple-600 ring-4 ring-purple-50 dark:ring-purple-900/20"></div>
                 <div>
-                  <p className="font-bold text-zinc-900 dark:text-gray-100">Michael Torres</p>
-                  <p className="text-sm text-zinc-500 dark:text-gray-400 font-medium">Talent Acquisition Lead</p>
+                  <p className="font-bold text-zinc-900 dark:text-gray-100">
+                    Michael Torres
+                  </p>
+                  <p className="text-sm text-zinc-500 dark:text-gray-400 font-medium">
+                    Talent Acquisition Lead
+                  </p>
                 </div>
               </div>
             </div>
@@ -888,25 +1027,33 @@ export default function Home() {
               <Quote className="absolute top-8 right-8 text-pink-100 dark:text-pink-900/30 w-12 h-12" />
               <div className="flex gap-1 mb-4 lg:mb-6">
                 {[1, 2, 3, 4, 5].map((i) => (
-                  <Star key={i} size={18} className="fill-yellow-400 text-yellow-400" />
+                  <Star
+                    key={i}
+                    size={18}
+                    className="fill-yellow-400 text-yellow-400"
+                  />
                 ))}
               </div>
               <p className="text-zinc-600 dark:text-gray-300 font-medium mb-4 lg:mb-8 leading-relaxed text-base lg:text-lg relative z-10">
-                "The integration with LetsMakeCV is seamless. One account, two powerful tools! I can update my CV and it reflects instantly here."
+                "The integration with LetsMakeCV is seamless. One account, two
+                powerful tools! I can update my CV and it reflects instantly
+                here."
               </p>
               <div className="mt-auto flex items-center gap-4">
                 <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-400 to-pink-600 ring-4 ring-pink-50 dark:ring-pink-900/20"></div>
                 <div>
-                  <p className="font-bold text-zinc-900 dark:text-gray-100">Priya Patel</p>
-                  <p className="text-sm text-zinc-500 dark:text-gray-400 font-medium">UX Designer</p>
+                  <p className="font-bold text-zinc-900 dark:text-gray-100">
+                    Priya Patel
+                  </p>
+                  <p className="text-sm text-zinc-500 dark:text-gray-400 font-medium">
+                    UX Designer
+                  </p>
                 </div>
               </div>
             </div>
           </div>
         </div>
       </section>
-
-
 
       {/* Core Features Section */}
       <section className="py-12 lg:py-24 bg-zinc-900 relative overflow-hidden">
@@ -918,7 +1065,9 @@ export default function Home() {
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 w-full">
           <div className="text-left w-full mb-8 lg:mb-16">
-            <h2 className="text-2xl lg:text-4xl font-bold text-white mb-4 lg:mb-6 tracking-tight text-left">Platform Capabilities</h2>
+            <h2 className="text-2xl lg:text-4xl font-bold text-white mb-4 lg:mb-6 tracking-tight text-left">
+              Platform Capabilities
+            </h2>
             <p className="text-base text-zinc-400 font-medium text-left max-w-2xl">
               Engineered for speed, security, and seamless connections.
             </p>
@@ -926,15 +1075,17 @@ export default function Home() {
 
           {/* Main Grid */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
-
             {/* Card 1: Secure Sharing */}
             <div className="group relative bg-zinc-800/40 hover:bg-zinc-800/60 backdrop-blur-md rounded-2xl p-6 lg:p-8 border border-white/5 hover:border-white/10 transition-all duration-300">
               <div className="w-12 h-12 bg-zinc-900 rounded-xl flex items-center justify-center border border-white/10 mb-4 lg:mb-6 text-white group-hover:scale-110 group-hover:bg-zinc-950 transition-all duration-300 shadow-lg shadow-black/20">
                 <LinkIcon size={22} strokeWidth={2} />
               </div>
-              <h3 className="text-lg lg:text-xl font-bold text-white mb-2 lg:mb-3">Secure Sharing</h3>
+              <h3 className="text-lg lg:text-xl font-bold text-white mb-2 lg:mb-3">
+                Secure Sharing
+              </h3>
               <p className="text-zinc-400 leading-relaxed text-sm">
-                Encrypted token-based access ensures only the right eyes see your professional profile.
+                Encrypted token-based access ensures only the right eyes see
+                your professional profile.
               </p>
             </div>
 
@@ -943,9 +1094,12 @@ export default function Home() {
               <div className="w-12 h-12 bg-zinc-900 rounded-xl flex items-center justify-center border border-white/10 mb-4 lg:mb-6 text-white group-hover:scale-110 group-hover:bg-zinc-950 transition-all duration-300 shadow-lg shadow-black/20">
                 <ScanEye size={22} strokeWidth={2} />
               </div>
-              <h3 className="text-lg lg:text-xl font-bold text-white mb-2 lg:mb-3">Live Preview</h3>
+              <h3 className="text-lg lg:text-xl font-bold text-white mb-2 lg:mb-3">
+                Live Preview
+              </h3>
               <p className="text-zinc-400 leading-relaxed text-sm">
-                Proprietary PDF rendering engine for a seamless, fast viewing experience on any device.
+                Proprietary PDF rendering engine for a seamless, fast viewing
+                experience on any device.
               </p>
             </div>
 
@@ -954,12 +1108,14 @@ export default function Home() {
               <div className="w-12 h-12 bg-zinc-900 rounded-xl flex items-center justify-center border border-white/10 mb-4 lg:mb-6 text-white group-hover:scale-110 group-hover:bg-zinc-950 transition-all duration-300 shadow-lg shadow-black/20">
                 <Sparkles size={22} strokeWidth={2} />
               </div>
-              <h3 className="text-lg lg:text-xl font-bold text-white mb-2 lg:mb-3">Smart Matching</h3>
+              <h3 className="text-lg lg:text-xl font-bold text-white mb-2 lg:mb-3">
+                Smart Matching
+              </h3>
               <p className="text-zinc-400 leading-relaxed text-sm">
-                Integrated with letsmakecv.com to match candidates with their dream jobs instantly.
+                Integrated with letsmakecv.com to match candidates with their
+                dream jobs instantly.
               </p>
             </div>
-
           </div>
         </div>
       </section>
@@ -968,7 +1124,6 @@ export default function Home() {
       {/* FAQ Section */}
       <section className="w-full max-w-7xl mx-auto px-4 lg:px-6 mb-12 lg:mb-16">
         <div className="bg-[#FAF9FF] dark:bg-gray-800 rounded-[32px] p-6 lg:p-10 relative overflow-hidden border border-purple-50 dark:border-gray-700">
-
           {/* Background Noise & Gradients */}
           <div className="absolute inset-0 -z-10">
             <div className="absolute inset-0 opacity-[0.03] bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]"></div>
@@ -976,11 +1131,14 @@ export default function Home() {
           </div>
 
           <div className="w-full max-w-4xl mx-auto px-0 lg:px-4 relative z-10">
-
             {/* Header */}
             <div className="mb-8 lg:mb-12 w-full">
-              <h1 className="text-xl lg:text-3xl font-bold text-zinc-900 dark:text-white tracking-tight text-left mb-2 lg:mb-4">Frequently Asked Questions</h1>
-              <p className="text-sm text-zinc-500 dark:text-zinc-400 font-medium text-left max-w-2xl">Everything you need to know about PreviewCV.</p>
+              <h1 className="text-xl lg:text-3xl font-bold text-zinc-900 dark:text-white tracking-tight text-left mb-2 lg:mb-4">
+                Frequently Asked Questions
+              </h1>
+              <p className="text-sm text-zinc-500 dark:text-zinc-400 font-medium text-left max-w-2xl">
+                Everything you need to know about PreviewCV.
+              </p>
             </div>
 
             {/* Accordion List */}
@@ -988,56 +1146,75 @@ export default function Home() {
               {[
                 {
                   question: "Is PreviewCV free to use?",
-                  answer: "Yes! PreviewCV is completely free for candidates. Create your resume on LetsMakeCV and share your PreviewCV link at no cost. Recruiters can access basic features for free as well."
+                  answer:
+                    "Yes! PreviewCV is completely free for candidates. Create your resume on LetsMakeCV and share your PreviewCV link at no cost. Recruiters can access basic features for free as well.",
                 },
                 {
                   question: "Do I need a LetsMakeCV account?",
-                  answer: "Yes, PreviewCV is the sharing platform for resumes built on LetsMakeCV. You'll need an account to create and manage your resume content, which automatically syncs here."
+                  answer:
+                    "Yes, PreviewCV is the sharing platform for resumes built on LetsMakeCV. You'll need an account to create and manage your resume content, which automatically syncs here.",
                 },
                 {
                   question: "How do I get my PreviewCV link?",
-                  answer: "Once you publish your resume on LetsMakeCV, a unique PreviewCV link is automatically generated for you. You can find this on your dashboard or sharing settings."
+                  answer:
+                    "Once you publish your resume on LetsMakeCV, a unique PreviewCV link is automatically generated for you. You can find this on your dashboard or sharing settings.",
                 },
                 {
                   question: "What happens when I update my resume?",
-                  answer: "Any changes you make on LetsMakeCV are instantly reflected on your PreviewCV link. No need to re-upload files or send new links to recruiters."
+                  answer:
+                    "Any changes you make on LetsMakeCV are instantly reflected on your PreviewCV link. No need to re-upload files or send new links to recruiters.",
                 },
                 {
                   question: "Is my data secure?",
-                  answer: "Absolutely. We use industry-standard encryption to protect your personal information. You also have granular control over who can view your profile."
+                  answer:
+                    "Absolutely. We use industry-standard encryption to protect your personal information. You also have granular control over who can view your profile.",
                 },
                 {
                   question: "Can I track who views my resume?",
-                  answer: "Yes, our analytics dashboard shows you when your resume was viewed, allowing you to gauge interest from recruiters and follow up effectively."
-                }
+                  answer:
+                    "Yes, our analytics dashboard shows you when your resume was viewed, allowing you to gauge interest from recruiters and follow up effectively.",
+                },
               ].map((item, index) => (
                 <div
                   key={index}
-                  onClick={() => setOpenIndex(openIndex === index ? null : index)}
+                  onClick={() =>
+                    setOpenIndex(openIndex === index ? null : index)
+                  }
                   className={`
                     group cursor-pointer transition-all duration-300 ease-in-out border border-zinc-200 dark:border-white/5
-                    ${openIndex === index
-                      ? 'bg-white dark:bg-zinc-900 p-5 lg:p-6 rounded-2xl shadow-lg shadow-black/5 dark:shadow-black/20'
-                      : 'bg-white/50 dark:bg-zinc-900/30 py-3 lg:py-4 px-5 lg:px-6 hover:bg-white dark:hover:bg-zinc-800 rounded-xl hover:shadow-sm'
+                    ${
+                      openIndex === index
+                        ? "bg-white dark:bg-zinc-900 p-5 lg:p-6 rounded-2xl shadow-lg shadow-black/5 dark:shadow-black/20"
+                        : "bg-white/50 dark:bg-zinc-900/30 py-3 lg:py-4 px-5 lg:px-6 hover:bg-white dark:hover:bg-zinc-800 rounded-xl hover:shadow-sm"
                     }
                   `}
                 >
                   <div className="flex justify-between items-center gap-4">
-                    <h3 className={`text-sm lg:text-lg font-medium transition-colors ${openIndex === index ? 'text-zinc-900 dark:text-gray-100' : 'text-zinc-800 dark:text-gray-300'}`}>
+                    <h3
+                      className={`text-sm lg:text-lg font-medium transition-colors ${openIndex === index ? "text-zinc-900 dark:text-gray-100" : "text-zinc-800 dark:text-gray-300"}`}
+                    >
                       {item.question}
                     </h3>
 
-                    <div className={`shrink-0 transition-transform duration-300 ${openIndex === index ? 'rotate-180' : ''}`}>
+                    <div
+                      className={`shrink-0 transition-transform duration-300 ${openIndex === index ? "rotate-180" : ""}`}
+                    >
                       {openIndex === index ? (
-                        <MinusCircle className="w-5 h-5 text-emerald-600/70 dark:text-emerald-400" strokeWidth={1.5} />
+                        <MinusCircle
+                          className="w-5 h-5 text-emerald-600/70 dark:text-emerald-400"
+                          strokeWidth={1.5}
+                        />
                       ) : (
-                        <PlusCircle className="w-5 h-5 text-zinc-400 dark:text-gray-500 group-hover:text-zinc-600 dark:group-hover:text-gray-300" strokeWidth={1.5} />
+                        <PlusCircle
+                          className="w-5 h-5 text-zinc-400 dark:text-gray-500 group-hover:text-zinc-600 dark:group-hover:text-gray-300"
+                          strokeWidth={1.5}
+                        />
                       )}
                     </div>
                   </div>
 
                   <div
-                    className={`grid transition-[grid-template-rows] duration-500 ease-in-out ${openIndex === index ? 'grid-rows-[1fr] opacity-100 mt-2 lg:mt-3' : 'grid-rows-[0fr] opacity-0'}`}
+                    className={`grid transition-[grid-template-rows] duration-500 ease-in-out ${openIndex === index ? "grid-rows-[1fr] opacity-100 mt-2 lg:mt-3" : "grid-rows-[0fr] opacity-0"}`}
                   >
                     <div className="overflow-hidden">
                       <p className="text-zinc-600 dark:text-gray-400 leading-relaxed text-xs lg:text-sm pr-4 lg:pr-8">
