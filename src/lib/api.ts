@@ -25,6 +25,7 @@ import type {
   ExperienceCardsResponse,
   RemoteCardsResponse,
   CardsSummaryResponse,
+  RelevantJobsResponse,
 } from "@/types/jobs";
 
 const API_BASE_URL =
@@ -487,6 +488,35 @@ export class ApiClient {
       true,
       false,
     );
+  }
+
+  async getRelevantJobs(params?: {
+    limit?: number;
+    offset?: number;
+    min_score?: number;
+    include_applied?: boolean;
+    job_type?: string;
+    experience_level?: string;
+    country?: string;
+    remote_only?: boolean;
+  }): Promise<RelevantJobsResponse> {
+    const queryParams = new URLSearchParams();
+    if (params?.limit) queryParams.append("limit", params.limit.toString());
+    if (params?.offset) queryParams.append("offset", params.offset.toString());
+    if (params?.min_score)
+      queryParams.append("min_score", params.min_score.toString());
+    if (params?.include_applied !== undefined)
+      queryParams.append("include_applied", params.include_applied.toString());
+    if (params?.job_type) queryParams.append("job_type", params.job_type);
+    if (params?.experience_level)
+      queryParams.append("experience_level", params.experience_level);
+    if (params?.country) queryParams.append("country", params.country);
+    if (params?.remote_only !== undefined)
+      queryParams.append("remote_only", params.remote_only.toString());
+
+    const url = `/api/v1/jobs/relevant${queryParams.toString() ? "?" + queryParams.toString() : ""}`;
+
+    return this.request<RelevantJobsResponse>(url, {}, true, false);
   }
 
   /**

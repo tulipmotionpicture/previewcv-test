@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
 import { api } from "@/lib/api";
 import { Application, PdfResume, Resume, Job } from "@/types/api";
+import { RelevantJobsResponse } from "@/types/jobs";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/context/ToastContext";
 import ResumeUpload from "@/components/ResumeUpload";
@@ -50,6 +51,12 @@ function CandidateDashboardContent() {
   } | null>(null);
   const [statusFilter, setStatusFilter] = useState<string>("");
   const [jobs, setJobs] = useState<Job[]>([]);
+  const [relevantJobsData, setRelevantJobsData] =
+    useState<RelevantJobsResponse | null>(null);
+  const [relevantJobsOffset, setRelevantJobsOffset] = useState(0);
+  const [relevantJobsHasMore, setRelevantJobsHasMore] = useState(false);
+  const [relevantJobsInfiniteLoading, setRelevantJobsInfiniteLoading] =
+    useState(false);
   const [loading, setLoading] = useState(false);
   const [jobsLoading, setJobsLoading] = useState(false);
 
@@ -114,25 +121,57 @@ function CandidateDashboardContent() {
     }
   };
 
-  const fetchJobs = async () => {
-    setJobsLoading(true);
+  const fetchJobs = async (isLoadMore = false) => {
+    if (isLoadMore) {
+      setRelevantJobsInfiniteLoading(true);
+    } else {
+      setJobsLoading(true);
+      setRelevantJobsOffset(0);
+    }
+
     try {
-      const response = await api.getJobs(new URLSearchParams());
-      // Adjust based on API response structure
-      if (response.items) {
-        setJobs(response.items);
-      } else if (response.jobs) {
-        setJobs(response.jobs);
-      } else if (Array.isArray(response)) {
-        setJobs(response);
+      const offset = isLoadMore ? relevantJobsOffset : 0;
+      const response = await api.getRelevantJobs({ limit: 20, offset });
+
+      if (response.success && response.jobs) {
+        if (isLoadMore && relevantJobsData) {
+          // Append new jobs to existing ones
+          setRelevantJobsData({
+            ...response,
+            jobs: [...relevantJobsData.jobs, ...response.jobs],
+          });
+        } else {
+          // Replace with new data
+          setRelevantJobsData(response);
+        }
+
+        setRelevantJobsOffset(offset + response.jobs.length);
+        setRelevantJobsHasMore(response.pagination?.has_more || false);
       } else {
-        setJobs([]);
+        if (!isLoadMore) {
+          setRelevantJobsData(null);
+          setJobs([]);
+          setRelevantJobsHasMore(false);
+        }
       }
     } catch (error) {
-      console.error("Failed to fetch jobs", error);
-      setJobs([]);
+      console.error("Failed to fetch relevant jobs", error);
+      if (!isLoadMore) {
+        setRelevantJobsData(null);
+        setJobs([]);
+        setRelevantJobsHasMore(false);
+      }
     } finally {
-      setJobsLoading(false);
+      setRelevantJobsInfiniteLoading(false);
+      if (!isLoadMore) {
+        setJobsLoading(false);
+      }
+    }
+  };
+
+  const loadMoreJobs = () => {
+    if (!relevantJobsInfiniteLoading && relevantJobsHasMore) {
+      fetchJobs(true);
     }
   };
 
@@ -194,7 +233,7 @@ function CandidateDashboardContent() {
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col">
-        <main className="flex-1 p-8 max-w-7xl w-full mx-auto">
+        <main className="flex-1 p-2 max-w-7xl w-full mx-auto">
           {/* Applications Tab */}
           {activeTab === "applications" && (
             <div className="animate-in fade-in duration-200">
@@ -207,44 +246,94 @@ function CandidateDashboardContent() {
                     Track your job application status
                   </p>
                 </div>
-
-                {/* Search Bar - Flat Design */}
-                <div className="relative max-w-md w-full">
-                  <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-                  <input
-                    type="text"
-                    placeholder="Search applications..."
-                    className="w-full pl-12 pr-4 py-3 border border-gray-200 dark:border-gray-800 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:border-[#0369A1] dark:focus:border-[#0EA5E9] transition-colors duration-150"
-                  />
-                </div>
               </div>
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-2 mb-8">
                 <div className="col-span-2">
-                  {/* Status Filter */}
-                  <div className="mb-4 flex items-center gap-4">
-                    <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                      Filter by status:
-                    </label>
-                    <select
-                      value={statusFilter}
-                      onChange={(e) => {
-                        setStatusFilter(e.target.value);
-                        fetchApplications({
-                          status_filter: e.target.value || undefined,
-                        });
-                      }}
-                      className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:border-[#0369A1] dark:focus:border-[#0EA5E9] transition-colors"
-                    >
-                      <option value="">All Applications</option>
-                      <option value="applied">Applied</option>
-                      <option value="under_review">Under Review</option>
-                      <option value="interview_scheduled">
-                        Interview Scheduled
-                      </option>
-                      <option value="offered">Offered</option>
-                      <option value="accepted">Accepted</option>
-                      <option value="rejected">Rejected</option>
-                    </select>
+                  {/* Filters and Search Section */}
+                  <div className="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-800 p-4 mb-2">
+                    <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+                      {/* Status Filter */}
+                      <div className="flex items-center gap-3 min-w-0 flex-1 sm:flex-initial">
+                        <label className="text-sm font-semibold text-gray-700 dark:text-gray-300 whitespace-nowrap">
+                          Filter by status:
+                        </label>
+                        <div className="relative">
+                          <select
+                            value={statusFilter}
+                            onChange={(e) => {
+                              setStatusFilter(e.target.value);
+                              fetchApplications({
+                                status_filter: e.target.value || undefined,
+                              });
+                            }}
+                            className="appearance-none px-4 py-2 pr-8 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-[#0369A1] focus:border-[#0369A1] dark:focus:ring-[#0EA5E9] dark:focus:border-[#0EA5E9] transition-all duration-150 text-sm"
+                          >
+                            <option value="">All Applications</option>
+                            <option value="applied">Applied</option>
+                            <option value="under_review">Under Review</option>
+                            <option value="interview_scheduled">
+                              Interview Scheduled
+                            </option>
+                            <option value="offered">Offered</option>
+                            <option value="accepted">Accepted</option>
+                            <option value="rejected">Rejected</option>
+                          </select>
+                          <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
+                            <svg
+                              className="w-4 h-4 text-gray-400"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M19 9l-7 7-7-7"
+                              />
+                            </svg>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Search Bar */}
+                      <div className="flex-1 max-w-md">
+                        <div className="relative">
+                          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                          <input
+                            type="text"
+                            placeholder="Search applications by job title or company..."
+                            className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#0369A1] focus:border-[#0369A1] dark:focus:ring-[#0EA5E9] dark:focus:border-[#0EA5E9] transition-all duration-150 text-sm"
+                          />
+                        </div>
+                      </div>
+
+                      {/* Clear Filters Button */}
+                      {statusFilter && (
+                        <button
+                          onClick={() => {
+                            setStatusFilter("");
+                            fetchApplications({});
+                          }}
+                          className="px-3 py-2 text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors duration-150 flex items-center gap-1"
+                        >
+                          <svg
+                            className="w-4 h-4"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M6 18L18 6M6 6l12 12"
+                            />
+                          </svg>
+                          Clear
+                        </button>
+                      )}
+                    </div>
                   </div>
 
                   <ApplicationsList
@@ -304,14 +393,18 @@ function CandidateDashboardContent() {
                       </div>
                     )}
                 </div>
-                <div className="col-span-1 p-4 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg shadow-sm">
-                  <h1 className="text-xl font-bold text-[#0C4A6E] dark:text-gray-100 mb-4 flex items-center gap-2">
+                <div className="col-span-1 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg shadow-sm">
+                  <h1 className="text-xl font-bold text-[#0C4A6E] dark:text-gray-100 mb-1 flex items-center gap-2  p-3">
                     <Sparkles className="w-5 h-5 text-[#0369A1]" />
                     Relevant Jobs
                   </h1>
-                  <div className="max-h-[600px] overflow-y-auto pr-2">
-                    <RelevantJobs jobs={jobs} loading={jobsLoading} />
-                  </div>
+                  <RelevantJobs
+                    relevantJobsData={relevantJobsData}
+                    loading={jobsLoading}
+                    onLoadMore={loadMoreJobs}
+                    hasMore={relevantJobsHasMore}
+                    infiniteScrollLoading={relevantJobsInfiniteLoading}
+                  />
                 </div>
               </div>
             </div>

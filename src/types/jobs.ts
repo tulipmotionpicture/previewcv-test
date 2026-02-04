@@ -192,3 +192,48 @@ export interface CardsSummaryResponse {
   };
   generated_at: string;
 }
+
+// ============================================================================
+// Relevant Jobs Types
+// ============================================================================
+
+export interface RelevantJob extends Job {
+  relevance_score: number;
+  relevance_tier: string;
+  score_breakdown: {
+    skills_match: number;
+    experience_match: number;
+    location_match: number;
+    job_type_match: number;
+    category_match: number;
+    salary_match: number;
+    behavioral_signals: number;
+  };
+  matched_required_skills?: string[];
+  missing_required_skills?: string[];
+  matched_preferred_skills?: string[];
+  missing_preferred_skills?: string[];
+  why_recommended?: string[];
+  days_since_posted?: number;
+  description: string;
+}
+
+export interface RelevantJobsResponse {
+  success: boolean;
+  profile_completeness: {
+    score: number;
+    improvement_tips: string[];
+  };
+  matching_criteria_summary: {
+    total_jobs: number;
+    average_score: number;
+    top_matching_criteria: string[];
+  };
+  jobs: RelevantJob[];
+  pagination: {
+    total: number;
+    limit: number;
+    offset: number;
+    has_more: boolean;
+  };
+}
