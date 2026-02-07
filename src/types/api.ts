@@ -386,3 +386,176 @@ export interface KycRequirementsResponse {
   country_code: string;
   recruiter_type: string;
 }
+
+// Pricing Types
+export interface JobPlan {
+  id: number;
+  name: string;
+  slug: string;
+  job_post_limit: number | null;
+  applicants_per_job: number | null;
+  job_duration_days: number;
+  has_basic_visibility: boolean;
+  has_limited_analytics: boolean;
+  has_analytics: boolean;
+  has_bulk_messaging: boolean;
+  has_featured_jobs: boolean;
+  has_priority_support: boolean;
+  price_usd: string;
+  price_inr: string;
+  billing_period: string;
+  description: string;
+  is_active: boolean;
+  is_default: boolean;
+  sort_order: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface CvPlan {
+  id: number;
+  name: string;
+  slug: string;
+  credits_per_period: number;
+  has_advanced_filters: boolean;
+  has_bulk_download: boolean;
+  has_priority_cv_access: boolean;
+  price_usd: string;
+  price_inr: string;
+  billing_period: string;
+  description: string;
+  is_active: boolean;
+  sort_order: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface RecruiterPricingResponse {
+  job_plans: JobPlan[];
+  cv_plans: CvPlan[];
+}
+
+// Subscription Types
+export interface JobSubscription {
+  id: number;
+  recruiter_id: number;
+  plan_config_id: number;
+  status: "active" | "cancelled" | "expired" | "paused";
+  stripe_subscription_id: string | null;
+  razorpay_subscription_id: string | null;
+  current_period_start: string;
+  current_period_end: string;
+  jobs_posted_this_period: number;
+  period_reset_at: string;
+  canceled_at: string | null;
+  cancel_at_period_end: boolean;
+  created_at: string;
+  updated_at: string;
+  plan_config: JobPlan;
+  jobs_remaining?: number;
+  can_post_jobs?: boolean;
+  days_until_renewal?: number;
+}
+
+export interface CvSubscription {
+  id: number;
+  recruiter_id: number;
+  plan_config_id: number;
+  status: "active" | "cancelled" | "expired" | "paused";
+  credits_remaining: number;
+  credits_used_this_period: number;
+  stripe_subscription_id: string | null;
+  razorpay_subscription_id: string | null;
+  current_period_start: string;
+  current_period_end: string;
+  canceled_at: string | null;
+  cancel_at_period_end: boolean;
+  created_at: string;
+  updated_at: string;
+  plan_config: CvPlan;
+  credits_percentage_used?: number;
+  has_credits?: boolean;
+  days_until_renewal?: number;
+}
+
+export interface SubscriptionDashboard {
+  job_subscription: JobSubscription | null;
+  cv_subscription: CvSubscription | null;
+  has_active_job_subscription: boolean;
+  has_active_cv_subscription: boolean;
+  total_monthly_cost_usd: number;
+  total_monthly_cost_inr: number;
+}
+
+export interface PlanSummary {
+  job_plan: {
+    name: string;
+    billing_cycle: string;
+    posts_remaining: number;
+    posts_limit: number;
+    renewal_date: string;
+    amount: number;
+  } | null;
+  cv_plan: {
+    name: string;
+    credits_remaining: number;
+    expiry_date: string | null;
+  } | null;
+}
+
+export interface SubscriptionHistory {
+  subscription_id: number;
+  subscription_type: string;
+  plan_name: string;
+  status: string;
+  started_at: string;
+  ended_at: string | null;
+  is_current: boolean;
+}
+
+export interface SubscriptionHistoryResponse {
+  job_subscriptions: SubscriptionHistory[];
+  cv_subscriptions: SubscriptionHistory[];
+}
+
+export interface CreditsBalance {
+  total_credits: number;
+  credits_used: number;
+  credits_remaining: number;
+  credits_purchased_this_month: number;
+  credits_used_this_month: number;
+  recent_transactions: CreditTransaction[];
+}
+
+export interface CreditTransaction {
+  id: number;
+  type: "purchase" | "usage" | "refund" | "bonus";
+  credits: number;
+  description: string;
+  created_at: string;
+}
+
+export interface CreateJobSubscriptionRequest {
+  plan_config_id: number;
+  payment_gateway: "stripe" | "razorpay";
+}
+
+export interface CreateCvSubscriptionRequest {
+  plan_config_id: number;
+  payment_gateway: "stripe" | "razorpay";
+}
+
+export interface CancelSubscriptionRequest {
+  cancel_at_period_end: boolean;
+  cancellation_reason?: string;
+}
+
+export interface CancelSubscriptionResponse {
+  subscription_id: number;
+  subscription_type: string;
+  status: string;
+  canceled_at: string;
+  cancel_at_period_end: boolean;
+  will_expire_at: string;
+  message: string;
+}

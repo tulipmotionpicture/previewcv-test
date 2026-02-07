@@ -18,6 +18,8 @@ import CompanyGallerySection from "@/components/CompanyGallerySection";
 import RecruiterGalleryEventsSection from "@/components/RecruiterGalleryEventsSection";
 import RecruiterProfileEdit from "./profile/page";
 import KYCVerification from "@/components/recruiter/KYCVerification";
+import PricingPlans from "@/components/recruiter/PricingPlans";
+import SubscriptionDashboard from "@/components/recruiter/SubscriptionDashboard";
 
 // Import separated components
 import {
@@ -810,6 +812,14 @@ export default function RecruiterDashboard() {
         {activeTab === "profile" && <RecruiterProfileEdit />}
 
         {activeTab === "kyc" && <KYCVerification />}
+
+        {activeTab === "subscriptions" && (
+          <SubscriptionDashboard
+            onNavigateToPricing={() => setActiveTab("pricing")}
+          />
+        )}
+
+        {activeTab === "pricing" && <PricingPlans />}
       </main>
 
       {/* Application Detail Modal */}

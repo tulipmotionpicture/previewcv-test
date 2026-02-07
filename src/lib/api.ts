@@ -17,6 +17,19 @@ import {
   KycDocument,
   KycStatus,
   KycRequirementsResponse,
+  RecruiterPricingResponse,
+  JobPlan,
+  CvPlan,
+  JobSubscription,
+  CvSubscription,
+  SubscriptionDashboard,
+  PlanSummary,
+  SubscriptionHistoryResponse,
+  CreditsBalance,
+  CreateJobSubscriptionRequest,
+  CreateCvSubscriptionRequest,
+  CancelSubscriptionRequest,
+  CancelSubscriptionResponse,
 } from "@/types/api";
 import {
   ReviewedResumeMetadata,
@@ -598,6 +611,128 @@ export class ApiClient {
   ): Promise<KycRequirementsResponse> {
     return this.request(
       `/api/v1/recruiters/kyc/requirements?country_code=${countryCode}`,
+      {},
+      true,
+      true,
+    );
+  }
+
+  // --- Recruiter Pricing ---
+  async getRecruiterPricing(): Promise<RecruiterPricingResponse> {
+    return this.request("/api/v1/recruiter-pricing", {}, false, false);
+  }
+
+  async getJobPlans(): Promise<JobPlan[]> {
+    return this.request(
+      "/api/v1/recruiter-pricing/job-plans",
+      {},
+      false,
+      false,
+    );
+  }
+
+  async getCvPlans(): Promise<CvPlan[]> {
+    return this.request("/api/v1/recruiter-pricing/cv-plans", {}, false, false);
+  }
+
+  // --- Recruiter Subscriptions ---
+  async getSubscriptionDashboard(): Promise<SubscriptionDashboard> {
+    return this.request(
+      "/api/v1/recruiter/subscriptions/dashboard",
+      {},
+      true,
+      true,
+    );
+  }
+
+  async getPlanSummary(): Promise<PlanSummary> {
+    return this.request(
+      "/api/v1/recruiter/subscriptions/plan-summary",
+      {},
+      true,
+      true,
+    );
+  }
+
+  async getCurrentJobSubscription(): Promise<JobSubscription | null> {
+    return this.request("/api/v1/recruiter/subscriptions/job", {}, true, true);
+  }
+
+  async createJobSubscription(
+    data: CreateJobSubscriptionRequest,
+  ): Promise<JobSubscription> {
+    return this.request(
+      "/api/v1/recruiter/subscriptions/job",
+      {
+        method: "POST",
+        body: JSON.stringify(data),
+      },
+      true,
+      true,
+    );
+  }
+
+  async cancelJobSubscription(
+    data: CancelSubscriptionRequest,
+  ): Promise<CancelSubscriptionResponse> {
+    return this.request(
+      "/api/v1/recruiter/subscriptions/job",
+      {
+        method: "DELETE",
+        body: JSON.stringify(data),
+      },
+      true,
+      true,
+    );
+  }
+
+  async getCurrentCvSubscription(): Promise<CvSubscription | null> {
+    return this.request("/api/v1/recruiter/subscriptions/cv", {}, true, true);
+  }
+
+  async createCvSubscription(
+    data: CreateCvSubscriptionRequest,
+  ): Promise<CvSubscription> {
+    return this.request(
+      "/api/v1/recruiter/subscriptions/cv",
+      {
+        method: "POST",
+        body: JSON.stringify(data),
+      },
+      true,
+      true,
+    );
+  }
+
+  async cancelCvSubscription(
+    data: CancelSubscriptionRequest,
+  ): Promise<CancelSubscriptionResponse> {
+    return this.request(
+      "/api/v1/recruiter/subscriptions/cv",
+      {
+        method: "DELETE",
+        body: JSON.stringify(data),
+      },
+      true,
+      true,
+    );
+  }
+
+  async getSubscriptionHistory(
+    limit: number = 50,
+    offset: number = 0,
+  ): Promise<SubscriptionHistoryResponse> {
+    return this.request(
+      `/api/v1/recruiter/subscriptions/history?limit=${limit}&offset=${offset}`,
+      {},
+      true,
+      true,
+    );
+  }
+
+  async getCreditsBalance(): Promise<CreditsBalance> {
+    return this.request(
+      "/api/v1/recruiter/subscriptions/credits",
       {},
       true,
       true,

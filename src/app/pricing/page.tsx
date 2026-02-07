@@ -2,11 +2,15 @@
 
 import PricingPage from "@/components/Pricing";
 import React from "react";
+import { useRouter } from "next/navigation";
 
 function page() {
+  const router = useRouter();
+
   const handleNavigate = (page: string) => {
-    // Handle navigation logic here
-    console.log(`Navigating to: ${page}`);
+    // Add leading slash if not present
+    const path = page.startsWith("/") ? page : `/${page}`;
+    router.push(path);
   };
 
   return <PricingPage onNavigate={handleNavigate} />;

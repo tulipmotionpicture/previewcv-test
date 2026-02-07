@@ -7,6 +7,8 @@ import {
   Calendar,
   User,
   Shield,
+  CreditCard,
+  DollarSign,
 } from "lucide-react";
 import DashboardSidebar from "@/components/shared/DashboardSidebar";
 import { Recruiter, KycStatus } from "@/types/api";
@@ -18,7 +20,9 @@ export type DashboardTab =
   | "galleryEvents"
   | "profile"
   | "jobs"
-  | "kyc";
+  | "kyc"
+  | "subscriptions"
+  | "pricing";
 
 interface RecruiterSidebarProps {
   recruiter: Recruiter | null;
@@ -56,6 +60,16 @@ export default function RecruiterSidebar({
       key: "ats",
       label: "Application Review",
       icon: <FileText className="w-5 h-5" />,
+    },
+    {
+      key: "subscriptions",
+      label: "Subscriptions",
+      icon: <CreditCard className="w-5 h-5" />,
+    },
+    {
+      key: "pricing",
+      label: "Pricing Plans",
+      icon: <DollarSign className="w-5 h-5" />,
     },
     {
       key: "kyc",
