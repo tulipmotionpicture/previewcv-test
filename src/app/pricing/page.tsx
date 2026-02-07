@@ -4,7 +4,7 @@ import PricingPage from "@/components/Pricing";
 import React from "react";
 import { useRouter } from "next/navigation";
 
-function page() {
+function Page() {
   const router = useRouter();
 
   const handleNavigate = (page: string) => {
@@ -16,4 +16,4 @@ function page() {
   return <PricingPage onNavigate={handleNavigate} />;
 }
 
-export default page;
+export default Page;
