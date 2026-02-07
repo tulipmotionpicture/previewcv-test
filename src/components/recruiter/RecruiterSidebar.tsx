@@ -6,23 +6,26 @@ import {
   Image as ImageIcon,
   Calendar,
   User,
+  Shield,
 } from "lucide-react";
 import DashboardSidebar from "@/components/shared/DashboardSidebar";
-import { Recruiter } from "@/types/api";
+import { Recruiter, KycStatus } from "@/types/api";
 
 export type DashboardTab =
-  | "jobs"
-  | "ats"
   | "stats"
+  | "ats"
   | "gallery"
   | "galleryEvents"
-  | "profile";
+  | "profile"
+  | "jobs"
+  | "kyc";
 
 interface RecruiterSidebarProps {
   recruiter: Recruiter | null;
   activeTab: DashboardTab;
   onTabChange: (tab: DashboardTab) => void;
   onLogout: () => void;
+  kycStatus?: KycStatus | null;
 }
 
 export default function RecruiterSidebar({
@@ -30,38 +33,56 @@ export default function RecruiterSidebar({
   activeTab,
   onTabChange,
   onLogout,
+  kycStatus,
 }: RecruiterSidebarProps) {
+  const isKycApproved = kycStatus?.kyc_status === "approved";
+
   const navItems: {
     key: DashboardTab;
     label: string;
     icon: React.ReactNode;
   }[] = [
-      {
-        key: "jobs",
-        label: "Manage Jobs",
-        icon: <Briefcase className="w-5 h-5" />,
-      },
-      {
-        key: "ats",
-        label: "Application Review",
-        icon: <FileText className="w-5 h-5" />,
-      },
-      {
-        key: "gallery",
-        label: "Company Gallery",
-        icon: <ImageIcon className="w-5 h-5" />,
-      },
-      {
-        key: "galleryEvents",
-        label: "Gallery Events",
-        icon: <Calendar className="w-5 h-5" />,
-      },
-      { key: "profile", label: "Profile", icon: <User className="w-5 h-5" /> },
-    ];
+    {
+      key: "stats",
+      label: "Dashboard",
+      icon: <Briefcase className="w-5 h-5" />,
+    },
+    {
+      key: "jobs",
+      label: "Manage Jobs",
+      icon: <Briefcase className="w-5 h-5" />,
+    },
+    {
+      key: "ats",
+      label: "Application Review",
+      icon: <FileText className="w-5 h-5" />,
+    },
+    {
+      key: "kyc",
+      label: "KYC Verification",
+      icon: <Shield className="w-5 h-5" />,
+    },
+    {
+      key: "gallery",
+      label: "Company Gallery",
+      icon: <ImageIcon className="w-5 h-5" />,
+    },
+    {
+      key: "galleryEvents",
+      label: "Gallery Events",
+      icon: <Calendar className="w-5 h-5" />,
+    },
+    { key: "profile", label: "Profile", icon: <User className="w-5 h-5" /> },
+  ];
+
+  // Filter nav items to show only KYC and Profile if KYC is not approved
+  const filteredNavItems = isKycApproved
+    ? navItems
+    : navItems.filter((item) => item.key === "kyc" || item.key === "profile");
 
   return (
     <DashboardSidebar
-      navItems={navItems}
+      navItems={filteredNavItems}
       activeTab={activeTab}
       onTabChange={onTabChange}
       onLogout={onLogout}

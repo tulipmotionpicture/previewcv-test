@@ -158,7 +158,7 @@ export default function EditJobModal({
       setFormData({
         ...formData,
         preferred_skills: formData.preferred_skills.filter(
-          (_, i) => i !== index
+          (_, i) => i !== index,
         ),
       });
     }
@@ -187,7 +187,7 @@ export default function EditJobModal({
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-y-auto">
         <div
-          className="absolute inset-0 bg-black bg-opacity-50 backdrop-blur-sm"
+          className="absolute inset-0  bg-opacity-50 backdrop-blur-sm"
           onClick={onClose}
         ></div>
         <div className="relative bg-white dark:bg-gray-900 rounded-3xl shadow-2xl max-w-4xl w-full p-8 my-8">
@@ -239,7 +239,7 @@ export default function EditJobModal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-y-auto">
       <div
-        className="absolute inset-0 bg-black bg-opacity-50 backdrop-blur-sm"
+        className="absolute inset-0 bg-opacity-50 backdrop-blur-sm"
         onClick={onClose}
       ></div>
 

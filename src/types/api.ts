@@ -97,6 +97,7 @@ export interface Job {
   view_count: number;
   status: "active" | "closed" | "draft";
   created_at: string;
+  is_active: boolean;
   updated_at: string;
   // Extended fields for UI
   recruiter_username?: string;
@@ -327,4 +328,61 @@ export interface TopHiringPartnersResponse {
   success: boolean;
   total: number;
   hiring_partners: TopHiringPartner[];
+}
+
+// KYC Types
+export interface KycDocument {
+  id: number;
+  recruiter_id: number;
+  document_type: string;
+  original_filename: string;
+  file_size_bytes: number;
+  file_size_mb: number;
+  status: string;
+  document_number?: string;
+  issuing_authority?: string;
+  issue_date?: string;
+  expiry_date?: string;
+  is_expired: boolean;
+  days_until_expiry?: number;
+  needs_renewal_warning: boolean;
+  issuing_country: string;
+  reviewed_at?: string;
+  rejection_reason?: string;
+  created_at: string;
+  updated_at: string;
+  download_url?: string;
+}
+
+export interface KycStatus {
+  kyc_status: "not_submitted" | "pending_review" | "approved" | "rejected";
+  kyc_status_display: string;
+  kyc_submitted_at?: string;
+  kyc_approved_at?: string;
+  kyc_rejection_reason?: string;
+  can_post_jobs: boolean;
+  uploaded_documents_count: number;
+  approved_documents_count: number;
+  rejected_documents_count: number;
+  pending_documents_count: number;
+}
+
+export interface KycRequirement {
+  id: number;
+  country_code: string;
+  recruiter_type: string;
+  document_type: string;
+  is_required: boolean;
+  display_name: string;
+  description: string;
+  accepts_expiry_date: boolean;
+  max_age_days?: number;
+  priority: number;
+  display_order: number;
+}
+
+export interface KycRequirementsResponse {
+  requirements: KycRequirement[];
+  country_code: string;
+  recruiter_type: string;
 }

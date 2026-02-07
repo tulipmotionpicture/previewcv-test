@@ -14,6 +14,9 @@ import {
   MyJobPostingResponse,
   MyApplicationsResponse,
   ApplicationStatsResponse,
+  KycDocument,
+  KycStatus,
+  KycRequirementsResponse,
 } from "@/types/api";
 import {
   ReviewedResumeMetadata,
@@ -487,6 +490,114 @@ export class ApiClient {
   ): Promise<ApplicationDetailResponse> {
     return this.request<ApplicationDetailResponse>(
       `/api/v1/recruiters/jobs/application/${applicationId}`,
+      {},
+      true,
+      true,
+    );
+  }
+
+  // --- KYC Management ---
+  async uploadKycDocument(
+    file: File,
+    documentType: string,
+    issuingCountry: string,
+    documentNumber?: string,
+    issuingAuthority?: string,
+    issueDate?: string,
+    expiryDate?: string,
+  ): Promise<KycDocument> {
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("document_type", documentType);
+    formData.append("issuing_country", issuingCountry);
+    if (documentNumber) formData.append("document_number", documentNumber);
+    if (issuingAuthority)
+      formData.append("issuing_authority", issuingAuthority);
+    if (issueDate) formData.append("issue_date", issueDate);
+    if (expiryDate) formData.append("expiry_date", expiryDate);
+
+    return this.request(
+      "/api/v1/recruiters/kyc/documents/upload",
+      {
+        method: "POST",
+        body: formData,
+      },
+      true,
+      true,
+    );
+  }
+
+  async getKycDocuments(
+    documentType?: string,
+    status?: string,
+  ): Promise<KycDocument[]> {
+    const params = new URLSearchParams();
+    if (documentType) params.append("document_type", documentType);
+    if (status) params.append("status", status);
+
+    const queryString = params.toString();
+    const url = `/api/v1/recruiters/kyc/documents${queryString ? `?${queryString}` : ""}`;
+
+    return this.request(url, {}, true, true);
+  }
+
+  async getKycDocumentDetail(documentId: number): Promise<KycDocument> {
+    return this.request(
+      `/api/v1/recruiters/kyc/documents/${documentId}`,
+      {},
+      true,
+      true,
+    );
+  }
+
+  async deleteKycDocument(documentId: number): Promise<string> {
+    return this.request(
+      `/api/v1/recruiters/kyc/documents/${documentId}`,
+      {
+        method: "DELETE",
+      },
+      true,
+      true,
+    );
+  }
+
+  async downloadKycDocument(documentId: number): Promise<Blob> {
+    const token =
+      typeof window !== "undefined"
+        ? localStorage.getItem("recruiter_access_token")
+        : null;
+    const response = await fetch(
+      `${this.baseUrl}/api/v1/recruiters/kyc/documents/${documentId}/download`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      },
+    );
+    if (!response.ok) throw new Error("Failed to download document");
+    return response.blob();
+  }
+
+  async submitKycForReview(): Promise<KycStatus> {
+    return this.request(
+      "/api/v1/recruiters/kyc/submit",
+      {
+        method: "POST",
+      },
+      true,
+      true,
+    );
+  }
+
+  async getKycStatus(): Promise<KycStatus> {
+    return this.request("/api/v1/recruiters/kyc/status", {}, true, true);
+  }
+
+  async getKycRequirements(
+    countryCode: string,
+  ): Promise<KycRequirementsResponse> {
+    return this.request(
+      `/api/v1/recruiters/kyc/requirements?country_code=${countryCode}`,
       {},
       true,
       true,
