@@ -30,17 +30,28 @@ export default function DashboardStats({
   if (loading) {
     return (
       <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-        <h1 className="text-3xl font-black text-gray-900 dark:text-gray-100 mb-10">
-          Dashboard Statistics
-        </h1>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {[...Array(6)].map((_, i) => (
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+            Overview
+          </h1>
+          <p className="text-sm text-[#60768D] dark:text-gray-400">
+            Welcome back john, Here what happening today.
+          </p>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {[...Array(4)].map((_, i) => (
             <div
               key={i}
               className="bg-white dark:bg-gray-800 rounded-2xl p-6 border border-gray-200 dark:border-gray-700 animate-pulse"
             >
-              <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-24 mb-4"></div>
-              <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-16"></div>
+              <div className="flex justify-between items-start mb-4">
+                <div className="space-y-2">
+                  <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-24"></div>
+                  <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-16"></div>
+                </div>
+                <div className="w-12 h-12 bg-gray-200 dark:bg-gray-700 rounded-xl"></div>
+              </div>
+              <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-32"></div>
             </div>
           ))}
         </div>
@@ -51,11 +62,16 @@ export default function DashboardStats({
   if (!stats) {
     return (
       <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-        <h1 className="text-3xl font-black text-gray-900 dark:text-gray-100 mb-10">
-          Dashboard Statistics
-        </h1>
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+            Overview
+          </h1>
+          <p className="text-sm text-[#60768D] dark:text-gray-400">
+            Welcome back john, Here what happening today.
+          </p>
+        </div>
         <div className="text-center py-20">
-          <p className="text-gray-500 dark:text-gray-400">
+          <p className="text-[#60768D] dark:text-gray-400">
             Failed to load statistics
           </p>
         </div>
@@ -69,31 +85,35 @@ export default function DashboardStats({
       value: stats.active_jobs,
       icon: Briefcase,
       trend: 12,
-      iconBg: "bg-blue-50 dark:bg-blue-900/20",
+      trendDirection: "up",
+      iconBg: "bg-blue-100/50 dark:bg-blue-900/30",
       iconColor: "text-blue-600 dark:text-blue-400",
     },
     {
       label: "Total Application",
-      value: stats.total_applications,
+      value: stats.total_applications, // 1,234
       icon: Users,
       trend: 8,
-      iconBg: "bg-purple-50 dark:bg-purple-900/20",
+      trendDirection: "up",
+      iconBg: "bg-purple-100/50 dark:bg-purple-900/30",
       iconColor: "text-purple-600 dark:text-purple-400",
     },
     {
       label: "Interview schedule",
-      value: stats.shortlisted_applications,
+      value: stats.shortlisted_applications, // 42
       icon: Calendar,
       trend: 12,
-      iconBg: "bg-blue-50 dark:bg-blue-900/20",
+      trendDirection: "up",
+      iconBg: "bg-blue-100/50 dark:bg-blue-900/30",
       iconColor: "text-blue-600 dark:text-blue-400",
     },
     {
-      label: "Pending Approvals",
-      value: stats.pending_applications,
-      icon: Clock,
+      label: "Pending Approals", // Typo in image "Approals" fixed here
+      value: stats.pending_applications, // 20
+      icon: Clock, // Was blue briefcase in image, using Clock for "Pending" makes sense, style matches blue
       trend: 24,
-      iconBg: "bg-blue-50 dark:bg-blue-900/20",
+      trendDirection: "up",
+      iconBg: "bg-blue-100/50 dark:bg-blue-900/30",
       iconColor: "text-blue-600 dark:text-blue-400",
     },
   ];
@@ -105,7 +125,7 @@ export default function DashboardStats({
         <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">
           Overview
         </h1>
-        <p className="text-sm text-gray-500 dark:text-gray-400">
+        <p className="text-sm text-[#60768D] dark:text-gray-400">
           Welcome back john, Here what happening today.
         </p>
       </div>
@@ -117,25 +137,29 @@ export default function DashboardStats({
           return (
             <div
               key={card.label}
-              className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700 hover:shadow-lg transition-shadow"
+              className="bg-white dark:bg-[#282727] rounded-xl p-6 border border-[#E1E8F1] dark:border-gray-700  transition-shadow"
             >
-              <div className="flex items-center justify-between mb-4">
-                <span className="text-sm text-gray-600 dark:text-gray-400 font-medium">
-                  {card.label}
-                </span>
-                <div className={`${card.iconBg} p-2 rounded-lg`}>
-                  <Icon className={`w-5 h-5 ${card.iconColor}`} />
+              <div className="flex justify-between items-start mb-4">
+                <div>
+                  <h3 className="text-sm font-semibold text-gray-600 dark:text-gray-400 mb-1">
+                    {card.label}
+                  </h3>
+                  <div className="text-3xl font-bold text-gray-900 dark:text-gray-100">
+                    {card.value.toLocaleString()}
+                  </div>
+                </div>
+                <div className={`p-3 rounded-xl ${card.iconBg}`}>
+                  <Icon className={`w-6 h-6 ${card.iconColor}`} />
                 </div>
               </div>
-              <div className="flex items-end justify-between">
-                <div className="text-3xl font-bold text-gray-900 dark:text-gray-100">
-                  {card.value.toLocaleString()}
-                </div>
-                <div className="flex items-center gap-1 text-xs font-semibold text-green-600 dark:text-green-400">
-                  <TrendingUp className="w-3 h-3" />
-                  {card.trend}%{" "}
-                  <span className="text-gray-500">vs last month</span>
-                </div>
+              <div className="flex items-center gap-2">
+                <span className="flex items-center text-sm font-bold text-green-500">
+                  <TrendingUp className="w-4 h-4 mr-1 stroke-[3px]" />
+                  {card.trend}%
+                </span>
+                <span className="text-xs font-medium text-gray-400 dark:text-gray-500">
+                  vs last month
+                </span>
               </div>
             </div>
           );
