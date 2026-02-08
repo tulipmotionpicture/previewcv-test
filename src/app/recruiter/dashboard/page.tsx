@@ -31,7 +31,7 @@ import {
   ApplicationDetailModal,
   JOB_FORM_INITIAL,
 } from "@/components/recruiter";
-import type { DashboardTab, JobFormState } from "@/components/recruiter";
+import type { DashboardTab, JobFormState, JobManagementTab } from "@/components/recruiter";
 import {
   ArrowRight,
   Clock,
@@ -129,8 +129,8 @@ export default function RecruiterDashboard() {
   const [deleteJobId, setDeleteJobId] = useState<number | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
 
-  // Create Job Modal State
-  const [showCreateJobModal, setShowCreateJobModal] = useState(false);
+  // Job Management View State
+  const [jobManagementView, setJobManagementView] = useState<JobManagementTab>("manage");
 
   // Action Menu State
   const [openMenuJobId, setOpenMenuJobId] = useState<number | null>(null);
@@ -583,12 +583,12 @@ export default function RecruiterDashboard() {
                 <DashboardStats stats={dashboardStats} loading={loadingStats} />
 
                 {/* Recent Job Posting and Onboarding Status */}
-                <div className="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div className="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-6">
                   {/* Recent Job Posting Column */}
                   <div className="lg:col-span-2 flex flex-col gap-4">
                     <div className="flex items-end justify-between">
                       <div>
-                        <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-1">
+                        <h2 className="text-2xl font-medium text-gray-900 dark:text-gray-100 mb-1">
                           Recent Job Posting
                         </h2>
                         <p className="text-sm text-[#60768D] dark:text-gray-400">
@@ -596,7 +596,10 @@ export default function RecruiterDashboard() {
                         </p>
                       </div>
                       <button
-                        onClick={() => setShowCreateJobModal(true)}
+                        onClick={() => {
+                          setActiveTab("jobs");
+                          setJobManagementView("create");
+                        }}
                         className="flex items-center gap-2 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors shadow-sm text-sm"
                       >
                         <Plus className="w-4 h-4" />
@@ -604,12 +607,12 @@ export default function RecruiterDashboard() {
                       </button>
                     </div>
 
-                    <div className="bg-white p-5 dark:bg-[#282727] rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm overflow-hidden">
+                    <div className="bg-white  dark:bg-[#282727] rounded-xl border border-[#E1E8F1] dark:border-gray-700  overflow-hidden">
                       {/* Job Table */}
                       <div className="overflow-x-auto">
                         {loadingJobs ? (
-                          <div className="flex items-center justify-center py-12">
-                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                          <div className="flex items-center justify-center py-12 ">
+                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 "></div>
                           </div>
                         ) : jobs.length === 0 ? (
                           <div className="text-center py-12">
@@ -626,7 +629,7 @@ export default function RecruiterDashboard() {
                                     (heading, index) => (
                                       <th
                                         key={heading}
-                                        className={`pb-4 text-left text-xs font-bold uppercase text-gray-500 dark:text-gray-400 ${index === 3 ? "text-right pr-4" : ""}`}
+                                        className={`px-6 py-3 text-left text-xs bg-[#0B172B] font-bold uppercase text-white dark:text-gray-400 ${index === 3 ? "text-right pr-4" : ""}`}
                                       >
                                         {heading}
                                       </th>
@@ -643,7 +646,7 @@ export default function RecruiterDashboard() {
                                   >
                                     {/* ROLE */}
                                     <td className="py-5">
-                                      <div className="space-y-1">
+                                      <div className="space-y-1 px-4">
                                         <p className="font-bold text-gray-900 dark:text-gray-100 text-[15px]">
                                           {job.title}
                                         </p>
@@ -759,13 +762,13 @@ export default function RecruiterDashboard() {
                     </div>
                   </div>
 
+
                   {/* Help Guide - Takes 1 column */}
-                  {/* Help Guide - Takes 1 column */}
-                  <div className="flex flex-col h-full">
-                    <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-6">
+                  <div className="flex flex-col h-full mt-4">
+                    <h2 className="text-2xl font-medium text-gray-900 dark:text-gray-100 mb-6">
                       Help Guide
                     </h2>
-                    <div className="bg-white dark:bg-[#282727] rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm flex-1">
+                    <div className="bg-white dark:bg-[#282727] rounded-xl border border-[#E1E8F1] dark:border-gray-700  flex-1">
                       <div className="divide-y divide-gray-100 dark:divide-gray-700">
                         {applications.slice(0, 6).length > 0 ? (
                           applications.slice(0, 6).map((app) => (
@@ -855,6 +858,8 @@ export default function RecruiterDashboard() {
               currentPage={currentPage}
               totalPages={totalPages}
               filters={jobFilters}
+              activeView={jobManagementView}
+              onViewChange={setJobManagementView}
               onPageChange={handlePageChange}
               onFiltersChange={handleFiltersChange}
               onJobFormChange={handleJobFormChange}

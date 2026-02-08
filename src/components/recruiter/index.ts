@@ -7,4 +7,4 @@ export { default as PricingPlans } from "./PricingPlans";
 export { default as SubscriptionDashboard } from "./SubscriptionDashboard";
 
 export type { DashboardTab } from "./RecruiterSidebar";
-export type { JobFormState } from "./JobManagement";
+export type { JobFormState, JobManagementTab } from "./JobManagement";
