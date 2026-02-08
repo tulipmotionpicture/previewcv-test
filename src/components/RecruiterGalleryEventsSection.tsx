@@ -232,7 +232,7 @@ export default function RecruiterGalleryEventsSection({
   };
 
   return (
-    <div className="flex flex-col lg:flex-row gap-6 animate-in fade-in bg-gray-50 dark:bg-[#121212] min-h-screen p-6">
+    <div className="flex flex-col lg:flex-row gap-6 animate-in fade-in bg-gray-50 dark:bg-[#1C1D1F] min-h-screen p-6">
 
       {/* LEFT COLUMN: Event List */}
       <div className="flex-1">
@@ -253,7 +253,7 @@ export default function RecruiterGalleryEventsSection({
         {/* Create/Edit Modal */}
         {showForm && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-            <div className="bg-white dark:bg-[#1E1E1E] w-full max-w-3xl rounded-xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
+            <div className="bg-white dark:bg-[#313234] w-full max-w-3xl rounded-xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
 
               {/* Modal Header */}
               <div className="bg-[#0B172B] px-6 py-4 flex justify-between items-center text-white">
@@ -392,7 +392,7 @@ export default function RecruiterGalleryEventsSection({
         )}
 
         {/* Event List Table */}
-        <div className="bg-white dark:bg-[#1E1E1E] rounded-xl border border-gray-100 dark:border-gray-800 shadow-sm overflow-hidden flex flex-col h-[600px]">
+        <div className="bg-white dark:bg-[#313234] rounded-xl border border-gray-100 dark:border-gray-800 shadow-sm overflow-hidden flex flex-col h-[600px]">
 
           {/* Table Header */}
           <div className="grid grid-cols-12 px-6 py-3 bg-[#0B172B] text-white dark:bg-gray-800/50 border-b border-gray-100 dark:border-gray-800 text-xs font-semibold text-gray-500 uppercase sticky top-0 z-10 backdrop-blur-sm">
@@ -469,9 +469,9 @@ export default function RecruiterGalleryEventsSection({
       </div>
 
       {/* RIGHT COLUMN: Filters & Calendar */}
-      <div className="w-full lg:w-80 space-y-6">
+      <div className="w-full lg:w-64 space-y-6">
 
-        <div className="bg-white dark:bg-[#282727] rounded-xl border border-gray-100 dark:border-gray-700 overflow-hidden">
+        <div className="bg-white dark:bg-[#313234] rounded-xl border border-gray-100 dark:border-gray-700 overflow-hidden">
           <div className="bg-[#0B172B] px-4 py-3">
             <h2 className="text-sm font-bold text-white uppercase tracking-wider">Filters</h2>
           </div>
@@ -487,7 +487,7 @@ export default function RecruiterGalleryEventsSection({
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Search Event Name"
-                  className="w-full pl-9 pr-4 py-2.5 bg-white dark:bg-[#1E1E1E] border border-gray-200 dark:border-gray-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:text-white"
+                  className="w-full pl-9 pr-4 py-2.5 bg-white dark:bg-[#313234] border border-gray-200 dark:border-gray-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:text-white"
                 />
               </div>
             </div>
@@ -499,7 +499,7 @@ export default function RecruiterGalleryEventsSection({
                 {["Active", "Draft", "Closed"].map((tab) => (
                   <div
                     key={tab}
-                    className={`border rounded-lg p-3 cursor-pointer transition-all flex items-center justify-between group ${activeTab === tab ? 'bg-blue-50 border-blue-200 dark:bg-blue-900/20 dark:border-blue-800' : 'bg-white dark:bg-[#1E1E1E] border-gray-100 dark:border-gray-700 hover:border-blue-200'}`}
+                    className={`border rounded-lg p-3 cursor-pointer transition-all flex items-center justify-between group ${activeTab === tab ? 'bg-blue-50 border-blue-200 dark:bg-blue-900/20 dark:border-blue-800' : 'bg-white dark:bg-[#313234] border-gray-100 dark:border-gray-700 hover:border-blue-200'}`}
                     onClick={() => setActiveTab(tab as any)}
                   >
                     <span className={`text-sm ${activeTab === tab ? 'text-blue-700 dark:text-blue-400 font-semibold' : 'text-gray-600 dark:text-gray-400'}`}>
