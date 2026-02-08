@@ -185,9 +185,9 @@ export default function JobManagement({
       />
 
       {/* Header */}
-      <div className="flex items-end justify-between mb-8">
+      <div className="flex items-end justify-between mb-6">
         <div>
-          <h2 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-1">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-1">
             Jobs
           </h2>
           <p className="text-gray-500 dark:text-gray-400">
@@ -206,15 +206,15 @@ export default function JobManagement({
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
         {/* Job Table - Takes 3 columns */}
         <div className="lg:col-span-3">
-          <div className="bg-white dark:bg-[#282727] rounded-xl border border-[#E1E8F1] dark:border-gray-700  overflow-hidden flex flex-col h-full">
-            <div className="overflow-x-auto flex-1">
+          <div className="bg-white dark:bg-[#282727] rounded-xl border border-[#E1E8F1] dark:border-gray-700  overflow-hidden flex flex-col h-[600px]">
+            <div className="overflow-y-auto overflow-x-auto flex-1 h-[600px] custom-scrollbar">
               {loadingJobs ? (
                 <div className="text-center py-12 text-gray-500">
                   Loading jobs...
                 </div>
               ) : jobs.length > 0 ? (
                 <table className="w-full border-collapse">
-                  <thead>
+                  <thead className="sticky top-0 z-10">
                     <tr className="border-b border-gray-100 dark:border-gray-700">
                       {[
                         "ROLE",
@@ -225,7 +225,7 @@ export default function JobManagement({
                       ].map((heading, index) => (
                         <th
                           key={heading}
-                          className={`px-6 py-3 text-xs bg-[#101828] font-bold text-white dark:text-gray-500 uppercase tracking-wider ${index === 4 ? "text-right" : "text-left"
+                          className={`px-4 py-3 text-xs bg-[#101828] font-bold text-white dark:text-gray-500 uppercase tracking-wider ${index === 4 ? "text-right" : "text-left"
                             }`}
                         >
                           {heading}
@@ -237,7 +237,7 @@ export default function JobManagement({
                     {jobs.map((job) => (
                       <tr key={job.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors group">
                         {/* Role */}
-                        <td className="px-6 py-4">
+                        <td className="px-4 py-3">
                           <div className="font-bold text-gray-900 dark:text-gray-100 text-[15px]">
                             {job.title}
                           </div>
@@ -246,7 +246,7 @@ export default function JobManagement({
                           </div>
                         </td>
                         {/* Status */}
-                        <td className="px-6 py-4">
+                        <td className="px-4 py-3">
                           <span className={`inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium ${job.is_active
                             ? "bg-[#E6F4EA] text-[#1E7F3A] dark:bg-green-900/30 dark:text-green-400"
                             : "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400"
@@ -255,21 +255,21 @@ export default function JobManagement({
                           </span>
                         </td>
                         {/* Location */}
-                        <td className="px-6 py-4">
+                        <td className="px-4 py-3">
                           <div className="flex items-center gap-1.5 text-sm text-gray-600 dark:text-gray-300 font-medium">
                             <MapPin className="w-4 h-4 text-gray-400" />
                             {job.location}
                           </div>
                         </td>
                         {/* Posted */}
-                        <td className="px-6 py-4">
+                        <td className="px-4 py-3">
                           <div className="flex items-center gap-1.5 text-sm text-gray-600 dark:text-gray-300 font-medium">
                             <Clock className="w-4 h-4 text-gray-400" />
                             {formatTimeAgo(job.posted_date || new Date().toISOString())}
                           </div>
                         </td>
                         {/* Actions */}
-                        <td className="px-6 py-4 text-right">
+                        <td className="px-4 py-3 text-right">
                           <div className="relative inline-block text-left">
                             <button
                               onClick={(e) => {
@@ -341,7 +341,7 @@ export default function JobManagement({
 
             {/* Pagination Footter */}
             {totalPages > 1 && (
-              <div className="border-t border-gray-100 dark:border-gray-700 px-6 py-4 flex items-center justify-between bg-gray-50/50 dark:bg-gray-800/50">
+              <div className="border-t border-gray-100 dark:border-gray-700 px-6 py-1 flex items-center justify-between bg-gray-50/50 dark:bg-gray-800/50">
                 <span className="text-sm text-gray-500 dark:text-gray-400">
                   Page {currentPage} of {totalPages}
                 </span>

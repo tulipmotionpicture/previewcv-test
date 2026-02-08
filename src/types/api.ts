@@ -127,6 +127,7 @@ export interface ApplicationApplicant {
   street_number?: string;
   address?: string;
   postal_zip_code?: string;
+  profile_image_url?: string;
 }
 
 export interface ApplicationResumeDetail {
@@ -162,14 +163,14 @@ export interface Application {
   uploaded_resume_id?: number | null;
   cover_letter_id?: number | null;
   status:
-    | "applied"
-    | "under_review"
-    | "interview_scheduled"
-    | "offered"
-    | "accepted"
-    | "rejected"
-    | "withdrawn"
-    | "declined";
+  | "applied"
+  | "under_review"
+  | "interview_scheduled"
+  | "offered"
+  | "accepted"
+  | "rejected"
+  | "withdrawn"
+  | "declined";
   applied_at: string;
   updated_at: string;
   created_at?: string;

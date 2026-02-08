@@ -8,6 +8,7 @@ import Button from "@/components/ui/Button";
 import LoadingSkeleton from "@/components/ui/LoadingSkeleton";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
 import { Recruiter } from "@/types/api";
+import { ChevronDown, ChevronUp } from "lucide-react";
 
 export default function RecruiterProfileEdit() {
   const router = useRouter();
@@ -47,6 +48,11 @@ export default function RecruiterProfileEdit() {
   const [showLogoutDialog, setShowLogoutDialog] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
+  // Accordion states
+  const [profileOpen, setProfileOpen] = useState(true);
+  const [passwordOpen, setPasswordOpen] = useState(true);
+  const [dangerOpen, setDangerOpen] = useState(false);
+
   useEffect(() => {
     if (!authLoading && !isAuthenticated) {
       router.push("/");
@@ -75,32 +81,26 @@ export default function RecruiterProfileEdit() {
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
-
     if (!formData.display_name.trim()) {
       newErrors.display_name = "Display name is required";
     }
-
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const validatePassword = () => {
     const newErrors: Record<string, string> = {};
-
     if (!passwordData.current_password) {
       newErrors.current_password = "Current password is required";
     }
-
     if (!passwordData.new_password) {
       newErrors.new_password = "New password is required";
     } else if (passwordData.new_password.length < 8) {
       newErrors.new_password = "Password must be at least 8 characters";
     }
-
     if (passwordData.new_password !== passwordData.confirm_password) {
       newErrors.confirm_password = "Passwords do not match";
     }
-
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -123,25 +123,12 @@ export default function RecruiterProfileEdit() {
 
     setIsSaving(true);
     try {
-      // Convert years_experience to number if provided
       const profileData: Partial<Recruiter> = {
-        display_name: formData.display_name,
-        username: formData.username,
-        bio: formData.bio,
-        phone: formData.phone,
-        location: formData.location,
-        linkedin_url: formData.linkedin_url,
-        company_name: formData.company_name,
-        company_website: formData.company_website,
-        company_size: formData.company_size,
-        industry: formData.industry,
-        specialization: formData.specialization,
-        company_logo_url: formData.company_logo_url,
+        ...formData,
+        years_experience: formData.years_experience
+          ? parseInt(formData.years_experience, 10)
+          : undefined,
       };
-
-      if (formData.years_experience) {
-        profileData.years_experience = parseInt(formData.years_experience, 10);
-      }
 
       await updateProfile(profileData);
       toast.success("Profile updated successfully!");
@@ -160,7 +147,7 @@ export default function RecruiterProfileEdit() {
 
     setPasswordLoading(true);
     try {
-      // TODO: Implement password change API
+      // Placeholder for password change API
       toast.info("Password change feature coming soon!");
       setPasswordData({
         current_password: "",
@@ -196,397 +183,283 @@ export default function RecruiterProfileEdit() {
     );
   }
 
-  if (!isAuthenticated) {
-    return null;
-  }
+  if (!isAuthenticated) return null;
 
   return (
-    <div className="min-h-screen">
-      <div className="max-w-5xl mx-auto space-y-8">
-        {/* Public Profile URL */}
-        <div className=" p-6 rounded-[32px] dark:bg-gray-900">
-          <div className="flex items-start justify-between gap-6">
-            <div className="flex-1">
-              <h3 className="text-sm font-black text-gray-900 uppercase tracking-tight mb-2">
-                Your Public Profile URL
-              </h3>
-              <div className="flex items-center gap-3">
-                <input
-                  type="text"
-                  value={`http://localhost:3000${recruiter?.profile_url}`}
-                  readOnly
-                  className="flex-1 px-4 py-3 bg-gray-50 dark:bg-gray-800 border-none rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
-                />
-                <button
-                  onClick={() => {
-                    navigator.clipboard.writeText(
-                      `http://localhost:3000${recruiter?.profile_url}`,
-                    );
-                    toast.success("Link copied to clipboard!");
-                  }}
-                  className="px-6 py-3 bg-teal-dark dark:bg-teal-dark text-white hover:bg-teal-700 dark:hover:bg-teal-800 rounded-xl transition-all uppercase tracking-tight text-sm whitespace-nowrap"
-                >
-                  Copy Link
-                </button>
-              </div>
+    <div className="min-h-screen pb-20">
+      <div className="max-w-5xl mx-auto space-y-5">
+
+        {/* Profile Information Section */}
+        <div className="rounded-lg overflow-hidden shadow-sm border border-gray-100">
+          <button
+            onClick={() => setProfileOpen(!profileOpen)}
+            className="w-full bg-[#0B172B] text-white px-6 py-3 flex justify-between items-center"
+          >
+            <h2 className="text-base font-medium">Profile Information</h2>
+            {profileOpen ? (
+              <ChevronUp className="w-5 h-5 text-gray-400" />
+            ) : (
+              <ChevronDown className="w-5 h-5 text-gray-400" />
+            )}
+          </button>
+
+          {profileOpen && (
+            <div className="bg-white p-6">
+              <form onSubmit={handleSubmit} className="space-y-5">
+
+                {/* Contact & Location */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                  <div className="space-y-1.5">
+                    <label className="text-xs text-gray-500 font-medium uppercase">Phone no</label>
+                    <input
+                      type="tel"
+                      name="phone"
+                      value={formData.phone}
+                      onChange={handleChange}
+                      placeholder="+91 987654321"
+                      className="w-full px-3 py-2 bg-gray-50 border border-gray-100 rounded-lg text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="text-xs text-gray-500 font-medium uppercase">Location</label>
+                    <input
+                      type="text"
+                      name="location"
+                      value={formData.location}
+                      onChange={handleChange}
+                      placeholder="Pune, Maharastra"
+                      className="w-full px-3 py-2 bg-gray-50 border border-gray-100 rounded-lg text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                    />
+                  </div>
+                </div>
+
+                {/* Website & LinkedIn */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                  <div className="space-y-1.5">
+                    <label className="text-xs text-gray-500 font-medium uppercase">company Website</label>
+                    <input
+                      type="url"
+                      name="company_website"
+                      value={formData.company_website}
+                      onChange={handleChange}
+                      placeholder="www.companyname.com"
+                      className="w-full px-3 py-2 bg-gray-50 border border-gray-100 rounded-lg text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="text-xs text-gray-500 font-medium uppercase">Linkdiln URI</label>
+                    <input
+                      type="url"
+                      name="linkedin_url"
+                      value={formData.linkedin_url}
+                      onChange={handleChange}
+                      placeholder="www.linkdiln/company.com"
+                      className="w-full px-3 py-2 bg-gray-50 border border-gray-100 rounded-lg text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                    />
+                  </div>
+                </div>
+
+                {/* Size & Industry */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                  <div className="space-y-1.5">
+                    <label className="text-xs text-gray-500 font-medium uppercase">company Size</label>
+                    <select
+                      name="company_size"
+                      value={formData.company_size}
+                      onChange={handleChange}
+                      className="w-full px-3 py-2 bg-gray-50 border border-gray-100 rounded-lg text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20 appearance-none"
+                    >
+                      <option value="">Select size</option>
+                      <option value="1-10">1-10 employees</option>
+                      <option value="11-50">11-50 employees</option>
+                      <option value="51-200">51-200 employees</option>
+                      <option value="201-500">201-500 employees</option>
+                      <option value="501-1000">501-1000 employees</option>
+                      <option value="1000+">1000+ employees</option>
+                    </select>
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="text-xs text-gray-500 font-medium uppercase">Industry</label>
+                    <input
+                      type="text"
+                      name="industry"
+                      value={formData.industry}
+                      onChange={handleChange}
+                      placeholder="Information Technology"
+                      className="w-full px-3 py-2 bg-gray-50 border border-gray-100 rounded-lg text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                    />
+                  </div>
+                </div>
+
+                {/* Specialization & Experience */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                  <div className="space-y-1.5">
+                    <label className="text-xs text-gray-500 font-medium uppercase">Specilization</label>
+                    <input
+                      type="text"
+                      name="specialization"
+                      value={formData.specialization}
+                      onChange={handleChange}
+                      placeholder="Technical recruiting"
+                      className="w-full px-3 py-2 bg-gray-50 border border-gray-100 rounded-lg text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="text-xs text-gray-500 font-medium uppercase">Year of Experince</label>
+                    <input
+                      type="number"
+                      name="years_experience"
+                      value={formData.years_experience}
+                      onChange={handleChange}
+                      placeholder="10 Years"
+                      className="w-full px-3 py-2 bg-gray-50 border border-gray-100 rounded-lg text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                    />
+                  </div>
+                </div>
+
+                {/* Logo URL */}
+                <div className="space-y-1.5">
+                  <label className="text-xs text-gray-500 font-medium uppercase">company logo Url</label>
+                  <input
+                    type="url"
+                    name="company_logo_url"
+                    value={formData.company_logo_url}
+                    onChange={handleChange}
+                    placeholder="https://..."
+                    className="w-full px-3 py-2 bg-gray-50 border border-gray-100 rounded-lg text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                  />
+                </div>
+
+                <div className="flex justify-end pt-2">
+                  <Button
+                    type="submit"
+                    loading={isSaving}
+                    className="bg-[#007BFF] hover:bg-blue-600 text-white px-6 py-2 rounded-lg text-sm font-medium shadow-sm transition-colors"
+                  >
+                    Save Changes
+                  </Button>
+                </div>
+              </form>
             </div>
-          </div>
+          )}
         </div>
 
-        {/* Profile Information */}
-        <form
-          onSubmit={handleSubmit}
-          className="bg-white border border-gray-100 rounded-[40px] p-10 shadow-sm dark:bg-gray-900 dark:text-white"
-        >
-          <h2 className="text-xl font-bold text-gray-900 mb-6">
-            Profile Information
-          </h2>
-          <div className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2 ml-1">
-                  Display Name
-                </label>
-                <input
-                  type="text"
-                  name="display_name"
-                  required
-                  className="w-full px-6 py-4 bg-gray-50 dark:bg-gray-800 border-none rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
-                  value={formData.display_name}
-                  onChange={handleChange}
-                />
-                {errors.display_name && (
-                  <p className="mt-2 text-sm text-red-600 ml-1">
-                    {errors.display_name}
-                  </p>
-                )}
-              </div>
-              <div>
-                <label className="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2 ml-1">
-                  Username
-                </label>
-                <input
-                  type="text"
-                  name="username"
-                  className="w-full px-6 py-4 bg-gray-50 dark:bg-gray-800 border-none rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
-                  value={formData.username}
-                  onChange={handleChange}
-                  placeholder="your username"
-                />
-              </div>
-            </div>
+        {/* Change Password Section */}
+        <div className="rounded-lg overflow-hidden shadow-sm border border-gray-100">
+          <button
+            onClick={() => setPasswordOpen(!passwordOpen)}
+            className="w-full bg-[#0B172B] text-white px-6 py-3 flex justify-between items-center"
+          >
+            <h2 className="text-base font-medium">Change Password</h2>
+            {passwordOpen ? (
+              <ChevronUp className="w-5 h-5 text-gray-400" />
+            ) : (
+              <ChevronDown className="w-5 h-5 text-gray-400" />
+            )}
+          </button>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2 ml-1">
-                  Company Name
-                </label>
-                <input
-                  type="text"
-                  name="company_name"
-                  className="w-full px-6 py-4 bg-gray-50 dark:bg-gray-800 border-none rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
-                  value={formData.company_name}
-                  onChange={handleChange}
-                  placeholder="Your Company Name"
-                />
-              </div>
-              <div>
-                <label className="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2 ml-1">
-                  Email
-                </label>
-                <input
-                  type="email"
-                  value={recruiter?.email || ""}
-                  disabled
-                  className="w-full px-6 py-4 bg-gray-50 dark:bg-gray-800 border-none rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
-                />
-                <p className="text-xs text-gray-500 mt-2 ml-1">
-                  Email cannot be changed
-                </p>
-              </div>
-            </div>
+          {passwordOpen && (
+            <div className="bg-white p-6">
+              <form onSubmit={handlePasswordChange} className="space-y-5">
 
-            <div>
-              <label className="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2 ml-1">
-                Bio / Description
-              </label>
-              <textarea
-                name="bio"
-                rows={4}
-                className="w-full px-6 py-4 bg-gray-50 dark:bg-gray-800 border-none rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 resize-none"
-                value={formData.bio}
-                onChange={handleChange}
-                placeholder="Tell candidates about yourself or your company..."
-              />
-            </div>
+                {/* Current Password */}
+                <div className="space-y-1.5">
+                  <label className="text-xs text-gray-500 font-medium uppercase">Current Password</label>
+                  <input
+                    type="password"
+                    value={passwordData.current_password}
+                    onChange={(e) =>
+                      setPasswordData({ ...passwordData, current_password: e.target.value })
+                    }
+                    placeholder="*************"
+                    className="w-full px-3 py-2 bg-gray-50 border border-gray-100 rounded-lg text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                  />
+                  {errors.current_password && (
+                    <p className="text-xs text-red-500">{errors.current_password}</p>
+                  )}
+                </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2 ml-1">
-                  Phone Number
-                </label>
-                <input
-                  type="tel"
-                  name="phone"
-                  className="w-full px-6 py-4 bg-gray-50 dark:bg-gray-800 border-none rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
-                  value={formData.phone}
-                  onChange={handleChange}
-                />
-              </div>
-              <div>
-                <label className="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2 ml-1">
-                  Location
-                </label>
-                <input
-                  type="text"
-                  name="location"
-                  className="w-full px-6 py-4 bg-gray-50 dark:bg-gray-800 border-none rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
-                  value={formData.location}
-                  onChange={handleChange}
-                />
-              </div>
-            </div>
+                {/* New Passwords */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                  <div className="space-y-1.5">
+                    <label className="text-xs text-gray-500 font-medium uppercase">New Password</label>
+                    <input
+                      type="password"
+                      value={passwordData.new_password}
+                      onChange={(e) =>
+                        setPasswordData({ ...passwordData, new_password: e.target.value })
+                      }
+                      placeholder="*************"
+                      className="w-full px-3 py-2 bg-gray-50 border border-gray-100 rounded-lg text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                    />
+                    {errors.new_password && (
+                      <p className="text-xs text-red-500">{errors.new_password}</p>
+                    )}
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="text-xs text-gray-500 font-medium uppercase">Confirm New Password</label>
+                    <input
+                      type="password"
+                      value={passwordData.confirm_password}
+                      onChange={(e) =>
+                        setPasswordData({ ...passwordData, confirm_password: e.target.value })
+                      }
+                      placeholder="*************"
+                      className="w-full px-3 py-2 bg-gray-50 border border-gray-100 rounded-lg text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                    />
+                    {errors.confirm_password && (
+                      <p className="text-xs text-red-500">{errors.confirm_password}</p>
+                    )}
+                  </div>
+                </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2 ml-1">
-                  Company Website
-                </label>
-                <input
-                  type="url"
-                  name="company_website"
-                  className="w-full px-6 py-4 bg-gray-50 dark:bg-gray-800 border-none rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
-                  value={formData.company_website}
-                  onChange={handleChange}
-                  placeholder="https://yourcompany.com"
-                />
-              </div>
-              <div>
-                <label className="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2 ml-1">
-                  LinkedIn URL
-                </label>
-                <input
-                  type="url"
-                  name="linkedin_url"
-                  className="w-full px-6 py-4 bg-gray-50 dark:bg-gray-800 border-none rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
-                  value={formData.linkedin_url}
-                  onChange={handleChange}
-                  placeholder="https://linkedin.com/in/yourprofile"
-                />
-              </div>
+                <div className="flex justify-end pt-2">
+                  <Button
+                    type="submit"
+                    loading={passwordLoading}
+                    className="bg-[#007BFF] hover:bg-blue-600 text-white px-6 py-2 rounded-lg text-sm font-medium shadow-sm transition-colors"
+                  >
+                    Save Changes
+                  </Button>
+                </div>
+              </form>
             </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2 ml-1">
-                  Company Size
-                </label>
-                <select
-                  name="company_size"
-                  className="w-full px-6 py-4 bg-gray-50 dark:bg-gray-800 border-none rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
-                  value={formData.company_size}
-                  onChange={handleChange}
-                >
-                  <option value="">Select size</option>
-                  <option value="1-10">1-10 employees</option>
-                  <option value="11-50">11-50 employees</option>
-                  <option value="51-200">51-200 employees</option>
-                  <option value="201-500">201-500 employees</option>
-                  <option value="501-1000">501-1000 employees</option>
-                  <option value="1000+">1000+ employees</option>
-                </select>
-              </div>
-              <div>
-                <label className="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2 ml-1">
-                  Industry
-                </label>
-                <input
-                  type="text"
-                  name="industry"
-                  className="w-full px-6 py-4 bg-gray-50 dark:bg-gray-800 border-none rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
-                  value={formData.industry}
-                  onChange={handleChange}
-                  placeholder="e.g., Technology, Healthcare"
-                />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2 ml-1">
-                  Specialization
-                </label>
-                <input
-                  type="text"
-                  name="specialization"
-                  className="w-full px-6 py-4 bg-gray-50 dark:bg-gray-800 border-none rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
-                  value={formData.specialization}
-                  onChange={handleChange}
-                  placeholder="e.g., Technical Recruiting, Executive Search"
-                />
-              </div>
-              <div>
-                <label className="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2 ml-1">
-                  Years of Experience
-                </label>
-                <input
-                  type="number"
-                  name="years_experience"
-                  min="0"
-                  max="50"
-                  className="w-full px-6 py-4 bg-gray-50 dark:bg-gray-800 border-none rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
-                  value={formData.years_experience}
-                  onChange={handleChange}
-                  placeholder="e.g., 5"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2 ml-1">
-                Company Logo URL
-              </label>
-              <input
-                type="url"
-                name="company_logo_url"
-                className="w-full px-6 py-4 bg-gray-50 dark:bg-gray-800 border-none rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
-                value={formData.company_logo_url}
-                onChange={handleChange}
-                placeholder="https://yourcompany.com/logo.png"
-              />
-              <p className="text-xs text-gray-500 mt-2 ml-1">
-                Direct URL to your company logo image
-              </p>
-            </div>
-
-            <div className="flex justify-end pt-6 border-t border-gray-100">
-              <Button
-                type="submit"
-                loading={isSaving}
-                className="bg-teal-dark dark:bg-teal-dark text-white hover:bg-teal-700 dark:hover:bg-teal-800 shadow-none"
-              >
-                Save Changes
-              </Button>
-            </div>
-          </div>
-        </form>
-
-        {/* Password Change */}
-        <form
-          onSubmit={handlePasswordChange}
-          className="bg-white border border-gray-100 rounded-[40px] p-10 shadow-sm dark:bg-gray-900"
-        >
-          <h2 className="text-xl font-bold text-gray-900 mb-6">
-            Change Password
-          </h2>
-          <div className="space-y-6">
-            <div>
-              <label className="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2 ml-1">
-                Current Password
-              </label>
-              <input
-                type="password"
-                value={passwordData.current_password}
-                onChange={(e) =>
-                  setPasswordData({
-                    ...passwordData,
-                    current_password: e.target.value,
-                  })
-                }
-                className="w-full px-6 py-4 bg-gray-50 dark:bg-gray-800 border-none rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
-                placeholder="••••••••"
-              />
-              {errors.current_password && (
-                <p className="mt-2 text-sm text-red-600 ml-1">
-                  {errors.current_password}
-                </p>
-              )}
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2 ml-1">
-                  New Password
-                </label>
-                <input
-                  type="password"
-                  value={passwordData.new_password}
-                  onChange={(e) =>
-                    setPasswordData({
-                      ...passwordData,
-                      new_password: e.target.value,
-                    })
-                  }
-                  className="w-full px-6 py-4 bg-gray-50 dark:bg-gray-800 border-none rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
-                  placeholder="••••••••"
-                />
-                {errors.new_password && (
-                  <p className="mt-2 text-sm text-red-600 ml-1">
-                    {errors.new_password}
-                  </p>
-                )}
-                <p className="text-xs text-gray-500 mt-2 ml-1">
-                  Minimum 8 characters
-                </p>
-              </div>
-              <div>
-                <label className="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2 ml-1">
-                  Confirm New Password
-                </label>
-                <input
-                  type="password"
-                  value={passwordData.confirm_password}
-                  onChange={(e) =>
-                    setPasswordData({
-                      ...passwordData,
-                      confirm_password: e.target.value,
-                    })
-                  }
-                  className="w-full px-6 py-4 bg-gray-50 dark:bg-gray-800 border-none rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
-                  placeholder="••••••••"
-                />
-                {errors.confirm_password && (
-                  <p className="mt-2 text-sm text-red-600 ml-1">
-                    {errors.confirm_password}
-                  </p>
-                )}
-              </div>
-            </div>
-            <div className="flex justify-end pt-6 border-t border-gray-100">
-              <Button
-                type="submit"
-                loading={passwordLoading}
-                className="bg-teal-dark dark:bg-teal-dark text-white hover:bg-teal-700 dark:hover:bg-teal-800 shadow-none"
-              >
-                Update Password
-              </Button>
-            </div>
-          </div>
-        </form>
-
-        {/* Danger Zone */}
-        <div className="bg-white border border-red-200 rounded-[40px] p-10 shadow-sm dark:bg-gray-900">
-          <h2 className="text-xl font-bold text-red-600 mb-2">Danger Zone</h2>
-          <p className="text-gray-600 mb-6">
-            Irreversible actions that affect your account
-          </p>
-          <div className="flex items-center justify-between p-4 bg-red-50 rounded-2xl dark:bg-gray-800">
-            <div>
-              <h3 className="font-bold text-gray-900">
-                Logout from all devices
-              </h3>
-              <p className="text-sm text-gray-600">
-                This will sign you out from all active sessions
-              </p>
-            </div>
-            <Button
-              variant="danger"
-              onClick={() => setShowLogoutDialog(true)}
-              className="shadow-none"
-            >
-              Logout
-            </Button>
-          </div>
+          )}
         </div>
+
+        {/* Danger Zone (Collapsible) */}
+        <div className="rounded-lg overflow-hidden shadow-sm border border-red-100">
+          <button
+            onClick={() => setDangerOpen(!dangerOpen)}
+            className="w-full bg-white border-b border-gray-100 px-8 py-5 flex justify-between items-center hover:bg-gray-50 transition-colors"
+          >
+            <h2 className="text-lg font-medium text-red-600">Danger Zone</h2>
+            {dangerOpen ? (
+              <ChevronUp className="w-5 h-5 text-gray-400" />
+            ) : (
+              <ChevronDown className="w-5 h-5 text-gray-400" />
+            )}
+          </button>
+
+          {dangerOpen && (
+            <div className="bg-white p-8">
+              <div className="flex items-center justify-between p-4 bg-red-50 rounded-lg">
+                <div>
+                  <h3 className="font-bold text-gray-900">Logout from all devices</h3>
+                  <p className="text-sm text-gray-600">This will sign you out from all active sessions</p>
+                </div>
+                <Button
+                  variant="danger"
+                  onClick={() => setShowLogoutDialog(true)}
+                  className="shadow-none bg-red-600 hover:bg-red-700 text-white border-none"
+                >
+                  Logout
+                </Button>
+              </div>
+            </div>
+          )}
+        </div>
+
       </div>
 
       <ConfirmDialog

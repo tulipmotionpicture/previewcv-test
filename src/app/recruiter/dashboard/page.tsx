@@ -87,7 +87,7 @@ export default function RecruiterDashboard() {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalJobs, setTotalJobs] = useState(0);
-  const jobsPerPage = 10;
+  const jobsPerPage = 15;
   const [applications, setApplications] = useState<Application[]>([]);
   const [dashboardStats, setDashboardStats] = useState<{
     total_jobs: number;
@@ -506,15 +506,15 @@ export default function RecruiterDashboard() {
       {/* Main Content */}
       <main className="flex-1 p-5 max-w-7xl mx-auto overflow-x-hidden">
         {/* Dashboard Header */}
-        <header className="flex items-center justify-between mb-8">
+        <header className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-4">
-            <div className="w-14 h-14 bg-white dark:bg-[#282727] rounded-md flex items-center justify-center border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden">
+            <div className="w-12 h-12 bg-white dark:bg-[#282727] rounded-md flex items-center justify-center border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden">
               {recruiter?.company_logo_url ? (
                 <Image
                   src={recruiter.company_logo_url}
                   alt="Company Logo"
-                  width={56}
-                  height={56}
+                  width={48}
+                  height={48}
                   className="object-cover w-full h-full"
                 />
               ) : (
@@ -583,12 +583,12 @@ export default function RecruiterDashboard() {
                 <DashboardStats stats={dashboardStats} loading={loadingStats} />
 
                 {/* Recent Job Posting and Onboarding Status */}
-                <div className="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div className="mt-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
                   {/* Recent Job Posting Column */}
                   <div className="lg:col-span-2 flex flex-col gap-4">
                     <div className="flex items-end justify-between">
                       <div>
-                        <h2 className="text-2xl font-medium text-gray-900 dark:text-gray-100 mb-1">
+                        <h2 className="text-xl font-medium text-gray-900 dark:text-gray-100 mb-1">
                           Recent Job Posting
                         </h2>
                         <p className="text-sm text-[#60768D] dark:text-gray-400">
@@ -607,9 +607,9 @@ export default function RecruiterDashboard() {
                       </button>
                     </div>
 
-                    <div className="bg-white  dark:bg-[#282727] rounded-xl border border-[#E1E8F1] dark:border-gray-700  overflow-hidden">
+                    <div className="bg-white  dark:bg-[#282727] rounded-xl border border-[#E1E8F1] dark:border-gray-700  overflow-hidden h-[568px]">
                       {/* Job Table */}
-                      <div className="overflow-x-auto">
+                      <div className="overflow-x-auto h-full overflow-y-auto custom-scrollbar">
                         {loadingJobs ? (
                           <div className="flex items-center justify-center py-12 ">
                             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 "></div>
@@ -623,13 +623,13 @@ export default function RecruiterDashboard() {
                         ) : (
                           <>
                             <table className="w-full border-collapse">
-                              <thead>
+                              <thead className="sticky top-0 z-10">
                                 <tr className="border-b border-gray-100 dark:border-gray-700">
                                   {["ROLE", "STATUS", "POSTED", "ACTIONS"].map(
                                     (heading, index) => (
                                       <th
                                         key={heading}
-                                        className={`px-6 py-3 text-left text-xs bg-[#0B172B] font-bold uppercase text-white dark:text-gray-400 ${index === 3 ? "text-right pr-4" : ""}`}
+                                        className={`px-4 py-3 text-left text-xs bg-[#0B172B] font-bold uppercase text-white dark:text-gray-400 ${index === 3 ? "text-right pr-4" : ""}`}
                                       >
                                         {heading}
                                       </th>
@@ -645,7 +645,7 @@ export default function RecruiterDashboard() {
                                     className="border-b border-gray-100 dark:border-gray-700/50 hover:bg-gray-50 dark:hover:bg-gray-800/40 transition"
                                   >
                                     {/* ROLE */}
-                                    <td className="py-5">
+                                    <td className="py-3">
                                       <div className="space-y-1 px-4">
                                         <p className="font-bold text-gray-900 dark:text-gray-100 text-[15px]">
                                           {job.title}
@@ -657,7 +657,7 @@ export default function RecruiterDashboard() {
                                     </td>
 
                                     {/* STATUS */}
-                                    <td className="py-5">
+                                    <td className="py-3">
                                       <span
                                         className={`inline-flex items-center rounded px-3 py-1 text-xs font-medium ${job.is_active
                                           ? "bg-[#E6F4EA] text-[#1E7F3A] dark:bg-green-900/30 dark:text-green-400"
@@ -669,7 +669,7 @@ export default function RecruiterDashboard() {
                                     </td>
 
                                     {/* POSTED */}
-                                    <td className="py-5">
+                                    <td className="py-3">
                                       <div className="flex items-center gap-2 text-sm text-[#60768D] dark:text-gray-400 font-medium">
                                         <Clock className="h-4 w-4" />
                                         {formatTimeAgo(job.posted_date)}
@@ -677,7 +677,7 @@ export default function RecruiterDashboard() {
                                     </td>
 
                                     {/* ACTIONS */}
-                                    <td className="py-5 pr-4 text-right">
+                                    <td className="py-3 pr-4 text-right">
                                       <div className="relative inline-block text-left">
                                         <button
                                           onClick={() =>
@@ -765,7 +765,7 @@ export default function RecruiterDashboard() {
 
                   {/* Help Guide - Takes 1 column */}
                   <div className="flex flex-col h-full mt-4">
-                    <h2 className="text-2xl font-medium text-gray-900 dark:text-gray-100 mb-6">
+                    <h2 className="text-xl font-medium text-gray-900 dark:text-gray-100 mb-6">
                       Help Guide
                     </h2>
                     <div className="bg-white dark:bg-[#282727] rounded-xl border border-[#E1E8F1] dark:border-gray-700  flex-1">
@@ -774,10 +774,10 @@ export default function RecruiterDashboard() {
                           applications.slice(0, 6).map((app) => (
                             <div
                               key={app.id}
-                              className="flex items-center gap-4 p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors cursor-pointer group first:rounded-t-2xl last:rounded-b-2xl"
+                              className="flex items-center gap-4 p-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors cursor-pointer group first:rounded-t-2xl last:rounded-b-2xl"
                               onClick={() => handleViewApplicationDetail(app)}
                             >
-                              <div className="w-12 h-12 rounded-full bg-[#0B172B] flex items-center justify-center text-white font-bold text-sm shadow-sm flex-shrink-0">
+                              <div className="w-10 h-10 rounded-full bg-[#0B172B] flex items-center justify-center text-white font-bold text-sm shadow-sm flex-shrink-0">
                                 {app.candidate_name
                                   ?.substring(0, 2)
                                   .toUpperCase() || "JD"}
