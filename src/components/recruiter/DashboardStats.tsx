@@ -114,8 +114,8 @@ export default function DashboardStats({
   return (
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
       {/* Overview Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
           Overview
         </h1>
         <p className="text-sm text-[#60768D] dark:text-gray-400">
@@ -124,25 +124,25 @@ export default function DashboardStats({
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {statCards.map((card) => {
           const Icon = card.icon;
           return (
             <div
               key={card.label}
-              className="bg-white dark:bg-[#282727] rounded-xl p-6 border border-[#E1E8F1] dark:border-gray-700  transition-shadow"
+              className="bg-white dark:bg-[#282727] rounded-xl p-4 border border-[#E1E8F1] dark:border-gray-700  transition-shadow"
             >
               <div className="flex justify-between items-start mb-4">
                 <div>
                   <h3 className="text-sm font-semibold text-gray-600 dark:text-gray-400 mb-1">
                     {card.label}
                   </h3>
-                  <div className="text-3xl font-bold text-gray-900 dark:text-gray-100">
+                  <div className="text-2xl font-bold text-gray-900 dark:text-gray-100">
                     {card.value.toLocaleString()}
                   </div>
                 </div>
-                <div className={`p-3 rounded-xl ${card.iconBg}`}>
-                  <Icon className={`w-6 h-6 ${card.iconColor}`} />
+                <div className={`p-2 rounded-xl ${card.iconBg}`}>
+                  <Icon className={`w-5 h-5 ${card.iconColor}`} />
                 </div>
               </div>
               <div className="flex items-center gap-2">

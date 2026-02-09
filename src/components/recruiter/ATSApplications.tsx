@@ -69,8 +69,8 @@ export default function ATSApplications({
 
   return (
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
           Application Review System
         </h1>
         <p className="text-gray-500 dark:text-gray-400">
@@ -78,14 +78,14 @@ export default function ATSApplications({
         </p>
       </div>
 
-      <div className="flex flex-col lg:flex-row gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
 
         {/* LEFT COLUMN: Candidate Table (Main) */}
-        <div className="flex-1 order-2 lg:order-1">
-          <div className="bg-white dark:bg-[#282727] rounded-xl border border-[#E1E8F1] dark:border-gray-700 overflow-hidden shadow-sm">
+        <div className="lg:col-span-3">
+          <div className="bg-white dark:bg-[#282727] rounded-xl border border-[#E1E8F1] dark:border-gray-700 overflow-hidden shadow-sm h-[600px] flex flex-col">
 
             {/* Table Header */}
-            <div className="bg-[#0B172B] px-6 py-4 grid grid-cols-12 gap-4 items-center">
+            <div className="bg-[#0B172B] px-4 py-3 grid grid-cols-12 gap-4 items-center sticky top-0 z-10">
               <div className="col-span-4 text-xs font-bold text-white uppercase tracking-wider">Candidate</div>
               <div className="col-span-2 text-xs font-bold text-white uppercase tracking-wider">Status</div>
               <div className="col-span-3 text-xs font-bold text-white uppercase tracking-wider">Resume</div>
@@ -93,12 +93,12 @@ export default function ATSApplications({
             </div>
 
             {/* Table Body */}
-            <div className="divide-y divide-gray-100 dark:divide-gray-700">
+            <div className="divide-y divide-gray-100 dark:divide-gray-700 overflow-y-auto flex-1 custom-scrollbar">
               {loadingApps ? (
                 <div className="p-10 text-center text-gray-500">Loading applications...</div>
               ) : filteredApplications.length > 0 ? (
                 filteredApplications.map((app) => (
-                  <div key={app.id} className="px-6 py-4 grid grid-cols-12 gap-4 items-center hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
+                  <div key={app.id} className="px-4 py-3 grid grid-cols-12 gap-4 items-center hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
 
                     {/* Candidate Info */}
                     <div className="col-span-4">
@@ -184,7 +184,7 @@ export default function ATSApplications({
         </div>
 
         {/* RIGHT COLUMN: Filter Section (Sidebar) */}
-        <div className="w-full lg:w-80 order-1 lg:order-2">
+        <div className="lg:col-span-1">
           <div className="bg-white dark:bg-[#282727] rounded-xl border border-[#E1E8F1] dark:border-gray-700 overflow-hidden shadow-sm sticky top-6">
 
             {/* Filter Header */}

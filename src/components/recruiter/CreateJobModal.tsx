@@ -2,6 +2,7 @@
 import React from "react";
 import { X, ChevronDown, Plus } from "lucide-react";
 import { JobFormState } from "./JobManagement";
+import RichTextEditor from "../ui/RichTextEditor";
 
 interface CreateJobModalProps {
     isOpen: boolean;
@@ -198,13 +199,18 @@ export default function CreateJobModal({
                         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                             Job Description
                         </label>
-                        <textarea
-                            name="description"
+                        <RichTextEditor
                             value={jobForm.description}
-                            onChange={onChange}
-                            rows={4}
+                            onChange={(content: string) => {
+                                const event = {
+                                    target: {
+                                        name: "description",
+                                        value: content,
+                                    },
+                                } as any;
+                                onChange(event);
+                            }}
                             placeholder="Describe the opportunity, team and impact"
-                            className="w-full px-4 py-3 bg-white dark:bg-[#282727] border border-gray-200 dark:border-gray-700 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all placeholder-gray-400 dark:text-white resize-none"
                         />
                     </div>
 

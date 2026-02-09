@@ -41,7 +41,7 @@ export default function RecruiterSidebar({
 }: RecruiterSidebarProps) {
   const isKycApproved = kycStatus?.kyc_status === "approved";
 
-  const navItems: {
+  const primaryNavItems: {
     key: DashboardTab;
     label: string;
     icon: React.ReactNode;
@@ -72,15 +72,18 @@ export default function RecruiterSidebar({
         label: "Gallery Events",
         icon: <Calendar className="w-5 h-5" />,
       },
+    ];
 
-
+  const secondaryNavItems: {
+    key: DashboardTab;
+    label: string;
+    icon: React.ReactNode;
+  }[] = [
       {
         key: "kyc",
         label: "KYC Verification",
         icon: <Shield className="w-5 h-5" />,
       },
-
-
       {
         key: "pricing",
         label: "Pricing Plans",
@@ -91,17 +94,21 @@ export default function RecruiterSidebar({
         label: "Subscriptions",
         icon: <CreditCard className="w-5 h-5" />,
       },
-
     ];
 
   // Filter nav items to show only KYC and Profile if KYC is not approved
-  const filteredNavItems = isKycApproved
-    ? navItems
-    : navItems.filter((item) => item.key === "kyc" || item.key === "profile");
+  const filteredPrimary = isKycApproved
+    ? primaryNavItems
+    : primaryNavItems.filter((item) => item.key === "profile");
+
+  const filteredSecondary = isKycApproved
+    ? secondaryNavItems
+    : secondaryNavItems.filter((item) => item.key === "kyc");
 
   return (
     <DashboardSidebar
-      navItems={filteredNavItems}
+      navItems={filteredPrimary}
+      secondaryNavItems={filteredSecondary}
       activeTab={activeTab}
       onTabChange={onTabChange}
       onLogout={onLogout}
