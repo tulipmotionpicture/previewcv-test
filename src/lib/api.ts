@@ -519,6 +519,25 @@ export class ApiClient {
     );
   }
 
+  async sendMessageToApplicant(
+    applicationId: number,
+    message: string,
+  ): Promise<{ success: boolean; application: Application; message: string }> {
+    return this.request<{
+      success: boolean;
+      application: Application;
+      message: string;
+    }>(
+      `/api/v1/recruiters/jobs/application/${applicationId}/message`,
+      {
+        method: "PUT",
+        body: JSON.stringify({ message }),
+      },
+      true,
+      true,
+    );
+  }
+
   // --- KYC Management ---
   async uploadKycDocument(
     file: File,
