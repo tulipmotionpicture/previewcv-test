@@ -5,6 +5,7 @@ import { api } from "@/lib/api";
 import { Recruiter } from "@/types/api";
 import { useRecruiterAuth } from "@/context/RecruiterAuthContext";
 import { Copy, Globe, Pencil, Share2, Plus, X } from "lucide-react";
+import RichTextEditor from "./ui/RichTextEditor";
 
 function CompanyGallerySection({
   recruiter,
@@ -315,12 +316,11 @@ function CompanyGallerySection({
 
           <div>
             <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5 uppercase">About Company</label>
-            <textarea
-              rows={4}
-              name="bio"
+            <RichTextEditor
               value={formData.bio}
-              onChange={handleInputChange}
-              className="w-full px-4 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none transition-colors resize-none"
+              onChange={(content: string) =>
+                setFormData((prev) => ({ ...prev, bio: content }))
+              }
               placeholder="Tell us about your company..."
             />
           </div>

@@ -2,6 +2,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { api } from "@/lib/api";
 import { Plus, Search, Calendar, ChevronLeft, ChevronRight, Edit2, Trash2, X } from "lucide-react";
+import RichTextEditor from "./ui/RichTextEditor";
 // Removed 'sonner' import since it is not installed. Relying on toast prop.
 
 interface EventFormState {
@@ -308,13 +309,12 @@ export default function RecruiterGalleryEventsSection({
                     <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
                       Event Description
                     </label>
-                    <textarea
-                      name="description"
+                    <RichTextEditor
                       value={eventForm.description}
-                      onChange={handleFormChange}
+                      onChange={(content: string) =>
+                        setEventForm((prev) => ({ ...prev, description: content }))
+                      }
                       placeholder="Event Description"
-                      rows={4}
-                      className="w-full px-4 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-sm resize-none outline-none focus:border-blue-500 transition-colors"
                     />
                   </div>
 
