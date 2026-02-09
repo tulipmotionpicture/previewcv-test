@@ -10,6 +10,7 @@ import {
   JobApplicationsResponse,
   ApplicationDetailResponse,
   KycStatus,
+  RecruiterDashboardAnalytics,
 } from "@/types/api";
 import { useRecruiterAuth } from "@/context/RecruiterAuthContext";
 import { useToast } from "@/context/ToastContext";
@@ -31,7 +32,11 @@ import {
   ApplicationDetailModal,
   JOB_FORM_INITIAL,
 } from "@/components/recruiter";
-import type { DashboardTab, JobFormState, JobManagementTab } from "@/components/recruiter";
+import type {
+  DashboardTab,
+  JobFormState,
+  JobManagementTab,
+} from "@/components/recruiter";
 import {
   ArrowRight,
   Clock,
@@ -89,14 +94,8 @@ export default function RecruiterDashboard() {
   const [totalJobs, setTotalJobs] = useState(0);
   const jobsPerPage = 10;
   const [applications, setApplications] = useState<Application[]>([]);
-  const [dashboardStats, setDashboardStats] = useState<{
-    total_jobs: number;
-    active_jobs: number;
-    total_applications: number;
-    pending_applications: number;
-    shortlisted_applications: number;
-    rejected_applications: number;
-  } | null>(null);
+  const [dashboardStats, setDashboardStats] =
+    useState<RecruiterDashboardAnalytics | null>(null);
 
   // Loading states
   const [loadingJobs, setLoadingJobs] = useState(false);
@@ -130,7 +129,8 @@ export default function RecruiterDashboard() {
   const [deleteLoading, setDeleteLoading] = useState(false);
 
   // Job Management View State
-  const [jobManagementView, setJobManagementView] = useState<JobManagementTab>("manage");
+  const [jobManagementView, setJobManagementView] =
+    useState<JobManagementTab>("manage");
 
   // Action Menu State
   const [openMenuJobId, setOpenMenuJobId] = useState<number | null>(null);
@@ -241,20 +241,12 @@ export default function RecruiterDashboard() {
   const fetchDashboardStats = useCallback(async () => {
     setLoadingStats(true);
     try {
-      // const response = await api.getRecruiterDashboardStats();
-      // if (response.success && response.stats) {
-      setDashboardStats({
-        total_jobs: 12,
-        active_jobs: 12,
-        total_applications: 23,
-        pending_applications: 55,
-        shortlisted_applications: 66,
-        rejected_applications: 456,
-      });
-
-      // }
+      const analytics = await api.getRecruiterDashboardAnalytics();
+      if (analytics.success) {
+        setDashboardStats(analytics);
+      }
     } catch (error) {
-      console.error("Failed to fetch dashboard stats:", error);
+      console.error("Failed to fetch dashboard analytics:", error);
     } finally {
       setLoadingStats(false);
     }
@@ -444,12 +436,12 @@ export default function RecruiterDashboard() {
         setSelectedApplicationDetail((prev) =>
           prev
             ? {
-              ...prev,
-              application: {
-                ...prev.application,
-                status: newStatus as Application["status"],
-              },
-            }
+                ...prev,
+                application: {
+                  ...prev.application,
+                  status: newStatus as Application["status"],
+                },
+              }
             : null,
         );
       }
@@ -659,10 +651,11 @@ export default function RecruiterDashboard() {
                                     {/* STATUS */}
                                     <td className="py-5">
                                       <span
-                                        className={`inline-flex items-center rounded px-3 py-1 text-xs font-medium ${job.is_active
-                                          ? "bg-[#E6F4EA] text-[#1E7F3A] dark:bg-green-900/30 dark:text-green-400"
-                                          : "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-400"
-                                          }`}
+                                        className={`inline-flex items-center rounded px-3 py-1 text-xs font-medium ${
+                                          job.is_active
+                                            ? "bg-[#E6F4EA] text-[#1E7F3A] dark:bg-green-900/30 dark:text-green-400"
+                                            : "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-400"
+                                        }`}
                                       >
                                         {job.is_active ? "Active" : "Inactive"}
                                       </span>
@@ -703,7 +696,9 @@ export default function RecruiterDashboard() {
                                             <div className="absolute right-0 top-8 z-20 w-48 bg-white dark:bg-[#282727] rounded-lg shadow-xl border border-gray-100 dark:border-gray-700 py-1 animate-in fade-in zoom-in-95 duration-200">
                                               <button
                                                 onClick={() => {
-                                                  handleViewApplications(job.id);
+                                                  handleViewApplications(
+                                                    job.id,
+                                                  );
                                                   setOpenMenuJobId(null);
                                                 }}
                                                 className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-[#60768D] dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors font-medium"
@@ -762,7 +757,6 @@ export default function RecruiterDashboard() {
                     </div>
                   </div>
 
-
                   {/* Help Guide - Takes 1 column */}
                   <div className="flex flex-col h-full mt-4">
                     <h2 className="text-2xl font-medium text-gray-900 dark:text-gray-100 mb-6">
@@ -770,55 +764,53 @@ export default function RecruiterDashboard() {
                     </h2>
                     <div className="bg-white dark:bg-[#282727] rounded-xl border border-[#E1E8F1] dark:border-gray-700  flex-1">
                       <div className="divide-y divide-gray-100 dark:divide-gray-700">
-                        {applications.slice(0, 6).length > 0 ? (
-                          applications.slice(0, 6).map((app) => (
-                            <div
-                              key={app.id}
-                              className="flex items-center gap-4 p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors cursor-pointer group first:rounded-t-2xl last:rounded-b-2xl"
-                              onClick={() => handleViewApplicationDetail(app)}
-                            >
-                              <div className="w-12 h-12 rounded-full bg-[#0B172B] flex items-center justify-center text-white font-bold text-sm shadow-sm flex-shrink-0">
-                                {app.candidate_name
-                                  ?.substring(0, 2)
-                                  .toUpperCase() || "JD"}
-                              </div>
-                              <div className="flex-1 min-w-0">
-                                <div className="font-bold text-gray-900 dark:text-gray-100 truncate text-[15px]">
-                                  {app.candidate_name || "John Deo"}
+                        {applications.slice(0, 6).length > 0
+                          ? applications.slice(0, 6).map((app) => (
+                              <div
+                                key={app.id}
+                                className="flex items-center gap-4 p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors cursor-pointer group first:rounded-t-2xl last:rounded-b-2xl"
+                                onClick={() => handleViewApplicationDetail(app)}
+                              >
+                                <div className="w-12 h-12 rounded-full bg-[#0B172B] flex items-center justify-center text-white font-bold text-sm shadow-sm flex-shrink-0">
+                                  {app.candidate_name
+                                    ?.substring(0, 2)
+                                    .toUpperCase() || "JD"}
                                 </div>
-                                <div className="text-xs text-[#60768D] dark:text-gray-400 font-medium mt-0.5">
-                                  Application Review
+                                <div className="flex-1 min-w-0">
+                                  <div className="font-bold text-gray-900 dark:text-gray-100 truncate text-[15px]">
+                                    {app.candidate_name || "John Deo"}
+                                  </div>
+                                  <div className="text-xs text-[#60768D] dark:text-gray-400 font-medium mt-0.5">
+                                    Application Review
+                                  </div>
                                 </div>
-                              </div>
-                              <div className="w-10 h-10 rounded-full border border-gray-200 dark:border-gray-700 flex items-center justify-center bg-white dark:bg-[#282727] group-hover:bg-gray-50 dark:group-hover:bg-gray-700 transition-colors">
-                                <Clock className="w-5 h-5 text-gray-400 group-hover:text-gray-600 dark:group-hover:text-gray-300 stroke-1" />
-                              </div>
-                            </div>
-                          ))
-                        ) : (
-                          // Fallback mock items
-                          [1, 2, 3, 4, 5, 6].map((i) => (
-                            <div
-                              key={i}
-                              className="flex items-center gap-4 p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors cursor-pointer group first:rounded-t-2xl last:rounded-b-2xl"
-                            >
-                              <div className="w-12 h-12 rounded-full bg-[#0B172B] flex items-center justify-center text-white font-bold text-sm shadow-sm flex-shrink-0">
-                                JD
-                              </div>
-                              <div className="flex-1 min-w-0">
-                                <div className="font-bold text-gray-900 dark:text-gray-100 truncate text-[15px]">
-                                  John Deo
-                                </div>
-                                <div className="text-xs text-[#60768D] dark:text-gray-400 font-medium mt-0.5">
-                                  Application Review
+                                <div className="w-10 h-10 rounded-full border border-gray-200 dark:border-gray-700 flex items-center justify-center bg-white dark:bg-[#282727] group-hover:bg-gray-50 dark:group-hover:bg-gray-700 transition-colors">
+                                  <Clock className="w-5 h-5 text-gray-400 group-hover:text-gray-600 dark:group-hover:text-gray-300 stroke-1" />
                                 </div>
                               </div>
-                              <div className="w-10 h-10 rounded-full border border-gray-200 dark:border-gray-700 flex items-center justify-center bg-white dark:bg-[#282727] group-hover:bg-gray-50 dark:group-hover:bg-gray-700 transition-colors">
-                                <Clock className="w-5 h-5 text-gray-400 group-hover:text-gray-600 dark:group-hover:text-gray-300 stroke-1" />
+                            ))
+                          : // Fallback mock items
+                            [1, 2, 3, 4, 5, 6].map((i) => (
+                              <div
+                                key={i}
+                                className="flex items-center gap-4 p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors cursor-pointer group first:rounded-t-2xl last:rounded-b-2xl"
+                              >
+                                <div className="w-12 h-12 rounded-full bg-[#0B172B] flex items-center justify-center text-white font-bold text-sm shadow-sm flex-shrink-0">
+                                  JD
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <div className="font-bold text-gray-900 dark:text-gray-100 truncate text-[15px]">
+                                    John Deo
+                                  </div>
+                                  <div className="text-xs text-[#60768D] dark:text-gray-400 font-medium mt-0.5">
+                                    Application Review
+                                  </div>
+                                </div>
+                                <div className="w-10 h-10 rounded-full border border-gray-200 dark:border-gray-700 flex items-center justify-center bg-white dark:bg-[#282727] group-hover:bg-gray-50 dark:group-hover:bg-gray-700 transition-colors">
+                                  <Clock className="w-5 h-5 text-gray-400 group-hover:text-gray-600 dark:group-hover:text-gray-300 stroke-1" />
+                                </div>
                               </div>
-                            </div>
-                          ))
-                        )}
+                            ))}
                       </div>
                       <div className="p-4 border-t border-gray-100 dark:border-gray-700"></div>
                     </div>
@@ -844,84 +836,73 @@ export default function RecruiterDashboard() {
               </div>
             )}
           </>
-        )
-        }
+        )}
 
-        {
-          activeTab === "jobs" && kycStatus?.kyc_status === "approved" && (
-            <JobManagement
-              jobs={jobs}
-              loadingJobs={loadingJobs}
-              jobForm={jobForm}
-              creatingJob={creatingJob}
-              totalJobs={totalJobs}
-              currentPage={currentPage}
-              totalPages={totalPages}
-              filters={jobFilters}
-              activeView={jobManagementView}
-              onViewChange={setJobManagementView}
-              onPageChange={handlePageChange}
-              onFiltersChange={handleFiltersChange}
-              onJobFormChange={handleJobFormChange}
-              onCreateJob={handleCreateJob}
-              onEditJob={handleEditJob}
-              onDeleteJob={(jobId) => setDeleteJobId(jobId)}
-              onViewApplications={handleViewApplications}
-            />
-          )
-        }
+        {activeTab === "jobs" && kycStatus?.kyc_status === "approved" && (
+          <JobManagement
+            jobs={jobs}
+            loadingJobs={loadingJobs}
+            jobForm={jobForm}
+            creatingJob={creatingJob}
+            totalJobs={totalJobs}
+            currentPage={currentPage}
+            totalPages={totalPages}
+            filters={jobFilters}
+            activeView={jobManagementView}
+            onViewChange={setJobManagementView}
+            onPageChange={handlePageChange}
+            onFiltersChange={handleFiltersChange}
+            onJobFormChange={handleJobFormChange}
+            onCreateJob={handleCreateJob}
+            onEditJob={handleEditJob}
+            onDeleteJob={(jobId) => setDeleteJobId(jobId)}
+            onViewApplications={handleViewApplications}
+          />
+        )}
 
-        {
-          activeTab === "ats" && kycStatus?.kyc_status === "approved" && (
-            <ATSApplications
-              jobs={jobs}
-              applications={applications}
-              selectedJobId={selectedJobId}
-              statusFilter={statusFilter}
-              loadingApps={loadingApps}
-              onJobSelect={setSelectedJobId}
-              onStatusFilterChange={setStatusFilter}
-              onViewDetails={handleViewApplicationDetail}
-              onUpdateStatus={handleUpdateStatus}
-            />
-          )
-        }
+        {activeTab === "ats" && kycStatus?.kyc_status === "approved" && (
+          <ATSApplications
+            jobs={jobs}
+            applications={applications}
+            selectedJobId={selectedJobId}
+            statusFilter={statusFilter}
+            loadingApps={loadingApps}
+            onJobSelect={setSelectedJobId}
+            onStatusFilterChange={setStatusFilter}
+            onViewDetails={handleViewApplicationDetail}
+            onUpdateStatus={handleUpdateStatus}
+          />
+        )}
 
-        {
-          activeTab === "gallery" &&
+        {activeTab === "gallery" &&
           kycStatus?.kyc_status === "approved" &&
           recruiter && (
             <CompanyGallerySection recruiter={recruiter} toast={toast} />
-          )
-        }
+          )}
 
-        {
-          activeTab === "galleryEvents" &&
+        {activeTab === "galleryEvents" &&
           kycStatus?.kyc_status === "approved" && (
             <RecruiterGalleryEventsSection
               recruiter={recruiter}
               toast={toast}
             />
-          )
-        }
+          )}
 
         {activeTab === "profile" && <RecruiterProfileEdit />}
 
         {activeTab === "kyc" && <KYCVerification />}
 
-        {
-          activeTab === "subscriptions" && (
-            <SubscriptionDashboard
-              onNavigateToPricing={() => setActiveTab("pricing")}
-            />
-          )
-        }
+        {activeTab === "subscriptions" && (
+          <SubscriptionDashboard
+            onNavigateToPricing={() => setActiveTab("pricing")}
+          />
+        )}
 
         {activeTab === "pricing" && <PricingPlans />}
-      </main >
+      </main>
 
       {/* Application Detail Modal */}
-      < ApplicationDetailModal
+      <ApplicationDetailModal
         applicationDetail={selectedApplicationDetail}
         isOpen={isDetailModalOpen}
         loading={loadingApplicationDetail}
@@ -954,6 +935,6 @@ export default function RecruiterDashboard() {
         variant="danger"
         loading={deleteLoading}
       />
-    </div >
+    </div>
   );
 }

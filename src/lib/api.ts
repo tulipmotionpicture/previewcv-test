@@ -30,6 +30,7 @@ import {
   CreateCvSubscriptionRequest,
   CancelSubscriptionRequest,
   CancelSubscriptionResponse,
+  RecruiterDashboardAnalytics,
 } from "@/types/api";
 import {
   ReviewedResumeMetadata,
@@ -477,6 +478,15 @@ export class ApiClient {
   }> {
     return this.request(
       "/api/v1/recruiters/jobs/dashboard/stats",
+      {},
+      true,
+      true,
+    );
+  }
+
+  async getRecruiterDashboardAnalytics(): Promise<RecruiterDashboardAnalytics> {
+    return this.request<RecruiterDashboardAnalytics>(
+      "/api/v1/recruiters/jobs/dashboard/analytics",
       {},
       true,
       true,

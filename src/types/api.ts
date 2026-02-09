@@ -559,3 +559,70 @@ export interface CancelSubscriptionResponse {
   will_expire_at: string;
   message: string;
 }
+
+// --- Recruiter Dashboard Analytics ---
+export interface TrendMetric {
+  count: number;
+  change_percentage: number | null;
+  previous_month_count: number;
+  trend: "up" | "down" | "stable";
+}
+
+export interface InterviewMetrics extends TrendMetric {
+  upcoming: number;
+  completed: number;
+  total: number;
+}
+
+export interface PendingApprovalsMetrics {
+  jobs_pending_approval: number;
+  applications_pending_review: number;
+  total: number;
+}
+
+export interface ApplicationPipeline {
+  applied: number;
+  under_review: number;
+  interview_scheduled: number;
+  interviewed: number;
+  offered: number;
+  accepted: number;
+  rejected: number;
+  withdrawn: number;
+}
+
+export interface TopJobMetric {
+  job_id: number;
+  title: string;
+  application_count: number;
+  view_count: number;
+  posted_date: string;
+}
+
+export interface SubscriptionUsageMetrics {
+  plan_name: string;
+  jobs_posted_this_period: number;
+  jobs_remaining: number;
+  cv_credits_remaining: number;
+  period_end: string;
+}
+
+export interface AnalyticsPeriod {
+  current_month_start: string;
+  current_month_end: string;
+  previous_month_start: string;
+  previous_month_end: string;
+}
+
+export interface RecruiterDashboardAnalytics {
+  success: boolean;
+  active_jobs: TrendMetric;
+  total_applications: TrendMetric;
+  interviews: InterviewMetrics;
+  pending_approvals: PendingApprovalsMetrics;
+  application_pipeline: ApplicationPipeline;
+  top_jobs: TopJobMetric[];
+  subscription_usage: SubscriptionUsageMetrics;
+  period: AnalyticsPeriod;
+  generated_at: string;
+}

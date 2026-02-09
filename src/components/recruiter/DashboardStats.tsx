@@ -7,19 +7,12 @@ import {
   Clock,
   TrendingUp,
   TrendingDown,
+  Minus,
 } from "lucide-react";
-
-interface DashboardStatsData {
-  total_jobs: number;
-  active_jobs: number;
-  total_applications: number;
-  pending_applications: number;
-  shortlisted_applications: number;
-  rejected_applications: number;
-}
+import type { RecruiterDashboardAnalytics } from "@/types/api";
 
 interface DashboardStatsProps {
-  stats: DashboardStatsData | null;
+  stats: RecruiterDashboardAnalytics | null;
   loading: boolean;
 }
 
@@ -82,37 +75,37 @@ export default function DashboardStats({
   const statCards = [
     {
       label: "Active Jobs",
-      value: stats.active_jobs,
+      value: stats.active_jobs.count,
       icon: Briefcase,
-      trend: 12,
-      trendDirection: "up",
+      trend: stats.active_jobs.change_percentage,
+      trendDirection: stats.active_jobs.trend,
       iconBg: "bg-blue-100/50 dark:bg-blue-900/30",
       iconColor: "text-blue-600 dark:text-blue-400",
     },
     {
       label: "Total Application",
-      value: stats.total_applications, // 1,234
+      value: stats.total_applications.count,
       icon: Users,
-      trend: 8,
-      trendDirection: "up",
+      trend: stats.total_applications.change_percentage,
+      trendDirection: stats.total_applications.trend,
       iconBg: "bg-purple-100/50 dark:bg-purple-900/30",
       iconColor: "text-purple-600 dark:text-purple-400",
     },
     {
-      label: "Interview schedule",
-      value: stats.shortlisted_applications, // 42
+      label: "Interview Schedule",
+      value: stats.interviews.total,
       icon: Calendar,
-      trend: 12,
-      trendDirection: "up",
+      trend: stats.interviews.change_percentage,
+      trendDirection: stats.interviews.trend,
       iconBg: "bg-blue-100/50 dark:bg-blue-900/30",
       iconColor: "text-blue-600 dark:text-blue-400",
     },
     {
-      label: "Pending Approals", // Typo in image "Approals" fixed here
-      value: stats.pending_applications, // 20
-      icon: Clock, // Was blue briefcase in image, using Clock for "Pending" makes sense, style matches blue
-      trend: 24,
-      trendDirection: "up",
+      label: "Pending Approvals",
+      value: stats.pending_approvals.total,
+      icon: Clock,
+      trend: null, // Pending approvals don't have trend data
+      trendDirection: "stable",
       iconBg: "bg-blue-100/50 dark:bg-blue-900/30",
       iconColor: "text-blue-600 dark:text-blue-400",
     },
@@ -153,13 +146,37 @@ export default function DashboardStats({
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <span className="flex items-center text-sm font-bold text-green-500">
-                  <TrendingUp className="w-4 h-4 mr-1 stroke-[3px]" />
-                  {card.trend}%
-                </span>
-                <span className="text-xs font-medium text-gray-400 dark:text-gray-500">
-                  vs last month
-                </span>
+                {card.trend !== null ? (
+                  <>
+                    <span
+                      className={`flex items-center text-sm font-bold ${
+                        card.trendDirection === "up"
+                          ? "text-green-500"
+                          : card.trendDirection === "down"
+                            ? "text-red-500"
+                            : "text-gray-500"
+                      }`}
+                    >
+                      {card.trendDirection === "up" && (
+                        <TrendingUp className="w-4 h-4 mr-1 stroke-[3px]" />
+                      )}
+                      {card.trendDirection === "down" && (
+                        <TrendingDown className="w-4 h-4 mr-1 stroke-[3px]" />
+                      )}
+                      {card.trendDirection === "stable" && (
+                        <Minus className="w-4 h-4 mr-1 stroke-[3px]" />
+                      )}
+                      {Math.abs(card.trend).toFixed(0)}%
+                    </span>
+                    <span className="text-xs font-medium text-gray-400 dark:text-gray-500">
+                      vs last month
+                    </span>
+                  </>
+                ) : (
+                  <span className="text-xs font-medium text-gray-400 dark:text-gray-500">
+                    Current period
+                  </span>
+                )}
               </div>
             </div>
           );
