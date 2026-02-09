@@ -80,6 +80,9 @@ export interface Job {
   company_name: string;
   company_logo_url?: string;
   location: string;
+  country?: string;
+  state?: string;
+  city?: string;
   job_type: "full_time" | "part_time" | "contract" | "freelance" | "internship";
   description: string;
   requirements?: string;
@@ -163,14 +166,14 @@ export interface Application {
   uploaded_resume_id?: number | null;
   cover_letter_id?: number | null;
   status:
-  | "applied"
-  | "under_review"
-  | "interview_scheduled"
-  | "offered"
-  | "accepted"
-  | "rejected"
-  | "withdrawn"
-  | "declined";
+    | "applied"
+    | "under_review"
+    | "interview_scheduled"
+    | "offered"
+    | "accepted"
+    | "rejected"
+    | "withdrawn"
+    | "declined";
   applied_at: string;
   updated_at: string;
   created_at?: string;
