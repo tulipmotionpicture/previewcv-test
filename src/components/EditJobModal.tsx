@@ -22,7 +22,9 @@ export default function EditJobModal({
   const [formData, setFormData] = useState({
     title: "",
     company_name: "",
-    location: "",
+    country: "",
+    state: "",
+    city: "",
     job_type: "full_time" as Job["job_type"],
     experience_level: "mid" as Job["experience_level"],
     description: "",
@@ -48,7 +50,9 @@ export default function EditJobModal({
       setFormData({
         title: job.title || "",
         company_name: job.company_name || "",
-        location: job.location || "",
+        country: job.country || "",
+        state: job.state || "",
+        city: job.city || "",
         job_type: job.job_type || "full_time",
         experience_level: job.experience_level || "mid",
         description: job.description || "",
@@ -92,7 +96,9 @@ export default function EditJobModal({
       } = {
         title: formData.title,
         company_name: formData.company_name,
-        location: formData.location,
+        country: formData.country,
+        state: formData.state,
+        city: formData.city,
         job_type: formData.job_type,
         experience_level: formData.experience_level,
         description: formData.description,
@@ -299,19 +305,49 @@ export default function EditJobModal({
             </div>
           </div>
 
-          <div>
-            <label className="block text-xs font-black uppercase tracking-widest text-gray-400 dark:text-gray-500 mb-2 ml-1">
-              Location
-            </label>
-            <input
-              type="text"
-              value={formData.location}
-              onChange={(e) =>
-                setFormData({ ...formData, location: e.target.value })
-              }
-              className="w-full px-6 py-4 bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl focus:ring-2 focus:ring-indigo-600 outline-none hover:bg-gray-100 dark:hover:bg-gray-750 transition-all font-medium text-gray-900 dark:text-gray-100"
-              required
-            />
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div>
+              <label className="block text-xs font-black uppercase tracking-widest text-gray-400 dark:text-gray-500 mb-2 ml-1">
+                Country
+              </label>
+              <input
+                type="text"
+                value={formData.country}
+                onChange={(e) =>
+                  setFormData({ ...formData, country: e.target.value })
+                }
+                className="w-full px-6 py-4 bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl focus:ring-2 focus:ring-indigo-600 outline-none hover:bg-gray-100 dark:hover:bg-gray-750 transition-all font-medium text-gray-900 dark:text-gray-100"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-black uppercase tracking-widest text-gray-400 dark:text-gray-500 mb-2 ml-1">
+                State / Region
+              </label>
+              <input
+                type="text"
+                value={formData.state}
+                onChange={(e) =>
+                  setFormData({ ...formData, state: e.target.value })
+                }
+                className="w-full px-6 py-4 bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl focus:ring-2 focus:ring-indigo-600 outline-none hover:bg-gray-100 dark:hover:bg-gray-750 transition-all font-medium text-gray-900 dark:text-gray-100"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-black uppercase tracking-widest text-gray-400 dark:text-gray-500 mb-2 ml-1">
+                City
+              </label>
+              <input
+                type="text"
+                value={formData.city}
+                onChange={(e) =>
+                  setFormData({ ...formData, city: e.target.value })
+                }
+                className="w-full px-6 py-4 bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl focus:ring-2 focus:ring-indigo-600 outline-none hover:bg-gray-100 dark:hover:bg-gray-750 transition-all font-medium text-gray-900 dark:text-gray-100"
+                required
+              />
+            </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

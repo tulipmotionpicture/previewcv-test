@@ -6,7 +6,18 @@ import { Job } from "@/types/api";
 import JobDetailsClient from "./JobDetailsClient";
 import { notFound } from "next/navigation";
 import { api } from "@/lib/api";
-import { MapPin, Briefcase, Zap, DollarSign, Calendar, Users, Eye, Building2, ChevronRight, ArrowLeft } from "lucide-react";
+import {
+  MapPin,
+  Briefcase,
+  Zap,
+  DollarSign,
+  Calendar,
+  Users,
+  Eye,
+  Building2,
+  ChevronRight,
+  ArrowLeft,
+} from "lucide-react";
 
 // Server-side data fetching function for individual job details
 async function getJobBySlug(slug: string): Promise<Job | null> {
@@ -174,9 +185,9 @@ export default async function JobDetailsPage({
                       <DollarSign className="w-4 h-4" />
                       {job.salary_min
                         ? formatCurrency(
-                          job.salary_min,
-                          job.salary_currency || "USD",
-                        )
+                            job.salary_min,
+                            job.salary_currency || "USD",
+                          )
                         : ""}
                       {job.salary_max
                         ? ` - ${formatCurrency(job.salary_max, job.salary_currency || "USD")}`
@@ -223,9 +234,17 @@ export default async function JobDetailsPage({
                     <div className="w-1.5 h-6 bg-[#0369A1] rounded-full"></div>
                     About the Role
                   </h2>
-                  <div className="text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-line text-base">
-                    {job.description}
-                  </div>
+                  <div
+                    className="prose prose-slate dark:prose-invert max-w-none
+                      prose-headings:text-[#0C4A6E] dark:prose-headings:text-gray-100
+                      prose-h3:text-lg prose-h3:font-bold prose-h3:mt-6 prose-h3:mb-3
+                      prose-p:text-gray-700 dark:prose-p:text-gray-300 prose-p:leading-relaxed prose-p:mb-4
+                      prose-ul:my-4 prose-ul:list-disc prose-ul:pl-6
+                      prose-li:text-gray-700 dark:prose-li:text-gray-300 prose-li:mb-2
+                      prose-strong:text-gray-900 dark:prose-strong:text-gray-100 prose-strong:font-semibold
+                      prose-hr:border-gray-200 dark:prose-hr:border-gray-700 prose-hr:my-6"
+                    dangerouslySetInnerHTML={{ __html: job.description }}
+                  />
                 </section>
 
                 {/* Responsibilities */}

@@ -12,8 +12,9 @@ interface JobListProps {
 
 function formatSalary(job: Job) {
   if (job.salary_min && job.salary_max) {
-    return `${job.salary_currency || "USD"} ${job.salary_min} - ${job.salary_max
-      }`;
+    return `${job.salary_currency || "USD"} ${job.salary_min} - ${
+      job.salary_max
+    }`;
   }
   return "Competitive Salary";
 }
@@ -130,9 +131,19 @@ export default function JobList({ jobs, loading, error }: JobListProps) {
               </div>
 
               {/* Description */}
-              <p className="text-gray-600 dark:text-gray-400 text-sm leading-relaxed mb-3 line-clamp-2">
-                {job.description}
-              </p>
+              {/* <p className="text-gray-600 dark:text-gray-400 text-sm leading-relaxed mb-3 line-clamp-2"> */}
+              <div
+                className="prose prose-slate dark:prose-invert max-w-none
+                      prose-headings:text-[#0C4A6E] dark:prose-headings:text-gray-100
+                      prose-h3:text-lg prose-h3:font-bold prose-h3:mt-6 prose-h3:mb-3
+                      prose-p:text-gray-700 dark:prose-p:text-gray-300 prose-p:leading-relaxed prose-p:mb-4
+                      prose-ul:my-4 prose-ul:list-disc prose-ul:pl-6
+                      prose-li:text-gray-700 dark:prose-li:text-gray-300 prose-li:mb-2
+                      prose-strong:text-gray-900 dark:prose-strong:text-gray-100 prose-strong:font-semibold
+                      prose-hr:border-gray-200 dark:prose-hr:border-gray-700 prose-hr:my-6 text-gray-600 dark:text-gray-400 text-sm leading-relaxed mb-3 line-clamp-2"
+                dangerouslySetInnerHTML={{ __html: job.description }}
+              />
+              {/* </p> */}
 
               {/* Skills */}
               {job.required_skills && job.required_skills.length > 0 && (

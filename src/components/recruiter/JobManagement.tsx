@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Job } from "@/types/api";
 import {
   Search,
@@ -19,23 +19,25 @@ export type JobManagementTab = "create" | "manage";
 
 export type JobFormState = {
   title: string;
-  location: string;
+  country: string;
+  state: string;
+  city: string;
   job_type:
-  | "full_time"
-  | "part_time"
-  | "contract"
-  | "internship"
-  | "temporary"
-  | "freelance"
-  | "other";
+    | "full_time"
+    | "part_time"
+    | "contract"
+    | "internship"
+    | "temporary"
+    | "freelance"
+    | "other";
   experience_level:
-  | "entry"
-  | "junior"
-  | "mid"
-  | "senior"
-  | "lead"
-  | "director"
-  | "executive";
+    | "entry"
+    | "junior"
+    | "mid"
+    | "senior"
+    | "lead"
+    | "director"
+    | "executive";
   description: string;
   requirements: string;
   responsibilities: string;
@@ -50,7 +52,9 @@ export type JobFormState = {
 
 export const JOB_FORM_INITIAL: JobFormState = {
   title: "",
-  location: "",
+  country: "",
+  state: "",
+  city: "",
   job_type: "full_time",
   experience_level: "entry",
   description: "",
@@ -71,8 +75,7 @@ export interface JobFilters {
   posted_date_to?: string;
   application_deadline_from?: string;
   application_deadline_to?: string;
-  title?: string;
-  location?: string;
+  search_keyword?: string;
 }
 
 interface JobManagementProps {
@@ -118,7 +121,8 @@ export default function JobManagement({
   activeView,
   onViewChange,
 }: JobManagementProps) {
-  const [internalActiveTab, setInternalActiveTab] = useState<JobManagementTab>("manage");
+  const [internalActiveTab, setInternalActiveTab] =
+    useState<JobManagementTab>("manage");
 
   const activeTab = activeView !== undefined ? activeView : internalActiveTab;
 
@@ -130,28 +134,31 @@ export default function JobManagement({
     }
   };
 
-  // Local state for debounced filters
-  const [localSearch, setLocalSearch] = useState(filters.title || "");
-  const [localLocation, setLocalLocation] = useState(filters.location || "");
+  // Local state for debounced search (updates UI instantly, triggers API after 500ms)
+  const [localSearch, setLocalSearch] = useState(filters.search_keyword || "");
 
-  // Debounce search inputs
-  const [searchTimeout, setSearchTimeout] = useState<NodeJS.Timeout | null>(null);
+  // Debounce search timeout
+  const [searchTimeout, setSearchTimeout] = useState<NodeJS.Timeout | null>(
+    null,
+  );
+
+  // Sync localSearch when filters change externally (e.g., clear filters)
+  useEffect(() => {
+    setLocalSearch(filters.search_keyword || "");
+  }, [filters.search_keyword]);
 
   // State for tracking which job's menu is open
   const [openMenuJobId, setOpenMenuJobId] = useState<number | null>(null);
 
-  const handleSearchChange = (val: string, type: 'title' | 'location') => {
-    if (type === 'title') setLocalSearch(val);
-    else setLocalLocation(val);
+  const handleSearchChange = (val: string) => {
+    setLocalSearch(val);
 
     if (searchTimeout) clearTimeout(searchTimeout);
 
     const timeout = setTimeout(() => {
       onFiltersChange({
         ...filters,
-        title: type === 'title' ? val : localSearch,
-        location: type === 'location' ? val : localLocation,
-        // Reset page to 1 on filter change usually handled by parent or we should trigger it
+        search_keyword: val,
       });
     }, 500);
     setSearchTimeout(timeout);
@@ -174,7 +181,6 @@ export default function JobManagement({
 
   return (
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-
       <CreateJobModal
         isOpen={activeTab === "create"}
         onClose={() => handleTabChange("manage")}
@@ -216,26 +222,26 @@ export default function JobManagement({
                 <table className="w-full border-collapse">
                   <thead className="sticky top-0 z-10">
                     <tr className="border-b border-gray-100 dark:border-gray-700">
-                      {[
-                        "ROLE",
-                        "STATUS",
-                        "LOCATION",
-                        "POSTED",
-                        "ACTIONS"
-                      ].map((heading, index) => (
-                        <th
-                          key={heading}
-                          className={`px-4 py-3 text-xs bg-[#101828] font-bold text-white dark:text-gray-500 uppercase tracking-wider ${index === 4 ? "text-right" : "text-left"
+                      {["ROLE", "STATUS", "LOCATION", "POSTED", "ACTIONS"].map(
+                        (heading, index) => (
+                          <th
+                            key={heading}
+                            className={`px-4 py-3 text-xs bg-[#101828] font-bold text-white dark:text-gray-500 uppercase tracking-wider ${
+                              index === 4 ? "text-right" : "text-left"
                             }`}
-                        >
-                          {heading}
-                        </th>
-                      ))}
+                          >
+                            {heading}
+                          </th>
+                        ),
+                      )}
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
                     {jobs.map((job) => (
-                      <tr key={job.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors group">
+                      <tr
+                        key={job.id}
+                        className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors group"
+                      >
                         {/* Role */}
                         <td className="px-4 py-3">
                           <div className="font-bold text-gray-900 dark:text-gray-100 text-[15px]">
@@ -247,10 +253,13 @@ export default function JobManagement({
                         </td>
                         {/* Status */}
                         <td className="px-4 py-3">
-                          <span className={`inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium ${job.is_active
-                            ? "bg-[#E6F4EA] text-[#1E7F3A] dark:bg-green-900/30 dark:text-green-400"
-                            : "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400"
-                            }`}>
+                          <span
+                            className={`inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium ${
+                              job.is_active
+                                ? "bg-[#E6F4EA] text-[#1E7F3A] dark:bg-green-900/30 dark:text-green-400"
+                                : "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400"
+                            }`}
+                          >
                             {job.is_active ? "Active" : "Inactive"}
                           </span>
                         </td>
@@ -265,7 +274,9 @@ export default function JobManagement({
                         <td className="px-4 py-3">
                           <div className="flex items-center gap-1.5 text-sm text-gray-600 dark:text-gray-300 font-medium">
                             <Clock className="w-4 h-4 text-gray-400" />
-                            {formatTimeAgo(job.posted_date || new Date().toISOString())}
+                            {formatTimeAgo(
+                              job.posted_date || new Date().toISOString(),
+                            )}
                           </div>
                         </td>
                         {/* Actions */}
@@ -274,7 +285,9 @@ export default function JobManagement({
                             <button
                               onClick={(e) => {
                                 e.stopPropagation();
-                                setOpenMenuJobId(openMenuJobId === job.id ? null : job.id);
+                                setOpenMenuJobId(
+                                  openMenuJobId === job.id ? null : job.id,
+                                );
                               }}
                               className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
                             >
@@ -296,7 +309,19 @@ export default function JobManagement({
                                       }}
                                       className="flex items-center gap-2 w-full px-4 py-2.5 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
                                     >
-                                      <svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
+                                      <svg
+                                        className="w-4 h-4 text-gray-400"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke="currentColor"
+                                      >
+                                        <path
+                                          strokeLinecap="round"
+                                          strokeLinejoin="round"
+                                          strokeWidth={2}
+                                          d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
+                                        />
+                                      </svg>
                                       Edit Job
                                     </button>
                                     <button
@@ -306,9 +331,25 @@ export default function JobManagement({
                                       }}
                                       className="flex items-center gap-2 w-full px-4 py-2.5 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
                                     >
-                                      <svg className="w-4 h-4 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                      <svg
+                                        className="w-4 h-4 text-gray-400"
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke="currentColor"
+                                      >
+                                        <path
+                                          strokeLinecap="round"
+                                          strokeLinejoin="round"
+                                          strokeWidth={2}
+                                          d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                                        />
+                                        <path
+                                          strokeLinecap="round"
+                                          strokeLinejoin="round"
+                                          strokeWidth={2}
+                                          d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                                        />
                                       </svg>
                                       View Applications
                                     </button>
@@ -319,7 +360,19 @@ export default function JobManagement({
                                       }}
                                       className="flex items-center gap-2 w-full px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
                                     >
-                                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                                      <svg
+                                        className="w-4 h-4"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke="currentColor"
+                                      >
+                                        <path
+                                          strokeLinecap="round"
+                                          strokeLinejoin="round"
+                                          strokeWidth={2}
+                                          d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                                        />
+                                      </svg>
                                       Deactivate Job
                                     </button>
                                   </div>
@@ -369,39 +422,23 @@ export default function JobManagement({
         {/* Filters - Takes 1 column */}
 
         <div className="lg:col-span-1">
-
           <div className="bg-white dark:bg-[#282727]  rounded-xl border border-[#E1E8F1] dark:border-gray-700  space-y-6">
             {/* Search by Role */}
 
-            <h1
-              className="bg-[#101828]  text-[13px] bg-[#0B172B] font-bold text-white dark:text-gray-500 uppercase tracking-wider p-3 rounded-t-xl"
-            >
+            <h1 className="bg-[#101828]  text-[13px] font-bold text-white dark:text-gray-500 uppercase tracking-wider p-3 rounded-t-xl">
               Filter
             </h1>
             <div className="px-2">
               <div className="relative">
-                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Search by Role</label>
+                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                  Search Jobs
+                </label>
                 <Search className="absolute left-3 translate-y-1/2 w-5 h-5 text-gray-400" />
                 <input
                   type="text"
                   value={localSearch}
-                  onChange={(e) => handleSearchChange(e.target.value, 'title')}
-                  placeholder="Search by role"
-                  className="w-full pl-10 pr-4 py-3 bg-white dark:bg-gray-800 border border-[#E1E8F1] dark:border-gray-700 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all placeholder-gray-400 dark:text-gray-200"
-                />
-              </div>
-            </div>
-
-            {/* Location */}
-            <div className="px-2">
-              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Location</label>
-              <div className="relative">
-                <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                <input
-                  type="text"
-                  value={localLocation}
-                  onChange={(e) => handleSearchChange(e.target.value, 'location')}
-                  placeholder="e.g. Remote, New York"
+                  onChange={(e) => handleSearchChange(e.target.value)}
+                  placeholder="Search by title, location, skills..."
                   className="w-full pl-10 pr-4 py-3 bg-white dark:bg-gray-800 border border-[#E1E8F1] dark:border-gray-700 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all placeholder-gray-400 dark:text-gray-200"
                 />
               </div>
@@ -410,16 +447,25 @@ export default function JobManagement({
             {/* Date Filters - Functional */}
             <div className="px-2">
               <div className="flex items-center justify-between mb-2">
-                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">Posted Between</label>
+                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">
+                  Posted Between
+                </label>
               </div>
 
               <div className="space-y-3">
                 <div>
-                  <label className="text-xs text-gray-500 mb-1 block">From</label>
+                  <label className="text-xs text-gray-500 mb-1 block">
+                    From
+                  </label>
                   <input
                     type="date"
                     value={filters.posted_date_from || ""}
-                    onChange={e => onFiltersChange({ ...filters, posted_date_from: e.target.value })}
+                    onChange={(e) =>
+                      onFiltersChange({
+                        ...filters,
+                        posted_date_from: e.target.value,
+                      })
+                    }
                     className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-[#E1E8F1] dark:border-gray-700 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none dark:text-gray-200"
                   />
                 </div>
@@ -428,7 +474,12 @@ export default function JobManagement({
                   <input
                     type="date"
                     value={filters.posted_date_to || ""}
-                    onChange={e => onFiltersChange({ ...filters, posted_date_to: e.target.value })}
+                    onChange={(e) =>
+                      onFiltersChange({
+                        ...filters,
+                        posted_date_to: e.target.value,
+                      })
+                    }
                     className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-[#E1E8F1] dark:border-gray-700 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none dark:text-gray-200"
                   />
                 </div>
@@ -440,15 +491,13 @@ export default function JobManagement({
               <button
                 onClick={() => {
                   setLocalSearch("");
-                  setLocalLocation("");
                   onFiltersChange({
                     is_active: null,
                     posted_date_from: "",
                     posted_date_to: "",
                     application_deadline_from: "",
                     application_deadline_to: "",
-                    title: "",
-                    location: ""
+                    search_keyword: "",
                   });
                 }}
                 className="w-full px-4 py-3 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
@@ -456,8 +505,6 @@ export default function JobManagement({
                 Clear Filters
               </button>
             </div>
-
-
           </div>
         </div>
       </div>

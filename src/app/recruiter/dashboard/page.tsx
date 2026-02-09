@@ -58,8 +58,7 @@ interface JobFilters {
   posted_date_to?: string;
   application_deadline_from?: string;
   application_deadline_to?: string;
-  title?: string;
-  location?: string;
+  search_keyword?: string;
 }
 
 function formatTimeAgo(dateString: string) {
@@ -211,11 +210,8 @@ export default function RecruiterDashboard() {
             currentFilters.application_deadline_to,
           );
         }
-        if (currentFilters.title) {
-          params.append("title", currentFilters.title);
-        }
-        if (currentFilters.location) {
-          params.append("location", currentFilters.location);
+        if (currentFilters.search_keyword) {
+          params.append("search_keyword", currentFilters.search_keyword);
         }
 
         const response = await api.getMyJobPostings(params);
@@ -320,11 +316,13 @@ export default function RecruiterDashboard() {
     e.preventDefault();
 
     const title = jobForm.title.trim();
-    const location = jobForm.location.trim();
+    const country = jobForm.country.trim();
+    const state = jobForm.state.trim();
+    const city = jobForm.city.trim();
     const description = jobForm.description.trim();
 
-    if (!title || !location || !description) {
-      toast.error("Title, location, and description are required");
+    if (!title || !country || !state || !city || !description) {
+      toast.error("Title, country, state, city, and description are required");
       return;
     }
 
@@ -338,7 +336,9 @@ export default function RecruiterDashboard() {
     try {
       await api.createJob({
         title,
-        location,
+        country,
+        state,
+        city,
         company_name:
           recruiter?.company_name || recruiter?.display_name || "My Company",
         job_type: jobForm.job_type,
