@@ -31,6 +31,8 @@ import {
   ATSApplications,
   ApplicationDetailModal,
   JOB_FORM_INITIAL,
+  CVSearchPage,
+  BucketsPage,
 } from "@/components/recruiter";
 import type {
   DashboardTab,
@@ -583,9 +585,6 @@ export default function RecruiterDashboard() {
                         <h2 className="text-xl font-medium text-gray-900 dark:text-gray-100 mb-1">
                           Recent Job Posting
                         </h2>
-                        <p className="text-sm text-[#60768D] dark:text-gray-400">
-                          Welcome back john, Here what happening today.
-                        </p>
                       </div>
                       <button
                         onClick={() => {
@@ -891,6 +890,14 @@ export default function RecruiterDashboard() {
         {activeTab === "profile" && <RecruiterProfileEdit />}
 
         {activeTab === "kyc" && <KYCVerification />}
+
+        {activeTab === "cvSearch" && kycStatus?.kyc_status === "approved" && (
+          <CVSearchPage />
+        )}
+
+        {activeTab === "buckets" && kycStatus?.kyc_status === "approved" && (
+          <BucketsPage />
+        )}
 
         {activeTab === "subscriptions" && (
           <SubscriptionDashboard

@@ -2,13 +2,16 @@
 
 import { useState } from "react";
 import { Job, Application } from "@/types/api";
+import { api } from "@/lib/api";
+import { useToast } from "@/context/ToastContext";
 import {
   Search,
   Copy,
   ChevronDown,
   FileText,
   Clock,
-  Calendar
+  Calendar,
+  Download,
 } from "lucide-react";
 
 interface ATSApplicationsProps {
@@ -34,83 +37,210 @@ export default function ATSApplications({
   onViewDetails,
   onUpdateStatus,
 }: ATSApplicationsProps) {
-
+  const { showToast } = useToast();
   const [searchTerm, setSearchTerm] = useState("");
+  const [downloadingBulk, setDownloadingBulk] = useState(false);
+  const [taskId, setTaskId] = useState<string | null>(null);
+  const [downloadProgress, setDownloadProgress] = useState<number | null>(null);
+  const [downloadUrl, setDownloadUrl] = useState<string | null>(null);
 
   const handleStatusUpdate = (appId: number, newStatus: string) => {
     onUpdateStatus(appId, newStatus);
   };
 
   // Filter applications locally by name if search term exists
-  const filteredApplications = applications.filter(app => {
+  const filteredApplications = applications.filter((app) => {
     if (!searchTerm) return true;
     const name = app.applicant?.full_name || app.candidate_name || "";
     const email = app.applicant?.email || app.candidate_email || "";
     const term = searchTerm.toLowerCase();
-    return name.toLowerCase().includes(term) || email.toLowerCase().includes(term);
+    return (
+      name.toLowerCase().includes(term) || email.toLowerCase().includes(term)
+    );
   });
 
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
-      case 'active':
-      case 'applied':
-        return 'bg-[#E6F4EA] text-[#1E7F3A] dark:bg-green-900/30 dark:text-green-400';
-      case 'rejected':
-      case 'withdrawn':
-        return 'bg-red-50 text-red-600 dark:bg-red-900/20 dark:text-red-400';
-      case 'hired':
-      case 'offered':
-      case 'accepted':
-        return 'bg-blue-50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400';
+      case "active":
+      case "applied":
+        return "bg-[#E6F4EA] text-[#1E7F3A] dark:bg-green-900/30 dark:text-green-400";
+      case "rejected":
+      case "withdrawn":
+        return "bg-red-50 text-red-600 dark:bg-red-900/20 dark:text-red-400";
+      case "hired":
+      case "offered":
+      case "accepted":
+        return "bg-blue-50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400";
       default:
-        return 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400';
+        return "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400";
+    }
+  };
+
+  // Handle bulk download
+  const handleBulkDownload = async () => {
+    if (!selectedJobId) {
+      showToast("Please select a job first", "error");
+      return;
+    }
+
+    if (filteredApplications.length === 0) {
+      showToast("No applications to download", "error");
+      return;
+    }
+
+    setDownloadingBulk(true);
+    setDownloadProgress(0);
+    setDownloadUrl(null);
+
+    try {
+      // Start the bulk download task
+      const response = await api.prepareBulkDownload(selectedJobId);
+      setTaskId(response.task_id);
+
+      // Poll for status
+      const pollInterval = setInterval(async () => {
+        try {
+          const status = await api.getTaskStatus(response.task_id);
+
+          if (status.progress !== undefined) {
+            setDownloadProgress(status.progress);
+          }
+
+          if (status.status === "completed") {
+            clearInterval(pollInterval);
+            setDownloadingBulk(false);
+            setDownloadProgress(null);
+
+            if (status.result?.download_url) {
+              setDownloadUrl(status.result.download_url);
+              // Auto-download
+              window.open(status.result.download_url, "_blank");
+              showToast(
+                `Successfully prepared ${status.result.total_resumes} resumes for download!`,
+                "success",
+              );
+            }
+          } else if (status.status === "failed") {
+            clearInterval(pollInterval);
+            setDownloadingBulk(false);
+            setDownloadProgress(null);
+            showToast(
+              `Download failed: ${status.error || "Unknown error"}`,
+              "error",
+            );
+          }
+        } catch (error) {
+          console.error("Error polling status:", error);
+        }
+      }, 2000); // Poll every 2 seconds
+
+      // Set timeout to stop polling after 5 minutes
+      setTimeout(() => {
+        clearInterval(pollInterval);
+        if (downloadingBulk) {
+          setDownloadingBulk(false);
+          setDownloadProgress(null);
+          showToast("Download preparation timeout. Please try again.", "error");
+        }
+      }, 300000);
+    } catch (error: any) {
+      console.error("Failed to prepare bulk download:", error);
+      setDownloadingBulk(false);
+      setDownloadProgress(null);
+      showToast(
+        error?.message || "Failed to prepare download. Please try again.",
+        "error",
+      );
     }
   };
 
   return (
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
-          Application Review System
-        </h1>
-        <p className="text-gray-500 dark:text-gray-400">
-          Review and manage candidate applications for your active roles.
-        </p>
+      <div className="mb-6 flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+            Application Review System
+          </h1>
+          <p className="text-gray-500 dark:text-gray-400">
+            Review and manage candidate applications for your active roles.
+          </p>
+        </div>
+
+        {/* Bulk Download Button */}
+        {selectedJobId && filteredApplications.length > 0 && (
+          <button
+            onClick={handleBulkDownload}
+            disabled={downloadingBulk}
+            className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors disabled:opacity-50 flex items-center gap-2"
+          >
+            {downloadingBulk ? (
+              <>
+                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                {downloadProgress !== null
+                  ? `Processing ${downloadProgress}%`
+                  : "Preparing..."}
+              </>
+            ) : (
+              <>
+                <Download className="w-5 h-5" />
+                Download All Resumes
+              </>
+            )}
+          </button>
+        )}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
-
         {/* LEFT COLUMN: Candidate Table (Main) */}
         <div className="lg:col-span-3">
           <div className="bg-white dark:bg-[#282727] rounded-xl border border-[#E1E8F1] dark:border-gray-700 overflow-hidden shadow-sm h-[600px] flex flex-col">
-
             {/* Table Header */}
             <div className="bg-[#0B172B] px-4 py-3 grid grid-cols-12 gap-4 items-center sticky top-0 z-10">
-              <div className="col-span-4 text-xs font-bold text-white uppercase tracking-wider">Candidate</div>
-              <div className="col-span-2 text-xs font-bold text-white uppercase tracking-wider">Status</div>
-              <div className="col-span-3 text-xs font-bold text-white uppercase tracking-wider">Resume</div>
-              <div className="col-span-3 text-xs font-bold text-white uppercase tracking-wider text-right">Actions</div>
+              <div className="col-span-4 text-xs font-bold text-white uppercase tracking-wider">
+                Candidate
+              </div>
+              <div className="col-span-2 text-xs font-bold text-white uppercase tracking-wider">
+                Status
+              </div>
+              <div className="col-span-3 text-xs font-bold text-white uppercase tracking-wider">
+                Resume
+              </div>
+              <div className="col-span-3 text-xs font-bold text-white uppercase tracking-wider text-right">
+                Actions
+              </div>
             </div>
 
             {/* Table Body */}
             <div className="divide-y divide-gray-100 dark:divide-gray-700 overflow-y-auto flex-1 custom-scrollbar">
               {loadingApps ? (
-                <div className="p-10 text-center text-gray-500">Loading applications...</div>
+                <div className="p-10 text-center text-gray-500">
+                  Loading applications...
+                </div>
               ) : filteredApplications.length > 0 ? (
                 filteredApplications.map((app) => (
-                  <div key={app.id} className="px-4 py-3 grid grid-cols-12 gap-4 items-center hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
-
+                  <div
+                    key={app.id}
+                    className="px-4 py-3 grid grid-cols-12 gap-4 items-center hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
+                  >
                     {/* Candidate Info */}
                     <div className="col-span-4">
                       <div className="font-bold text-gray-900 dark:text-gray-100 text-[15px]">
-                        {app.applicant?.full_name || app.candidate_name || "Unknown Name"}
+                        {app.applicant?.full_name ||
+                          app.candidate_name ||
+                          "Unknown Name"}
                       </div>
                       <div className="flex items-center gap-2 mt-0.5">
                         <span className="text-xs text-[#60768D] dark:text-gray-400">
-                          {app.applicant?.email || app.candidate_email || "No Email"}
+                          {app.applicant?.email ||
+                            app.candidate_email ||
+                            "No Email"}
                         </span>
                         <button
-                          onClick={() => navigator.clipboard.writeText(app.applicant?.email || app.candidate_email || "")}
+                          onClick={() =>
+                            navigator.clipboard.writeText(
+                              app.applicant?.email || app.candidate_email || "",
+                            )
+                          }
                           className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
                         >
                           <Copy className="w-3 h-3" />
@@ -120,7 +250,9 @@ export default function ATSApplications({
 
                     {/* Status */}
                     <div className="col-span-2">
-                      <span className={`inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium capitalize ${getStatusColor(app.status)}`}>
+                      <span
+                        className={`inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium capitalize ${getStatusColor(app.status)}`}
+                      >
                         {app.status.replace(/_/g, " ")}
                       </span>
                     </div>
@@ -156,22 +288,58 @@ export default function ATSApplications({
                         <div className="relative">
                           <select
                             value={app.status}
-                            onChange={(e) => handleStatusUpdate(app.id, e.target.value)}
+                            onChange={(e) =>
+                              handleStatusUpdate(app.id, e.target.value)
+                            }
                             className="appearance-none pl-4 pr-9 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium rounded-lg cursor-pointer transition-colors focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 w-[110px]"
                           >
-                            <option value="applied" className="text-gray-900 bg-white">Applied</option>
-                            <option value="under_review" className="text-gray-900 bg-white">Under Review</option>
-                            <option value="interview_scheduled" className="text-gray-900 bg-white">Interview</option>
-                            <option value="offered" className="text-gray-900 bg-white">Offered</option>
-                            <option value="accepted" className="text-gray-900 bg-white">Accepted</option>
-                            <option value="rejected" className="text-gray-900 bg-white">Rejected</option>
-                            <option value="withdrawn" className="text-gray-900 bg-white">Withdrawn</option>
+                            <option
+                              value="applied"
+                              className="text-gray-900 bg-white"
+                            >
+                              Applied
+                            </option>
+                            <option
+                              value="under_review"
+                              className="text-gray-900 bg-white"
+                            >
+                              Under Review
+                            </option>
+                            <option
+                              value="interview_scheduled"
+                              className="text-gray-900 bg-white"
+                            >
+                              Interview
+                            </option>
+                            <option
+                              value="offered"
+                              className="text-gray-900 bg-white"
+                            >
+                              Offered
+                            </option>
+                            <option
+                              value="accepted"
+                              className="text-gray-900 bg-white"
+                            >
+                              Accepted
+                            </option>
+                            <option
+                              value="rejected"
+                              className="text-gray-900 bg-white"
+                            >
+                              Rejected
+                            </option>
+                            <option
+                              value="withdrawn"
+                              className="text-gray-900 bg-white"
+                            >
+                              Withdrawn
+                            </option>
                           </select>
                           <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-white pointer-events-none" />
                         </div>
                       </div>
                     </div>
-
                   </div>
                 ))
               ) : (
@@ -186,16 +354,16 @@ export default function ATSApplications({
         {/* RIGHT COLUMN: Filter Section (Sidebar) */}
         <div className="lg:col-span-1">
           <div className="bg-white dark:bg-[#282727] rounded-xl border border-[#E1E8F1] dark:border-gray-700 overflow-hidden shadow-sm sticky top-6">
-
             {/* Filter Header */}
             <div className="bg-[#0B172B] px-6 py-4">
-              <h2 className="text-[13px] font-bold text-white uppercase tracking-wider">Filter</h2>
+              <h2 className="text-[13px] font-bold text-white uppercase tracking-wider">
+                Filter
+              </h2>
             </div>
 
             <div className="p-5 space-y-6">
-
               {/* Job Categories Filter */}
-              <div className="space-y-2">
+              {/* <div className="space-y-2">
                 <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Job Categories</label>
                 <div className="relative">
                   <select
@@ -210,11 +378,13 @@ export default function ATSApplications({
                   </select>
                   <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
                 </div>
-              </div>
+              </div> */}
 
               {/* Status Filter */}
               <div className="space-y-2">
-                <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Status</label>
+                <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+                  Status
+                </label>
                 <div className="relative">
                   <select
                     value={statusFilter}
@@ -234,7 +404,9 @@ export default function ATSApplications({
 
               {/* Candidate Name Search */}
               <div className="space-y-2">
-                <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Candidate Name</label>
+                <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+                  Candidate Name
+                </label>
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                   <input
@@ -256,18 +428,22 @@ export default function ATSApplications({
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div className="relative">
-                    <input className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-[#E1E8F1] dark:border-gray-700 rounded-lg text-xs" type="date" />
+                    <input
+                      className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-[#E1E8F1] dark:border-gray-700 rounded-lg text-xs"
+                      type="date"
+                    />
                   </div>
                   <div className="relative">
-                    <input className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-[#E1E8F1] dark:border-gray-700 rounded-lg text-xs" type="time" />
+                    <input
+                      className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-[#E1E8F1] dark:border-gray-700 rounded-lg text-xs"
+                      type="time"
+                    />
                   </div>
                 </div>
               </div>
-
             </div>
           </div>
         </div>
-
       </div>
     </div>
   );

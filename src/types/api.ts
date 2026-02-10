@@ -630,3 +630,231 @@ export interface RecruiterDashboardAnalytics {
   period: AnalyticsPeriod;
   generated_at: string;
 }
+
+// CV Search Types
+export interface CVSearchResult {
+  resume_id: number;
+  resume_name: string;
+  professional_title: string;
+  user_id: number;
+  is_unlocked: boolean;
+  unlocked_until?: string;
+  full_name: string;
+  profile_image_url?: string;
+  location: string;
+  skills: string[];
+  experience_years: number;
+  current_company?: string;
+  highest_education: string;
+  languages: string[];
+  certifications_count: number;
+  profile_summary?: string;
+  user_other_resumes?: Array<{
+    resume_id: number;
+    resume_name: string;
+    professional_title: string;
+    is_unlocked: boolean;
+    created_at: string;
+    updated_at: string;
+  }>;
+  in_buckets?: any[];
+  bucket_count: number;
+  last_active: string;
+  open_to_work: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface CVSearchResponse {
+  results: CVSearchResult[];
+  total: number;
+  page: number;
+  page_size: number;
+  total_pages: number;
+  has_next_page: boolean;
+  has_previous_page: boolean;
+  filters_applied: Record<string, any>;
+  search_performed_at: string;
+}
+
+export interface CVUnlockResponse {
+  success: boolean;
+  message: string;
+  credits_remaining: number;
+  resume_id: number;
+  resume_name: string;
+  resume_pdf_url?: string;
+  resume_data?: Record<string, any>;
+  contact_info: {
+    email?: string;
+    phone?: string;
+    full_name?: string;
+    linkedin?: string;
+    github?: string;
+    website?: string;
+  };
+  unlocked_at: string;
+  unlocked_until: string;
+}
+
+export interface CVBulkUnlockResponse {
+  success: boolean;
+  unlocked_count: number;
+  already_unlocked_count: number;
+  credits_used: number;
+  credits_remaining: number;
+  unlocked_resume_ids: number[];
+  skipped_resume_ids: number[];
+  summary_message: string;
+}
+
+export interface UnlockedProfile {
+  id: number;
+  recruiter_id: number;
+  resume_id: number;
+  unlocked_at: string;
+  expires_at: string;
+  credits_used: number;
+  unlock_source: string;
+  last_accessed_at?: string;
+  view_count: number;
+  download_count: number;
+  profile_summary?: Record<string, any>;
+}
+
+export interface UnlockedProfilesResponse {
+  unlocked_profiles: UnlockedProfile[];
+  total: number;
+  active_unlocks: number;
+  expired_unlocks: number;
+  total_credits_invested: number;
+}
+
+export interface CVAccessLog {
+  id: number;
+  recruiter_id: number;
+  resume_id: number;
+  access_type: string;
+  credits_consumed: number;
+  accessed_at: string;
+  ip_address?: string;
+  user_agent?: string;
+}
+
+export interface AccessLogsResponse {
+  access_logs: CVAccessLog[];
+  total: number;
+  page: number;
+  page_size: number;
+  total_pages: number;
+  total_credits_consumed: number;
+  total_searches: number;
+  total_unlocks: number;
+  total_views: number;
+  total_downloads: number;
+}
+
+export interface CVCreditsStatus {
+  credits_remaining: number;
+  total_unlocked_profiles: number;
+  active_unlocks: number;
+  message: string;
+}
+
+// Bucket Types
+export interface Bucket {
+  id: number;
+  recruiter_id: number;
+  name: string;
+  description?: string;
+  color?: string;
+  icon?: string;
+  display_order: number;
+  is_archived: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface BucketWithStats extends Bucket {
+  item_count: number;
+  avg_rating?: number;
+}
+
+export interface BucketListResponse {
+  buckets: BucketWithStats[];
+  total: number;
+}
+
+export interface BucketItem {
+  id: number;
+  bucket_id: number;
+  resume_id: number;
+  recruiter_id: number;
+  display_order: number;
+  notes?: string;
+  rating?: number;
+  status?: string;
+  added_at: string;
+  updated_at: string;
+}
+
+export interface ResumeBucketInfo {
+  item_id: number;
+  bucket_id: number;
+  bucket_name: string;
+  bucket_color?: string;
+  rating?: number;
+  status?: string;
+  notes?: string;
+  added_at: string;
+}
+
+export interface AddResumesToBucketRequest {
+  resume_ids: number[];
+  notes?: string;
+  rating?: number;
+  status?: string;
+}
+
+export interface AddResumesToBucketResponse {
+  success: boolean;
+  message: string;
+  data: {
+    bucket_id: number;
+    added_count: number;
+    skipped_count: number;
+  };
+}
+
+export interface BucketActivityLog {
+  id: number;
+  bucket_id: number;
+  recruiter_id: number;
+  action: string;
+  metadata?: Record<string, any>;
+  ip_address?: string;
+  user_agent?: string;
+  created_at: string;
+}
+
+// Bulk Download Types
+export interface BulkDownloadTaskResponse {
+  task_id: string;
+  status: "pending" | "processing" | "completed" | "failed";
+  message: string;
+}
+
+export interface TaskStatusResponse {
+  task_id: string;
+  status: "pending" | "processing" | "completed" | "failed";
+  progress?: number;
+  result?: {
+    download_url?: string;
+    total_resumes?: number;
+    file_size_mb?: number;
+    expires_at?: string;
+  };
+  error?: string;
+  created_at: string;
+  updated_at: string;
+}

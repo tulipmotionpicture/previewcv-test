@@ -1760,6 +1760,343 @@ export class ApiClient {
       this.blogBaseUrl,
     );
   }
+
+  // --- CV Search APIs ---
+  async searchCVs(
+    searchParams: Record<string, any>,
+  ): Promise<CVSearchResponse> {
+    return this.request<CVSearchResponse>(
+      `/api/v1/recruiter/cv-search/search`,
+      {
+        method: "POST",
+        body: JSON.stringify(searchParams),
+      },
+      true,
+      true,
+    );
+  }
+
+  async unlockCVProfile(
+    resumeId: number,
+    source: string = "search",
+  ): Promise<CVUnlockResponse> {
+    return this.request<CVUnlockResponse>(
+      `/api/v1/recruiter/cv-search/unlock/${resumeId}?source=${source}`,
+      { method: "POST" },
+      true,
+      true,
+    );
+  }
+
+  async bulkUnlockCVProfiles(
+    resumeIds: number[],
+    source: string = "search",
+  ): Promise<CVBulkUnlockResponse> {
+    return this.request<CVBulkUnlockResponse>(
+      `/api/v1/recruiter/cv-search/bulk-unlock`,
+      {
+        method: "POST",
+        body: JSON.stringify({ resume_ids: resumeIds, source }),
+      },
+      true,
+      true,
+    );
+  }
+
+  async downloadUnlockedResume(
+    resumeId: number,
+    downloadType: string = "url",
+    forceDownload: boolean = false,
+  ): Promise<any> {
+    return this.request<any>(
+      `/api/v1/recruiter/cv-search/download/${resumeId}?download_type=${downloadType}&force_download=${forceDownload}`,
+      { method: "GET" },
+      true,
+      true,
+    );
+  }
+
+  async getUnlockedProfiles(
+    includeExpired: boolean = false,
+    page: number = 1,
+    pageSize: number = 50,
+  ): Promise<UnlockedProfilesResponse> {
+    return this.request<UnlockedProfilesResponse>(
+      `/api/v1/recruiter/cv-search/unlocked?include_expired=${includeExpired}&page=${page}&page_size=${pageSize}`,
+      { method: "GET" },
+      true,
+      true,
+    );
+  }
+
+  async getAccessLogs(
+    page: number = 1,
+    pageSize: number = 50,
+  ): Promise<AccessLogsResponse> {
+    return this.request<AccessLogsResponse>(
+      `/api/v1/recruiter/cv-search/access-logs?page=${page}&page_size=${pageSize}`,
+      { method: "GET" },
+      true,
+      true,
+    );
+  }
+
+  async getCVCreditsStatus(): Promise<CVCreditsStatus> {
+    return this.request<CVCreditsStatus>(
+      `/api/v1/recruiter/cv-search/credits`,
+      { method: "GET" },
+      true,
+      true,
+    );
+  }
+
+  // ===== BUCKET MANAGEMENT APIs =====
+
+  // Create a new bucket
+  async createBucket(data: {
+    name: string;
+    description?: string;
+    color?: string;
+    icon?: string;
+    display_order?: number;
+  }): Promise<BucketWithStats> {
+    return this.request<BucketWithStats>(
+      `/api/v1/recruiter/buckets`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      },
+      true,
+      true,
+    );
+  }
+
+  // List all buckets
+  async listBuckets(params?: {
+    include_archived?: boolean;
+    sort_by?: string;
+    order?: string;
+  }): Promise<BucketListResponse> {
+    const query = new URLSearchParams();
+    if (params?.include_archived !== undefined)
+      query.append("include_archived", String(params.include_archived));
+    if (params?.sort_by) query.append("sort_by", params.sort_by);
+    if (params?.order) query.append("order", params.order);
+
+    return this.request<BucketListResponse>(
+      `/api/v1/recruiter/buckets?${query}`,
+      { method: "GET" },
+      true,
+      true,
+    );
+  }
+
+  // Search buckets
+  async searchBuckets(params?: {
+    query?: string;
+    rating?: number;
+    status?: string;
+    include_archived?: boolean;
+  }): Promise<BucketListResponse> {
+    const queryParams = new URLSearchParams();
+    if (params?.query) queryParams.append("query", params.query);
+    if (params?.rating) queryParams.append("rating", String(params.rating));
+    if (params?.status) queryParams.append("status", params.status);
+    if (params?.include_archived !== undefined)
+      queryParams.append("include_archived", String(params.include_archived));
+
+    return this.request<BucketListResponse>(
+      `/api/v1/recruiter/buckets/search?${queryParams}`,
+      { method: "GET" },
+      true,
+      true,
+    );
+  }
+
+  // Get buckets containing a specific resume
+  async getResumeBucketInfo(resumeId: number): Promise<ResumeBucketInfo[]> {
+    return this.request<ResumeBucketInfo[]>(
+      `/api/v1/recruiter/buckets/resumes/${resumeId}/buckets`,
+      { method: "GET" },
+      true,
+      true,
+    );
+  }
+
+  // Get a single bucket
+  async getBucket(bucketId: number): Promise<BucketWithStats> {
+    return this.request<BucketWithStats>(
+      `/api/v1/recruiter/buckets/${bucketId}`,
+      { method: "GET" },
+      true,
+      true,
+    );
+  }
+
+  // Update bucket metadata
+  async updateBucket(
+    bucketId: number,
+    data: {
+      name?: string;
+      description?: string;
+      color?: string;
+      icon?: string;
+      display_order?: number;
+      is_archived?: boolean;
+    },
+  ): Promise<Bucket> {
+    return this.request<Bucket>(
+      `/api/v1/recruiter/buckets/${bucketId}`,
+      {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      },
+      true,
+      true,
+    );
+  }
+
+  // Delete a bucket
+  async deleteBucket(bucketId: number): Promise<void> {
+    return this.request<void>(
+      `/api/v1/recruiter/buckets/${bucketId}`,
+      { method: "DELETE" },
+      true,
+      true,
+    );
+  }
+
+  // Add resumes to bucket
+  async addResumesToBucket(
+    bucketId: number,
+    data: AddResumesToBucketRequest,
+  ): Promise<AddResumesToBucketResponse> {
+    return this.request<AddResumesToBucketResponse>(
+      `/api/v1/recruiter/buckets/${bucketId}/resumes`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      },
+      true,
+      true,
+    );
+  }
+
+  // List bucket resumes
+  async listBucketResumes(
+    bucketId: number,
+    params?: {
+      page?: number;
+      per_page?: number;
+      sort_by?: string;
+      order?: string;
+      rating?: number;
+      status?: string;
+    },
+  ): Promise<any> {
+    const query = new URLSearchParams();
+    if (params?.page) query.append("page", String(params.page));
+    if (params?.per_page) query.append("per_page", String(params.per_page));
+    if (params?.sort_by) query.append("sort_by", params.sort_by);
+    if (params?.order) query.append("order", params.order);
+    if (params?.rating) query.append("rating", String(params.rating));
+    if (params?.status) query.append("status", params.status);
+
+    return this.request<any>(
+      `/api/v1/recruiter/buckets/${bucketId}/resumes?${query}`,
+      { method: "GET" },
+      true,
+      true,
+    );
+  }
+
+  // Update bucket item
+  async updateBucketItem(
+    bucketId: number,
+    itemId: number,
+    data: {
+      notes?: string;
+      rating?: number;
+      status?: string;
+      display_order?: number;
+    },
+  ): Promise<BucketItem> {
+    return this.request<BucketItem>(
+      `/api/v1/recruiter/buckets/${bucketId}/resumes/${itemId}`,
+      {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      },
+      true,
+      true,
+    );
+  }
+
+  // Remove bucket item
+  async removeBucketItem(bucketId: number, itemId: number): Promise<void> {
+    return this.request<void>(
+      `/api/v1/recruiter/buckets/${bucketId}/resumes/${itemId}`,
+      { method: "DELETE" },
+      true,
+      true,
+    );
+  }
+
+  // Bulk remove resumes
+  async bulkRemoveBucketResumes(
+    bucketId: number,
+    itemIds: number[],
+  ): Promise<AddResumesToBucketResponse> {
+    return this.request<AddResumesToBucketResponse>(
+      `/api/v1/recruiter/buckets/${bucketId}/resumes/bulk-remove`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ item_ids: itemIds }),
+      },
+      true,
+      true,
+    );
+  }
+
+  // Get bucket activity logs
+  async getBucketActivity(
+    bucketId: number,
+    limit: number = 100,
+  ): Promise<BucketActivityLog[]> {
+    return this.request<BucketActivityLog[]>(
+      `/api/v1/recruiter/buckets/${bucketId}/activity?limit=${limit}`,
+      { method: "GET" },
+      true,
+      true,
+    );
+  }
+
+  // ===== BULK DOWNLOAD APIs =====
+
+  // Prepare bulk resume download for a job
+  async prepareBulkDownload(jobId: number): Promise<BulkDownloadTaskResponse> {
+    return this.request<BulkDownloadTaskResponse>(
+      `/api/v1/recruiters/jobs/${jobId}/resumes/prepare-bulk-download`,
+      { method: "POST" },
+      true,
+      true,
+    );
+  }
+
+  // Get task status
+  async getTaskStatus(taskId: string): Promise<TaskStatusResponse> {
+    return this.request<TaskStatusResponse>(
+      `/api/v1/recruiters/jobs/tasks/${taskId}/status`,
+      { method: "GET" },
+      true,
+      true,
+    );
+  }
 }
 
 // Resume Metadata types for parsed resume
@@ -1825,3 +2162,23 @@ export interface ResumeLanguage {
 }
 
 export const api = new ApiClient();
+
+// Add CV Search types to imports if not already there
+import type {
+  CVSearchResponse,
+  CVUnlockResponse,
+  CVBulkUnlockResponse,
+  UnlockedProfilesResponse,
+  AccessLogsResponse,
+  CVCreditsStatus,
+  Bucket,
+  BucketWithStats,
+  BucketListResponse,
+  BucketItem,
+  ResumeBucketInfo,
+  AddResumesToBucketRequest,
+  AddResumesToBucketResponse,
+  BucketActivityLog,
+  BulkDownloadTaskResponse,
+  TaskStatusResponse,
+} from "@/types/api";

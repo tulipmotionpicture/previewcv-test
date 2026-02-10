@@ -210,7 +210,6 @@ function JobsPageContent() {
   }, [jobs.length, hasMore, loading, loadingMore, handleLoadMore]);
 
   return (
-
     <div className="min-h-screen transition-colors duration-300 bg-gray-50 dark:bg-gray-950">
       <Header
         links={[{ label: "Candidate Login", href: "/candidate/login" }]}
@@ -221,10 +220,10 @@ function JobsPageContent() {
         }}
         showAuthButtons={true}
       />
-      <div className="pt-20 pb-8 px-12 max-w-7xl mx-auto" >
+      <div className="pt-20 pb-8 px-12 max-w-7xl mx-auto">
         {/* Search Bar Container */}
         {/* Search Bar Container */}
-        <div className="mb-2">
+        <div className="mb-6">
           <form
             onSubmit={(e) => {
               e.preventDefault();
@@ -241,8 +240,18 @@ function JobsPageContent() {
           >
             {/* Keyword Input */}
             <div className="flex-[2] bg-white dark:bg-gray-900 rounded-lg border border-blue-200 dark:border-gray-700 flex items-center px-4   hover:border-blue-400 transition-colors">
-              <svg className="w-6 h-6 text-gray-400 mr-3 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              <svg
+                className="w-6 h-6 text-gray-400 mr-3 shrink-0"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                />
               </svg>
               <input
                 type="text"
@@ -255,9 +264,24 @@ function JobsPageContent() {
 
             {/* Location Input */}
             <div className="flex-[1.5] bg-white dark:bg-gray-900 rounded-lg border border-blue-200 dark:border-gray-700 flex items-center px-4 py-3 hover:border-blue-400 transition-colors">
-              <svg className="w-6 h-6 text-gray-400 mr-3 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a2 2 0 01-2.828 0l-4.243-4.243a8 8 0 1111.314 0z" />
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+              <svg
+                className="w-6 h-6 text-gray-400 mr-3 shrink-0"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M17.657 16.657L13.414 20.9a2 2 0 01-2.828 0l-4.243-4.243a8 8 0 1111.314 0z"
+                />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                />
               </svg>
               <input
                 type="text"
@@ -270,7 +294,9 @@ function JobsPageContent() {
 
             {/* Experience Input */}
             <div className="flex-[1.5] bg-white dark:bg-gray-900 rounded-lg border border-blue-200 dark:border-gray-700 flex items-center px-4 py-3 hover:border-blue-400 transition-colors">
-              <span className="w-6 h-6 text-gray-400 mr-3 flex items-center justify-center font-bold text-lg shrink-0">₹</span>
+              <span className="w-6 h-6 text-gray-400 mr-3 flex items-center justify-center font-bold text-lg shrink-0">
+                ₹
+              </span>
               <input
                 type="text"
                 placeholder="Enter in years"
@@ -289,7 +315,7 @@ function JobsPageContent() {
         </div>
 
         {/* Popular Search */}
-        <div className="flex flex-wrap items-center gap-2 mb-8 text-sm">
+        {/* <div className="flex flex-wrap items-center gap-2 mb-8 text-sm">
           <span className="font-bold text-gray-500 dark:text-gray-400 mr-2">Popular Search:</span>
           {["UI UX developer", "FrontEnd developer", "Deops Engineer", "Product Manager"].map((tag) => (
             <button
@@ -303,7 +329,7 @@ function JobsPageContent() {
               {tag}
             </button>
           ))}
-        </div>
+        </div> */}
 
         <JobsLayout
           filters={
@@ -317,9 +343,29 @@ function JobsPageContent() {
               {/* Header for Job List */}
               <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-4">
                 <h2 className="text-gray-600 dark:text-gray-300 text-sm font-medium">
-                  Showing <span className="font-bold text-gray-900 dark:text-white">{total}</span> jobs
-                  {keyword && <> related to <span className="font-bold text-gray-900 dark:text-white">"{keyword}"</span></>}
-                  {location && <> in <span className="font-bold text-gray-900 dark:text-white">"{location}"</span></>}
+                  Showing{" "}
+                  <span className="font-bold text-gray-900 dark:text-white">
+                    {total}
+                  </span>{" "}
+                  jobs
+                  {keyword && (
+                    <>
+                      {" "}
+                      related to{" "}
+                      <span className="font-bold text-gray-900 dark:text-white">
+                        "{keyword}"
+                      </span>
+                    </>
+                  )}
+                  {location && (
+                    <>
+                      {" "}
+                      in{" "}
+                      <span className="font-bold text-gray-900 dark:text-white">
+                        "{location}"
+                      </span>
+                    </>
+                  )}
                 </h2>
 
                 <div className="flex items-center gap-2">
@@ -369,14 +415,16 @@ function JobsPageContent() {
 
 export default function JobsPage() {
   return (
-    <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600 dark:text-gray-400">Loading jobs...</p>
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <p className="text-gray-600 dark:text-gray-400">Loading jobs...</p>
+          </div>
         </div>
-      </div>
-    }>
+      }
+    >
       <JobsPageContent />
     </Suspense>
   );

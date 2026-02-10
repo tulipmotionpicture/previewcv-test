@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState, useCallback, Fragment } from "react";
+import { useToast } from "@/context/ToastContext";
 import {
   Shield,
   Upload,
@@ -22,6 +23,7 @@ import { api } from "@/lib/api";
 import type { KycDocument, KycStatus, KycRequirement } from "@/types/api";
 
 export default function KYCVerification() {
+  const { showToast } = useToast();
   const [kycStatus, setKycStatus] = useState<KycStatus | null>(null);
   const [documents, setDocuments] = useState<KycDocument[]>([]);
   const [requirements, setRequirements] = useState<KycRequirement[]>([]);
@@ -37,6 +39,9 @@ export default function KYCVerification() {
   const [expiryDate, setExpiryDate] = useState<string>("");
   const [editingDocId, setEditingDocId] = useState<number | null>(null);
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showSubmitConfirm, setShowSubmitConfirm] = useState(false);
+  const [docToDelete, setDocToDelete] = useState<number | null>(null);
 
   const fetchData = useCallback(async () => {
     try {
@@ -107,13 +112,23 @@ export default function KYCVerification() {
   };
 
   const handleDelete = async (docId: number) => {
-    if (!confirm("Are you sure you want to delete this document?")) return;
+    setDocToDelete(docId);
+    setShowDeleteConfirm(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!docToDelete) return;
 
     try {
-      await api.deleteKycDocument(docId);
+      await api.deleteKycDocument(docToDelete);
       await fetchData();
+      showToast("Document deleted successfully", "success");
     } catch (error) {
       console.error("Delete failed:", error);
+      showToast("Failed to delete document", "error");
+    } finally {
+      setShowDeleteConfirm(false);
+      setDocToDelete(null);
     }
   };
 
@@ -170,18 +185,21 @@ export default function KYCVerification() {
   };
 
   const handleSubmitForReview = async () => {
-    if (
-      !confirm("Are you sure you want to submit your KYC documents for review?")
-    )
-      return;
+    setShowSubmitConfirm(true);
+  };
 
+  const confirmSubmitForReview = async () => {
     try {
       const response = await api.submitKycForReview();
       if (response) {
         await fetchData();
+        showToast("KYC documents submitted for review", "success");
       }
     } catch (error) {
       console.error("Submit failed:", error);
+      showToast("Failed to submit documents for review", "error");
+    } finally {
+      setShowSubmitConfirm(false);
     }
   };
 
@@ -751,6 +769,76 @@ export default function KYCVerification() {
           </div>
         )}
       </div>
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-[#282727] rounded-xl shadow-xl max-w-md w-full">
+            <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+              <h2 className="text-xl font-semibold text-red-600 dark:text-red-400">
+                Delete Document
+              </h2>
+            </div>
+            <div className="p-6">
+              <p className="text-gray-700 dark:text-gray-300">
+                Are you sure you want to delete this document? This action
+                cannot be undone.
+              </p>
+            </div>
+            <div className="px-6 py-4 border-t border-gray-200 dark:border-gray-700 flex gap-3">
+              <button
+                onClick={() => {
+                  setShowDeleteConfirm(false);
+                  setDocToDelete(null);
+                }}
+                className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmDelete}
+                className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Submit for Review Confirmation Modal */}
+      {showSubmitConfirm && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-[#282727] rounded-xl shadow-xl max-w-md w-full">
+            <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+              <h2 className="text-xl font-semibold text-blue-600 dark:text-blue-400">
+                Submit for Review
+              </h2>
+            </div>
+            <div className="p-6">
+              <p className="text-gray-700 dark:text-gray-300">
+                Are you sure you want to submit your KYC documents for review?
+                Once submitted, you won&apos;t be able to modify them until the
+                review is complete.
+              </p>
+            </div>
+            <div className="px-6 py-4 border-t border-gray-200 dark:border-gray-700 flex gap-3">
+              <button
+                onClick={() => setShowSubmitConfirm(false)}
+                className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmSubmitForReview}
+                className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+              >
+                Submit
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

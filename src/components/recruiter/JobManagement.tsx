@@ -23,21 +23,21 @@ export type JobFormState = {
   state: string;
   city: string;
   job_type:
-  | "full_time"
-  | "part_time"
-  | "contract"
-  | "internship"
-  | "temporary"
-  | "freelance"
-  | "other";
+    | "full_time"
+    | "part_time"
+    | "contract"
+    | "internship"
+    | "temporary"
+    | "freelance"
+    | "other";
   experience_level:
-  | "entry"
-  | "junior"
-  | "mid"
-  | "senior"
-  | "lead"
-  | "director"
-  | "executive";
+    | "entry"
+    | "junior"
+    | "mid"
+    | "senior"
+    | "lead"
+    | "director"
+    | "executive";
   description: string;
   requirements: string;
   responsibilities: string;
@@ -196,9 +196,6 @@ export default function JobManagement({
           <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-1">
             Jobs
           </h2>
-          <p className="text-gray-500 dark:text-gray-400">
-            Welcome back john, Here what happening today.
-          </p>
         </div>
         <button
           onClick={() => handleTabChange("create")}
@@ -222,17 +219,23 @@ export default function JobManagement({
                 <table className="w-full border-collapse">
                   <thead className="sticky top-0 z-10">
                     <tr className="border-b border-gray-100 dark:border-gray-700">
-                      {["ROLE", "STATUS", "LOCATION", "POSTED", "ACTIONS"].map(
-                        (heading, index) => (
-                          <th
-                            key={heading}
-                            className={`px-4 py-3 text-xs bg-[#101828] font-bold text-white dark:text-gray-500 uppercase tracking-wider ${index === 4 ? "text-right" : "text-left"
-                              }`}
-                          >
-                            {heading}
-                          </th>
-                        ),
-                      )}
+                      {[
+                        "ROLE",
+                        "STATUS",
+                        "View Count",
+                        "Application",
+                        "POSTED",
+                        "ACTIONS",
+                      ].map((heading, index) => (
+                        <th
+                          key={heading}
+                          className={`px-4 py-3 text-xs bg-[#101828] font-bold text-white dark:text-gray-500 uppercase tracking-wider ${
+                            index === 4 ? "text-right" : "text-left"
+                          }`}
+                        >
+                          {heading}
+                        </th>
+                      ))}
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
@@ -253,20 +256,23 @@ export default function JobManagement({
                         {/* Status */}
                         <td className="px-4 py-3">
                           <span
-                            className={`inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium ${job.is_active
+                            className={`inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium ${
+                              job.is_active
                                 ? "bg-[#E6F4EA] text-[#1E7F3A] dark:bg-green-900/30 dark:text-green-400"
                                 : "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400"
-                              }`}
+                            }`}
                           >
                             {job.is_active ? "Active" : "Inactive"}
                           </span>
                         </td>
                         {/* Location */}
-                        <td className="px-4 py-3">
-                          <div className="flex items-center gap-1.5 text-sm text-gray-600 dark:text-gray-300 font-medium">
-                            <MapPin className="w-4 h-4 text-gray-400" />
-                            {job.location}
-                          </div>
+                        <td className="px-4 py-3 text-sm text-gray-600 dark:text-gray-300 font-medium text-center">
+                          {/* <div className="flex items-center gap-1.5 text-sm text-gray-600 dark:text-gray-300 font-medium"> */}
+                          {job.view_count}
+                          {/* </div> */}
+                        </td>
+                        <td className="px-4 py-3 text-sm text-gray-600 dark:text-gray-300 font-medium text-center">
+                          {job.application_count}
                         </td>
                         {/* Posted */}
                         <td className="px-4 py-3">
@@ -424,10 +430,11 @@ export default function JobManagement({
                       <button
                         key={page}
                         onClick={() => onPageChange(page)}
-                        className={`min-w-[32px] h-8 px-2 flex items-center justify-center rounded-lg text-sm font-medium transition-colors ${currentPage === page
+                        className={`min-w-[32px] h-8 px-2 flex items-center justify-center rounded-lg text-sm font-medium transition-colors ${
+                          currentPage === page
                             ? "bg-blue-600 text-white shadow-sm"
                             : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
-                          }`}
+                        }`}
                       >
                         {page}
                       </button>
