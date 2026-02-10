@@ -19,7 +19,7 @@ const RelevantJobItem: React.FC<RelevantJobItemProps> = ({ job }) => {
   };
 
   return (
-    <div className="bg-white border border-slate-200 rounded-xl overflow-hidden hover:shadow-md transition-all">
+    <div className="bg-white border border-slate-200 rounded-xl overflow-hidden transition-all">
       <div
         className="p-4 cursor-pointer"
         onClick={() => setExpanded(!expanded)}
@@ -131,7 +131,7 @@ const RelevantJobItem: React.FC<RelevantJobItemProps> = ({ job }) => {
 
           <Link
             href={`/job/${job.slug}`}
-            className="block w-full py-2 bg-blue-600 text-white rounded-lg text-xs font-bold hover:bg-blue-700 transition-colors shadow-sm text-center"
+            className="block w-full py-2 bg-blue-600 text-white rounded-lg text-xs font-bold hover:bg-blue-700 transition-colors text-center"
           >
             View Details
           </Link>

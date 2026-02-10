@@ -23,21 +23,21 @@ export type JobFormState = {
   state: string;
   city: string;
   job_type:
-    | "full_time"
-    | "part_time"
-    | "contract"
-    | "internship"
-    | "temporary"
-    | "freelance"
-    | "other";
+  | "full_time"
+  | "part_time"
+  | "contract"
+  | "internship"
+  | "temporary"
+  | "freelance"
+  | "other";
   experience_level:
-    | "entry"
-    | "junior"
-    | "mid"
-    | "senior"
-    | "lead"
-    | "director"
-    | "executive";
+  | "entry"
+  | "junior"
+  | "mid"
+  | "senior"
+  | "lead"
+  | "director"
+  | "executive";
   description: string;
   requirements: string;
   responsibilities: string;
@@ -226,9 +226,8 @@ export default function JobManagement({
                         (heading, index) => (
                           <th
                             key={heading}
-                            className={`px-4 py-3 text-xs bg-[#101828] font-bold text-white dark:text-gray-500 uppercase tracking-wider ${
-                              index === 4 ? "text-right" : "text-left"
-                            }`}
+                            className={`px-4 py-3 text-xs bg-[#101828] font-bold text-white dark:text-gray-500 uppercase tracking-wider ${index === 4 ? "text-right" : "text-left"
+                              }`}
                           >
                             {heading}
                           </th>
@@ -254,11 +253,10 @@ export default function JobManagement({
                         {/* Status */}
                         <td className="px-4 py-3">
                           <span
-                            className={`inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium ${
-                              job.is_active
+                            className={`inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium ${job.is_active
                                 ? "bg-[#E6F4EA] text-[#1E7F3A] dark:bg-green-900/30 dark:text-green-400"
                                 : "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400"
-                            }`}
+                              }`}
                           >
                             {job.is_active ? "Active" : "Inactive"}
                           </span>
@@ -393,25 +391,55 @@ export default function JobManagement({
             </div>
 
             {/* Pagination Footter */}
+            {/* Pagination Footer */}
             {totalPages > 1 && (
-              <div className="border-t border-gray-100 dark:border-gray-700 px-6 py-1 flex items-center justify-between bg-gray-50/50 dark:bg-gray-800/50">
+              <div className="border-t border-gray-100 dark:border-gray-700 px-6 py-3 flex items-center justify-between bg-white dark:bg-[#282727] rounded-b-xl mt-auto">
                 <span className="text-sm text-gray-500 dark:text-gray-400">
                   Page {currentPage} of {totalPages}
                 </span>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1">
                   <button
                     onClick={() => onPageChange(currentPage - 1)}
                     disabled={currentPage === 1}
-                    className="p-2 rounded-lg hover:bg-white dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors border border-transparent hover:border-gray-200 dark:hover:border-gray-600"
+                    className="p-2 mr-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-gray-600 dark:text-gray-400"
                   >
-                    <ChevronLeft className="w-4 h-4 text-gray-600 dark:text-gray-300" />
+                    <ChevronLeft className="w-5 h-5" />
                   </button>
+
+                  {/* Page Numbers */}
+                  {(() => {
+                    const pages = [];
+                    const maxVisible = 5;
+                    let start = Math.max(1, currentPage - 2);
+                    const end = Math.min(totalPages, start + maxVisible - 1);
+                    if (end - start < maxVisible - 1) {
+                      start = Math.max(1, end - maxVisible + 1);
+                    }
+
+                    for (let i = start; i <= end; i++) {
+                      pages.push(i);
+                    }
+
+                    return pages.map((page) => (
+                      <button
+                        key={page}
+                        onClick={() => onPageChange(page)}
+                        className={`min-w-[32px] h-8 px-2 flex items-center justify-center rounded-lg text-sm font-medium transition-colors ${currentPage === page
+                            ? "bg-blue-600 text-white shadow-sm"
+                            : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
+                          }`}
+                      >
+                        {page}
+                      </button>
+                    ));
+                  })()}
+
                   <button
                     onClick={() => onPageChange(currentPage + 1)}
                     disabled={currentPage === totalPages}
-                    className="p-2 rounded-lg hover:bg-white dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors border border-transparent hover:border-gray-200 dark:hover:border-gray-600"
+                    className="p-2 ml-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-gray-600 dark:text-gray-400"
                   >
-                    <ChevronRight className="w-4 h-4 text-gray-600 dark:text-gray-300" />
+                    <ChevronRight className="w-5 h-5" />
                   </button>
                 </div>
               </div>

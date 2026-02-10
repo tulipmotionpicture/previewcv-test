@@ -6,4 +6,5 @@ export { default as CandidateSettings } from "./CandidateSettings";
 export { default as RelevantJobs } from "./RelevantJobs";
 export { default as RelevantJobItem } from "./RelevantJobItem";
 export { default as JobCard } from "./JobCard";
+export { default as ApplicationMasterDetail } from "./ApplicationMasterDetail";
 export type { CandidateDashboardTab } from "./CandidateSidebar";

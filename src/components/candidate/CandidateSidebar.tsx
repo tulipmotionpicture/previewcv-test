@@ -6,11 +6,12 @@ import {
     User,
     Settings,
     LogOut,
+    LayoutDashboard,
 } from "lucide-react";
 import DashboardSidebar from "@/components/shared/DashboardSidebar";
 import { useAuth } from "@/context/AuthContext";
 
-export type CandidateDashboardTab = "applications" | "resumes" | "profile" | "settings";
+export type CandidateDashboardTab = "overview" | "applications" | "resumes" | "profile" | "settings";
 
 interface CandidateSidebarProps {
     activeTab: CandidateDashboardTab;
@@ -30,6 +31,11 @@ export default function CandidateSidebar({
         label: string;
         icon: React.ReactNode;
     }[] = [
+            {
+                key: "overview",
+                label: "Overview",
+                icon: <LayoutDashboard className="w-5 h-5" />,
+            },
             {
                 key: "applications",
                 label: "My Application",

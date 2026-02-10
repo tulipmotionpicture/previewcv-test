@@ -37,7 +37,7 @@ export default function DashboardHeader({ applicationCount }: DashboardHeaderPro
                 {/* Stats Cards */}
                 <div className="grid grid-cols-3 gap-6">
                     {stats.map((stat, index) => (
-                        <div key={index} className="bg-white dark:bg-gray-900 rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-gray-800">
+                        <div key={index} className="bg-white dark:bg-gray-900 rounded-2xl p-6 border border-gray-100 dark:border-gray-800">
                             <div className="flex items-start gap-4">
                                 <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-xl">
                                     {stat.icon}

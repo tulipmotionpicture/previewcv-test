@@ -23,6 +23,7 @@ import {
   CandidateSettings,
   RelevantJobs,
   CandidateDashboardTab,
+  ApplicationMasterDetail,
 } from "@/components/candidate";
 import { MatchAnalysis } from "@/components/jobs";
 import {
@@ -42,15 +43,18 @@ import {
   Gift,
   Bell,
   Filter,
+  User as UserIcon,
+  Briefcase,
+  Users,
 } from "lucide-react";
 
 function CandidateDashboardContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { isAuthenticated, loading: authLoading, logout } = useAuth();
+  const { user, isAuthenticated, loading: authLoading, logout } = useAuth();
   const toast = useToast();
   const [activeTab, setActiveTab] =
-    useState<CandidateDashboardTab>("applications");
+    useState<CandidateDashboardTab>("overview");
   const [applications, setApplications] = useState<Application[]>([]);
   const [applicationsPagination, setApplicationsPagination] = useState<{
     total: number;
@@ -62,6 +66,7 @@ function CandidateDashboardContent() {
     has_previous: boolean;
   } | null>(null);
   const [statusFilter, setStatusFilter] = useState<string>("");
+
   const [jobs, setJobs] = useState<Job[]>([]);
   const [relevantJobsData, setRelevantJobsData] =
     useState<RelevantJobsResponse | null>(null);
@@ -85,8 +90,8 @@ function CandidateDashboardContent() {
   // Initialize active tab from URL on mount
   useEffect(() => {
     const tabParam = searchParams.get("tab");
-    if (tabParam && ["applications", "resumes"].includes(tabParam)) {
-      setActiveTab(tabParam as "applications" | "resumes");
+    if (tabParam && ["overview", "applications", "resumes"].includes(tabParam)) {
+      setActiveTab(tabParam as "overview" | "applications" | "resumes");
     }
   }, [searchParams]);
 
@@ -108,7 +113,7 @@ function CandidateDashboardContent() {
   };
 
   useEffect(() => {
-    if (activeTab === "applications") {
+    if (activeTab === "overview" || activeTab === "applications") {
       fetchApplications();
       fetchJobs();
       fetchApplicationStats();
@@ -249,7 +254,7 @@ function CandidateDashboardContent() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F0F9FF] dark:bg-gray-950 flex transition-colors duration-200">
+    <div className="min-h-screen flex transition-colors duration-300 bg-[#F9FAFC] dark:bg-[#121111]">
       {/* Sidebar */}
       <CandidateSidebar
         activeTab={activeTab}
@@ -258,151 +263,167 @@ function CandidateDashboardContent() {
       />
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col">
-        <main className="flex-1 p-2 max-w-7xl w-full mx-auto">
-          {/* Applications Tab */}
-          {activeTab === "applications" && (
-            <div className="animate-in fade-in duration-200">
-              <div className="mb-6 flex justify-between items-center">
-                <div>
-                  <h1 className="text-3xl font-bold text-slate-900 dark:text-gray-100 mb-1">
-                    My Applications
-                  </h1>
-                  <p className="text-sm text-slate-500 dark:text-gray-400">
-                    Track and manage your job hunting progress
-                  </p>
-                </div>
-                <button className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
-                  <Bell className="w-5 h-5 text-slate-600 dark:text-gray-400" />
-                </button>
-              </div>
+      <main className="flex-1 p-5 max-w-7xl mx-auto overflow-x-hidden">
+        {/* Dashboard Header */}
+        <header className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 bg-white dark:bg-[#282727] rounded-md flex items-center justify-center border border-gray-200 dark:border-gray-700 overflow-hidden">
+              <UserIcon className="w-6 h-6 text-gray-400" />
+            </div>
+            <div>
+              <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100">
+                {user?.full_name || "Candidate"}&apos;s Dashboard
+              </h1>
+              <p className="text-sm text-[#60768D] dark:text-gray-400">
+                {user?.email || "user@example.com"}
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-4">
+            <div className="relative hidden md:block">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <input
+                type="text"
+                placeholder="Search..."
+                readOnly
+                onClick={() => router.push("/jobs")}
+                className="pl-10 pr-4 py-2.5 w-80 bg-gray-50 dark:bg-gray-900 border border-[#E1E8F1] dark:border-gray-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all cursor-pointer"
+              />
+            </div>
+            <button className="relative p-2.5 bg-gray-50 dark:bg-gray-900 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400">
+              <Bell className="w-5 h-5" />
+              <span className="absolute top-2 right-2.5 w-2 h-2 bg-red-500 rounded-full border-2 border-white dark:border-gray-900"></span>
+            </button>
+          </div>
+        </header>
 
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 mb-8">
-                <div className="col-span-2 space-y-2">
-                  {/* Search and Filter Section */}
-                  <div className="flex flex-col gap-3 mb-2">
-                    {/* Stats Cards */}
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-2">
-                      <div className="bg-white dark:bg-gray-900 rounded-xl p-5 border border-slate-200 dark:border-gray-800">
-                        <div className="flex items-center justify-between mb-2">
-                          <span className="text-sm text-slate-500 dark:text-gray-400">
+        {/* Applications Tab */}
+        {activeTab === "overview" && (
+          <div className="animate-in fade-in duration-200">
+
+
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 mb-8">
+              <div className="col-span-2 space-y-2">
+                {/* Search and Filter Section */}
+                {/* Search and Filter Section */}
+                <div className="flex flex-col gap-3 mb-2">
+                  {/* Stats Cards */}
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-2">
+                    {/* Total Applications */}
+                    <div className="bg-white dark:bg-gray-900 rounded-xl p-4 border border-slate-200 dark:border-gray-800 relative overflow-hidden">
+                      <div className="flex justify-between items-start mb-3">
+                        <div>
+                          <span className="text-xs font-semibold text-slate-500 dark:text-gray-400 block mb-0.5">
                             Total Applications
                           </span>
-                          <FileText className="w-4 h-4 text-slate-400" />
-                        </div>
-                        <div className="flex items-baseline gap-2">
-                          <span className="text-4xl font-bold text-slate-900 dark:text-white">
+                          <span className="text-2xl font-bold text-slate-900 dark:text-white block">
                             {applicationStats?.total_applications?.total ||
-                              applicationsPagination?.total ||
                               applications.length}
                           </span>
-                          {applicationStats?.total_applications
-                            ?.weekly_change !== undefined && (
-                            <span
-                              className={`text-sm font-semibold flex items-center gap-1 ${
-                                applicationStats.total_applications
-                                  .weekly_change >= 0
-                                  ? "text-emerald-600 dark:text-emerald-400"
-                                  : "text-red-600 dark:text-red-400"
-                              }`}
-                            >
-                              <TrendingUp className="w-3 h-3" />
-                              {applicationStats.total_applications
-                                .weekly_change >= 0
-                                ? "+"
-                                : ""}
-                              {
-                                applicationStats.total_applications
-                                  .weekly_change
-                              }{" "}
-                              this week
-                            </span>
-                          )}
+                        </div>
+                        <div className="p-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                          <Briefcase className="w-4 h-4 text-blue-500 dark:text-blue-400" />
                         </div>
                       </div>
 
-                      <div className="bg-white dark:bg-gray-900 rounded-xl p-5 border border-slate-200 dark:border-gray-800">
-                        <div className="flex items-center justify-between mb-2">
-                          <span className="text-sm text-slate-500 dark:text-gray-400">
+                      {applicationStats?.total_applications?.weekly_change !== undefined && (
+                        <div className="flex items-center gap-1">
+                          <TrendingUp className={`w-3 h-3 ${applicationStats.total_applications.weekly_change >= 0
+                            ? "text-emerald-500"
+                            : "text-red-500"
+                            }`} />
+                          <span className={`text-xs font-bold ${applicationStats.total_applications.weekly_change >= 0
+                            ? "text-emerald-500"
+                            : "text-red-500"
+                            }`}>
+                            {applicationStats.total_applications.weekly_change >= 0 ? "+" : ""}
+                            {applicationStats.total_applications.weekly_change} this week
+                          </span>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Interview Invites */}
+                    <div className="bg-white dark:bg-gray-900 rounded-xl p-4 border border-slate-200 dark:border-gray-800 relative overflow-hidden">
+                      <div className="flex justify-between items-start mb-3">
+                        <div>
+                          <span className="text-xs font-semibold text-slate-500 dark:text-gray-400 block mb-0.5">
                             Interview Invites
                           </span>
-                          <CheckCircle className="w-4 h-4 text-slate-400" />
-                        </div>
-                        <div className="flex items-baseline gap-2">
-                          <span className="text-4xl font-bold text-slate-900 dark:text-white">
+                          <span className="text-2xl font-bold text-slate-900 dark:text-white block">
                             {applicationStats?.interview_invites?.total ||
-                              applications.filter(
-                                (app) => app.status === "interview_scheduled",
-                              ).length}
+                              applications.filter((app) => app.status === "interview_scheduled").length}
                           </span>
-                          {applicationStats?.interview_invites
-                            ?.weekly_change !== undefined && (
-                            <span
-                              className={`text-sm font-semibold flex items-center gap-1 ${
-                                applicationStats.interview_invites
-                                  .weekly_change >= 0
-                                  ? "text-emerald-600 dark:text-emerald-400"
-                                  : "text-red-600 dark:text-red-400"
-                              }`}
-                            >
-                              <TrendingUp className="w-3 h-3" />
-                              {applicationStats.interview_invites
-                                .weekly_change >= 0
-                                ? "+"
-                                : ""}
-                              {applicationStats.interview_invites.weekly_change}{" "}
-                              this week
-                            </span>
-                          )}
+                        </div>
+                        <div className="p-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                          <Users className="w-4 h-4 text-blue-500 dark:text-blue-400" />
                         </div>
                       </div>
 
-                      <div className="bg-white dark:bg-gray-900 rounded-xl p-5 border border-slate-200 dark:border-gray-800">
-                        <div className="flex items-center justify-between mb-2">
-                          <span className="text-sm text-slate-500 dark:text-gray-400">
+                      {applicationStats?.interview_invites?.weekly_change !== undefined && (
+                        <div className="flex items-center gap-1">
+                          <TrendingUp className={`w-3 h-3 ${applicationStats.interview_invites.weekly_change >= 0
+                            ? "text-emerald-500"
+                            : "text-red-500"
+                            }`} />
+                          <span className={`text-xs font-bold ${applicationStats.interview_invites.weekly_change >= 0
+                            ? "text-emerald-500"
+                            : "text-red-500"
+                            }`}>
+                            {applicationStats.interview_invites.weekly_change >= 0 ? "+" : ""}
+                            {applicationStats.interview_invites.weekly_change} this week
+                          </span>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Offers Received */}
+                    <div className="bg-white dark:bg-gray-900 rounded-xl p-4 border border-slate-200 dark:border-gray-800 relative overflow-hidden">
+                      <div className="flex justify-between items-start mb-3">
+                        <div>
+                          <span className="text-xs font-semibold text-slate-500 dark:text-gray-400 block mb-0.5">
                             Offers Received
                           </span>
-                          <Gift className="w-4 h-4 text-slate-400" />
-                        </div>
-                        <div className="flex items-baseline gap-2">
-                          <span className="text-4xl font-bold text-slate-900 dark:text-white">
+                          <span className="text-2xl font-bold text-slate-900 dark:text-white block">
                             {applicationStats?.offers_received?.total ||
                               applications.filter(
                                 (app) =>
-                                  app.status === "offered" ||
-                                  app.status === "accepted",
+                                  app.status === "offered" || app.status === "accepted"
                               ).length}
                           </span>
-                          {applicationStats?.offers_received?.weekly_change !==
-                            undefined && (
-                            <span
-                              className={`text-sm font-semibold flex items-center gap-1 ${
-                                applicationStats.offers_received
-                                  .weekly_change >= 0
-                                  ? "text-emerald-600 dark:text-emerald-400"
-                                  : "text-red-600 dark:text-red-400"
-                              }`}
-                            >
-                              <TrendingUp className="w-3 h-3" />
-                              {applicationStats.offers_received.weekly_change >=
-                              0
-                                ? "+"
-                                : ""}
-                              {applicationStats.offers_received.weekly_change}{" "}
-                              this week
-                            </span>
-                          )}
+                        </div>
+                        <div className="p-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                          <Gift className="w-4 h-4 text-blue-500 dark:text-blue-400" />
                         </div>
                       </div>
-                    </div>
 
+                      {applicationStats?.offers_received?.weekly_change !== undefined && (
+                        <div className="flex items-center gap-1">
+                          <TrendingUp className={`w-3 h-3 ${applicationStats.offers_received.weekly_change >= 0
+                            ? "text-emerald-500"
+                            : "text-red-500"
+                            }`} />
+                          <span className={`text-xs font-bold ${applicationStats.offers_received.weekly_change >= 0
+                            ? "text-emerald-500"
+                            : "text-red-500"
+                            }`}>
+                            {applicationStats.offers_received.weekly_change >= 0 ? "+" : ""}
+                            {applicationStats.offers_received.weekly_change} this week
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Search and Filter Section */}
+                  <div className="flex flex-col gap-3 mb-2">
                     <div className="flex gap-2">
                       <div className="flex-1 relative">
                         <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-slate-400" />
                         <input
                           type="text"
                           placeholder="Search applications by role, company..."
-                          className="w-full pl-10 pr-2 py-2 border border-slate-200 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-slate-900 dark:text-gray-100 placeholder-slate-400 transition-all"
+                          className="w-full pl-10 pr-2 py-3 border border-slate-200 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-slate-900 dark:text-gray-100 placeholder-slate-400 transition-all focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900 focus:border-blue-400"
                         />
                       </div>
                       <div className="relative">
@@ -414,7 +435,7 @@ function CandidateDashboardContent() {
                               status_filter: e.target.value || undefined,
                             });
                           }}
-                          className="appearance-none px-8 py-2 border border-slate-200 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-slate-700 dark:text-gray-300 transition-all "
+                          className="appearance-none px-8 py-3 pr-10 border border-slate-200 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-slate-700 dark:text-gray-300 transition-all focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900 focus:border-blue-400"
                         >
                           <option value="">All Statuses</option>
                           <option value="applied">Applied</option>
@@ -457,7 +478,7 @@ function CandidateDashboardContent() {
                           Showing {applicationsPagination.offset + 1} to{" "}
                           {Math.min(
                             applicationsPagination.offset +
-                              applicationsPagination.limit,
+                            applicationsPagination.limit,
                             applicationsPagination.total,
                           )}{" "}
                           of {applicationsPagination.total} applications
@@ -469,7 +490,7 @@ function CandidateDashboardContent() {
                                 offset: Math.max(
                                   0,
                                   applicationsPagination.offset -
-                                    applicationsPagination.limit,
+                                  applicationsPagination.limit,
                                 ),
                                 status_filter: statusFilter || undefined,
                               })
@@ -501,115 +522,153 @@ function CandidateDashboardContent() {
                       </div>
                     )}
                 </div>
-                <div className="col-span-1 space-y-3">
-                  {/* AI Match Insight Panel */}
-                  {relevantJobsData && relevantJobsData.jobs.length > 0 && (
-                    <div>
-                      <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-4">
-                        AI Match Insight
-                      </h2>
-                      <MatchAnalysis
-                        job={{
-                          ...relevantJobsData.jobs[0],
-                          matchScore: Math.round(
-                            relevantJobsData.jobs[0].relevance_score,
+              </div>
+              <div className="col-span-1 space-y-3">
+                {/* AI Match Insight Panel */}
+                {relevantJobsData && relevantJobsData.jobs.length > 0 && (
+                  <div>
+                    <MatchAnalysis
+                      job={{
+                        ...relevantJobsData.jobs[0],
+                        matchScore: Math.round(
+                          relevantJobsData.jobs[0].relevance_score,
+                        ),
+                        reasoning: {
+                          skillsMatch: Math.round(
+                            relevantJobsData.jobs[0].score_breakdown
+                              .skills_match,
                           ),
-                          reasoning: {
-                            skillsMatch: Math.round(
-                              relevantJobsData.jobs[0].score_breakdown
-                                .skills_match,
-                            ),
-                            experienceMatch: Math.round(
-                              relevantJobsData.jobs[0].score_breakdown
-                                .experience_match,
-                            ),
-                            salaryMatch: Math.round(
-                              relevantJobsData.jobs[0].score_breakdown
-                                .salary_match || 0,
-                            ),
-                            locationMatch: Math.round(
-                              relevantJobsData.jobs[0].score_breakdown
-                                .location_match,
-                            ),
-                            keyHighlights:
-                              relevantJobsData.jobs[0].why_recommended || [],
-                            skillsBreakdown: [
-                              ...(
-                                relevantJobsData.jobs[0]
-                                  .matched_required_skills || []
-                              ).map((skill) => ({
+                          experienceMatch: Math.round(
+                            relevantJobsData.jobs[0].score_breakdown
+                              .experience_match,
+                          ),
+                          salaryMatch: Math.round(
+                            relevantJobsData.jobs[0].score_breakdown
+                              .salary_match || 0,
+                          ),
+                          locationMatch: Math.round(
+                            relevantJobsData.jobs[0].score_breakdown
+                              .location_match,
+                          ),
+                          keyHighlights:
+                            relevantJobsData.jobs[0].why_recommended || [],
+                          skillsBreakdown: [
+                            ...(
+                              relevantJobsData.jobs[0]
+                                .matched_required_skills || []
+                            ).map((skill) => ({
+                              name: skill,
+                              matched: true,
+                              importance: "Required" as const,
+                            })),
+                            ...(
+                              relevantJobsData.jobs[0]
+                                .missing_required_skills || []
+                            ).map((skill) => ({
+                              name: skill,
+                              matched: false,
+                              importance: "Required" as const,
+                            })),
+                            ...(
+                              relevantJobsData.jobs[0]
+                                .matched_preferred_skills || []
+                            )
+                              .slice(0, 3)
+                              .map((skill) => ({
                                 name: skill,
                                 matched: true,
-                                importance: "Required" as const,
+                                importance: "Preferred" as const,
                               })),
-                              ...(
-                                relevantJobsData.jobs[0]
-                                  .missing_required_skills || []
-                              ).map((skill) => ({
-                                name: skill,
-                                matched: false,
-                                importance: "Required" as const,
-                              })),
-                              ...(
-                                relevantJobsData.jobs[0]
-                                  .matched_preferred_skills || []
-                              )
-                                .slice(0, 3)
-                                .map((skill) => ({
-                                  name: skill,
-                                  matched: true,
-                                  importance: "Preferred" as const,
-                                })),
-                              ...(
-                                relevantJobsData.jobs[0]
-                                  .missing_preferred_skills || []
-                              )
-                                .slice(0, 2)
-                                .map((skill) => ({
-                                  name: skill,
-                                  matched: false,
-                                  importance: "Nice to have" as const,
-                                })),
-                            ],
-                            missingSkills:
-                              relevantJobsData.jobs[0]
-                                .missing_required_skills || [],
-                          },
-                        }}
-                        matchingCriteria={relevantJobsData.matching_criteria}
-                      />
-                    </div>
-                  )}
-
-                  {/* Relevant Jobs Section */}
-                  <div className="bg-white dark:bg-gray-900 border border-slate-200 dark:border-gray-800 rounded-xl shadow-sm overflow-hidden">
-                    <div className="p-4 border-b border-slate-100 dark:border-gray-800">
-                      <h2 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                        <Sparkles className="w-5 h-5 text-blue-600" />
-                        Relevant Jobs
-                      </h2>
-                    </div>
-                    <RelevantJobs
-                      relevantJobsData={relevantJobsData}
-                      loading={jobsLoading}
-                      onLoadMore={loadMoreJobs}
-                      hasMore={relevantJobsHasMore}
-                      infiniteScrollLoading={relevantJobsInfiniteLoading}
+                          ],
+                          missingSkills:
+                            relevantJobsData.jobs[0]
+                              .missing_required_skills || [],
+                        },
+                      }}
+                      matchingCriteria={relevantJobsData.matching_criteria}
                     />
                   </div>
+                )}
+
+                {/* Relevant Jobs Section */}
+                <div className="bg-white dark:bg-gray-900 border border-slate-200 dark:border-gray-800 rounded-xl overflow-hidden">
+                  <div className="p-2 bg-slate-900 dark:bg-slate-900 border-b border-slate-900 dark:border-gray-800">
+                    <h2 className="text-lg font-bold text-white flex items-center gap-2">
+                      <Sparkles className="w-5 h-5 text-white" />
+                      Relative Jobs
+                    </h2>
+                  </div>
+                  <RelevantJobs
+                    relevantJobsData={relevantJobsData}
+                    loading={jobsLoading}
+                    onLoadMore={loadMoreJobs}
+                    hasMore={relevantJobsHasMore}
+                    infiniteScrollLoading={relevantJobsInfiniteLoading}
+                  />
                 </div>
               </div>
             </div>
-          )}
+          </div>
+        )
+        }
 
-          {/* Resumes Tab */}
-          {activeTab === "resumes" && (
+        {/* Applications Tab */}
+        {
+          activeTab === "applications" && (
+            <div className="animate-in fade-in duration-300">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                  <Briefcase className="w-5 h-5 text-blue-500" />
+                  My Applications
+                </h2>
+                <div className="flex gap-2">
+                  <span className="px-3 py-1 bg-white dark:bg-gray-800 rounded-full text-xs font-semibold text-slate-600 dark:text-gray-400 border border-slate-200 dark:border-gray-700">
+                    Total: {applications.length}
+                  </span>
+                </div>
+              </div>
+
+              <ApplicationMasterDetail
+                applications={applications}
+                loading={loading}
+                pagination={
+                  applicationsPagination
+                    ? {
+                      page: applicationsPagination.page,
+                      total_pages: applicationsPagination.total_pages,
+                      has_more: applicationsPagination.has_more,
+                      has_previous: applicationsPagination.has_previous,
+                    }
+                    : undefined
+                }
+                onPageChange={(direction) =>
+                  fetchApplications({
+                    offset:
+                      direction === "next"
+                        ? (applicationsPagination?.offset || 0) +
+                        (applicationsPagination?.limit || 10)
+                        : Math.max(
+                          0,
+                          (applicationsPagination?.offset || 0) -
+                          (applicationsPagination?.limit || 10),
+                        ),
+                    status_filter: statusFilter || undefined,
+                  })
+                }
+              />
+            </div>
+          )
+        }
+
+        {/* Resumes Tab */}
+        {
+          activeTab === "resumes" && (
             <div className="animate-in fade-in duration-200">
               <div className="mb-6">
-                <h1 className="text-3xl font-bold text-[#0C4A6E] dark:text-gray-100 mb-1">
+                <h2 className="text-xl font-medium text-gray-900 dark:text-gray-100 mb-1">
                   My Resumes
-                </h1>
-                <p className="text-sm text-[#0369A1] dark:text-gray-400">
+                </h2>
+                <p className="text-sm text-[#60768D] dark:text-gray-400">
                   Manage your resume collection
                 </p>
               </div>
@@ -681,11 +740,10 @@ function CandidateDashboardContent() {
                           <div className="px-4 py-2 bg-gray-50 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 flex items-center justify-between">
                             <div className="flex items-center gap-2">
                               <span
-                                className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
-                                  resume.is_active
-                                    ? "bg-[#22C55E] text-white"
-                                    : "bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-400"
-                                }`}
+                                className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${resume.is_active
+                                  ? "bg-[#22C55E] text-white"
+                                  : "bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-400"
+                                  }`}
                               >
                                 {resume.is_active ? "Active" : "Inactive"}
                               </span>
@@ -819,11 +877,10 @@ function CandidateDashboardContent() {
                           <div className="px-4 py-2 bg-gray-50 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 flex items-center justify-between">
                             <div className="flex items-center gap-2">
                               <span
-                                className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
-                                  resume.is_active
-                                    ? "bg-[#22C55E] text-white"
-                                    : "bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-400"
-                                }`}
+                                className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${resume.is_active
+                                  ? "bg-[#22C55E] text-white"
+                                  : "bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-400"
+                                  }`}
                               >
                                 {resume.is_active ? "Active" : "Inactive"}
                               </span>
@@ -901,17 +958,19 @@ function CandidateDashboardContent() {
                 <ResumeUpload onUploadSuccess={handleResumeUploadSuccess} />
               </div>
             </div>
-          )}
+          )
+        }
 
-          {/* Profile Tab */}
-          {activeTab === "profile" && <CandidateProfile />}
+        {/* Profile Tab */}
+        {activeTab === "profile" && <CandidateProfile />}
 
-          {/* Settings Tab */}
-          {activeTab === "settings" && <CandidateSettings />}
-        </main>
+        {/* Settings Tab */}
+        {activeTab === "settings" && <CandidateSettings />}
+      </main >
 
-        {/* Resume Review Modal */}
-        {parsingResumeId && (
+      {/* Resume Review Modal */}
+      {
+        parsingResumeId && (
           <div className="fixed inset-0 z-[300] bg-white dark:bg-gray-950 overflow-y-auto">
             <div className="min-h-screen p-4 md:p-8">
               <div className="max-w-6xl mx-auto">
@@ -944,10 +1003,12 @@ function CandidateDashboardContent() {
               </div>
             </div>
           </div>
-        )}
+        )
+      }
 
-        {/* Share Resume Modal - Flat Design */}
-        {shareModalResume && shareModalResume.permanent_link && (
+      {/* Share Resume Modal - Flat Design */}
+      {
+        shareModalResume && shareModalResume.permanent_link && (
           <div
             className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
             onClick={() => setShareModalResume(null)}
@@ -979,10 +1040,10 @@ function CandidateDashboardContent() {
 
               {/* Modal Header */}
               <div className="text-center mb-6">
-                <div className="inline-flex items-center justify-center w-12 h-12 rounded-lg bg-[#0369A1] text-white text-xl mb-3">
+                <div className="inline-flex items-center justify-center w-12 h-12 rounded-lg bg-blue-600 text-white text-xl mb-3">
                   <Share2 className="w-6 h-6" />
                 </div>
-                <h3 className="text-xl font-bold text-[#0C4A6E] dark:text-gray-100 mb-1">
+                <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-1">
                   Share Resume
                 </h3>
                 <p className="text-sm text-gray-500 dark:text-gray-400">
@@ -1015,7 +1076,7 @@ function CandidateDashboardContent() {
                     type="text"
                     readOnly
                     value={shareModalResume.permanent_link.share_url}
-                    className="flex-1 px-4 py-3 text-sm bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-700 dark:text-gray-300 font-mono focus:outline-none focus:border-[#0369A1]"
+                    className="flex-1 px-4 py-3 text-sm bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-700 dark:text-gray-300 font-mono focus:outline-none focus:border-blue-500"
                   />
                   <button
                     onClick={() => {
@@ -1024,7 +1085,7 @@ function CandidateDashboardContent() {
                       );
                       toast.success("Link copied to clipboard!");
                     }}
-                    className="px-4 py-3 bg-[#0369A1] hover:bg-[#0284C7] text-white text-sm font-bold rounded-lg transition-colors duration-150 flex items-center gap-2 cursor-pointer"
+                    className="px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold rounded-lg transition-colors duration-150 flex items-center gap-2 cursor-pointer"
                   >
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
@@ -1062,9 +1123,9 @@ function CandidateDashboardContent() {
               </div>
             </div>
           </div>
-        )}
-      </div>
-    </div>
+        )
+      }
+    </div >
   );
 }
 
@@ -1072,8 +1133,8 @@ export default function CandidateDashboard() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen bg-[#F0F9FF] dark:bg-gray-950 flex items-center justify-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-2 border-[#0369A1] border-t-transparent"></div>
+        <div className="min-h-screen bg-[#F9FAFC] dark:bg-[#121111] flex items-center justify-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-2 border-blue-600 border-t-transparent"></div>
         </div>
       }
     >

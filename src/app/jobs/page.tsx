@@ -210,7 +210,8 @@ function JobsPageContent() {
   }, [jobs.length, hasMore, loading, loadingMore, handleLoadMore]);
 
   return (
-    <div className="min-h-screen transition-colors duration-300">
+
+    <div className="min-h-screen transition-colors duration-300 bg-gray-50 dark:bg-gray-950">
       <Header
         links={[{ label: "Candidate Login", href: "/candidate/login" }]}
         cta={{
@@ -220,9 +221,10 @@ function JobsPageContent() {
         }}
         showAuthButtons={true}
       />
-      <div className="pt-20">
-        {/* Horizontal Search Bar */}
-        <div className="w-full flex justify-center mb-4 px-4">
+      <div className="pt-20 pb-8 px-12 max-w-7xl mx-auto" >
+        {/* Search Bar Container */}
+        {/* Search Bar Container */}
+        <div className="mb-2">
           <form
             onSubmit={(e) => {
               e.preventDefault();
@@ -231,76 +233,76 @@ function JobsPageContent() {
                 skill_search: keyword ? [keyword] : [],
                 location: location ? [location] : [],
               }));
+              // Trigger fetch
+              setOffset(0);
+              fetchJobs(0, false);
             }}
-            className="w-full max-w-7xl bg-white dark:bg-gray-800 
-              border-2 border-gray-200 dark:border-gray-700 rounded-xl
-              shadow-md hover:shadow-lg transition-shadow duration-200"
+            className="flex flex-col lg:flex-row items-stretch gap-6"
           >
-            <div className="flex flex-col md:flex-row items-stretch gap-0">
-              {/* Keyword */}
-              <div className="flex-1 px-4 py-2.5 flex flex-col justify-center">
-                <label
-                  htmlFor="job-keywords"
-                  className="block text-[10px] font-bold text-gray-500 dark:text-gray-400 mb-1 uppercase tracking-wide"
-                >
-                  Keywords
-                </label>
-                <input
-                  id="job-keywords"
-                  type="text"
-                  placeholder="Job title, skills, company"
-                  value={keyword}
-                  onChange={(e) => setKeyword(e.target.value)}
-                  className="w-full bg-transparent outline-none 
-                     text-gray-900 dark:text-gray-100 
-                     placeholder-gray-400 dark:placeholder-gray-500 
-                     font-medium text-sm
-                     focus:ring-0 border-0 p-0"
-                />
-              </div>
-
-              {/* Divider */}
-              <div className="hidden md:block w-px bg-gray-200 dark:bg-gray-700 my-2" />
-
-              {/* Location */}
-              <div className="flex-1 px-4 py-2.5 flex flex-col justify-center border-t md:border-t-0 border-gray-200 dark:border-gray-700">
-                <label
-                  htmlFor="job-location"
-                  className="block text-[10px] font-bold text-gray-500 dark:text-gray-400 mb-1 uppercase tracking-wide"
-                >
-                  Location
-                </label>
-                <input
-                  id="job-location"
-                  type="text"
-                  placeholder="City, state or remote"
-                  value={location}
-                  onChange={(e) => setLocation(e.target.value)}
-                  className="w-full bg-transparent outline-none 
-                     text-gray-900 dark:text-gray-100 
-                     placeholder-gray-400 dark:placeholder-gray-500 
-                     font-medium text-sm
-                     focus:ring-0 border-0 p-0"
-                />
-              </div>
-
-              {/* Button */}
-              <div className="px-2 py-2 flex items-center justify-center border-t md:border-t-0 border-gray-200 dark:border-gray-700">
-                <button
-                  type="submit"
-                  className="w-full md:w-auto px-8 py-2.5
-                     bg-blue-600 hover:bg-blue-700 active:bg-blue-800
-                     text-white font-semibold text-sm
-                     rounded-lg shadow-md hover:shadow-lg 
-                     transition-all duration-200
-                     focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
-                     transform hover:scale-105"
-                >
-                  Search Jobs
-                </button>
-              </div>
+            {/* Keyword Input */}
+            <div className="flex-[2] bg-white dark:bg-gray-900 rounded-lg border border-blue-200 dark:border-gray-700 flex items-center px-4   hover:border-blue-400 transition-colors">
+              <svg className="w-6 h-6 text-gray-400 mr-3 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+              <input
+                type="text"
+                placeholder="Enter Skills, Destinations, or Company Name"
+                value={keyword}
+                onChange={(e) => setKeyword(e.target.value)}
+                className="w-full bg-transparent border-none outline-none text-gray-700 dark:text-gray-200 placeholder-gray-400 text-sm font-medium focus:ring-0 p-0"
+              />
             </div>
+
+            {/* Location Input */}
+            <div className="flex-[1.5] bg-white dark:bg-gray-900 rounded-lg border border-blue-200 dark:border-gray-700 flex items-center px-4 py-3 hover:border-blue-400 transition-colors">
+              <svg className="w-6 h-6 text-gray-400 mr-3 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a2 2 0 01-2.828 0l-4.243-4.243a8 8 0 1111.314 0z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+              <input
+                type="text"
+                placeholder="Enter City or County"
+                value={location}
+                onChange={(e) => setLocation(e.target.value)}
+                className="w-full bg-transparent border-none outline-none text-gray-700 dark:text-gray-200 placeholder-gray-400 text-sm font-medium focus:ring-0 p-0"
+              />
+            </div>
+
+            {/* Experience Input */}
+            <div className="flex-[1.5] bg-white dark:bg-gray-900 rounded-lg border border-blue-200 dark:border-gray-700 flex items-center px-4 py-3 hover:border-blue-400 transition-colors">
+              <span className="w-6 h-6 text-gray-400 mr-3 flex items-center justify-center font-bold text-lg shrink-0">₹</span>
+              <input
+                type="text"
+                placeholder="Enter in years"
+                className="w-full bg-transparent border-none outline-none text-gray-700 dark:text-gray-200 placeholder-gray-400 text-sm font-medium focus:ring-0 p-0"
+              />
+            </div>
+
+            {/* Search Button */}
+            <button
+              type="submit"
+              className="px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors shadow-sm whitespace-nowrap min-w-[140px]"
+            >
+              Search Job
+            </button>
           </form>
+        </div>
+
+        {/* Popular Search */}
+        <div className="flex flex-wrap items-center gap-2 mb-8 text-sm">
+          <span className="font-bold text-gray-500 dark:text-gray-400 mr-2">Popular Search:</span>
+          {["UI UX developer", "FrontEnd developer", "Deops Engineer", "Product Manager"].map((tag) => (
+            <button
+              key={tag}
+              onClick={() => {
+                setKeyword(tag);
+                setSelectedFilters(prev => ({ ...prev, skill_search: [tag] }));
+              }}
+              className="px-3 py-1 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300 rounded-md text-xs font-medium transition-colors"
+            >
+              {tag}
+            </button>
+          ))}
         </div>
 
         <JobsLayout
@@ -312,7 +314,26 @@ function JobsPageContent() {
           }
           jobs={
             <>
+              {/* Header for Job List */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-4">
+                <h2 className="text-gray-600 dark:text-gray-300 text-sm font-medium">
+                  Showing <span className="font-bold text-gray-900 dark:text-white">{total}</span> jobs
+                  {keyword && <> related to <span className="font-bold text-gray-900 dark:text-white">"{keyword}"</span></>}
+                  {location && <> in <span className="font-bold text-gray-900 dark:text-white">"{location}"</span></>}
+                </h2>
+
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-gray-500">Sort by :</span>
+                  <select className="bg-transparent text-sm font-bold text-gray-900 dark:text-white border-none focus:ring-0 cursor-pointer p-0 pr-6">
+                    <option>Date</option>
+                    <option>Relevance</option>
+                    <option>Salary</option>
+                  </select>
+                </div>
+              </div>
+
               <JobList jobs={jobs} loading={loading} error={error} />
+
               {!loading && !error && hasMore && (
                 <div
                   ref={loadMoreRef}
