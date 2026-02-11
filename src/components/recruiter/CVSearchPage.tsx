@@ -10,6 +10,10 @@ import {
   CVCreditsStatus,
   BucketWithStats,
   BucketListResponse,
+  SearchHistoryResponse,
+  SearchHistoryItem,
+  SearchResultCountTrendResponse,
+  SearchHistoryTrendItem,
 } from "@/types/api";
 import {
   Search,
@@ -29,6 +33,10 @@ import {
   ChevronDown,
   FolderPlus,
   Plus,
+  History,
+  TrendingUp,
+  RotateCw,
+  Clock,
 } from "lucide-react";
 
 export default function CVSearchPage() {
@@ -88,6 +96,14 @@ export default function CVSearchPage() {
   const [showCreateBucket, setShowCreateBucket] = useState(false);
   const [addingToBucket, setAddingToBucket] = useState(false);
 
+  // History & Trend states
+  const [showHistoryModal, setShowHistoryModal] = useState(false);
+  const [searchHistory, setSearchHistory] = useState<SearchHistoryItem[]>([]);
+  const [historyLoading, setHistoryLoading] = useState(false);
+  const [showTrendModal, setShowTrendModal] = useState(false);
+  const [trendData, setTrendData] = useState<SearchResultCountTrendResponse | null>(null);
+  const [trendLoading, setTrendLoading] = useState(false);
+
   // Fetch credits status and buckets
   useEffect(() => {
     const fetchCreditsStatus = async () => {
@@ -113,6 +129,64 @@ export default function CVSearchPage() {
   }, []);
 
   // Search CVs
+  // --- History & Trend Handlers ---
+  const [historyError, setHistoryError] = useState<string | null>(null);
+
+  const fetchSearchHistory = async () => {
+    setHistoryLoading(true);
+    setHistoryError(null);
+    try {
+      const res: any = await api.getSearchHistory({ limit: 10 });
+      let items = [];
+      if (Array.isArray(res)) {
+        items = res;
+      } else if (res?.history && Array.isArray(res.history)) {
+        items = res.history;
+      } else if (res?.results && Array.isArray(res.results)) {
+        items = res.results;
+      } else if (res?.data && Array.isArray(res.data)) {
+        items = res.data;
+      }
+      setSearchHistory(items);
+      setShowHistoryModal(true);
+    } catch (error) {
+      console.error("Failed to fetch search history", error);
+      setHistoryError("Failed to load search history. Please try again.");
+      // Still show modal to show error
+      setShowHistoryModal(true);
+    } finally {
+      setHistoryLoading(false);
+    }
+  };
+
+  const handleRerunSearch = async (historyId: number) => {
+    setLoading(true);
+    setShowHistoryModal(false);
+    try {
+      const res = await api.rerunSavedSearch(historyId);
+      setSearchResults(res);
+    } catch (error) {
+      console.error("Failed to rerun search", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleShowTrend = async (historyId: number) => {
+    setTrendLoading(true);
+    try {
+      const res = await api.getSearchHistoryTrend(historyId);
+      // Ensure history array exists
+      const safeData = res ? { ...res, history: res.history || [] } : null;
+      setTrendData(safeData);
+      setShowTrendModal(true);
+    } catch (error) {
+      console.error("Failed to fetch trend", error);
+    } finally {
+      setTrendLoading(false);
+    }
+  };
+
   const handleSearch = useCallback(async () => {
     if (
       !searchQuery.trim() &&
@@ -902,6 +976,14 @@ export default function CVSearchPage() {
             Search CVs
           </button>
 
+          <button
+            onClick={fetchSearchHistory}
+            className="px-6 py-3 bg-gray-600 hover:bg-gray-700 text-white rounded-lg font-medium transition-colors flex items-center gap-2"
+          >
+            <History className="w-5 h-5" />
+            History
+          </button>
+
           {selectedResumes.size > 0 && (
             <>
               <button
@@ -1231,6 +1313,150 @@ export default function CVSearchPage() {
                 >
                   {addingToBucket ? "Adding..." : "Add to Bucket"}
                 </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+      {/* Search History Modal */}
+      {showHistoryModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-3xl max-h-[80vh] flex flex-col">
+            <div className="p-6 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
+              <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
+                <History className="w-5 h-5" />
+                Search History
+              </h3>
+              <button
+                onClick={() => setShowHistoryModal(false)}
+                className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="flex-1 overflow-y-auto p-6">
+              {historyLoading ? (
+                <div className="flex justify-center p-8">
+                  <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
+                </div>
+              ) : historyError ? (
+                <div className="text-center text-red-500 py-8">
+                  {historyError}
+                </div>
+              ) : !searchHistory || searchHistory.length === 0 ? (
+                <div className="text-center text-gray-500 dark:text-gray-400 py-8">
+                  No search history found.
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {searchHistory.map((item) => (
+                    <div
+                      key={item.id}
+                      className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:border-blue-500 transition-colors bg-gray-50 dark:bg-gray-900/50"
+                    >
+                      <div className="flex justify-between items-start gap-4">
+                        <div>
+                          <div className="flex flex-wrap gap-2 mb-2">
+                            {Object.entries(item.filters || {}).map(([key, value]) => (
+                              value && key !== 'page' && key !== 'limit' ? (
+                                <span key={key} className="px-2 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-xs rounded-full">
+                                  {key.replace(/_/g, ' ')}: {String(value)}
+                                </span>
+                              ) : null
+                            ))}
+                          </div>
+                          <div className="flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
+                            <span className="flex items-center gap-1">
+                              <Clock className="w-3 h-3" />
+                              {new Date(item.created_at).toLocaleDateString()}
+                            </span>
+                            <span>{item.result_count} results found</span>
+                          </div>
+                        </div>
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => handleShowTrend(item.id)}
+                            className="p-2 text-purple-600 hover:bg-purple-50 dark:hover:bg-purple-900/20 rounded-lg transition-colors"
+                            title="View Trend"
+                          >
+                            <TrendingUp className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() => handleRerunSearch(item.id)}
+                            className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-lg flex items-center gap-1 transition-colors"
+                          >
+                            <RotateCw className="w-3 h-3" />
+                            Rerun
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Trend Modal */}
+      {showTrendModal && trendData && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-2xl">
+            <div className="p-6 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
+              <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
+                <TrendingUp className="w-5 h-5 text-purple-600" />
+                Search Result Trend
+              </h3>
+              <button
+                onClick={() => setShowTrendModal(false)}
+                className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="p-6">
+              {trendLoading ? (
+                <div className="flex justify-center p-8">
+                  <div className="w-8 h-8 border-4 border-purple-600 border-t-transparent rounded-full animate-spin" />
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center mb-4">
+                    <span className="text-sm text-gray-500">Total Records: {trendData.total_records}</span>
+                  </div>
+                  <div className="relative h-64 border-l border-b border-gray-300 dark:border-gray-600">
+                    <div className="absolute inset-0 flex items-end justify-around px-2">
+                      {trendData.history?.map((point, index) => {
+                        const history = trendData.history || [];
+                        const maxCount = Math.max(...history.map(h => h.result_count), 1);
+                        const height = (point.result_count / maxCount) * 100;
+                        return (
+                          <div key={index} className="flex flex-col items-center group w-8">
+                            <div
+                              className="w-full bg-purple-500 rounded-t transition-all group-hover:bg-purple-600 relative"
+                              style={{ height: `${height}%` }}
+                            >
+                              <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10">
+                                {point.result_count} results
+                                <br />
+                                {new Date(point.recorded_at).toLocaleDateString()}
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                  <div className="flex justify-between text-xs text-gray-500 mt-2 px-2">
+                    {trendData.history?.length > 0 && (
+                      <>
+                        <span>{new Date(trendData.history[0].recorded_at).toLocaleDateString()}</span>
+                        <span>{new Date(trendData.history[trendData.history.length - 1].recorded_at).toLocaleDateString()}</span>
+                      </>
+                    )}
+                  </div>
+                </div>
               )}
             </div>
           </div>

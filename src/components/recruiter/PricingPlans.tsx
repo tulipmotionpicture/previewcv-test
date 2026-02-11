@@ -137,11 +137,10 @@ export default function PricingPlans() {
       {/* Currency Toggle */}
       <div className="flex items-center justify-center gap-3">
         <span
-          className={`text-sm font-medium ${
-            currency === "usd"
+          className={`text-sm font-medium ${currency === "usd"
               ? "text-gray-900 dark:text-white"
               : "text-gray-500 dark:text-gray-400"
-          }`}
+            }`}
         >
           USD
         </span>
@@ -150,17 +149,15 @@ export default function PricingPlans() {
           className="relative w-14 h-7 bg-gray-200 dark:bg-gray-700 rounded-full transition-colors"
         >
           <div
-            className={`absolute top-0.5 left-0.5 w-6 h-6 bg-blue-600 rounded-full transition-transform ${
-              currency === "inr" ? "translate-x-7" : ""
-            }`}
+            className={`absolute top-0.5 left-0.5 w-6 h-6 bg-blue-600 rounded-full transition-transform ${currency === "inr" ? "translate-x-7" : ""
+              }`}
           />
         </button>
         <span
-          className={`text-sm font-medium ${
-            currency === "inr"
+          className={`text-sm font-medium ${currency === "inr"
               ? "text-gray-900 dark:text-white"
               : "text-gray-500 dark:text-gray-400"
-          }`}
+            }`}
         >
           INR
         </span>
@@ -184,13 +181,12 @@ export default function PricingPlans() {
             return (
               <div
                 key={plan.id}
-                className={`relative bg-white dark:bg-gray-800 rounded-xl border-2 p-6 ${
-                  isCurrentPlan
+                className={`relative bg-white dark:bg-gray-800 rounded-xl border-2 p-6 ${isCurrentPlan
                     ? "border-green-500 shadow-lg"
                     : index === 1
                       ? "border-blue-600 shadow-lg"
                       : "border-gray-200 dark:border-gray-700"
-                }`}
+                  }`}
               >
                 {isCurrentPlan && (
                   <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
@@ -223,9 +219,7 @@ export default function PricingPlans() {
                     <span className="text-4xl font-bold text-gray-900 dark:text-white">
                       {currency === "usd" ? plan.price_usd : plan.price_inr}
                     </span>
-                    <span className="text-gray-500 dark:text-gray-400">
-                      /mo
-                    </span>
+
                   </div>
                 </div>
 
@@ -243,13 +237,12 @@ export default function PricingPlans() {
                 <button
                   onClick={() => handleJobPlanSubscribe(plan.id)}
                   disabled={subscribing || isCurrentPlan}
-                  className={`w-full py-2.5 rounded-lg font-semibold transition-colors ${
-                    subscribing || isCurrentPlan
+                  className={`w-full py-2.5 rounded-lg font-semibold transition-colors ${subscribing || isCurrentPlan
                       ? "bg-gray-300 dark:bg-gray-600 text-gray-500 cursor-not-allowed"
                       : index === 1
                         ? "bg-blue-600 hover:bg-blue-700 text-white"
                         : "bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-900 dark:text-white"
-                  }`}
+                    }`}
                 >
                   {subscribing
                     ? "Processing..."
@@ -281,13 +274,12 @@ export default function PricingPlans() {
             return (
               <div
                 key={plan.id}
-                className={`relative bg-white dark:bg-gray-800 rounded-xl border-2 p-6 ${
-                  isCurrentPlan
+                className={`relative bg-white dark:bg-gray-800 rounded-xl border-2 p-6 ${isCurrentPlan
                     ? "border-green-500 shadow-lg"
                     : index === 1
                       ? "border-purple-600 shadow-lg"
                       : "border-gray-200 dark:border-gray-700"
-                }`}
+                  }`}
               >
                 {isCurrentPlan && (
                   <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
@@ -343,13 +335,12 @@ export default function PricingPlans() {
                 <button
                   onClick={() => handleCvPlanPurchase(plan.id)}
                   disabled={subscribing || isCurrentPlan}
-                  className={`w-full py-2.5 rounded-lg font-semibold transition-colors ${
-                    subscribing || isCurrentPlan
+                  className={`w-full py-2.5 rounded-lg font-semibold transition-colors ${subscribing || isCurrentPlan
                       ? "bg-gray-300 dark:bg-gray-600 text-gray-500 cursor-not-allowed"
                       : index === 1
                         ? "bg-purple-600 hover:bg-purple-700 text-white"
                         : "bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-900 dark:text-white"
-                  }`}
+                    }`}
                 >
                   {subscribing
                     ? "Processing..."

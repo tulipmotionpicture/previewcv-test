@@ -132,7 +132,7 @@ export default function JobList({ jobs, loading, error }: JobListProps) {
                     {formatSalary(job).split(' ')[0] === 'USD' ? '$' : formatSalary(job).split(' ')[0]}
                     {formatSalary(job).split(' ').slice(1).join(' ').replace("Competitive Salary", "Competitive")}
                   </span>
-                  <span className="text-gray-400 text-xs ml-1">/mo</span>
+
                 </div>
 
                 {job.is_remote && (

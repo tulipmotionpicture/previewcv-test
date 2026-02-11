@@ -31,6 +31,8 @@ import {
   CancelSubscriptionRequest,
   CancelSubscriptionResponse,
   RecruiterDashboardAnalytics,
+  SearchResultCountTrendResponse,
+  SearchHistoryResponse,
 } from "@/types/api";
 import {
   ReviewedResumeMetadata,
@@ -459,9 +461,8 @@ export class ApiClient {
       );
     }
     const queryString = params.toString();
-    const endpoint = `/api/v1/recruiters/jobs/posting/${jobId}/applications${
-      queryString ? `?${queryString}` : ""
-    }`;
+    const endpoint = `/api/v1/recruiters/jobs/posting/${jobId}/applications${queryString ? `?${queryString}` : ""
+      }`;
     return this.request<JobApplicationsResponse>(endpoint, {}, true, true);
   }
 
@@ -1046,7 +1047,7 @@ export class ApiClient {
     success: boolean;
     filters: Record<
       string,
-      { name: string; value: string; count: number; [key: string]: any }[]
+      { name: string; value: string; count: number;[key: string]: any }[]
     >;
     location_hierarchy?: Record<string, any>;
   }> {
@@ -1054,7 +1055,7 @@ export class ApiClient {
       success: boolean;
       filters: Record<
         string,
-        { name: string; value: string; count: number; [key: string]: any }[]
+        { name: string; value: string; count: number;[key: string]: any }[]
       >;
       location_hierarchy?: Record<string, any>;
     }>("/api/v1/jobs/filters", {}, false, false);
@@ -1771,6 +1772,47 @@ export class ApiClient {
         method: "POST",
         body: JSON.stringify(searchParams),
       },
+      true,
+      true,
+    );
+  }
+
+  async rerunSavedSearch(searchId: number): Promise<CVSearchResponse> {
+    return this.request<CVSearchResponse>(
+      `/api/v1/recruiter/cv-search/search-history/${searchId}/rerun`,
+      { method: "POST" },
+      true,
+      true,
+    );
+  }
+
+  async getSearchHistoryTrend(
+    searchId: number,
+    limit: number = 30,
+  ): Promise<SearchResultCountTrendResponse> {
+    const queryParams = new URLSearchParams();
+    queryParams.append("limit", limit.toString());
+
+    return this.request<SearchResultCountTrendResponse>(
+      `/api/v1/recruiter/cv-search/search-history/${searchId}/trend?${queryParams.toString()}`,
+      { method: "GET" },
+      true,
+      true,
+    );
+  }
+
+
+  async getSearchHistory(params?: {
+    page?: number;
+    limit?: number;
+  }): Promise<SearchHistoryResponse> {
+    const queryParams = new URLSearchParams();
+    if (params?.page) queryParams.append("page", params.page.toString());
+    if (params?.limit) queryParams.append("limit", params.limit.toString());
+
+    return this.request<SearchHistoryResponse>(
+      `/api/v1/recruiter/cv-search/search-history?${queryParams.toString()}`,
+      { method: "GET" },
       true,
       true,
     );
