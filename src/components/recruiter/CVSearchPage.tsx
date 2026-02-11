@@ -1,0 +1,1241 @@
+"use client";
+
+import { useState, useCallback, useEffect } from "react";
+import { api } from "@/lib/api";
+import { useToast } from "@/context/ToastContext";
+import {
+  CVSearchResult,
+  CVSearchResponse,
+  CVUnlockResponse,
+  CVCreditsStatus,
+  BucketWithStats,
+  BucketListResponse,
+} from "@/types/api";
+import {
+  Search,
+  Filter,
+  Unlock,
+  Download,
+  MapPin,
+  Briefcase,
+  GraduationCap,
+  Award,
+  ChevronLeft,
+  ChevronRight,
+  MessageSquare,
+  Check,
+  X,
+  ChevronUp,
+  ChevronDown,
+  FolderPlus,
+  Plus,
+} from "lucide-react";
+
+export default function CVSearchPage() {
+  const { showToast } = useToast();
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filters, setFilters] = useState({
+    skills: [] as string[],
+    skills_match_all: false,
+    min_experience_years: 0,
+    max_experience_years: 50,
+    country: "",
+    state: "",
+    city: "",
+    job_titles: [] as string[],
+    companies: [] as string[],
+    education_level: "",
+    degrees: [] as string[],
+    languages: [] as string[],
+    language_proficiency: "",
+    open_to_work_only: false,
+    is_currently_employed: undefined as boolean | undefined,
+    page: 1,
+    page_size: 20,
+    sort_by: "relevance",
+    sort_order: "desc",
+  });
+
+  // Input states for adding items to arrays
+  const [skillInput, setSkillInput] = useState("");
+  const [jobTitleInput, setJobTitleInput] = useState("");
+  const [companyInput, setCompanyInput] = useState("");
+  const [degreeInput, setDegreeInput] = useState("");
+  const [languageInput, setLanguageInput] = useState("");
+  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
+
+  const [searchResults, setSearchResults] = useState<CVSearchResponse | null>(
+    null,
+  );
+  const [creditsStatus, setCreditsStatus] = useState<CVCreditsStatus | null>(
+    null,
+  );
+  const [loading, setLoading] = useState(false);
+  const [unlockedResumes, setUnlockedResumes] = useState<Set<number>>(
+    new Set(),
+  );
+  const [selectedResumes, setSelectedResumes] = useState<Set<number>>(
+    new Set(),
+  );
+  const [unlockingIds, setUnlockingIds] = useState<Set<number>>(new Set());
+
+  // Bucket states
+  const [buckets, setBuckets] = useState<BucketWithStats[]>([]);
+  const [showBucketModal, setShowBucketModal] = useState(false);
+  const [selectedBucketId, setSelectedBucketId] = useState<number | null>(null);
+  const [newBucketName, setNewBucketName] = useState("");
+  const [isCreatingBucket, setIsCreatingBucket] = useState(false);
+  const [showCreateBucket, setShowCreateBucket] = useState(false);
+  const [addingToBucket, setAddingToBucket] = useState(false);
+
+  // Fetch credits status and buckets
+  useEffect(() => {
+    const fetchCreditsStatus = async () => {
+      try {
+        const status = await api.getCVCreditsStatus();
+        setCreditsStatus(status);
+      } catch (error) {
+        console.error("Failed to fetch credits status:", error);
+      }
+    };
+
+    const fetchBuckets = async () => {
+      try {
+        const response = await api.listBuckets({ include_archived: false });
+        setBuckets(response.buckets);
+      } catch (error) {
+        console.error("Failed to fetch buckets:", error);
+      }
+    };
+
+    fetchCreditsStatus();
+    fetchBuckets();
+  }, []);
+
+  // Search CVs
+  const handleSearch = useCallback(async () => {
+    if (
+      !searchQuery.trim() &&
+      filters.skills.length === 0 &&
+      filters.job_titles.length === 0
+    ) {
+      showToast("Please enter a search keyword or select filters", "error");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const params: any = {
+        keyword_search: searchQuery || undefined,
+        skills: filters.skills.length > 0 ? filters.skills : undefined,
+        skills_match_all: filters.skills_match_all,
+        job_titles:
+          filters.job_titles.length > 0 ? filters.job_titles : undefined,
+        companies: filters.companies.length > 0 ? filters.companies : undefined,
+        min_experience_years: filters.min_experience_years,
+        max_experience_years: filters.max_experience_years,
+        country: filters.country || undefined,
+        state: filters.state || undefined,
+        city: filters.city || undefined,
+        degrees: filters.degrees.length > 0 ? filters.degrees : undefined,
+        languages: filters.languages.length > 0 ? filters.languages : undefined,
+        language_proficiency: filters.language_proficiency || undefined,
+        open_to_work_only: filters.open_to_work_only || undefined,
+        is_currently_employed: filters.is_currently_employed,
+        page: filters.page,
+        page_size: filters.page_size,
+        sort_by: filters.sort_by,
+        sort_order: filters.sort_order,
+      };
+
+      // Remove undefined values
+      Object.keys(params).forEach(
+        (key) => params[key] === undefined && delete params[key],
+      );
+
+      const response = await api.searchCVs(params);
+      setSearchResults(response);
+    } catch (error) {
+      console.error("Failed to search CVs:", error);
+      showToast("Failed to search CVs. Please try again.", "error");
+    } finally {
+      setLoading(false);
+    }
+  }, [searchQuery, filters]);
+
+  // Unlock single resume
+  const handleUnlockResume = async (resumeId: number) => {
+    setUnlockingIds((prev) => new Set([...prev, resumeId]));
+    try {
+      await api.unlockCVProfile(resumeId, "search");
+      setUnlockedResumes((prev) => new Set([...prev, resumeId]));
+
+      // Refresh credits
+      const status = await api.getCVCreditsStatus();
+      setCreditsStatus(status);
+
+      showToast("Resume unlocked successfully!", "success");
+    } catch (error: any) {
+      console.error("Failed to unlock resume:", error);
+      showToast(
+        error?.message || "Failed to unlock resume. Please try again.",
+        "error",
+      );
+    } finally {
+      setUnlockingIds((prev) => {
+        const newSet = new Set(prev);
+        newSet.delete(resumeId);
+        return newSet;
+      });
+    }
+  };
+
+  // Bulk unlock
+  const handleBulkUnlock = async () => {
+    if (selectedResumes.size === 0) {
+      showToast("Please select resumes to unlock", "error");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const response = await api.bulkUnlockCVProfiles(
+        Array.from(selectedResumes),
+        "search",
+      );
+
+      // Mark as unlocked
+      selectedResumes.forEach((id) => {
+        setUnlockedResumes((prev) => new Set([...prev, id]));
+      });
+      setSelectedResumes(new Set());
+
+      // Refresh credits
+      const status = await api.getCVCreditsStatus();
+      setCreditsStatus(status);
+
+      showToast(
+        `${response.unlocked_count} resumes unlocked successfully!`,
+        "success",
+      );
+    } catch (error: any) {
+      console.error("Failed to bulk unlock:", error);
+      showToast(error?.message || "Failed to unlock resumes.", "error");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Download resume
+  const handleDownloadResume = async (resumeId: number) => {
+    try {
+      const response = await api.downloadUnlockedResume(resumeId, "url", true);
+      if (response.download_url) {
+        window.open(response.download_url, "_blank");
+      }
+    } catch (error) {
+      console.error("Failed to download resume:", error);
+      showToast("Failed to download resume.", "error");
+    }
+  };
+
+  const toggleSelectResume = (resumeId: number) => {
+    setSelectedResumes((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(resumeId)) {
+        newSet.delete(resumeId);
+      } else {
+        newSet.add(resumeId);
+      }
+      return newSet;
+    });
+  };
+
+  // Helper functions to add/remove array items
+  const addSkill = () => {
+    if (skillInput.trim() && !filters.skills.includes(skillInput.trim())) {
+      setFilters({
+        ...filters,
+        skills: [...filters.skills, skillInput.trim()],
+      });
+      setSkillInput("");
+    }
+  };
+
+  const removeSkill = (skill: string) => {
+    setFilters({
+      ...filters,
+      skills: filters.skills.filter((s) => s !== skill),
+    });
+  };
+
+  const addJobTitle = () => {
+    if (
+      jobTitleInput.trim() &&
+      !filters.job_titles.includes(jobTitleInput.trim())
+    ) {
+      setFilters({
+        ...filters,
+        job_titles: [...filters.job_titles, jobTitleInput.trim()],
+      });
+      setJobTitleInput("");
+    }
+  };
+
+  const removeJobTitle = (title: string) => {
+    setFilters({
+      ...filters,
+      job_titles: filters.job_titles.filter((t) => t !== title),
+    });
+  };
+
+  const addCompany = () => {
+    if (
+      companyInput.trim() &&
+      !filters.companies.includes(companyInput.trim())
+    ) {
+      setFilters({
+        ...filters,
+        companies: [...filters.companies, companyInput.trim()],
+      });
+      setCompanyInput("");
+    }
+  };
+
+  const removeCompany = (company: string) => {
+    setFilters({
+      ...filters,
+      companies: filters.companies.filter((c) => c !== company),
+    });
+  };
+
+  const addDegree = () => {
+    if (degreeInput.trim() && !filters.degrees.includes(degreeInput.trim())) {
+      setFilters({
+        ...filters,
+        degrees: [...filters.degrees, degreeInput.trim()],
+      });
+      setDegreeInput("");
+    }
+  };
+
+  const removeDegree = (degree: string) => {
+    setFilters({
+      ...filters,
+      degrees: filters.degrees.filter((d) => d !== degree),
+    });
+  };
+
+  const addLanguage = () => {
+    if (
+      languageInput.trim() &&
+      !filters.languages.includes(languageInput.trim())
+    ) {
+      setFilters({
+        ...filters,
+        languages: [...filters.languages, languageInput.trim()],
+      });
+      setLanguageInput("");
+    }
+  };
+
+  const removeLanguage = (language: string) => {
+    setFilters({
+      ...filters,
+      languages: filters.languages.filter((l) => l !== language),
+    });
+  };
+
+  // Bucket functions
+  const handleCreateBucket = async () => {
+    if (!newBucketName.trim()) {
+      showToast("Please enter a bucket name", "error");
+      return;
+    }
+
+    setIsCreatingBucket(true);
+    try {
+      const newBucket = await api.createBucket({
+        name: newBucketName.trim(),
+        color: "#3B82F6",
+      });
+      setBuckets([...buckets, newBucket]);
+      setNewBucketName("");
+      setShowCreateBucket(false);
+      showToast("Bucket created successfully!", "success");
+    } catch (error: any) {
+      console.error("Failed to create bucket:", error);
+      showToast(error?.message || "Failed to create bucket", "error");
+    } finally {
+      setIsCreatingBucket(false);
+    }
+  };
+
+  const handleAddToBucket = async () => {
+    if (!selectedBucketId) {
+      showToast("Please select a bucket", "error");
+      return;
+    }
+    if (selectedResumes.size === 0) {
+      showToast("Please select resumes to add", "error");
+      return;
+    }
+
+    setAddingToBucket(true);
+    try {
+      const response = await api.addResumesToBucket(selectedBucketId, {
+        resume_ids: Array.from(selectedResumes),
+      });
+
+      showToast(
+        `${response.data.added_count} resumes added to bucket successfully!`,
+        "success",
+      );
+      setShowBucketModal(false);
+      setSelectedResumes(new Set());
+
+      // Refresh buckets to update counts
+      const refreshed = await api.listBuckets({ include_archived: false });
+      setBuckets(refreshed.buckets);
+    } catch (error: any) {
+      console.error("Failed to add resumes to bucket:", error);
+      showToast(error?.message || "Failed to add resumes to bucket", "error");
+    } finally {
+      setAddingToBucket(false);
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
+            CV Search
+          </h1>
+          <p className="text-gray-600 dark:text-gray-400 mt-1">
+            Search and unlock candidate profiles
+          </p>
+        </div>
+        {creditsStatus && (
+          <div className="">
+            <div className="text-sm font-medium text-gray-600 dark:text-gray-300">
+              Available Credits
+            </div>
+            <div className="text-3xl font-bold text-blue-600 dark:text-blue-400">
+              {creditsStatus.credits_remaining}
+            </div>
+            <div className="text-xs text-gray-500 mt-1">
+              {creditsStatus.active_unlocks} active unlocks
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Search Section */}
+      <div className="bg-white dark:bg-[#282727] rounded-xl border border-gray-200 dark:border-gray-700 p-6 space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Keyword Search */}
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+              Keyword Search
+            </label>
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyPress={(e) => e.key === "Enter" && handleSearch()}
+                placeholder="Search by skills, title, company..."
+                className="w-full pl-10 pr-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all placeholder-gray-400 dark:text-gray-200"
+              />
+            </div>
+          </div>
+
+          {/* Country Filter */}
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+              Country
+            </label>
+            <input
+              type="text"
+              value={filters.country}
+              onChange={(e) =>
+                setFilters({ ...filters, country: e.target.value })
+              }
+              placeholder="e.g., United States"
+              className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all placeholder-gray-400 dark:text-gray-200"
+            />
+          </div>
+
+          {/* State Filter */}
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+              State
+            </label>
+            <input
+              type="text"
+              value={filters.state}
+              onChange={(e) =>
+                setFilters({ ...filters, state: e.target.value })
+              }
+              placeholder="e.g., California"
+              className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all placeholder-gray-400 dark:text-gray-200"
+            />
+          </div>
+
+          {/* City Filter */}
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+              City
+            </label>
+            <input
+              type="text"
+              value={filters.city}
+              onChange={(e) => setFilters({ ...filters, city: e.target.value })}
+              placeholder="e.g., San Francisco"
+              className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all placeholder-gray-400 dark:text-gray-200"
+            />
+          </div>
+
+          {/* Experience Range */}
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+              Experience (Years)
+            </label>
+            <div className="flex gap-2">
+              <input
+                type="number"
+                min="0"
+                value={filters.min_experience_years}
+                onChange={(e) =>
+                  setFilters({
+                    ...filters,
+                    min_experience_years: parseInt(e.target.value) || 0,
+                  })
+                }
+                placeholder="Min"
+                className="flex-1 px-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none placeholder-gray-400 dark:text-gray-200"
+              />
+              <input
+                type="number"
+                min="0"
+                value={filters.max_experience_years}
+                onChange={(e) =>
+                  setFilters({
+                    ...filters,
+                    max_experience_years: parseInt(e.target.value) || 50,
+                  })
+                }
+                placeholder="Max"
+                className="flex-1 px-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none placeholder-gray-400 dark:text-gray-200"
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Advanced Filters Toggle */}
+        <button
+          onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
+          className="flex items-center justify-between w-full px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+        >
+          <span>Advanced Filters</span>
+          {showAdvancedFilters ? (
+            <ChevronUp className="h-4 w-4" />
+          ) : (
+            <ChevronDown className="h-4 w-4" />
+          )}
+        </button>
+
+        {/* Advanced Filters Section */}
+        {showAdvancedFilters && (
+          <div className="space-y-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+            {/* Skills */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Skills
+              </label>
+              <div className="flex gap-2 mb-2">
+                <input
+                  type="text"
+                  value={skillInput}
+                  onChange={(e) => setSkillInput(e.target.value)}
+                  onKeyDown={(e) =>
+                    e.key === "Enter" && (e.preventDefault(), addSkill())
+                  }
+                  placeholder="Add skill (e.g., React, Python)"
+                  className="flex-1 px-3 py-2 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+                <button
+                  onClick={addSkill}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                >
+                  Add
+                </button>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {filters.skills.map((skill) => (
+                  <span
+                    key={skill}
+                    className="inline-flex items-center gap-1 px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded-full text-sm"
+                  >
+                    {skill}
+                    <button
+                      onClick={() => removeSkill(skill)}
+                      className="hover:text-blue-600"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </span>
+                ))}
+              </div>
+              <label className="flex items-center gap-2 mt-2">
+                <input
+                  type="checkbox"
+                  checked={filters.skills_match_all}
+                  onChange={(e) =>
+                    setFilters({
+                      ...filters,
+                      skills_match_all: e.target.checked,
+                    })
+                  }
+                  className="rounded border-gray-300 dark:border-gray-600"
+                />
+                <span className="text-sm text-gray-600 dark:text-gray-400">
+                  Match all skills (AND)
+                </span>
+              </label>
+            </div>
+
+            {/* Job Titles */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Job Titles
+              </label>
+              <div className="flex gap-2 mb-2">
+                <input
+                  type="text"
+                  value={jobTitleInput}
+                  onChange={(e) => setJobTitleInput(e.target.value)}
+                  onKeyDown={(e) =>
+                    e.key === "Enter" && (e.preventDefault(), addJobTitle())
+                  }
+                  placeholder="Add job title (e.g., Software Engineer)"
+                  className="flex-1 px-3 py-2 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+                <button
+                  onClick={addJobTitle}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                >
+                  Add
+                </button>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {filters.job_titles.map((title) => (
+                  <span
+                    key={title}
+                    className="inline-flex items-center gap-1 px-3 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 rounded-full text-sm"
+                  >
+                    {title}
+                    <button
+                      onClick={() => removeJobTitle(title)}
+                      className="hover:text-green-600"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            {/* Companies */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Companies
+              </label>
+              <div className="flex gap-2 mb-2">
+                <input
+                  type="text"
+                  value={companyInput}
+                  onChange={(e) => setCompanyInput(e.target.value)}
+                  onKeyDown={(e) =>
+                    e.key === "Enter" && (e.preventDefault(), addCompany())
+                  }
+                  placeholder="Add company (e.g., Google, Microsoft)"
+                  className="flex-1 px-3 py-2 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+                <button
+                  onClick={addCompany}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                >
+                  Add
+                </button>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {filters.companies.map((company) => (
+                  <span
+                    key={company}
+                    className="inline-flex items-center gap-1 px-3 py-1 bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200 rounded-full text-sm"
+                  >
+                    {company}
+                    <button
+                      onClick={() => removeCompany(company)}
+                      className="hover:text-purple-600"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            {/* Education Level */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Education Level
+              </label>
+              <select
+                value={filters.education_level}
+                onChange={(e) =>
+                  setFilters({ ...filters, education_level: e.target.value })
+                }
+                className="w-full px-3 py-2 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="">Any</option>
+                <option value="high_school">High School</option>
+                <option value="associate">Associate</option>
+                <option value="bachelor">Bachelor's</option>
+                <option value="master">Master's</option>
+                <option value="phd">PhD</option>
+              </select>
+            </div>
+
+            {/* Degrees */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Degrees
+              </label>
+              <div className="flex gap-2 mb-2">
+                <input
+                  type="text"
+                  value={degreeInput}
+                  onChange={(e) => setDegreeInput(e.target.value)}
+                  onKeyDown={(e) =>
+                    e.key === "Enter" && (e.preventDefault(), addDegree())
+                  }
+                  placeholder="Add degree (e.g., Computer Science, MBA)"
+                  className="flex-1 px-3 py-2 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+                <button
+                  onClick={addDegree}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                >
+                  Add
+                </button>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {filters.degrees.map((degree) => (
+                  <span
+                    key={degree}
+                    className="inline-flex items-center gap-1 px-3 py-1 bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200 rounded-full text-sm"
+                  >
+                    {degree}
+                    <button
+                      onClick={() => removeDegree(degree)}
+                      className="hover:text-yellow-600"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            {/* Languages */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Languages
+              </label>
+              <div className="flex gap-2 mb-2">
+                <input
+                  type="text"
+                  value={languageInput}
+                  onChange={(e) => setLanguageInput(e.target.value)}
+                  onKeyDown={(e) =>
+                    e.key === "Enter" && (e.preventDefault(), addLanguage())
+                  }
+                  placeholder="Add language (e.g., English, Spanish)"
+                  className="flex-1 px-3 py-2 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+                <button
+                  onClick={addLanguage}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                >
+                  Add
+                </button>
+              </div>
+              <div className="flex flex-wrap gap-2 mb-2">
+                {filters.languages.map((language) => (
+                  <span
+                    key={language}
+                    className="inline-flex items-center gap-1 px-3 py-1 bg-indigo-100 dark:bg-indigo-900 text-indigo-800 dark:text-indigo-200 rounded-full text-sm"
+                  >
+                    {language}
+                    <button
+                      onClick={() => removeLanguage(language)}
+                      className="hover:text-indigo-600"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </span>
+                ))}
+              </div>
+              <select
+                value={filters.language_proficiency}
+                onChange={(e) =>
+                  setFilters({
+                    ...filters,
+                    language_proficiency: e.target.value,
+                  })
+                }
+                className="w-full px-3 py-2 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="">Any Proficiency</option>
+                <option value="basic">Basic</option>
+                <option value="intermediate">Intermediate</option>
+                <option value="advanced">Advanced</option>
+                <option value="fluent">Fluent</option>
+                <option value="native">Native</option>
+              </select>
+            </div>
+
+            {/* Employment Status Filters */}
+            <div className="space-y-2">
+              <label className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  checked={filters.open_to_work_only}
+                  onChange={(e) =>
+                    setFilters({
+                      ...filters,
+                      open_to_work_only: e.target.checked,
+                    })
+                  }
+                  className="rounded border-gray-300 dark:border-gray-600"
+                />
+                <span className="text-sm text-gray-700 dark:text-gray-300">
+                  Open to work only
+                </span>
+              </label>
+              <label className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  checked={filters.is_currently_employed === true}
+                  onChange={(e) =>
+                    setFilters({
+                      ...filters,
+                      is_currently_employed: e.target.checked
+                        ? true
+                        : undefined,
+                    })
+                  }
+                  className="rounded border-gray-300 dark:border-gray-600"
+                />
+                <span className="text-sm text-gray-700 dark:text-gray-300">
+                  Currently employed
+                </span>
+              </label>
+            </div>
+
+            {/* Sort Controls */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Sort By
+                </label>
+                <select
+                  value={filters.sort_by}
+                  onChange={(e) =>
+                    setFilters({ ...filters, sort_by: e.target.value })
+                  }
+                  className="w-full px-3 py-2 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="relevance">Relevance</option>
+                  <option value="created_at">Created Date</option>
+                  <option value="experience_years">Experience Years</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Sort Order
+                </label>
+                <select
+                  value={filters.sort_order}
+                  onChange={(e) =>
+                    setFilters({
+                      ...filters,
+                      sort_order: e.target.value as "asc" | "desc",
+                    })
+                  }
+                  className="w-full px-3 py-2 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="desc">Descending</option>
+                  <option value="asc">Ascending</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        )}
+
+        <div className="flex gap-3">
+          <button
+            onClick={handleSearch}
+            disabled={loading}
+            className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors disabled:opacity-50 flex items-center gap-2"
+          >
+            {loading ? (
+              <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+            ) : (
+              <Search className="w-5 h-5" />
+            )}
+            Search CVs
+          </button>
+
+          {selectedResumes.size > 0 && (
+            <>
+              <button
+                onClick={handleBulkUnlock}
+                disabled={
+                  loading ||
+                  !creditsStatus ||
+                  creditsStatus.credits_remaining < selectedResumes.size
+                }
+                className="px-6 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors disabled:opacity-50 flex items-center gap-2"
+              >
+                <Unlock className="w-5 h-5" />
+                Unlock {selectedResumes.size}
+              </button>
+
+              <button
+                onClick={() => setShowBucketModal(true)}
+                className="px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-medium transition-colors flex items-center gap-2"
+              >
+                <FolderPlus className="w-5 h-5" />
+                Add to Bucket
+              </button>
+            </>
+          )}
+        </div>
+      </div>
+
+      {/* Results Section */}
+      {searchResults && (
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
+              Found {searchResults.total} candidates
+            </p>
+            <div className="text-sm text-gray-600 dark:text-gray-400">
+              Page {searchResults.page} of {searchResults.total_pages}
+            </div>
+          </div>
+          <div className="grid gap-6 grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
+            {searchResults.results.map((result) => (
+              <div
+                key={result.resume_id}
+                className="group relative rounded-2xl border border-gray-200 dark:border-gray-700
+                 bg-white dark:bg-[#282727]
+                 p-6 shadow-sm
+                 hover:shadow-xl hover:-translate-y-0.5
+                 transition-all duration-200
+                 flex flex-col"
+              >
+                {/* Card Header */}
+                <div className="flex items-start justify-between gap-4 mb-5">
+                  <div className="flex items-center gap-4">
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 leading-tight">
+                        {result.full_name}
+                      </h3>
+                      <p className="text-sm font-medium text-blue-600 dark:text-blue-400">
+                        {result.professional_title}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Select */}
+                  <label className="flex items-center gap-2 text-xs text-gray-500 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={selectedResumes.has(result.resume_id)}
+                      onChange={() => toggleSelectResume(result.resume_id)}
+                      className="w-4 h-4 rounded border-gray-300"
+                    />
+                    Select
+                  </label>
+                </div>
+
+                {/* Meta Info */}
+                <div className="grid grid-cols-2 gap-y-3 gap-x-4 text-sm text-gray-600 dark:text-gray-400 mb-5">
+                  <div className="flex items-center gap-2">
+                    <MapPin className="w-4 h-4 text-gray-400" />
+                    {result.location}
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Briefcase className="w-4 h-4 text-gray-400" />
+                    {result.experience_years} yrs
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <GraduationCap className="w-4 h-4 text-gray-400" />
+                    {result.highest_education}
+                  </div>
+                  {result.current_company && (
+                    <div className="flex items-center gap-2 col-span-2">
+                      <Award className="w-4 h-4 text-gray-400" />
+                      {result.current_company}
+                    </div>
+                  )}
+                </div>
+
+                {/* Skills */}
+                {result.skills?.length > 0 && (
+                  <div className="mb-6">
+                    <p className="text-[11px] font-semibold tracking-wide text-gray-500 dark:text-gray-400 uppercase mb-2">
+                      Skills
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      {result.skills.slice(0, 5).map((skill, idx) => (
+                        <span
+                          key={idx}
+                          className="px-3 py-1 rounded-full text-xs font-medium
+                           bg-blue-50 text-blue-700
+                           dark:bg-blue-900/30 dark:text-blue-300"
+                        >
+                          {skill}
+                        </span>
+                      ))}
+                      {result.skills.length > 5 && (
+                        <span
+                          className="px-3 py-1 rounded-full text-xs font-medium
+                               bg-gray-100 dark:bg-gray-800
+                               text-gray-700 dark:text-gray-300"
+                        >
+                          +{result.skills.length - 5} more
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Actions */}
+                <div className="mt-auto">
+                  {result.is_unlocked ? (
+                    <button
+                      onClick={() => handleDownloadResume(result.resume_id)}
+                      className="w-full px-4 py-2 rounded-xl text-sm font-semibold
+                       bg-emerald-600 hover:bg-emerald-700
+                       text-white shadow-md transition flex items-center justify-center gap-2"
+                    >
+                      <Download className="w-4 h-4" />
+                      Download CV
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => handleUnlockResume(result.resume_id)}
+                      disabled={
+                        unlockingIds.has(result.resume_id) ||
+                        !creditsStatus ||
+                        creditsStatus.credits_remaining < 1
+                      }
+                      className="w-full px-4 py-2 rounded-xl text-sm font-semibold
+                       bg-gradient-to-r from-blue-600 to-indigo-600
+                       hover:from-blue-700 hover:to-indigo-700
+                       text-white shadow-md transition
+                       disabled:opacity-50 flex items-center justify-center gap-2"
+                    >
+                      {unlockingIds.has(result.resume_id) ? (
+                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      ) : (
+                        <Unlock className="w-4 h-4" />
+                      )}
+                      Unlock (1 credit)
+                    </button>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Pagination */}
+          {searchResults.total_pages > 1 && (
+            <div className="flex items-center justify-center gap-2 mt-6">
+              <button
+                onClick={() =>
+                  setFilters({
+                    ...filters,
+                    page: Math.max(1, filters.page - 1),
+                  })
+                }
+                disabled={filters.page === 1}
+                className="p-2 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 disabled:opacity-50"
+              >
+                <ChevronLeft className="w-5 h-5" />
+              </button>
+              <span className="text-sm text-gray-600 dark:text-gray-400">
+                Page {filters.page} of {searchResults.total_pages}
+              </span>
+              <button
+                onClick={() =>
+                  setFilters({
+                    ...filters,
+                    page: Math.min(searchResults.total_pages, filters.page + 1),
+                  })
+                }
+                disabled={filters.page === searchResults.total_pages}
+                className="p-2 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 disabled:opacity-50"
+              >
+                <ChevronRight className="w-5 h-5" />
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Bucket Modal */}
+      {showBucketModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-[#282727] rounded-xl shadow-xl max-w-md w-full max-h-[80vh] overflow-hidden flex flex-col">
+            {/* Modal Header */}
+            <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
+                Add to Bucket
+              </h2>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                {selectedResumes.size} resume
+                {selectedResumes.size > 1 ? "s" : ""} selected
+              </p>
+            </div>
+
+            {/* Modal Body */}
+            <div className="p-6 overflow-y-auto flex-1">
+              {!showCreateBucket ? (
+                <div className="space-y-4">
+                  {/* Bucket List */}
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                      Select a bucket
+                    </label>
+                    {buckets.length > 0 ? (
+                      <div className="space-y-2 max-h-60 overflow-y-auto">
+                        {buckets.map((bucket) => (
+                          <label
+                            key={bucket.id}
+                            className="flex items-center gap-3 p-3 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer"
+                          >
+                            <input
+                              type="radio"
+                              name="bucket"
+                              value={bucket.id}
+                              checked={selectedBucketId === bucket.id}
+                              onChange={() => setSelectedBucketId(bucket.id)}
+                              className="w-4 h-4 text-blue-600"
+                            />
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2">
+                                {bucket.color && (
+                                  <div
+                                    className="w-3 h-3 rounded-full"
+                                    style={{ backgroundColor: bucket.color }}
+                                  />
+                                )}
+                                <span className="font-medium text-gray-900 dark:text-gray-100">
+                                  {bucket.name}
+                                </span>
+                              </div>
+                              <span className="text-xs text-gray-500">
+                                {bucket.item_count} items
+                              </span>
+                            </div>
+                          </label>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-sm text-gray-500 text-center py-4">
+                        No buckets yet. Create one to organize your resumes.
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Create New Bucket Button */}
+                  <button
+                    onClick={() => setShowCreateBucket(true)}
+                    className="w-full px-4 py-2 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 hover:border-blue-500 hover:text-blue-600 dark:hover:text-blue-400 transition-colors flex items-center justify-center gap-2"
+                  >
+                    <Plus className="w-4 h-4" />
+                    Create New Bucket
+                  </button>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      Bucket Name
+                    </label>
+                    <input
+                      type="text"
+                      value={newBucketName}
+                      onChange={(e) => setNewBucketName(e.target.value)}
+                      placeholder="e.g., Senior Developers"
+                      className="w-full px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      autoFocus
+                    />
+                  </div>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => setShowCreateBucket(false)}
+                      className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={handleCreateBucket}
+                      disabled={isCreatingBucket}
+                      className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+                    >
+                      {isCreatingBucket ? "Creating..." : "Create"}
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Modal Footer */}
+            <div className="px-6 py-4 border-t border-gray-200 dark:border-gray-700 flex gap-3">
+              <button
+                onClick={() => {
+                  setShowBucketModal(false);
+                  setShowCreateBucket(false);
+                  setSelectedBucketId(null);
+                  setNewBucketName("");
+                }}
+                className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800"
+              >
+                Cancel
+              </button>
+              {!showCreateBucket && (
+                <button
+                  onClick={handleAddToBucket}
+                  disabled={!selectedBucketId || addingToBucket}
+                  className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+                >
+                  {addingToBucket ? "Adding..." : "Add to Bucket"}
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}

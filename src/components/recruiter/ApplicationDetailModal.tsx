@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { ApplicationDetailResponse } from "@/types/api";
 import { api } from "@/lib/api";
+import { useToast } from "@/context/ToastContext";
 import {
   X,
   Copy,
@@ -28,6 +29,7 @@ export default function ApplicationDetailModal({
   onClose,
   onMessageSent,
 }: ApplicationDetailModalProps) {
+  const { showToast } = useToast();
   const [viewLoading, setViewLoading] = useState(false);
   const [downloadLoading, setDownloadLoading] = useState(false);
   const [message, setMessage] = useState("");
@@ -109,7 +111,7 @@ export default function ApplicationDetailModal({
       }
     } catch (error) {
       console.error("Failed to send message:", error);
-      alert("Failed to send message. Please try again.");
+      showToast("Failed to send message. Please try again.", "error");
     } finally {
       setSendingMessage(false);
     }

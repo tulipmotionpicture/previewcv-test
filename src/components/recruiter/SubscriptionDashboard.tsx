@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useToast } from "@/context/ToastContext";
 import {
   CreditCard,
   Calendar,
@@ -97,6 +98,7 @@ export default function SubscriptionDashboard({
   onNavigateToPricing,
 }: SubscriptionDashboardProps = {}) {
   const router = useRouter();
+  const { showToast } = useToast();
   const [dashboard, setDashboard] = useState<SubscriptionDashboardType | null>(
     null,
   );
@@ -106,6 +108,9 @@ export default function SubscriptionDashboard({
   const [activeTab, setActiveTab] = useState<"overview" | "history">(
     "overview",
   );
+  const [showCancelModal, setShowCancelModal] = useState(false);
+  const [cancelReason, setCancelReason] = useState("");
+  const [cancelImmediately, setCancelImmediately] = useState(false);
 
   useEffect(() => {
     fetchData();
@@ -135,26 +140,23 @@ export default function SubscriptionDashboard({
   };
 
   const handleCancelJobSubscription = async () => {
-    const cancelImmediately = confirm(
-      "Do you want to cancel your subscription immediately?\n\n" +
-        "Click OK to cancel immediately (you'll lose access now)\n" +
-        "Click Cancel to cancel at the end of billing period (you'll keep access until then)",
-    );
+    setShowCancelModal(true);
+  };
 
-    const reason = prompt(
-      "Please let us know why you're canceling (optional):",
-    );
-
+  const confirmCancelSubscription = async () => {
     try {
       const response = await api.cancelJobSubscription({
         cancel_at_period_end: !cancelImmediately,
-        cancellation_reason: reason || undefined,
+        cancellation_reason: cancelReason || undefined,
       });
-      alert(response.message);
+      showToast(response.message, "success");
       await fetchData();
+      setShowCancelModal(false);
+      setCancelReason("");
+      setCancelImmediately(false);
     } catch (error) {
       console.error("Failed to cancel subscription:", error);
-      alert("Failed to cancel subscription. Please try again.");
+      showToast("Failed to cancel subscription. Please try again.", "error");
     }
   };
 
@@ -619,6 +621,71 @@ export default function SubscriptionDashboard({
                 </tbody>
               </table>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* Cancel Subscription Modal */}
+      {showCancelModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-[#282727] rounded-xl shadow-xl max-w-md w-full">
+            <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+              <h2 className="text-xl font-semibold text-red-600 dark:text-red-400">
+                Cancel Subscription
+              </h2>
+            </div>
+            <div className="p-6 space-y-4">
+              <div>
+                <label className="flex items-center space-x-3 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={cancelImmediately}
+                    onChange={(e) => setCancelImmediately(e.target.checked)}
+                    className="w-4 h-4 text-red-600 rounded focus:ring-red-500"
+                  />
+                  <div>
+                    <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                      Cancel Immediately
+                    </div>
+                    <div className="text-xs text-gray-600 dark:text-gray-400">
+                      {cancelImmediately
+                        ? "You'll lose access right away"
+                        : "Keep access until the end of your billing period"}
+                    </div>
+                  </div>
+                </label>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Reason for canceling (optional)
+                </label>
+                <textarea
+                  value={cancelReason}
+                  onChange={(e) => setCancelReason(e.target.value)}
+                  placeholder="Help us improve by sharing your feedback..."
+                  rows={3}
+                  className="w-full px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-red-500"
+                />
+              </div>
+            </div>
+            <div className="px-6 py-4 border-t border-gray-200 dark:border-gray-700 flex gap-3">
+              <button
+                onClick={() => {
+                  setShowCancelModal(false);
+                  setCancelReason("");
+                  setCancelImmediately(false);
+                }}
+                className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800"
+              >
+                Keep Subscription
+              </button>
+              <button
+                onClick={confirmCancelSubscription}
+                className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
+              >
+                Cancel Subscription
+              </button>
+            </div>
           </div>
         </div>
       )}

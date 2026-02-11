@@ -216,17 +216,22 @@ export default function JobManagement({
                 <table className="w-full border-collapse">
                   <thead className="sticky top-0 z-10">
                     <tr className="border-b border-gray-100 dark:border-gray-700">
-                      {["ROLE", "STATUS", "LOCATION", "POSTED", "ACTIONS"].map(
-                        (heading, index) => (
-                          <th
-                            key={heading}
-                            className={`px-4 py-3 text-xs bg-[#101828] font-bold text-white dark:text-gray-500 uppercase tracking-wider ${index === 4 ? "text-right" : "text-left"
-                              }`}
-                          >
-                            {heading}
-                          </th>
-                        ),
-                      )}
+                      {[
+                        "ROLE",
+                        "STATUS",
+                        "View Count",
+                        "Application",
+                        "POSTED",
+                        "ACTIONS",
+                      ].map((heading, index) => (
+                        <th
+                          key={heading}
+                          className={`px-4 py-3 text-xs bg-[#101828] font-bold text-white dark:text-gray-500 uppercase tracking-wider ${index === 4 ? "text-right" : "text-left"
+                            }`}
+                        >
+                          {heading}
+                        </th>
+                      ))}
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
@@ -256,11 +261,13 @@ export default function JobManagement({
                           </span>
                         </td>
                         {/* Location */}
-                        <td className="px-4 py-3">
-                          <div className="flex items-center gap-1.5 text-sm text-gray-600 dark:text-gray-300 font-medium">
-                            <MapPin className="w-4 h-4 text-gray-400" />
-                            {job.location}
-                          </div>
+                        <td className="px-4 py-3 text-sm text-gray-600 dark:text-gray-300 font-medium text-center">
+                          {/* <div className="flex items-center gap-1.5 text-sm text-gray-600 dark:text-gray-300 font-medium"> */}
+                          {job.view_count}
+                          {/* </div> */}
+                        </td>
+                        <td className="px-4 py-3 text-sm text-gray-600 dark:text-gray-300 font-medium text-center">
+                          {job.application_count}
                         </td>
                         {/* Posted */}
                         <td className="px-4 py-3">

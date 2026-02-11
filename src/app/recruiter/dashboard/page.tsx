@@ -31,6 +31,8 @@ import {
   ATSApplications,
   ApplicationDetailModal,
   JOB_FORM_INITIAL,
+  CVSearchPage,
+  BucketsPage,
 } from "@/components/recruiter";
 import type {
   DashboardTab,
@@ -885,6 +887,14 @@ export default function RecruiterDashboard() {
         {activeTab === "profile" && <RecruiterProfileEdit />}
 
         {activeTab === "kyc" && <KYCVerification />}
+
+        {activeTab === "cvSearch" && kycStatus?.kyc_status === "approved" && (
+          <CVSearchPage />
+        )}
+
+        {activeTab === "buckets" && kycStatus?.kyc_status === "approved" && (
+          <BucketsPage />
+        )}
 
         {activeTab === "subscriptions" && (
           <SubscriptionDashboard
