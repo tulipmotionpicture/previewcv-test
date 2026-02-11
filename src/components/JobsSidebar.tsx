@@ -26,7 +26,7 @@ export default function JobsSidebar() {
   }, []);
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-3">
       {/* Top Hiring Partners Card */}
       <div className="bg-white dark:bg-gray-900 rounded-xl overflow-hidden border border-gray-200 dark:border-gray-800 ">
         <div className="bg-blue-600 px-6 py-2 flex items-center justify-between">
@@ -86,22 +86,44 @@ export default function JobsSidebar() {
         </div>
       </div>
 
-      {/* Post a Job CTA */}
-      <div className="bg-blue-50 dark:bg-blue-900/20 rounded-xl p-6 text-center border border-blue-100 dark:border-blue-800">
-        <h3 className="font-semibold mb-2 text-lg text-blue-900 dark:text-blue-100">
-          Post a Job
-        </h3>
-        <p className="text-sm text-blue-900 dark:text-blue-200 mb-4">
-          Reach our pool of verified specialists directly. Zero agency
-          commission.
-        </p>
-        <Link
-          href="/recruiter/login"
-          className="bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-blue-700 transition shadow-md hover:shadow-lg"
-        >
-          Get Started
-        </Link>
-      </div>
+      {/* Create Resume Card */}
+      <Link href="/resume/build" className="group relative overflow-hidden bg-white dark:bg-gray-900 rounded-lg p-5 border border-blue-100 dark:border-blue-900/30 hover:border-blue-200 dark:hover:border-blue-800 transition-all hover:shadow-sm">
+        <div className="absolute top-0 right-0 w-24 h-24 bg-blue-50 dark:bg-blue-900/20 rounded-bl-[100px] -mr-4 -mt-4 transition-transform group-hover:scale-110"></div>
+        <div className="relative flex justify-between items-center z-10">
+          <div>
+            <h3 className="text-base font-bold text-blue-700 dark:text-blue-400 mb-0.5">Create Resume</h3>
+            <p className="text-xs font-medium text-slate-500 dark:text-slate-400">Build a new cv profile</p>
+          </div>
+          <div className="h-12 w-12 bg-blue-600 rounded-lg flex items-center justify-center text-white shadow-md shadow-blue-200 dark:shadow-none group-hover:scale-105 transition-transform">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
+              <polyline points="14 2 14 8 20 8" />
+              <line x1="16" y1="13" x2="8" y2="13" />
+              <line x1="16" y1="17" x2="8" y2="17" />
+              <line x1="10" y1="9" x2="8" y2="9" />
+            </svg>
+          </div>
+        </div>
+      </Link>
+
+      {/* Create Cover Letter Card */}
+      <Link href="/cover-letter/create" className="group relative overflow-hidden bg-white dark:bg-gray-900 rounded-lg p-5 border border-purple-100 dark:border-purple-900/30 hover:border-purple-200 dark:hover:border-purple-800 transition-all hover:shadow-sm">
+        <div className="absolute top-0 right-0 w-24 h-24 bg-purple-50 dark:bg-purple-900/20 rounded-bl-[100px] -mr-4 -mt-4 transition-transform group-hover:scale-110"></div>
+        <div className="relative flex justify-between items-center z-10">
+          <div>
+            <h3 className="text-base font-bold text-purple-700 dark:text-purple-400 mb-0.5">Create Cover letter</h3>
+            <p className="text-xs font-medium text-slate-500 dark:text-slate-400">AI-assisted drafting</p>
+          </div>
+          <div className="h-12 w-12 bg-purple-600 rounded-lg flex items-center justify-center text-white shadow-md shadow-purple-200 dark:shadow-none group-hover:scale-105 transition-transform">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M12 19l7-7 3 3-7 7-3-3z" />
+              <path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z" />
+              <path d="M2 2l7.586 7.586" />
+              <circle cx="11" cy="11" r="2" />
+            </svg>
+          </div>
+        </div>
+      </Link>
     </div>
   );
 }

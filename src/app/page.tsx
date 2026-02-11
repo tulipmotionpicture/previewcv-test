@@ -835,9 +835,9 @@ export default function Home() {
                         <button className="flex items-center gap-1 bg-black dark:bg-white text-white dark:text-black px-4 py-1.5 rounded-full text-xs font-semibold hover:opacity-90 transition-opacity">
                           Apply <ArrowRight className="w-3 h-3" />
                         </button>
-                        <span className="bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 px-3 py-1 rounded-md text-[10px] font-semibold">
+                        <div className="bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 px-3 py-1 rounded-md text-[10px] font-semibold">
                           {job.location}
-                        </span>
+                        </div>
                       </div>
                     </div>
                   ))}

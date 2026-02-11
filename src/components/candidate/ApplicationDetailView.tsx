@@ -61,44 +61,56 @@ const ApplicationDetailView: React.FC<ApplicationDetailViewProps> = ({
     const totalApplications = application.total_applicants || 0;
     const recruiterViewCount = application.recruiter_view_count || (application.recruiter_viewed ? 1 : 0);
 
+    // Dynamic Theme Colors for Timeline
+    // Dynamic Theme Colors for Timeline
+    const getThemeColors = () => {
+        if (["rejected", "declined", "withdrawn"].includes(application.status))
+            return { bg: "bg-red-500", text: "text-red-500", border: "border-red-500", ring: "ring-red-500/20" };
+        if (["offered", "accepted"].includes(application.status))
+            return { bg: "bg-emerald-500", text: "text-emerald-500", border: "border-emerald-500", ring: "ring-emerald-500/20" };
+        if (application.status === "interview_scheduled")
+            return { bg: "bg-indigo-500", text: "text-indigo-500", border: "border-indigo-500", ring: "ring-indigo-500/20" };
+        if (application.recruiter_viewed)
+            return { bg: "bg-purple-500", text: "text-purple-500", border: "border-purple-500", ring: "ring-purple-500/20" };
+        return { bg: "bg-blue-500", text: "text-blue-500", border: "border-blue-500", ring: "ring-blue-500/20" };
+    };
+    const themeColors = getThemeColors();
+
     return (
-        <div className="flex-1 h-full overflow-y-auto p-6 bg-white dark:bg-gray-900">
-            {/* Header */}
-            <div className="flex justify-between items-start mb-6">
-                <div>
-                    <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-1">
-                        {application.job_title || application.job?.title || "Unknown Job Title"}
-                    </h1>
-                    <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 mb-2">
-                        <span className="font-semibold">{application.company_name || application.job?.company_name || "Unknown Company"}</span>
-                        <span>•</span>
-                        <div className="flex items-center gap-1">
-                            {(application.location || application.job?.location) && (
-                                <span className="flex items-center gap-1">
-                                    <MapPin size={12} />
-                                    {application.location || application.job?.location}
-                                </span>
-                            )}
-                            {(application.job_type || application.job?.job_type) && (
-                                <>
-                                    <span>•</span>
-                                    <span className="capitalize">{(application.job_type || application.job?.job_type || "").replace(/_/g, " ")}</span>
-                                </>
-                            )}
-                        </div>
+        <div className="flex-1 h-full overflow-y-auto p-5 bg-white dark:bg-gray-900 scroll-smooth">
+            {/* Header Section */}
+            <div className="flex justify-between items-start mb-5 pb-5 border-b border-gray-100 dark:border-gray-800">
+                <div className="flex-1 pr-6">
+                    <div className="flex items-center gap-3 mb-3">
+                        <span className="px-2.5 py-1 rounded-md bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 text-[11px] font-bold uppercase tracking-wider">
+                            {(application.job_type || application.job?.job_type || "Full Time").replace(/_/g, " ")}
+                        </span>
+                        {application.location && (
+                            <span className="flex items-center gap-1 text-xs font-medium text-gray-500 dark:text-gray-400">
+                                <MapPin size={12} />
+                                {application.location}
+                            </span>
+                        )}
                     </div>
-                    {application.job_slug ? (
-                        <Link href={`/jobs/${application.job_slug}`} className="text-blue-600 text-xs font-semibold hover:underline flex items-center gap-1">
-                            View full job description <ExternalLink size={10} />
-                        </Link>
-                    ) : application.job?.slug ? (
-                        <Link href={`/jobs/${application.job.slug}`} className="text-blue-600 text-xs font-semibold hover:underline flex items-center gap-1">
-                            View full job description <ExternalLink size={10} />
-                        </Link>
-                    ) : null}
+
+                    <h1 className="text-lg font-bold text-gray-900 dark:text-white mb-1 leading-snug">
+                        {application.job_title || application.job?.title}
+                    </h1>
+
+                    <div className="flex items-center gap-2 mb-2">
+                        <span className="text-sm font-medium text-gray-600 dark:text-gray-300">
+                            {application.company_name || application.job?.company_name}
+                        </span>
+                        {application.job_id && (
+                            <Link href={`/jobs/${application.job_slug || application.job?.slug}`} className="text-xs font-bold text-blue-600 hover:text-blue-700 flex items-center gap-1 ml-2">
+                                View Job <ExternalLink size={10} />
+                            </Link>
+                        )}
+                    </div>
                 </div>
 
-                <div className="w-16 h-16 border border-gray-200 dark:border-gray-700 rounded-xl p-2 bg-white flex items-center justify-center shadow-sm">
+                {/* Company Logo - Right Side */}
+                <div className="w-14 h-14 rounded-xl border border-gray-100 dark:border-gray-700 p-1.5 bg-white dark:bg-gray-800 shadow-sm flex items-center justify-center">
                     {application.company_logo_url || application.job?.company_logo_url ? (
                         <img
                             src={application.company_logo_url || application.job?.company_logo_url || ""}
@@ -106,47 +118,54 @@ const ApplicationDetailView: React.FC<ApplicationDetailViewProps> = ({
                             className="w-full h-full object-contain"
                         />
                     ) : (
-                        <Building2 className="text-gray-300 w-8 h-8" />
+                        <Building2 className="text-gray-300 w-10 h-10" />
                     )}
                 </div>
             </div>
 
-            <hr className="border-gray-100 dark:border-gray-800 mb-8" />
-
             {/* Application Status Timeline */}
-            <div className="mb-10 p-4 border border-gray-100 dark:border-gray-800 rounded-2xl bg-gray-50/30 dark:bg-gray-800/20">
-                <h3 className="text-sm font-bold text-gray-900 dark:text-gray-100 mb-8 px-2">Application Timeline</h3>
-                <div className="relative flex items-center justify-between w-full px-6 md:px-10">
+            {/* Application Status Timeline */}
+            <div className="mb-6 bg-slate-50 dark:bg-gray-800/50 rounded-xl p-4 border border-slate-100 dark:border-gray-700">
+                <h3 className="text-xs font-bold text-gray-900 dark:text-gray-100 mb-6">Application Status</h3>
+                <div className="relative flex items-center justify-between w-full px-2 md:px-6">
                     {/* Horizontal Line Background */}
-                    <div className="absolute top-[12px] left-6 right-6 md:left-10 md:right-10 h-0.5 bg-gray-200 dark:bg-gray-700 z-0" />
+                    <div className="absolute top-[10px] left-2 right-2 md:left-6 md:right-6 h-0.5 bg-gray-200 dark:bg-gray-700 z-0" />
 
-                    {/* Progress Bar (calculated dynamically) */}
+                    {/* Progress Bar */}
                     <div
-                        className="absolute top-[12px] left-6 md:left-10 h-0.5 bg-green-500 z-0 transition-all duration-500 rounded-full"
+                        className={`absolute top-[10px] left-2 md:left-6 h-0.5 z-0 transition-all duration-500 ${themeColors.bg}`}
                         style={{
-                            width: `calc(${((steps.filter(s => s.active).length - 1) / (steps.length - 1)) * 100}% - 40px)`
+                            width: `calc(${((steps.filter(s => s.active).length - 1) / (steps.length - 1)) * 100}% - 24px)`
                         }}
                     />
 
                     {steps.map((step, idx) => {
                         const isRejected = step.status === "rejected" || step.status === "declined" || step.status === "withdrawn";
                         const isCompleted = step.active;
+                        const isCurrent = steps.filter(s => s.active).length - 1 === idx;
+
+
 
                         return (
                             <div key={idx} className="relative z-10 flex flex-col items-center group">
-                                <div className={`w-6 h-6 rounded-full flex items-center justify-center border-[2.5px] transition-all duration-300 bg-white dark:bg-gray-900 ${isCompleted
-                                    ? isRejected ? "border-red-500 text-red-500" : "border-green-500 text-green-500"
-                                    : "border-gray-300 dark:border-gray-600 text-transparent"
-                                    }`}>
-                                    <div className={`w-2 h-2 rounded-full ${isCompleted ? (isRejected ? "bg-red-500" : "bg-green-500") : "bg-transparent"}`} />
+                                <div className={`w-5 h-5 rounded-full flex items-center justify-center border-[2px] transition-all duration-300 bg-white dark:bg-gray-900 box-content ${isCompleted
+                                    ? themeColors.border
+                                    : "border-gray-300 dark:border-gray-600 text-gray-400"
+                                    } ${isCurrent ? `ring-2 ${themeColors.ring}` : ""}`}>
+
+                                    {isCompleted ? (
+                                        <div className={`w-2 h-2 rounded-full ${themeColors.bg}`} />
+                                    ) : (
+                                        <div className="w-1.5 h-1.5 rounded-full bg-gray-300 dark:bg-gray-600" />
+                                    )}
                                 </div>
-                                <div className="mt-4 text-center absolute -bottom-10 w-32 transform -translate-x-1/2 left-1/2">
-                                    <p className={`text-xs font-bold ${isCompleted ? "text-gray-900 dark:text-gray-100" : "text-gray-400"} whitespace-nowrap`}>
+                                <div className="mt-2 text-center absolute -bottom-8 w-24 transform -translate-x-1/2 left-1/2">
+                                    <p className={`text-[10px] font-bold uppercase tracking-wider ${isCompleted ? "text-gray-900 dark:text-white" : "text-gray-400"} whitespace-nowrap`}>
                                         {step.label}
                                     </p>
                                     {step.date && (
-                                        <p className="text-[10px] text-gray-500 dark:text-gray-400 mt-0.5 whitespace-nowrap">
-                                            {format(new Date(step.date), "dd MMM, yyyy")}
+                                        <p className="text-[10px] text-gray-500 dark:text-gray-400 mt-0.5 font-medium whitespace-nowrap">
+                                            {format(new Date(step.date), "MMM d")}
                                         </p>
                                     )}
                                 </div>
@@ -154,72 +173,83 @@ const ApplicationDetailView: React.FC<ApplicationDetailViewProps> = ({
                         );
                     })}
                 </div>
-                <div className="h-6"></div>
+                <div className="h-4"></div>
             </div>
 
             {/* Application Meta Grid */}
-            <div className="grid grid-cols-1 gap-6 mb-8 mt-6">
-                {/* Stats & Recruiter Combined */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {/* Activity Stats */}
-                    <div className="p-5 border border-gray-100 dark:border-gray-800 rounded-xl bg-white dark:bg-gray-900 shadow-sm">
-                        <h3 className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-4 flex items-center gap-2">
-                            <Users size={14} className="text-blue-500" />
-                            Applicant Stats
-                        </h3>
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <span className="text-2xl font-black text-gray-900 dark:text-white block">{totalApplications}</span>
-                                <span className="text-xs text-gray-500 dark:text-gray-400 font-medium">Applicants</span>
-                            </div>
-                            <div className="h-8 w-px bg-gray-100 dark:bg-gray-800"></div>
-                            <div>
-                                <span className="text-2xl font-black text-gray-900 dark:text-white block">{recruiterViewCount}</span>
-                                <span className="text-xs text-gray-500 dark:text-gray-400 font-medium">Views</span>
-                            </div>
+            {/* Application Meta Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-6">
+                {/* Activity Stats - Clean Card */}
+                <div className="p-4 border border-gray-100 dark:border-gray-800 rounded-xl bg-white dark:bg-gray-900 hover:shadow-sm transition-shadow">
+                    <div className="flex items-center gap-3 mb-6">
+                        <div className="h-8 w-8 rounded-full bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center text-blue-600">
+                            <Users size={16} />
                         </div>
+                        <h3 className="text-sm font-bold text-gray-900 dark:text-white">Activity Stats</h3>
                     </div>
 
-                    {/* Recruiter / Message */}
-                    {application.recruiter_message ? (
-                        <div className="p-5 border border-blue-100 dark:border-blue-900/30 rounded-xl bg-blue-50/50 dark:bg-blue-900/10 relative overflow-hidden">
-                            <div className="absolute top-0 right-0 p-2 opacity-10">
-                                <MessageSquare size={64} />
-                            </div>
-                            <h3 className="text-xs font-bold text-blue-800 dark:text-blue-300 uppercase tracking-wider mb-2 flex items-center gap-2">
-                                <MessageSquare size={14} />
-                                Recruiter Message
-                            </h3>
-                            <p className="text-sm text-gray-800 dark:text-gray-200 italic mb-2 relative z-10 font-medium">
-                                "{application.recruiter_message}"
-                            </p>
-                            {application.recruiter_message_at && (
-                                <p className="text-[10px] text-blue-600 dark:text-blue-400 font-bold mt-2">
-                                    {format(new Date(application.recruiter_message_at), "MMM d, h:mm a")}
-                                </p>
-                            )}
+                    <div className="flex items-center gap-8">
+                        <div>
+                            <span className="text-xl font-bold text-gray-900 dark:text-white block tracking-tight">{totalApplications}</span>
+                            <span className="text-xs text-gray-500 dark:text-gray-400 font-medium">Total Applicants</span>
                         </div>
+                        <div className="w-px h-10 bg-gray-100 dark:bg-gray-800"></div>
+                        <div>
+                            <span className="text-xl font-bold text-gray-900 dark:text-white block tracking-tight">{recruiterViewCount}</span>
+                            <span className="text-xs text-gray-500 dark:text-gray-400 font-medium">Total Views</span>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Recruiter Message - Clean Card */}
+                <div className="p-4 border border-gray-100 dark:border-gray-800 rounded-xl bg-white dark:bg-gray-900 hover:shadow-sm transition-shadow relative overflow-hidden">
+                    {application.recruiter_message ? (
+                        <>
+                            <div className="flex items-center gap-3 mb-4">
+                                <div className="h-8 w-8 rounded-full bg-emerald-50 dark:bg-emerald-900/20 flex items-center justify-center text-emerald-600">
+                                    <MessageSquare size={16} />
+                                </div>
+                                <h3 className="text-sm font-bold text-gray-900 dark:text-white">Recruiter Message</h3>
+                                <span className="ml-auto text-[10px] bg-slate-100 dark:bg-gray-800 px-2 py-1 rounded-full text-gray-500 font-medium">
+                                    {application.recruiter_message_at ? format(new Date(application.recruiter_message_at as string), "MMM d") : "New"}
+                                </span>
+                            </div>
+                            <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed font-medium relative z-10 pl-3 border-l-2 border-emerald-500/30">
+                                {application.recruiter_message}
+                            </p>
+
+                            {application.job?.recruiter_profile_url && (
+                                <div className="mt-4 pl-3">
+                                    <a
+                                        href={application.job.recruiter_profile_url}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="inline-flex items-center gap-2 px-3 py-1.5 bg-white border border-gray-200 dark:border-gray-700 rounded-lg text-xs font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors shadow-sm ring-1 ring-gray-900/5"
+                                    >
+                                        <User size={12} className="text-gray-500" />
+                                        View Recruiter Profile
+                                    </a>
+                                </div>
+                            )}
+                        </>
                     ) : (
-                        <div className="p-5 border border-gray-100 dark:border-gray-800 rounded-xl bg-white dark:bg-gray-900 shadow-sm flex items-center gap-4">
-                            <div className="w-12 h-12 rounded-full bg-gray-50 dark:bg-gray-800 flex items-center justify-center text-gray-400 border border-gray-100 dark:border-gray-700">
-                                <Building2 size={20} />
+                        <div className="h-full flex flex-col justify-center items-center text-center py-2">
+                            <div className="w-12 h-12 bg-gray-50 dark:bg-gray-800 rounded-full flex items-center justify-center mb-3">
+                                <Building2 size={24} className="text-gray-300" />
                             </div>
-                            <div>
-                                <h4 className="text-sm font-bold text-gray-900 dark:text-white">
-                                    {application.company_name || application.job?.company_name || "Hiring Team"}
-                                </h4>
-                                <p className="text-xs text-gray-500 dark:text-gray-400">
-                                    Status: <span className="capitalize font-medium text-gray-700 dark:text-gray-300">{application.status.replace(/_/g, " ")}</span>
-                                </p>
-                            </div>
+                            <p className="text-sm font-bold text-gray-900 dark:text-white mb-1">
+                                No messages yet
+                            </p>
+                            <p className="text-xs text-gray-500 dark:text-gray-400 max-w-[200px]">
+                                We'll notify you when the hiring team sends a message.
+                            </p>
                         </div>
                     )}
                 </div>
             </div>
 
             {/* Resume Info */}
-            <div className="mb-8">
-                <h3 className="text-sm font-bold text-gray-900 dark:text-gray-100 mb-3">Application Materials</h3>
+            <div className="mb-2">
                 <div className="flex flex-col gap-3">
                     {(application.resume || application.uploaded_resume) && (
                         <div className="flex items-center justify-between p-3 border border-gray-200 dark:border-gray-700 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors bg-white dark:bg-gray-900/50">

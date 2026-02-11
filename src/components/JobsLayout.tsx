@@ -10,7 +10,7 @@ export default function JobsLayout({
   sidebar: React.ReactNode;
 }) {
   return (
-    <div className="w-full grid grid-cols-1 md:grid-cols-4 lg:grid-cols-12 gap-6 pb-8">
+    <div className="w-full grid grid-cols-1 md:grid-cols-4 lg:grid-cols-12 gap-3 pb-8">
       {/* Filters */}
       <aside className="md:col-span-1 lg:col-span-3 order-1 h-full">
         <div className="sticky top-24 max-h-[calc(100vh-7rem)] overflow-y-auto pr-1">

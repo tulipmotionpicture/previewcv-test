@@ -8,7 +8,7 @@ import { useAuth } from "@/context/AuthContext";
 import ResumeUpload from "@/components/ResumeUpload";
 import BookmarkButton from "@/components/BookmarkButton";
 import ResumeReview from "@/components/ResumeReview";
-import { Check, Send, Plus, ExternalLink, Zap, Eye, X, Briefcase, GraduationCap, Wrench, Languages, Building2, MapPin, Calendar, LogIn } from "lucide-react";
+import { Check, Send, Plus, ExternalLink, Zap, Eye, X, Briefcase, GraduationCap, Wrench, Languages, Building2, MapPin, Calendar, LogIn, Share2, Copy } from "lucide-react";
 
 interface JobDetailsClientProps {
   job: Job;
@@ -140,6 +140,24 @@ export default function JobDetailsClient({ job, slug }: JobDetailsClientProps) {
     fetchResumes();
   };
 
+  const handleShare = async () => {
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: job.title,
+          text: `Check out this ${job.title} at ${job.company_name}`,
+          url: window.location.href,
+        });
+      } else {
+        await navigator.clipboard.writeText(window.location.href);
+        // Could enable a toast here, but for now simple alert or just success state
+        alert("Link copied to clipboard!");
+      }
+    } catch (err) {
+      console.error("Error sharing:", err);
+    }
+  };
+
   return (
     <>
       {/* Sticky Application Card - Flat Design */}
@@ -153,13 +171,22 @@ export default function JobDetailsClient({ job, slug }: JobDetailsClientProps) {
               Application
             </h3>
           </div>
-          <BookmarkButton
-            jobId={job.id}
-            jobSlug={job.slug}
-            isBookmarked={isBookmarked}
-            onBookmarkChange={setIsBookmarked}
-            size="md"
-          />
+          <div className="flex flex-col gap-2">
+            <BookmarkButton
+              jobId={job.id}
+              jobSlug={job.slug}
+              isBookmarked={isBookmarked}
+              onBookmarkChange={setIsBookmarked}
+              size="md"
+            />
+            <button
+              onClick={handleShare}
+              className="p-2 text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors rounded-full hover:bg-blue-50 dark:hover:bg-blue-900/20 flex items-center justify-center border border-transparent hover:border-blue-100 dark:hover:border-blue-900"
+              title="Share Job"
+            >
+              <Share2 className="w-5 h-5" />
+            </button>
+          </div>
         </div>
 
         {isApplied ? (

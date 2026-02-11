@@ -85,7 +85,7 @@ const ApplicationMasterDetail: React.FC<ApplicationMasterDetailProps> = ({
     }
 
     return (
-        <div className="flex h-[calc(100vh-140px)] bg-white dark:bg-gray-900 border border-slate-200 dark:border-gray-800 rounded-2xl overflow-hidden shadow-sm">
+        <div className="flex sticky top-5 h-[calc(100vh-100px)] bg-white dark:bg-gray-900 border border-slate-200 dark:border-gray-800 rounded-2xl overflow-hidden shadow-sm">
             {/* Sidebar List */}
             <div className="w-1/3 min-w-[320px] border-r border-slate-200 dark:border-gray-800 flex flex-col bg-white dark:bg-gray-900">
                 {/* Filters & Search */}

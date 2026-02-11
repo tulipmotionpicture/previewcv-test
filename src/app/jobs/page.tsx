@@ -221,89 +221,92 @@ function JobsPageContent() {
         }}
         showAuthButtons={true}
       />
-      <div className="pt-20 pb-8 px-12 max-w-7xl mx-auto" >
+      <div className="pt-18 pb-8 px-12 max-w-7xl mx-auto" >
         {/* Search Bar Container */}
         {/* Search Bar Container */}
-        <div className="mb-2">
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              setSelectedFilters((prev) => ({
-                ...prev,
-                skill_search: keyword ? [keyword] : [],
-                location: location ? [location] : [],
-              }));
-              // Trigger fetch
-              setOffset(0);
-              fetchJobs(0, false);
-            }}
-            className="flex flex-col lg:flex-row items-stretch gap-6"
-          >
-            {/* Keyword Input */}
-            <div className="flex-[2] bg-white dark:bg-gray-900 rounded-lg border border-blue-200 dark:border-gray-700 flex items-center px-4   hover:border-blue-400 transition-colors">
-              <svg className="w-6 h-6 text-gray-400 mr-3 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
-              <input
-                type="text"
-                placeholder="Enter Skills, Destinations, or Company Name"
-                value={keyword}
-                onChange={(e) => setKeyword(e.target.value)}
-                className="w-full bg-transparent border-none outline-none text-gray-700 dark:text-gray-200 placeholder-gray-400 text-sm font-medium focus:ring-0 p-0"
-              />
-            </div>
-
-            {/* Location Input */}
-            <div className="flex-[1.5] bg-white dark:bg-gray-900 rounded-lg border border-blue-200 dark:border-gray-700 flex items-center px-4 py-3 hover:border-blue-400 transition-colors">
-              <svg className="w-6 h-6 text-gray-400 mr-3 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a2 2 0 01-2.828 0l-4.243-4.243a8 8 0 1111.314 0z" />
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-              </svg>
-              <input
-                type="text"
-                placeholder="Enter City or County"
-                value={location}
-                onChange={(e) => setLocation(e.target.value)}
-                className="w-full bg-transparent border-none outline-none text-gray-700 dark:text-gray-200 placeholder-gray-400 text-sm font-medium focus:ring-0 p-0"
-              />
-            </div>
-
-            {/* Experience Input */}
-            <div className="flex-[1.5] bg-white dark:bg-gray-900 rounded-lg border border-blue-200 dark:border-gray-700 flex items-center px-4 py-3 hover:border-blue-400 transition-colors">
-              <span className="w-6 h-6 text-gray-400 mr-3 flex items-center justify-center font-bold text-lg shrink-0">₹</span>
-              <input
-                type="text"
-                placeholder="Enter in years"
-                className="w-full bg-transparent border-none outline-none text-gray-700 dark:text-gray-200 placeholder-gray-400 text-sm font-medium focus:ring-0 p-0"
-              />
-            </div>
-
-            {/* Search Button */}
-            <button
-              type="submit"
-              className="px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors shadow-sm whitespace-nowrap min-w-[140px]"
-            >
-              Search Job
-            </button>
-          </form>
-        </div>
-
-        {/* Popular Search */}
-        <div className="flex flex-wrap items-center gap-2 mb-8 text-sm">
-          <span className="font-bold text-gray-500 dark:text-gray-400 mr-2">Popular Search:</span>
-          {["UI UX developer", "FrontEnd developer", "Deops Engineer", "Product Manager"].map((tag) => (
-            <button
-              key={tag}
-              onClick={() => {
-                setKeyword(tag);
-                setSelectedFilters(prev => ({ ...prev, skill_search: [tag] }));
+        <div className="border-1 border-[#E1E8F1] rounded-xl dark:border-gray-700 p-4 bg-white dark:bg-gray-900 mb-3">
+          <div className="mb-4">
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                setSelectedFilters((prev) => ({
+                  ...prev,
+                  skill_search: keyword ? [keyword] : [],
+                  location: location ? [location] : [],
+                }));
+                // Trigger fetch
+                setOffset(0);
+                fetchJobs(0, false);
               }}
-              className="px-3 py-1 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300 rounded-md text-xs font-medium transition-colors"
+              className="flex flex-col lg:flex-row items-stretch gap-3"
             >
-              {tag}
-            </button>
-          ))}
+              {/* Keyword Input */}
+              <div className="flex-[2] bg-white dark:bg-gray-900 rounded-lg border border-blue-200 dark:border-gray-700 flex items-center px-4   hover:border-blue-400 transition-colors">
+                <svg className="w-6 h-6 text-gray-400 mr-3 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+                <input
+                  type="text"
+                  placeholder="Enter Skills, Destinations, or Company Name"
+                  value={keyword}
+                  onChange={(e) => setKeyword(e.target.value)}
+                  className="w-full bg-transparent border-none outline-none text-gray-700 dark:text-gray-200 placeholder-gray-400 text-sm font-medium focus:ring-0 p-0"
+                />
+              </div>
+
+              {/* Location Input */}
+              <div className="flex-[1.5] bg-white dark:bg-gray-900 rounded-lg border border-blue-200 dark:border-gray-700 flex items-center px-4 py-3 hover:border-blue-400 transition-colors">
+                <svg className="w-6 h-6 text-gray-400 mr-3 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a2 2 0 01-2.828 0l-4.243-4.243a8 8 0 1111.314 0z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                <input
+                  type="text"
+                  placeholder="Enter City or County"
+                  value={location}
+                  onChange={(e) => setLocation(e.target.value)}
+                  className="w-full bg-transparent border-none outline-none text-gray-700 dark:text-gray-200 placeholder-gray-400 text-sm font-medium focus:ring-0 p-0"
+                />
+              </div>
+
+              {/* Experience Input */}
+              <div className="flex-[1.5] bg-white dark:bg-gray-900 rounded-lg border border-blue-200 dark:border-gray-700 flex items-center px-4 py-3 hover:border-blue-400 transition-colors">
+                <span className="w-6 h-6 text-gray-400 mr-3 flex items-center justify-center font-bold text-lg shrink-0">₹</span>
+                <input
+                  type="text"
+                  placeholder="Enter Salary"
+                  className="w-full bg-transparent border-none outline-none text-gray-700 dark:text-gray-200 placeholder-gray-400 text-sm font-medium focus:ring-0 p-0"
+                />
+              </div>
+
+              {/* Search Button */}
+              <button
+                type="submit"
+                className="px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors shadow-sm whitespace-nowrap min-w-[140px]"
+              >
+                Search Job
+              </button>
+            </form>
+          </div>
+
+          {/* Popular Search */}
+          <div className="flex flex-wrap items-center gap-2 mb-2 text-sm">
+            <span className="font-bold text-gray-500 dark:text-gray-400 mr-2">Popular Search:</span>
+            {["UI UX developer", "FrontEnd developer", "Deops Engineer", "Product Manager"].map((tag) => (
+              <button
+                key={tag}
+                onClick={() => {
+                  setKeyword(tag);
+                  setSelectedFilters(prev => ({ ...prev, skill_search: [tag] }));
+                }}
+                className="px-3 py-1 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300 rounded-md text-xs font-medium transition-colors"
+              >
+                {tag}
+              </button>
+            ))}
+          </div>
         </div>
+
 
         <JobsLayout
           filters={
@@ -315,20 +318,27 @@ function JobsPageContent() {
           jobs={
             <>
               {/* Header for Job List */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-4">
-                <h2 className="text-gray-600 dark:text-gray-300 text-sm font-medium">
-                  Showing <span className="font-bold text-gray-900 dark:text-white">{total}</span> jobs
-                  {keyword && <> related to <span className="font-bold text-gray-900 dark:text-white">"{keyword}"</span></>}
-                  {location && <> in <span className="font-bold text-gray-900 dark:text-white">"{location}"</span></>}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-2">
+                <h2 className="text-slate-500 text-[15px] font-medium">
+                  Showing <span className="font-bold text-slate-900 dark:text-white">{total}</span> jobs
+                  {keyword && <span className="font-bold text-slate-900 dark:text-white"> {keyword}</span>}
+                  {location && <> in <span className="font-bold text-slate-900 dark:text-white">{location}</span></>}
                 </h2>
 
-                <div className="flex items-center gap-2">
-                  <span className="text-sm text-gray-500">Sort by :</span>
-                  <select className="bg-transparent text-sm font-bold text-gray-900 dark:text-white border-none focus:ring-0 cursor-pointer p-0 pr-6">
-                    <option>Date</option>
-                    <option>Relevance</option>
-                    <option>Salary</option>
-                  </select>
+                <div className="flex items-center gap-2 bg-white dark:bg-gray-900 rounded-lg border border-blue-200 dark:border-gray-700 flex items-center px-1 py-1 hover:border-blue-400 transition-colors">
+                  <span className="text-slate-500 text-sm">Sort by :</span>
+                  <div className="relative group cursor-pointer">
+                    <select className="appearance-none bg-transparent text-sm font-bold text-slate-900 dark:text-white border-none focus:ring-0 cursor-pointer  py-1 px-1">
+                      <option>Date</option>
+                      <option>Relevance</option>
+                      <option>Salary</option>
+                    </select>
+                    <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center text-slate-900 dark:text-white">
+                      <svg className="h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+                      </svg>
+                    </div>
+                  </div>
                 </div>
               </div>
 

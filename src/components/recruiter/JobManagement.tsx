@@ -191,14 +191,8 @@ export default function JobManagement({
       />
 
       {/* Header */}
-      <div className="flex items-end justify-between mb-6">
+      <div className="flex items-end justify-between mb-2">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-1">
-            Jobs
-          </h2>
-          <p className="text-gray-500 dark:text-gray-400">
-            Welcome back john, Here what happening today.
-          </p>
         </div>
         <button
           onClick={() => handleTabChange("create")}
@@ -212,8 +206,8 @@ export default function JobManagement({
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
         {/* Job Table - Takes 3 columns */}
         <div className="lg:col-span-3">
-          <div className="bg-white dark:bg-[#282727] rounded-xl border border-[#E1E8F1] dark:border-gray-700  overflow-hidden flex flex-col h-[600px]">
-            <div className="overflow-y-auto overflow-x-auto flex-1 h-[600px] custom-scrollbar">
+          <div className="bg-white dark:bg-[#282727] rounded-xl border border-[#E1E8F1] dark:border-gray-700  overflow-hidden flex flex-col sticky top-5 h-[calc(100vh-140px)]">
+            <div className="overflow-y-auto overflow-x-auto flex-1 custom-scrollbar">
               {loadingJobs ? (
                 <div className="text-center py-12 text-gray-500">
                   Loading jobs...
@@ -254,8 +248,8 @@ export default function JobManagement({
                         <td className="px-4 py-3">
                           <span
                             className={`inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium ${job.is_active
-                                ? "bg-[#E6F4EA] text-[#1E7F3A] dark:bg-green-900/30 dark:text-green-400"
-                                : "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400"
+                              ? "bg-[#E6F4EA] text-[#1E7F3A] dark:bg-green-900/30 dark:text-green-400"
+                              : "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400"
                               }`}
                           >
                             {job.is_active ? "Active" : "Inactive"}
@@ -425,8 +419,8 @@ export default function JobManagement({
                         key={page}
                         onClick={() => onPageChange(page)}
                         className={`min-w-[32px] h-8 px-2 flex items-center justify-center rounded-lg text-sm font-medium transition-colors ${currentPage === page
-                            ? "bg-blue-600 text-white shadow-sm"
-                            : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
+                          ? "bg-blue-600 text-white shadow-sm"
+                          : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
                           }`}
                       >
                         {page}

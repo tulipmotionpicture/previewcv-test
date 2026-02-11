@@ -112,34 +112,29 @@ export default function DashboardSidebar<T extends string>({
 
             {/* User Profile Section - Flat Design */}
             {userName && (
-                <div className="mt-auto pt-6 border-t border-gray-200 dark:border-gray-800">
-                    <div className="flex items-center gap-3 mb-3">
-                        {/* User Avatar - Flat Design */}
-                        <div className="w-10 h-10 rounded-lg bg-[#0369A1] flex items-center justify-center flex-shrink-0">
-                            {userName ? (
-                                <span className="text-sm font-bold text-white">
-                                    {userName.charAt(0).toUpperCase()}
-                                </span>
-                            ) : (
-                                <User className="w-5 h-5 text-white" />
-                            )}
+                <div className="mt-auto px-2 pb-4">
+                    <div className="bg-[#1C2534] dark:bg-[#1E293B] rounded-lg p-2.5 flex items-center gap-2.5 mb-2 shadow-sm border border-gray-700/50">
+                        {/* User Avatar - Circle Design */}
+                        <div className="w-8 h-8 rounded-full bg-[#111827] flex items-center justify-center flex-shrink-0 text-white font-bold text-xs border border-gray-600">
+                            {userName ? userName.slice(0, 2).toUpperCase() : <User size={14} />}
                         </div>
                         <div className="flex-1 min-w-0">
-                            <p className="text-sm font-bold text-gray-900 dark:text-gray-100 truncate">
+                            <p className="text-xs font-bold text-white truncate">
                                 {userName}
                             </p>
-                            <p className="text-xs text-gray-500 dark:text-gray-400">
+                            <p className="text-[10px] text-gray-400">
                                 Candidate
                             </p>
                         </div>
                     </div>
-                    {/* Logout Button - Flat Design */}
+
+                    {/* Logout Button - Red Text Design */}
                     <button
                         onClick={onLogout}
-                        className="w-full flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors duration-150 cursor-pointer"
+                        className="w-full flex items-center justify-center gap-1.5 px-4 py-1.5 text-xs font-bold text-[#FF4444] hover:text-[#FF2222] transition-colors duration-150 cursor-pointer"
                     >
                         <LogOut className="w-4 h-4" />
-                        Sign Out
+                        LogOut
                     </button>
                 </div>
             )}
