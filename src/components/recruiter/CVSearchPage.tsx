@@ -105,7 +105,8 @@ export default function CVSearchPage() {
   const [searchHistory, setSearchHistory] = useState<SearchHistoryItem[]>([]);
   const [historyLoading, setHistoryLoading] = useState(false);
   const [showTrendModal, setShowTrendModal] = useState(false);
-  const [trendData, setTrendData] = useState<SearchResultCountTrendResponse | null>(null);
+  const [trendData, setTrendData] =
+    useState<SearchResultCountTrendResponse | null>(null);
   const [trendLoading, setTrendLoading] = useState(false);
 
   // Fetch credits status and buckets
@@ -151,16 +152,16 @@ export default function CVSearchPage() {
     setHistoryError(null);
     try {
       const res: any = await api.getSearchHistory({ limit: 10 });
-      let items = [];
-      if (Array.isArray(res)) {
-        items = res;
-      } else if (res?.history && Array.isArray(res.history)) {
-        items = res.history;
-      } else if (res?.results && Array.isArray(res.results)) {
-        items = res.results;
-      } else if (res?.data && Array.isArray(res.data)) {
-        items = res.data;
-      }
+
+      // api.getSearchHistory is now normalized, but accept a few legacy shapes here as well
+      let items: any[] = [];
+      if (Array.isArray(res)) items = res;
+      else if (res?.history && Array.isArray(res.history)) items = res.history;
+      else if (res?.searches && Array.isArray(res.searches))
+        items = res.searches;
+      else if (res?.results && Array.isArray(res.results)) items = res.results;
+      else if (res?.data && Array.isArray(res.data)) items = res.data;
+
       setSearchHistory(items);
       setShowHistoryModal(true);
     } catch (error) {
@@ -176,11 +177,72 @@ export default function CVSearchPage() {
   const handleRerunSearch = async (historyId: number) => {
     setLoading(true);
     setShowHistoryModal(false);
+
+    // helper to coerce arrays (API may store comma-joined strings)
+    const toArray = (v: any) => {
+      if (!v) return [];
+      if (Array.isArray(v)) return v;
+      return String(v)
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean);
+    };
+
     try {
+      // Populate form from saved history (if available in client state)
+      const saved = searchHistory.find((s) => s.id === historyId) as
+        | any
+        | undefined;
+      if (saved?.search_filters) {
+        const f = saved.search_filters || {};
+        setSearchQuery(f.keyword_search || f.keyword || "");
+
+        setFilters((prev) => ({
+          ...prev,
+          skills: toArray(f.skills),
+          skills_match_all: !!f.skills_match_all,
+          job_titles: toArray(f.job_titles),
+          companies: toArray(f.companies),
+          degrees: toArray(f.degrees),
+          languages: toArray(f.languages),
+          language_proficiency: f.language_proficiency || "",
+          min_experience_years:
+            typeof f.min_experience_years === "number"
+              ? f.min_experience_years
+              : prev.min_experience_years,
+          max_experience_years:
+            typeof f.max_experience_years === "number"
+              ? f.max_experience_years
+              : prev.max_experience_years,
+          country: f.country || "",
+          state: f.state || "",
+          city: f.city || "",
+          education_level: f.education_level || "",
+          open_to_work_only: !!f.open_to_work_only,
+          is_currently_employed:
+            f.is_currently_employed === undefined
+              ? undefined
+              : !!f.is_currently_employed,
+          page: f.page || 1,
+          page_size: f.page_size || prev.page_size,
+          sort_by: f.sort_by || prev.sort_by,
+          sort_order: f.sort_order || prev.sort_order,
+        }));
+
+        // clear single-item inputs (they'll be shown from filter arrays)
+        setSkillInput("");
+        setJobTitleInput("");
+        setCompanyInput("");
+        setDegreeInput("");
+        setLanguageInput("");
+      }
+
+      // Rerun on server and show results
       const res = await api.rerunSavedSearch(historyId);
       setSearchResults(res);
     } catch (error) {
       console.error("Failed to rerun search", error);
+      showToast("Failed to rerun saved search.", "error");
     } finally {
       setLoading(false);
     }
@@ -201,39 +263,59 @@ export default function CVSearchPage() {
     }
   };
 
-  const handleSearch = useCallback(async () => {
-    if (
-      !searchQuery.trim() &&
-      filters.skills.length === 0 &&
-      filters.job_titles.length === 0
-    ) {
-      showToast("Please enter a search keyword or select filters", "error");
-      return;
-    }
+  const handleSearch = useCallback(
+    async (overrides?: Partial<typeof filters>) => {
+      // Get current filters from state
+      const currentFilters = filters;
+      const activeFilters = overrides
+        ? { ...currentFilters, ...overrides }
+        : currentFilters;
 
-    setLoading(true);
-    try {
+      if (
+        !searchQuery.trim() &&
+        activeFilters.skills.length === 0 &&
+        activeFilters.job_titles.length === 0
+      ) {
+        showToast("Please enter a search keyword or select filters", "error");
+        return;
+      }
+
+      setLoading(true);
+
+      // Update filters state immediately
+      setFilters(activeFilters);
+
       const params: any = {
         keyword_search: searchQuery || undefined,
-        skills: filters.skills.length > 0 ? filters.skills : undefined,
-        skills_match_all: filters.skills_match_all,
+        skills:
+          activeFilters.skills.length > 0 ? activeFilters.skills : undefined,
+        skills_match_all: activeFilters.skills_match_all,
         job_titles:
-          filters.job_titles.length > 0 ? filters.job_titles : undefined,
-        companies: filters.companies.length > 0 ? filters.companies : undefined,
-        min_experience_years: filters.min_experience_years,
-        max_experience_years: filters.max_experience_years,
-        country: filters.country || undefined,
-        state: filters.state || undefined,
-        city: filters.city || undefined,
-        degrees: filters.degrees.length > 0 ? filters.degrees : undefined,
-        languages: filters.languages.length > 0 ? filters.languages : undefined,
-        language_proficiency: filters.language_proficiency || undefined,
-        open_to_work_only: filters.open_to_work_only || undefined,
-        is_currently_employed: filters.is_currently_employed,
-        page: filters.page,
-        page_size: filters.page_size,
-        sort_by: filters.sort_by,
-        sort_order: filters.sort_order,
+          activeFilters.job_titles.length > 0
+            ? activeFilters.job_titles
+            : undefined,
+        companies:
+          activeFilters.companies.length > 0
+            ? activeFilters.companies
+            : undefined,
+        min_experience_years: activeFilters.min_experience_years,
+        max_experience_years: activeFilters.max_experience_years,
+        country: activeFilters.country || undefined,
+        state: activeFilters.state || undefined,
+        city: activeFilters.city || undefined,
+        degrees:
+          activeFilters.degrees.length > 0 ? activeFilters.degrees : undefined,
+        languages:
+          activeFilters.languages.length > 0
+            ? activeFilters.languages
+            : undefined,
+        language_proficiency: activeFilters.language_proficiency || undefined,
+        open_to_work_only: activeFilters.open_to_work_only || undefined,
+        is_currently_employed: activeFilters.is_currently_employed,
+        page: activeFilters.page,
+        page_size: activeFilters.page_size,
+        sort_by: activeFilters.sort_by,
+        sort_order: activeFilters.sort_order,
       };
 
       // Remove undefined values
@@ -241,15 +323,18 @@ export default function CVSearchPage() {
         (key) => params[key] === undefined && delete params[key],
       );
 
-      const response = await api.searchCVs(params);
-      setSearchResults(response);
-    } catch (error) {
-      console.error("Failed to search CVs:", error);
-      showToast("Failed to search CVs. Please try again.", "error");
-    } finally {
-      setLoading(false);
-    }
-  }, [searchQuery, filters]);
+      try {
+        const response = await api.searchCVs(params);
+        setSearchResults(response);
+      } catch (error) {
+        console.error("Failed to search CVs:", error);
+        showToast("Failed to search CVs. Please try again.", "error");
+      } finally {
+        setLoading(false);
+      }
+    },
+    [searchQuery, filters, showToast],
+  );
 
   // Unlock single resume
   const handleUnlockResume = async (resumeId: number) => {
@@ -528,13 +613,14 @@ export default function CVSearchPage() {
                   className="stroke-blue-500 transition-all duration-1000 ease-out"
                   strokeWidth="8"
                   strokeDasharray={`${2 * Math.PI * 40}`}
-                  strokeDashoffset={`${2 *
+                  strokeDashoffset={`${
+                    2 *
                     Math.PI *
                     40 *
                     (1 -
                       creditsBalance.credits_remaining /
-                      Math.max(creditsBalance.total_credits, 1))
-                    }`}
+                        Math.max(creditsBalance.total_credits, 1))
+                  }`}
                   strokeLinecap="round"
                 />
               </svg>
@@ -663,7 +749,7 @@ export default function CVSearchPage() {
 
         <div className="flex flex-wrap gap-3 pt-4 border-t border-gray-100 dark:border-gray-700 mt-4">
           <button
-            onClick={handleSearch}
+            onClick={() => handleSearch()}
             disabled={loading}
             className="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors disabled:opacity-50 flex items-center gap-2 text-sm"
           >
@@ -721,7 +807,9 @@ export default function CVSearchPage() {
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
             <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-3xl max-h-[85vh] flex flex-col overflow-hidden animate-in zoom-in-95 duration-200   dark:border-gray-700">
               <div className="flex items-center justify-between px-6 py-1 border-b  bg-slate-900 rounded-t-xl">
-                <h3 className="text-lg font-semibold text-white">Advanced Filters</h3>
+                <h3 className="text-lg font-semibold text-white">
+                  Advanced Filters
+                </h3>
                 <button
                   onClick={() => setShowAdvancedFilters(false)}
                   className="p-2 text-white/70 hover:text-white hover:bg-white/10 rounded-full transition-colors"
@@ -878,7 +966,10 @@ export default function CVSearchPage() {
                   <select
                     value={filters.education_level}
                     onChange={(e) =>
-                      setFilters({ ...filters, education_level: e.target.value })
+                      setFilters({
+                        ...filters,
+                        education_level: e.target.value,
+                      })
                     }
                     className="w-full px-3 py-2 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
@@ -1042,8 +1133,9 @@ export default function CVSearchPage() {
                       className="w-full px-3 py-2 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
                     >
                       <option value="relevance">Relevance</option>
-                      <option value="created_at">Created Date</option>
-                      <option value="experience_years">Experience Years</option>
+                      <option value="recent_activity">Recent Activity</option>
+                      <option value="experience">Experience</option>
+                      <option value="education">Education</option>
                     </select>
                   </div>
                   <div>
@@ -1092,14 +1184,6 @@ export default function CVSearchPage() {
       {/* Results Section */}
       {searchResults && (
         <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
-              Found {searchResults.total} candidates
-            </p>
-            <div className="text-sm text-gray-600 dark:text-gray-400">
-              Page {searchResults.page} of {searchResults.total_pages}
-            </div>
-          </div>
           <div className="grid gap-6 grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
             {searchResults.results.map((result) => (
               <div
@@ -1190,7 +1274,8 @@ export default function CVSearchPage() {
 
                 {/* Actions */}
                 <div className="mt-auto">
-                  {result.is_unlocked ? (
+                  {result.is_unlocked ||
+                  unlockedResumes.has(result.resume_id) ? (
                     <button
                       onClick={() => handleDownloadResume(result.resume_id)}
                       className="w-full px-4 py-2 rounded-xl text-sm font-semibold
@@ -1433,24 +1518,80 @@ export default function CVSearchPage() {
                       className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:border-blue-500 transition-colors bg-gray-50 dark:bg-gray-900/50"
                     >
                       <div className="flex justify-between items-start gap-4">
-                        <div>
-                          <div className="flex flex-wrap gap-2 mb-2">
-                            {Object.entries(item.filters || {}).map(([key, value]) => (
-                              value && key !== 'page' && key !== 'limit' ? (
-                                <span key={key} className="px-2 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-xs rounded-full">
-                                  {key.replace(/_/g, ' ')}: {String(value)}
-                                </span>
-                              ) : null
-                            ))}
+                        <div className="flex-1">
+                          {/* Search Name/Title */}
+                          <h4 className="font-semibold text-gray-900 dark:text-gray-100 mb-2">
+                            {item.search_name || "Untitled Search"}
+                          </h4>
+
+                          {/* Filter badges */}
+                          <div className="flex flex-wrap gap-2 mb-3">
+                            {item.search_filters &&
+                              Object.entries(item.search_filters).map(
+                                ([key, value]) => {
+                                  // Skip internal/pagination fields
+                                  if (
+                                    !value ||
+                                    key === "page" ||
+                                    key === "limit" ||
+                                    key === "page_size" ||
+                                    key === "sort_by" ||
+                                    key === "sort_order" ||
+                                    key === "skills_match_all" ||
+                                    key === "not_in_any_bucket" ||
+                                    key === "open_to_work_only"
+                                  )
+                                    return null;
+
+                                  // Format the display value
+                                  let displayValue = String(value);
+                                  if (Array.isArray(value)) {
+                                    displayValue = value.join(", ");
+                                  } else if (typeof value === "boolean") {
+                                    displayValue = value ? "Yes" : "No";
+                                  }
+
+                                  return (
+                                    <span
+                                      key={key}
+                                      className="px-2 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-xs rounded-full"
+                                    >
+                                      {key.replace(/_/g, " ")}: {displayValue}
+                                    </span>
+                                  );
+                                },
+                              )}
                           </div>
-                          <div className="flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
+
+                          {/* Metadata */}
+                          <div className="flex flex-wrap items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
                             <span className="flex items-center gap-1">
                               <Clock className="w-3 h-3" />
                               {new Date(item.created_at).toLocaleDateString()}
                             </span>
-                            <span>{item.result_count} results found</span>
+                            <span>{item.latest_result_count} results</span>
+                            <span>
+                              Used {item.use_count}{" "}
+                              {item.use_count === 1 ? "time" : "times"}
+                            </span>
+                            {item.result_count_change != null &&
+                              item.result_count_change !== 0 && (
+                                <span
+                                  className={`flex items-center gap-1 ${
+                                    item.result_count_change > 0
+                                      ? "text-green-600 dark:text-green-400"
+                                      : "text-red-600 dark:text-red-400"
+                                  }`}
+                                >
+                                  <TrendingUp className="w-3 h-3" />
+                                  {item.result_count_change > 0 ? "+" : ""}
+                                  {item.result_count_change}
+                                </span>
+                              )}
                           </div>
                         </div>
+
+                        {/* Actions */}
                         <div className="flex gap-2">
                           <button
                             onClick={() => handleShowTrend(item.id)}
@@ -1501,16 +1642,24 @@ export default function CVSearchPage() {
               ) : (
                 <div className="space-y-4">
                   <div className="flex justify-between items-center mb-4">
-                    <span className="text-sm text-gray-500">Total Records: {trendData.total_records}</span>
+                    <span className="text-sm text-gray-500">
+                      Total Records: {trendData.total_records}
+                    </span>
                   </div>
                   <div className="relative h-64 border-l border-b border-gray-300 dark:border-gray-600">
                     <div className="absolute inset-0 flex items-end justify-around px-2">
                       {trendData.history?.map((point, index) => {
                         const history = trendData.history || [];
-                        const maxCount = Math.max(...history.map(h => h.result_count), 1);
+                        const maxCount = Math.max(
+                          ...history.map((h) => h.result_count),
+                          1,
+                        );
                         const height = (point.result_count / maxCount) * 100;
                         return (
-                          <div key={index} className="flex flex-col items-center group w-8">
+                          <div
+                            key={index}
+                            className="flex flex-col items-center group w-8"
+                          >
                             <div
                               className="w-full bg-purple-500 rounded-t transition-all group-hover:bg-purple-600 relative"
                               style={{ height: `${height}%` }}
@@ -1518,7 +1667,9 @@ export default function CVSearchPage() {
                               <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10">
                                 {point.result_count} results
                                 <br />
-                                {new Date(point.recorded_at).toLocaleDateString()}
+                                {new Date(
+                                  point.recorded_at,
+                                ).toLocaleDateString()}
                               </div>
                             </div>
                           </div>
@@ -1529,8 +1680,17 @@ export default function CVSearchPage() {
                   <div className="flex justify-between text-xs text-gray-500 mt-2 px-2">
                     {trendData.history?.length > 0 && (
                       <>
-                        <span>{new Date(trendData.history[0].recorded_at).toLocaleDateString()}</span>
-                        <span>{new Date(trendData.history[trendData.history.length - 1].recorded_at).toLocaleDateString()}</span>
+                        <span>
+                          {new Date(
+                            trendData.history[0].recorded_at,
+                          ).toLocaleDateString()}
+                        </span>
+                        <span>
+                          {new Date(
+                            trendData.history[trendData.history.length - 1]
+                              .recorded_at,
+                          ).toLocaleDateString()}
+                        </span>
                       </>
                     )}
                   </div>
