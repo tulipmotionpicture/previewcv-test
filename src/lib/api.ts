@@ -461,8 +461,9 @@ export class ApiClient {
       );
     }
     const queryString = params.toString();
-    const endpoint = `/api/v1/recruiters/jobs/posting/${jobId}/applications${queryString ? `?${queryString}` : ""
-      }`;
+    const endpoint = `/api/v1/recruiters/jobs/posting/${jobId}/applications${
+      queryString ? `?${queryString}` : ""
+    }`;
     return this.request<JobApplicationsResponse>(endpoint, {}, true, true);
   }
 
@@ -1047,7 +1048,7 @@ export class ApiClient {
     success: boolean;
     filters: Record<
       string,
-      { name: string; value: string; count: number;[key: string]: any }[]
+      { name: string; value: string; count: number; [key: string]: any }[]
     >;
     location_hierarchy?: Record<string, any>;
   }> {
@@ -1055,7 +1056,7 @@ export class ApiClient {
       success: boolean;
       filters: Record<
         string,
-        { name: string; value: string; count: number;[key: string]: any }[]
+        { name: string; value: string; count: number; [key: string]: any }[]
       >;
       location_hierarchy?: Record<string, any>;
     }>("/api/v1/jobs/filters", {}, false, false);
@@ -1801,7 +1802,6 @@ export class ApiClient {
     );
   }
 
-
   async getSearchHistory(params?: {
     page?: number;
     limit?: number;
@@ -1810,12 +1810,38 @@ export class ApiClient {
     if (params?.page) queryParams.append("page", params.page.toString());
     if (params?.limit) queryParams.append("limit", params.limit.toString());
 
-    return this.request<SearchHistoryResponse>(
+    // fetch raw response then normalize different backend shapes (some responses use `searches`)
+    const raw: any = await this.request<any>(
       `/api/v1/recruiter/cv-search/search-history?${queryParams.toString()}`,
       { method: "GET" },
       true,
       true,
     );
+
+    // Normalize to SearchHistoryResponse { history: SearchHistoryItem[], total }
+    if (Array.isArray(raw)) {
+      return { history: raw, total: raw.length } as SearchHistoryResponse;
+    }
+
+    if (raw?.history && Array.isArray(raw.history)) {
+      return { history: raw.history, total: raw.total ?? raw.history.length };
+    }
+
+    if (raw?.searches && Array.isArray(raw.searches)) {
+      return { history: raw.searches, total: raw.total ?? raw.searches.length };
+    }
+
+    // fallback: try other common containers
+    if (raw?.data && Array.isArray(raw.data)) {
+      return { history: raw.data, total: raw.total ?? raw.data.length };
+    }
+
+    if (raw?.results && Array.isArray(raw.results)) {
+      return { history: raw.results, total: raw.total ?? raw.results.length };
+    }
+
+    // final fallback: empty
+    return { history: [], total: 0 };
   }
 
   async unlockCVProfile(

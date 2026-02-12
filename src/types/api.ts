@@ -170,14 +170,14 @@ export interface Application {
   uploaded_resume_id?: number | null;
   cover_letter_id?: number | null;
   status:
-  | "applied"
-  | "under_review"
-  | "interview_scheduled"
-  | "offered"
-  | "accepted"
-  | "rejected"
-  | "withdrawn"
-  | "declined";
+    | "applied"
+    | "under_review"
+    | "interview_scheduled"
+    | "offered"
+    | "accepted"
+    | "rejected"
+    | "withdrawn"
+    | "declined";
   applied_at: string;
   updated_at: string;
   created_at?: string;
@@ -696,11 +696,15 @@ export interface SearchResultCountTrendResponse {
 export interface SearchHistoryItem {
   id: number;
   name?: string;
+  search_name?: string;
   filters: Record<string, any>;
+  search_filters?: Record<string, any>;
   result_count: number;
+  latest_result_count?: number;
   created_at: string;
   last_used_at: string;
   use_count: number;
+  result_count_change?: number;
 }
 
 export interface SearchHistoryResponse {
