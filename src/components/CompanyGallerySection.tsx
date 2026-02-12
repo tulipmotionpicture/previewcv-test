@@ -172,13 +172,10 @@ function CompanyGallerySection({
 
   /* ------------------ UI ------------------ */
   return (
-    <div className="max-w-7xl mx-auto p-6 animate-in fade-in bg-white dark:bg-[#1E1E1E] min-h-screen">
+    <div className="max-w-7xl mx-auto p-6 animate-in fade-in bg-white dark:bg-[#1E1E1E] min-h-screen pt-20">
 
       {/* Header section with Purple Banner */}
       <div className="relative mb-8">
-        <div className="h-48 w-full bg-[#8B5CF6] rounded-xl relative overflow-hidden">
-          {/* You can put a cover image here if needed, for now just purple color */}
-        </div>
 
         {/* Logo Overlapping Banner */}
         <div className="absolute -bottom-16 left-8 flex items-end">
@@ -377,7 +374,7 @@ function CompanyGallerySection({
 
       </div>
 
-      <div className="mt-12 flex justify-center">
+      <div className=" pt-2">
         <button
           onClick={handleSave}
           disabled={saving}

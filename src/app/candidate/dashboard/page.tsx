@@ -296,32 +296,30 @@ function CandidateDashboardContent() {
 
                       {applicationStats?.total_applications?.weekly_change !==
                         undefined && (
-                        <div className="flex items-center gap-1">
-                          <TrendingUp
-                            className={`w-3 h-3 ${
-                              applicationStats.total_applications
+                          <div className="flex items-center gap-1">
+                            <TrendingUp
+                              className={`w-3 h-3 ${applicationStats.total_applications
                                 .weekly_change >= 0
                                 ? "text-emerald-500"
                                 : "text-red-500"
-                            }`}
-                          />
-                          <span
-                            className={`text-xs font-bold ${
-                              applicationStats.total_applications
+                                }`}
+                            />
+                            <span
+                              className={`text-xs font-bold ${applicationStats.total_applications
                                 .weekly_change >= 0
                                 ? "text-emerald-500"
                                 : "text-red-500"
-                            }`}
-                          >
-                            {applicationStats.total_applications
-                              .weekly_change >= 0
-                              ? "+"
-                              : ""}
-                            {applicationStats.total_applications.weekly_change}{" "}
-                            this week
-                          </span>
-                        </div>
-                      )}
+                                }`}
+                            >
+                              {applicationStats.total_applications
+                                .weekly_change >= 0
+                                ? "+"
+                                : ""}
+                              {applicationStats.total_applications.weekly_change}{" "}
+                              this week
+                            </span>
+                          </div>
+                        )}
                     </div>
 
                     {/* Interview Invites */}
@@ -345,32 +343,30 @@ function CandidateDashboardContent() {
 
                       {applicationStats?.interview_invites?.weekly_change !==
                         undefined && (
-                        <div className="flex items-center gap-1">
-                          <TrendingUp
-                            className={`w-3 h-3 ${
-                              applicationStats.interview_invites
+                          <div className="flex items-center gap-1">
+                            <TrendingUp
+                              className={`w-3 h-3 ${applicationStats.interview_invites
                                 .weekly_change >= 0
                                 ? "text-emerald-500"
                                 : "text-red-500"
-                            }`}
-                          />
-                          <span
-                            className={`text-xs font-bold ${
-                              applicationStats.interview_invites
+                                }`}
+                            />
+                            <span
+                              className={`text-xs font-bold ${applicationStats.interview_invites
                                 .weekly_change >= 0
                                 ? "text-emerald-500"
                                 : "text-red-500"
-                            }`}
-                          >
-                            {applicationStats.interview_invites.weekly_change >=
-                            0
-                              ? "+"
-                              : ""}
-                            {applicationStats.interview_invites.weekly_change}{" "}
-                            this week
-                          </span>
-                        </div>
-                      )}
+                                }`}
+                            >
+                              {applicationStats.interview_invites.weekly_change >=
+                                0
+                                ? "+"
+                                : ""}
+                              {applicationStats.interview_invites.weekly_change}{" "}
+                              this week
+                            </span>
+                          </div>
+                        )}
                     </div>
 
                     {/* Offers Received */}
@@ -396,31 +392,29 @@ function CandidateDashboardContent() {
 
                       {applicationStats?.offers_received?.weekly_change !==
                         undefined && (
-                        <div className="flex items-center gap-1">
-                          <TrendingUp
-                            className={`w-3 h-3 ${
-                              applicationStats.offers_received.weekly_change >=
-                              0
+                          <div className="flex items-center gap-1">
+                            <TrendingUp
+                              className={`w-3 h-3 ${applicationStats.offers_received.weekly_change >=
+                                0
                                 ? "text-emerald-500"
                                 : "text-red-500"
-                            }`}
-                          />
-                          <span
-                            className={`text-xs font-bold ${
-                              applicationStats.offers_received.weekly_change >=
-                              0
+                                }`}
+                            />
+                            <span
+                              className={`text-xs font-bold ${applicationStats.offers_received.weekly_change >=
+                                0
                                 ? "text-emerald-500"
                                 : "text-red-500"
-                            }`}
-                          >
-                            {applicationStats.offers_received.weekly_change >= 0
-                              ? "+"
-                              : ""}
-                            {applicationStats.offers_received.weekly_change}{" "}
-                            this week
-                          </span>
-                        </div>
-                      )}
+                                }`}
+                            >
+                              {applicationStats.offers_received.weekly_change >= 0
+                                ? "+"
+                                : ""}
+                              {applicationStats.offers_received.weekly_change}{" "}
+                              this week
+                            </span>
+                          </div>
+                        )}
                     </div>
                   </div>
 
@@ -487,7 +481,7 @@ function CandidateDashboardContent() {
                           Showing {applicationsPagination.offset + 1} to{" "}
                           {Math.min(
                             applicationsPagination.offset +
-                              applicationsPagination.limit,
+                            applicationsPagination.limit,
                             applicationsPagination.total,
                           )}{" "}
                           of {applicationsPagination.total} applications
@@ -499,7 +493,7 @@ function CandidateDashboardContent() {
                                 offset: Math.max(
                                   0,
                                   applicationsPagination.offset -
-                                    applicationsPagination.limit,
+                                  applicationsPagination.limit,
                                 ),
                                 status_filter: statusFilter || undefined,
                               })
@@ -602,7 +596,7 @@ function CandidateDashboardContent() {
                 {/* Relevant Jobs Section */}
                 <div className="bg-white dark:bg-gray-900 border border-slate-200 dark:border-gray-800 rounded-xl overflow-hidden">
                   <div className="p-2 bg-slate-900 dark:bg-slate-900 border-b border-slate-900 dark:border-gray-800">
-                    <h2 className="text-lg font-bold text-white flex items-center gap-2">
+                    <h2 className="text-md font-bold text-white flex items-center gap-2">
                       <Sparkles className="w-5 h-5 text-white" />
                       Relative Jobs
                     </h2>
@@ -637,11 +631,11 @@ function CandidateDashboardContent() {
               pagination={
                 applicationsPagination
                   ? {
-                      page: applicationsPagination.page,
-                      total_pages: applicationsPagination.total_pages,
-                      has_more: applicationsPagination.has_more,
-                      has_previous: applicationsPagination.has_previous,
-                    }
+                    page: applicationsPagination.page,
+                    total_pages: applicationsPagination.total_pages,
+                    has_more: applicationsPagination.has_more,
+                    has_previous: applicationsPagination.has_previous,
+                  }
                   : undefined
               }
               onPageChange={(direction) =>
@@ -649,12 +643,12 @@ function CandidateDashboardContent() {
                   offset:
                     direction === "next"
                       ? (applicationsPagination?.offset || 0) +
-                        (applicationsPagination?.limit || 10)
+                      (applicationsPagination?.limit || 10)
                       : Math.max(
-                          0,
-                          (applicationsPagination?.offset || 0) -
-                            (applicationsPagination?.limit || 10),
-                        ),
+                        0,
+                        (applicationsPagination?.offset || 0) -
+                        (applicationsPagination?.limit || 10),
+                      ),
                   status_filter: statusFilter || undefined,
                 })
               }
@@ -669,11 +663,10 @@ function CandidateDashboardContent() {
             <div className="flex flex-col w-2/3 space-y-4">
               {/* PDF Resumes */}
               <div
-                className={`bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-800 overflow-hidden flex flex-col ${
-                  pdfResumesCollapsed ? "" : "h-[400px]"
-                }`}
+                className={`bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-800 overflow-hidden flex flex-col ${pdfResumesCollapsed ? "" : ""
+                  }`}
               >
-                <div className="p-4 border-b border-gray-200 dark:border-gray-800 bg-slate-900 dark:bg-gray-800 flex items-center justify-between">
+                <div className="p-2 border-b border-gray-200 dark:border-gray-800 bg-slate-900 dark:bg-gray-800 flex items-center justify-between">
                   <h3 className="font-bold text-white dark:text-gray-100 flex items-center gap-2">
                     <FileText className="w-5 h-5 text-[#0369A1]" />
                     Uploaded Resumes ({pdfResumes.length})
@@ -684,9 +677,8 @@ function CandidateDashboardContent() {
                     title={pdfResumesCollapsed ? "Expand" : "Collapse"}
                   >
                     <svg
-                      className={`w-5 h-5 transition-transform duration-200 ${
-                        pdfResumesCollapsed ? "" : "rotate-180"
-                      }`}
+                      className={`w-5 h-5 transition-transform duration-200 ${pdfResumesCollapsed ? "" : "rotate-180"
+                        }`}
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
@@ -714,23 +706,23 @@ function CandidateDashboardContent() {
                           className="group bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-[#0369A1] dark:hover:border-[#0EA5E9] transition-all duration-150 overflow-hidden cursor-pointer"
                         >
                           {/* Main Resume Info */}
-                          <div className="p-4">
-                            <div className="flex items-start gap-3">
+                          <div className="p-3">
+                            <div className="flex items-start gap-2">
                               {/* Icon - Flat Design */}
-                              <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-[#0369A1] flex items-center justify-center text-white">
-                                <FileText className="w-5 h-5" />
+                              <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-[#0369A1] flex items-center justify-center text-white">
+                                <FileText className="w-4 h-4" />
                               </div>
 
                               {/* Resume Details */}
                               <div className="flex-1 min-w-0">
-                                <h4 className="font-bold text-sm text-gray-900 dark:text-gray-100 mb-1 truncate group-hover:text-[#0369A1] dark:group-hover:text-[#0EA5E9] transition-colors duration-150">
+                                <h4 className="font-bold text-xs text-gray-900 dark:text-gray-100 mb-0.5 truncate group-hover:text-[#0369A1] dark:group-hover:text-[#0EA5E9] transition-colors duration-150">
                                   {resume.resume_name}
                                 </h4>
 
                                 {/* Meta Info */}
-                                <div className="flex flex-wrap items-center gap-3 text-xs text-gray-500 dark:text-gray-400">
+                                <div className="flex flex-wrap items-center gap-2 text-[10px] text-gray-500 dark:text-gray-400">
                                   <span className="flex items-center gap-1">
-                                    <Calendar className="w-3 h-3" />
+                                    <Calendar className="w-2.5 h-2.5" />
                                     {new Date(
                                       resume.created_at,
                                     ).toLocaleDateString("en-US", {
@@ -740,12 +732,12 @@ function CandidateDashboardContent() {
                                     })}
                                   </span>
                                   <span className="flex items-center gap-1">
-                                    <File className="w-3 h-3" />
+                                    <File className="w-2.5 h-2.5" />
                                     {resume.file_size_mb.toFixed(2)} MB
                                   </span>
                                   {resume.permanent_link && (
                                     <span className="flex items-center gap-1">
-                                      <Eye className="w-3 h-3" />
+                                      <Eye className="w-2.5 h-2.5" />
                                       {resume.permanent_link.view_count} views
                                     </span>
                                   )}
@@ -755,14 +747,13 @@ function CandidateDashboardContent() {
                           </div>
 
                           {/* Status Bar - Flat Design */}
-                          <div className="px-4 py-2 bg-gray-50 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 flex items-center justify-between">
+                          <div className="px-3 py-1.5 bg-gray-50 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 flex items-center justify-between">
                             <div className="flex items-center gap-2">
                               <span
-                                className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
-                                  resume.is_active
-                                    ? "bg-[#22C55E] text-white"
-                                    : "bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-400"
-                                }`}
+                                className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${resume.is_active
+                                  ? "bg-[#22C55E] text-white"
+                                  : "bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-400"
+                                  }`}
                               >
                                 {resume.is_active ? "Active" : "Inactive"}
                               </span>
@@ -831,13 +822,12 @@ function CandidateDashboardContent() {
 
               {/* Builder Resumes */}
               <div
-                className={`bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-800 overflow-hidden flex flex-col ${
-                  builderResumesCollapsed ? "" : "h-[400px]"
-                }`}
+                className={`bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-800 overflow-hidden flex flex-col ${builderResumesCollapsed ? "" : "h-[600px]"
+                  }`}
               >
-                <div className="p-4 border-b border-gray-200 dark:border-gray-800 bg-slate-900 dark:bg-gray-800 flex items-center justify-between">
+                <div className="p-2 border-b border-gray-200 dark:border-gray-800 bg-slate-900 dark:bg-gray-800 flex items-center justify-between">
                   <h3 className="font-bold text-white dark:text-gray-100 flex items-center gap-2">
-                    <Sparkles className="w-5 h-5 text-[#0EA5E9]" />
+                    <Sparkles className="w-5 h-5  text-[#0EA5E9]" />
                     LetsMakeCV Resumes ({builderResumes.length})
                   </h3>
                   <button
@@ -848,9 +838,8 @@ function CandidateDashboardContent() {
                     title={builderResumesCollapsed ? "Expand" : "Collapse"}
                   >
                     <svg
-                      className={`w-5 h-5 transition-transform duration-200 ${
-                        builderResumesCollapsed ? "" : "rotate-180"
-                      }`}
+                      className={`w-5 h-5 transition-transform duration-200 ${builderResumesCollapsed ? "" : "rotate-180"
+                        }`}
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
@@ -878,23 +867,23 @@ function CandidateDashboardContent() {
                           className="group bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-[#0EA5E9] dark:hover:border-[#0EA5E9] transition-all duration-150 overflow-hidden cursor-pointer"
                         >
                           {/* Main Resume Info */}
-                          <div className="p-4">
-                            <div className="flex items-start gap-3">
+                          <div className="p-3">
+                            <div className="flex items-start gap-2">
                               {/* Icon - Flat Design */}
-                              <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-[#0EA5E9] flex items-center justify-center text-white">
-                                <FileText className="w-5 h-5" />
+                              <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-[#0EA5E9] flex items-center justify-center text-white">
+                                <FileText className="w-4 h-4" />
                               </div>
 
                               {/* Resume Details */}
                               <div className="flex-1 min-w-0">
-                                <h4 className="font-bold text-sm text-gray-900 dark:text-gray-100 mb-1 truncate group-hover:text-[#0EA5E9] transition-colors duration-150">
+                                <h4 className="font-bold text-xs text-gray-900 dark:text-gray-100 mb-0.5 truncate group-hover:text-[#0EA5E9] transition-colors duration-150">
                                   {resume.name}
                                 </h4>
 
                                 {/* Meta Info */}
-                                <div className="flex flex-wrap items-center gap-3 text-xs text-gray-500 dark:text-gray-400">
+                                <div className="flex flex-wrap items-center gap-2 text-[10px] text-gray-500 dark:text-gray-400">
                                   <span className="flex items-center gap-1">
-                                    <Calendar className="w-3 h-3" />
+                                    <Calendar className="w-2.5 h-2.5" />
                                     {new Date(
                                       resume.created_at,
                                     ).toLocaleDateString("en-US", {
@@ -912,7 +901,7 @@ function CandidateDashboardContent() {
                                   )}
                                   {resume.view_count !== undefined && (
                                     <span className="flex items-center gap-1">
-                                      <Eye className="w-3 h-3" />
+                                      <Eye className="w-2.5 h-2.5" />
                                       {resume.access_count} views
                                     </span>
                                   )}
@@ -922,14 +911,13 @@ function CandidateDashboardContent() {
                           </div>
 
                           {/* Status Bar */}
-                          <div className="px-4 py-2 bg-gray-50 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 flex items-center justify-between">
+                          <div className="px-3 py-1.5 bg-gray-50 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 flex items-center justify-between">
                             <div className="flex items-center gap-2">
                               <span
-                                className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
-                                  resume.is_active
-                                    ? "bg-[#22C55E] text-white"
-                                    : "bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-400"
-                                }`}
+                                className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${resume.is_active
+                                  ? "bg-[#22C55E] text-white"
+                                  : "bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-400"
+                                  }`}
                               >
                                 {resume.is_active ? "Active" : "Inactive"}
                               </span>
@@ -1008,166 +996,171 @@ function CandidateDashboardContent() {
               <ResumeUpload onUploadSuccess={handleResumeUploadSuccess} />
             </div>
           </div>
-        )}
+        )
+        }
 
         {/* Profile Tab */}
         {activeTab === "profile" && <CandidateProfile />}
-      </main>
+      </main >
 
       {/* Resume Review Modal */}
-      {parsingResumeId && (
-        <div className="fixed inset-0 z-[300] bg-white dark:bg-gray-950 overflow-y-auto">
-          <div className="min-h-screen p-4 md:p-8">
-            <div className="max-w-6xl mx-auto">
-              <button
-                onClick={() => setParsingResumeId(null)}
-                className="mb-4 flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-[#0369A1] dark:hover:text-[#0EA5E9] font-bold transition-colors duration-150 cursor-pointer"
-              >
-                <svg
-                  className="w-5 h-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M15 19l-7-7 7-7"
-                  />
-                </svg>
-                Back to Dashboard
-              </button>
-              <ResumeReview
-                resumeId={parsingResumeId}
-                onSaveComplete={() => {
-                  setParsingResumeId(null);
-                  fetchResumes();
-                }}
-              />
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Share Resume Modal - Flat Design */}
-      {shareModalResume && shareModalResume.permanent_link && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
-          onClick={() => setShareModalResume(null)}
-        >
-          <div
-            className="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-800 max-w-md w-full p-6 relative"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* Close Button */}
-            <button
-              onClick={() => setShareModalResume(null)}
-              className="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded transition-colors duration-150 cursor-pointer"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth={2}
-                stroke="currentColor"
-                className="w-5 h-5"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M6 18 18 6M6 6l12 12"
-                />
-              </svg>
-            </button>
-
-            {/* Modal Header */}
-            <div className="text-center mb-6">
-              <div className="inline-flex items-center justify-center w-12 h-12 rounded-lg bg-blue-600 text-white text-xl mb-3">
-                <Share2 className="w-6 h-6" />
-              </div>
-              <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-1">
-                Share Resume
-              </h3>
-              <p className="text-sm text-gray-500 dark:text-gray-400">
-                {shareModalResume.resume_name}
-              </p>
-            </div>
-
-            {/* QR Code */}
-            {shareModalResume.permanent_link.qr_code_base64 && (
-              <div className="flex justify-center mb-6">
-                <div className="p-4 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
-                  <Image
-                    src={shareModalResume.permanent_link.qr_code_base64}
-                    alt="QR Code"
-                    className="w-48 h-48"
-                    width={192}
-                    height={192}
-                  />
-                </div>
-              </div>
-            )}
-
-            {/* Share URL */}
-            <div className="space-y-3">
-              <label className="block text-sm font-bold text-gray-700 dark:text-gray-300">
-                Share Link
-              </label>
-              <div className="flex items-center gap-2">
-                <input
-                  type="text"
-                  readOnly
-                  value={shareModalResume.permanent_link.share_url}
-                  className="flex-1 px-4 py-3 text-sm bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-700 dark:text-gray-300 font-mono focus:outline-none focus:border-blue-500"
-                />
+      {
+        parsingResumeId && (
+          <div className="fixed inset-0 z-[300] bg-white dark:bg-gray-950 overflow-y-auto">
+            <div className="min-h-screen p-4 md:p-8">
+              <div className="max-w-6xl mx-auto">
                 <button
-                  onClick={() => {
-                    navigator.clipboard.writeText(
-                      shareModalResume.permanent_link!.share_url,
-                    );
-                    toast.success("Link copied to clipboard!");
-                  }}
-                  className="px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold rounded-lg transition-colors duration-150 flex items-center gap-2 cursor-pointer"
+                  onClick={() => setParsingResumeId(null)}
+                  className="mb-4 flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-[#0369A1] dark:hover:text-[#0EA5E9] font-bold transition-colors duration-150 cursor-pointer"
                 >
                   <svg
-                    xmlns="http://www.w3.org/2000/svg"
+                    className="w-5 h-5"
                     fill="none"
-                    viewBox="0 0 24 24"
-                    strokeWidth={2}
                     stroke="currentColor"
-                    className="w-4 h-4"
+                    viewBox="0 0 24 24"
                   >
                     <path
                       strokeLinecap="round"
                       strokeLinejoin="round"
-                      d="M15.666 3.888A2.25 2.25 0 0 0 13.5 2.25h-3c-1.03 0-1.9.693-2.166 1.638m7.332 0c.055.194.084.4.084.612v0a.75.75 0 0 1-.75.75H9a.75.75 0 0 1-.75-.75v0c0-.212.03-.418.084-.612m7.332 0c.646.049 1.288.11 1.927.184 1.1.128 1.907 1.077 1.907 2.185V19.5a2.25 2.25 0 0 1-2.25 2.25H6.75A2.25 2.25 0 0 1 4.5 19.5V6.257c0-1.108.806-2.057 1.907-2.185a48.208 48.208 0 0 1 1.927-.184"
+                      strokeWidth={2}
+                      d="M15 19l-7-7 7-7"
                     />
                   </svg>
-                  Copy
+                  Back to Dashboard
                 </button>
+                <ResumeReview
+                  resumeId={parsingResumeId}
+                  onSaveComplete={() => {
+                    setParsingResumeId(null);
+                    fetchResumes();
+                  }}
+                />
+              </div>
+            </div>
+          </div>
+        )
+      }
+
+      {/* Share Resume Modal - Flat Design */}
+      {
+        shareModalResume && shareModalResume.permanent_link && (
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+            onClick={() => setShareModalResume(null)}
+          >
+            <div
+              className="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-800 max-w-md w-full p-6 relative"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Close Button */}
+              <button
+                onClick={() => setShareModalResume(null)}
+                className="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded transition-colors duration-150 cursor-pointer"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth={2}
+                  stroke="currentColor"
+                  className="w-5 h-5"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M6 18 18 6M6 6l12 12"
+                  />
+                </svg>
+              </button>
+
+              {/* Modal Header */}
+              <div className="text-center mb-6">
+                <div className="inline-flex items-center justify-center w-12 h-12 rounded-lg bg-blue-600 text-white text-xl mb-3">
+                  <Share2 className="w-6 h-6" />
+                </div>
+                <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-1">
+                  Share Resume
+                </h3>
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  {shareModalResume.resume_name}
+                </p>
               </div>
 
-              {/* Stats */}
-              <div className="flex items-center justify-center gap-6 pt-4 text-sm text-gray-500 dark:text-gray-400">
-                <div className="flex items-center gap-2">
-                  <Eye className="w-4 h-4" />
-                  <span className="font-medium">
-                    {shareModalResume.permanent_link.view_count} views
-                  </span>
+              {/* QR Code */}
+              {shareModalResume.permanent_link.qr_code_base64 && (
+                <div className="flex justify-center mb-6">
+                  <div className="p-4 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+                    <Image
+                      src={shareModalResume.permanent_link.qr_code_base64}
+                      alt="QR Code"
+                      className="w-48 h-48"
+                      width={192}
+                      height={192}
+                    />
+                  </div>
                 </div>
+              )}
+
+              {/* Share URL */}
+              <div className="space-y-3">
+                <label className="block text-sm font-bold text-gray-700 dark:text-gray-300">
+                  Share Link
+                </label>
                 <div className="flex items-center gap-2">
-                  <Link2 className="w-4 h-4" />
-                  <span className="font-medium">
-                    {shareModalResume.permanent_link.access_count} accesses
-                  </span>
+                  <input
+                    type="text"
+                    readOnly
+                    value={shareModalResume.permanent_link.share_url}
+                    className="flex-1 px-4 py-3 text-sm bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-700 dark:text-gray-300 font-mono focus:outline-none focus:border-blue-500"
+                  />
+                  <button
+                    onClick={() => {
+                      navigator.clipboard.writeText(
+                        shareModalResume.permanent_link!.share_url,
+                      );
+                      toast.success("Link copied to clipboard!");
+                    }}
+                    className="px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold rounded-lg transition-colors duration-150 flex items-center gap-2 cursor-pointer"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      strokeWidth={2}
+                      stroke="currentColor"
+                      className="w-4 h-4"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M15.666 3.888A2.25 2.25 0 0 0 13.5 2.25h-3c-1.03 0-1.9.693-2.166 1.638m7.332 0c.055.194.084.4.084.612v0a.75.75 0 0 1-.75.75H9a.75.75 0 0 1-.75-.75v0c0-.212.03-.418.084-.612m7.332 0c.646.049 1.288.11 1.927.184 1.1.128 1.907 1.077 1.907 2.185V19.5a2.25 2.25 0 0 1-2.25 2.25H6.75A2.25 2.25 0 0 1 4.5 19.5V6.257c0-1.108.806-2.057 1.907-2.185a48.208 48.208 0 0 1 1.927-.184"
+                      />
+                    </svg>
+                    Copy
+                  </button>
+                </div>
+
+                {/* Stats */}
+                <div className="flex items-center justify-center gap-6 pt-4 text-sm text-gray-500 dark:text-gray-400">
+                  <div className="flex items-center gap-2">
+                    <Eye className="w-4 h-4" />
+                    <span className="font-medium">
+                      {shareModalResume.permanent_link.view_count} views
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Link2 className="w-4 h-4" />
+                    <span className="font-medium">
+                      {shareModalResume.permanent_link.access_count} accesses
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
-      )}
-    </div>
+        )
+      }
+    </div >
   );
 }
 

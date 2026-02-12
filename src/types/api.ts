@@ -4,6 +4,10 @@ export interface User {
   full_name: string;
   phone?: string;
   created_at?: string;
+  location?: string;
+  current_position?: string;
+  bio?: string;
+  profile_image_url?: string;
 }
 
 export interface Recruiter {

@@ -1,264 +1,270 @@
 "use client";
 
-import { useState } from "react";
-import { User, Mail, Phone, MapPin, Briefcase, Calendar, Edit2, Save, X } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Camera } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/context/ToastContext";
 
 export default function CandidateProfile() {
-    const { user } = useAuth();
+    const { user, updateProfile } = useAuth();
     const { success, error } = useToast();
+
     const [isEditing, setIsEditing] = useState(false);
+
     const [formData, setFormData] = useState({
-        full_name: user?.full_name || "",
-        email: user?.email || "",
-        phone: user?.phone || "",
+        full_name: "",
+        email: "",
+        phone: "",
         location: "",
         current_position: "",
         bio: "",
     });
 
+    useEffect(() => {
+        if (user) {
+            setFormData({
+                full_name: user.full_name || "",
+                email: user.email || "",
+                phone: user.phone || "",
+                location: user.location || "",
+                current_position: user.current_position || "",
+                bio: user.bio || "",
+            });
+        }
+    }, [user]);
+
     const handleSave = async () => {
         try {
-            // TODO: Implement API call to update profile
+            await updateProfile(formData);
             success("Profile updated successfully!");
             setIsEditing(false);
         } catch (err) {
+            console.error(err);
             error("Failed to update profile");
         }
     };
 
     const handleCancel = () => {
+        if (!user) return;
+
         setFormData({
-            full_name: user?.full_name || "",
-            email: user?.email || "",
-            phone: user?.phone || "",
-            location: "",
-            current_position: "",
-            bio: "",
+            full_name: user.full_name || "",
+            email: user.email || "",
+            phone: user.phone || "",
+            location: user.location || "",
+            current_position: user.current_position || "",
+            bio: user.bio || "",
         });
+
         setIsEditing(false);
     };
 
-    return (
-        <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-            {/* Header */}
-            <div className="mb-8 flex items-center justify-between">
-                <div>
-                    <h1 className="text-3xl font-black text-gray-900 dark:text-gray-100 mb-2">
-                        My Profile
-                    </h1>
-                    <p className="text-gray-500 dark:text-gray-400">
-                        Manage your personal information and preferences
-                    </p>
-                </div>
-                {!isEditing ? (
-                    <button
-                        onClick={() => setIsEditing(true)}
-                        className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-colors"
-                    >
-                        <Edit2 className="w-4 h-4" />
-                        Edit Profile
-                    </button>
+    const DetailRow = ({
+        label,
+        value,
+        isEditing,
+        field,
+        type = "text",
+        placeholder = "",
+    }: {
+        label: string;
+        value: string;
+        isEditing?: boolean;
+        field?: keyof typeof formData;
+        type?: string;
+        placeholder?: string;
+    }) => (
+        <div className="grid grid-cols-[220px_1fr] py-4 border-b border-gray-100 last:border-b-0">
+            <div className="text-sm font-semibold text-slate-500">
+                {label}
+            </div>
+
+            <div className="text-sm font-semibold text-gray-900">
+                {isEditing && field ? (
+                    field === "bio" ? (
+                        <textarea
+                            value={formData[field]}
+                            onChange={(e) =>
+                                setFormData({ ...formData, [field]: e.target.value })
+                            }
+                            rows={3}
+                            className="w-full border border-gray-200 rounded-md px-3 py-2 text-sm font-normal focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                            placeholder={placeholder}
+                        />
+                    ) : (
+                        <input
+                            type={type}
+                            value={formData[field]}
+                            onChange={(e) =>
+                                setFormData({ ...formData, [field]: e.target.value })
+                            }
+                            disabled={field === "email"}
+                            className="w-full border border-gray-200 rounded-md px-3 py-2 text-sm font-normal focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:bg-gray-50"
+                            placeholder={placeholder}
+                        />
+                    )
                 ) : (
-                    <div className="flex gap-2">
-                        <button
-                            onClick={handleCancel}
-                            className="flex items-center gap-2 px-4 py-2 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 rounded-lg transition-colors"
-                        >
-                            <X className="w-4 h-4" />
-                            Cancel
-                        </button>
-                        <button
-                            onClick={handleSave}
-                            className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-colors"
-                        >
-                            <Save className="w-4 h-4" />
-                            Save Changes
-                        </button>
-                    </div>
+                    value || "None"
                 )}
             </div>
+        </div>
+    );
 
-            {/* Profile Card */}
-            <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-8 mb-6">
-                {/* Avatar Section */}
-                <div className="flex items-center gap-6 mb-8 pb-8 border-b border-gray-100 dark:border-gray-800">
-                    <div className="w-24 h-24 rounded-full bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center text-white text-3xl font-bold">
-                        {user?.full_name?.charAt(0).toUpperCase() || "U"}
-                    </div>
-                    <div className="flex-1">
-                        <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-1">
-                            {user?.full_name || "User"}
-                        </h2>
-                        <p className="text-gray-500 dark:text-gray-400 mb-3">
-                            {formData.current_position || "Job Seeker"}
+    return (
+        <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+
+            {/* ================= Header / Banner ================= */}
+            <div className="relative mb-10">
+
+                <div className="h-[200px] rounded-xl overflow-hidden border border-gray-100 bg-white relative">
+
+                    <div
+                        className="absolute inset-0"
+                        style={{
+                            backgroundImage: `
+                linear-gradient(to right, #f1f5f9 1px, transparent 1px),
+                linear-gradient(to bottom, #f1f5f9 1px, transparent 1px)
+              `,
+                            backgroundSize: "40px 40px",
+                        }}
+                    />
+
+                    {/* Member Since */}
+                    <div className="absolute right-8 top-1/2 translate-y-1/2 text-right z-10">
+                        <p className="text-sm font-semibold text-gray-900">
+                            Member Since
                         </p>
-                        {isEditing && (
-                            <button className="text-sm text-indigo-600 dark:text-indigo-400 hover:underline">
-                                Change Profile Picture
-                            </button>
-                        )}
+                        <p className="text-sm text-slate-500">
+                            {user?.created_at
+                                ? new Date(user.created_at).toLocaleDateString("en-US", {
+                                    month: "long",
+                                    year: "numeric",
+                                })
+                                : "July 2025"}
+                        </p>
                     </div>
                 </div>
 
-                {/* Profile Information */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {/* Full Name */}
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                            <div className="flex items-center gap-2">
-                                <User className="w-4 h-4" />
-                                Full Name
-                            </div>
-                        </label>
-                        {isEditing ? (
-                            <input
-                                type="text"
-                                value={formData.full_name}
-                                onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
-                                className="w-full px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                {/* Profile row */}
+                <div className="absolute left-10 top-[20px] text-center items-center gap-4">
+
+                    {/* Avatar */}
+                    <div className="relative ">
+                        <div className="w-[96px] ml-6 h-[96px] rounded-full border-4 border-white overflow-hidden bg-red-800">
+                            <img
+                                src={
+                                    user?.profile_image_url ||
+                                    `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                                        user?.full_name || "User Name"
+                                    )}&background=random`
+                                }
+                                alt="profile"
+                                className="w-full h-full object-cover "
                             />
-                        ) : (
-                            <p className="text-gray-900 dark:text-gray-100 font-medium">
-                                {formData.full_name || "Not provided"}
-                            </p>
-                        )}
-                    </div>
-
-                    {/* Email */}
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                            <div className="flex items-center gap-2">
-                                <Mail className="w-4 h-4" />
-                                Email Address
-                            </div>
-                        </label>
-                        <p className="text-gray-900 dark:text-gray-100 font-medium">
-                            {formData.email || "Not provided"}
-                        </p>
-                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                            Email cannot be changed
-                        </p>
-                    </div>
-
-                    {/* Phone */}
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                            <div className="flex items-center gap-2">
-                                <Phone className="w-4 h-4" />
-                                Phone Number
-                            </div>
-                        </label>
-                        {isEditing ? (
-                            <input
-                                type="tel"
-                                value={formData.phone}
-                                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                                className="w-full px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                                placeholder="+1 (555) 000-0000"
-                            />
-                        ) : (
-                            <p className="text-gray-900 dark:text-gray-100 font-medium">
-                                {formData.phone || "Not provided"}
-                            </p>
-                        )}
-                    </div>
-
-                    {/* Location */}
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                            <div className="flex items-center gap-2">
-                                <MapPin className="w-4 h-4" />
-                                Location
-                            </div>
-                        </label>
-                        {isEditing ? (
-                            <input
-                                type="text"
-                                value={formData.location}
-                                onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                                className="w-full px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                                placeholder="City, Country"
-                            />
-                        ) : (
-                            <p className="text-gray-900 dark:text-gray-100 font-medium">
-                                {formData.location || "Not provided"}
-                            </p>
-                        )}
-                    </div>
-
-                    {/* Current Position */}
-                    <div className="md:col-span-2">
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                            <div className="flex items-center gap-2">
-                                <Briefcase className="w-4 h-4" />
-                                Current Position
-                            </div>
-                        </label>
-                        {isEditing ? (
-                            <input
-                                type="text"
-                                value={formData.current_position}
-                                onChange={(e) => setFormData({ ...formData, current_position: e.target.value })}
-                                className="w-full px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                                placeholder="e.g., Senior Software Engineer"
-                            />
-                        ) : (
-                            <p className="text-gray-900 dark:text-gray-100 font-medium">
-                                {formData.current_position || "Not provided"}
-                            </p>
-                        )}
-                    </div>
-
-                    {/* Bio */}
-                    <div className="md:col-span-2">
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                            About Me
-                        </label>
-                        {isEditing ? (
-                            <textarea
-                                value={formData.bio}
-                                onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
-                                rows={4}
-                                className="w-full px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                                placeholder="Tell us about yourself..."
-                            />
-                        ) : (
-                            <p className="text-gray-900 dark:text-gray-100">
-                                {formData.bio || "No bio provided"}
-                            </p>
-                        )}
-                    </div>
-                </div>
-            </div>
-
-            {/* Account Information */}
-            <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-8">
-                <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-6">
-                    Account Information
-                </h3>
-                <div className="space-y-4">
-                    <div className="flex items-center justify-between py-3 border-b border-gray-100 dark:border-gray-800">
-                        <div className="flex items-center gap-3">
-                            <Calendar className="w-5 h-5 text-gray-400" />
-                            <div>
-                                <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
-                                    Member Since
-                                </p>
-                                <p className="text-sm text-gray-500 dark:text-gray-400">
-                                    {user?.created_at
-                                        ? new Date(user.created_at).toLocaleDateString("en-US", {
-                                            month: "long",
-                                            year: "numeric",
-                                        })
-                                        : "N/A"}
-                                </p>
-                            </div>
                         </div>
+
+                        {isEditing && (
+                            <div className="absolute inset-0 rounded-full bg-black/40 flex items-center justify-center cursor-pointer">
+                                <Camera className="w-6 h-6 text-white" />
+                            </div>
+                        )}
                     </div>
+
+                    {/* Name + role */}
+                    <div className="pr-20">
+                        <h1 className="text-xl font-bold text-gray-900">
+                            {formData.full_name || "User Name"}
+                        </h1>
+                        <p className="text-slate-500">
+                            {formData.current_position || "No position set"}
+                        </p>
+                    </div>
+
                 </div>
             </div>
+
+            {/* ================= Personal Details ================= */}
+            <div className="bg-white rounded-xl border border-gray-100 overflow-hidden">
+
+                <div className="px-6 py-2 border-b border-slate-900 bg-slate-900 flex justify-between items-center">
+                    <h3 className="text-lg font-bold text-white">
+                        Personal details
+                    </h3>
+
+                    {!isEditing ? (
+                        <button
+                            onClick={() => setIsEditing(true)}
+                            className="text-sm font-medium text-white hover:text-gray-200"
+                        >
+                            Edit
+                        </button>
+                    ) : (
+                        <div className="flex gap-4">
+                            <button
+                                onClick={handleCancel}
+                                className="text-sm font-medium text-gray-400 hover:text-gray-200"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={handleSave}
+                                className="text-sm font-medium text-white hover:text-gray-200"
+                            >
+                                Save
+                            </button>
+                        </div>
+                    )}
+                </div>
+
+                <div className="px-6">
+
+                    <DetailRow
+                        label="Full Name"
+                        value={formData.full_name}
+                        isEditing={isEditing}
+                        field="full_name"
+                    />
+
+                    <DetailRow
+                        label="Email Address"
+                        value={formData.email}
+                        isEditing={isEditing}
+                        field="email"
+                        type="email"
+                    />
+
+                    <DetailRow
+                        label="Phone Number"
+                        value={formData.phone}
+                        isEditing={isEditing}
+                        field="phone"
+                        type="tel"
+                    />
+
+                    <DetailRow
+                        label="Location"
+                        value={formData.location}
+                        isEditing={isEditing}
+                        field="location"
+                    />
+
+                    <DetailRow
+                        label="Current Position"
+                        value={formData.current_position}
+                        isEditing={isEditing}
+                        field="current_position"
+                    />
+
+                    <DetailRow
+                        label="About Me"
+                        value={formData.bio}
+                        isEditing={isEditing}
+                        field="bio"
+                    />
+
+                </div>
+            </div>
+
         </div>
     );
 }

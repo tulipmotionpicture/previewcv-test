@@ -6,11 +6,11 @@ import { api } from "@/lib/api";
 import { useAuth } from "@/context/AuthContext";
 import { User, PdfResume, Resume, Application } from "@/types/api";
 import Link from "next/link";
+import CandidateProfile from "@/components/candidate/CandidateProfile";
 
 export default function CandidateProfilePage() {
-  const { isAuthenticated, logout } = useAuth();
+  const { isAuthenticated, user, logout } = useAuth();
   const router = useRouter();
-  const [user, setUser] = useState<User | null>(null);
   const [applications, setApplications] = useState<Application[]>([]);
   const [pdfResumes, setPdfResumes] = useState<PdfResume[]>([]);
   const [builderResumes, setBuilderResumes] = useState<Resume[]>([]);
@@ -18,13 +18,6 @@ export default function CandidateProfilePage() {
   const [activeTab, setActiveTab] = useState<
     "profile" | "applications" | "resumes"
   >("profile");
-
-  // Edit mode states
-  const [isEditing, setIsEditing] = useState(false);
-  const [editForm, setEditForm] = useState({
-    full_name: "",
-    phone: "",
-  });
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -38,8 +31,7 @@ export default function CandidateProfilePage() {
   const fetchProfileData = async () => {
     setLoading(true);
     try {
-      const [userRes, appsRes, pdfRes, builderRes] = await Promise.all([
-        api.getCandidateProfile(),
+      const [appsRes, pdfRes, builderRes] = await Promise.all([
         api
           .getMyApplications()
           .catch(() => ({
@@ -51,11 +43,6 @@ export default function CandidateProfilePage() {
         api.getResumes().catch(() => []),
       ]);
 
-      setUser(userRes);
-      setEditForm({
-        full_name: userRes.full_name || "",
-        phone: userRes.phone || "",
-      });
       setApplications(appsRes.applications || []);
       setPdfResumes(pdfRes.resumes || []);
       setBuilderResumes(builderRes || []);
@@ -66,17 +53,7 @@ export default function CandidateProfilePage() {
     }
   };
 
-  const handleUpdateProfile = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      const updated = await api.updateCandidateProfile(editForm);
-      setUser(updated);
-      setIsEditing(false);
-    } catch (error) {
-      console.error("Failed to update profile:", error);
-      alert("Failed to update profile");
-    }
-  };
+
 
   const handleLogout = async () => {
     try {
@@ -142,122 +119,7 @@ export default function CandidateProfilePage() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Profile Header Card */}
-        <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-8 mb-6">
-          <div className="flex items-start justify-between mb-6">
-            <div className="flex items-center gap-6">
-              {/* Avatar */}
-              <div className="w-24 h-24 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center text-white text-3xl font-bold">
-                {user.full_name?.charAt(0).toUpperCase() || "U"}
-              </div>
-
-              {/* User Info */}
-              <div>
-                <h2 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">
-                  {user.full_name}
-                </h2>
-                <p className="text-gray-600 dark:text-gray-400 mb-1">
-                  {user.email}
-                </p>
-                {user.phone && (
-                  <p className="text-gray-600 dark:text-gray-400">
-                    {user.phone}
-                  </p>
-                )}
-                {user.created_at && (
-                  <p className="text-sm text-gray-500 dark:text-gray-500 mt-2">
-                    Member since{" "}
-                    {new Date(user.created_at).toLocaleDateString("en-US", {
-                      year: "numeric",
-                      month: "long",
-                      day: "numeric",
-                    })}
-                  </p>
-                )}
-              </div>
-            </div>
-
-            {!isEditing && (
-              <button
-                onClick={() => setIsEditing(true)}
-                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors flex items-center gap-2"
-              >
-                <svg
-                  className="w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                  />
-                </svg>
-                Edit Profile
-              </button>
-            )}
-          </div>
-
-          {/* Edit Form */}
-          {isEditing && (
-            <form
-              onSubmit={handleUpdateProfile}
-              className="border-t border-gray-200 dark:border-gray-800 pt-6 mt-6"
-            >
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Full Name
-                  </label>
-                  <input
-                    type="text"
-                    value={editForm.full_name}
-                    onChange={(e) =>
-                      setEditForm({ ...editForm, full_name: e.target.value })
-                    }
-                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Phone Number
-                  </label>
-                  <input
-                    type="tel"
-                    value={editForm.phone}
-                    onChange={(e) =>
-                      setEditForm({ ...editForm, phone: e.target.value })
-                    }
-                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  />
-                </div>
-              </div>
-              <div className="flex gap-3">
-                <button
-                  type="submit"
-                  className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors"
-                >
-                  Save Changes
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setIsEditing(false);
-                    setEditForm({
-                      full_name: user.full_name || "",
-                      phone: user.phone || "",
-                    });
-                  }}
-                  className="px-6 py-2 bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg font-medium hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
-                >
-                  Cancel
-                </button>
-              </div>
-            </form>
-          )}
-        </div>
+        <CandidateProfile />
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
@@ -353,21 +215,19 @@ export default function CandidateProfilePage() {
             <div className="flex">
               <button
                 onClick={() => setActiveTab("applications")}
-                className={`flex-1 px-6 py-4 text-sm font-medium transition-colors ${
-                  activeTab === "applications"
+                className={`flex-1 px-6 py-4 text-sm font-medium transition-colors ${activeTab === "applications"
                     ? "text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400 bg-blue-50 dark:bg-blue-900/20"
                     : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100"
-                }`}
+                  }`}
               >
                 My Applications ({applications.length})
               </button>
               <button
                 onClick={() => setActiveTab("resumes")}
-                className={`flex-1 px-6 py-4 text-sm font-medium transition-colors ${
-                  activeTab === "resumes"
+                className={`flex-1 px-6 py-4 text-sm font-medium transition-colors ${activeTab === "resumes"
                     ? "text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400 bg-blue-50 dark:bg-blue-900/20"
                     : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100"
-                }`}
+                  }`}
               >
                 My Resumes ({totalResumes})
               </button>

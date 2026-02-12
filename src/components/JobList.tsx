@@ -46,7 +46,7 @@ export default function JobList({ jobs, loading, error }: JobListProps) {
   };
 
   return (
-    <div className="relative">
+    <div className="relative pt-10">
       {error ? (
         <div className="text-center py-12 text-red-500 font-semibold">
           {error}

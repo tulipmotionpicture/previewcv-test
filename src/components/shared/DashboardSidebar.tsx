@@ -111,8 +111,9 @@ export default function DashboardSidebar<T extends string>({
             </nav>
 
             {/* User Profile Section - Flat Design */}
-            {userName && (
-                <div className="mt-auto px-2 pb-4">
+            {/* User Profile Section - Flat Design */}
+            <div className="mt-auto px-2 pb-4">
+                {userName && (
                     <div className="bg-[#1C2534] dark:bg-[#1E293B] rounded-lg p-2.5 flex items-center gap-2.5 mb-2 shadow-sm border border-gray-700/50">
                         {/* User Avatar - Circle Design */}
                         <div className="w-8 h-8 rounded-full bg-[#111827] flex items-center justify-center flex-shrink-0 text-white font-bold text-xs border border-gray-600">
@@ -127,17 +128,17 @@ export default function DashboardSidebar<T extends string>({
                             </p>
                         </div>
                     </div>
+                )}
 
-                    {/* Logout Button - Red Text Design */}
-                    <button
-                        onClick={onLogout}
-                        className="w-full flex items-center justify-center gap-1.5 px-4 py-1.5 text-xs font-bold text-[#FF4444] hover:text-[#FF2222] transition-colors duration-150 cursor-pointer"
-                    >
-                        <LogOut className="w-4 h-4" />
-                        LogOut
-                    </button>
-                </div>
-            )}
+                {/* Logout Button - Red Text Design */}
+                <button
+                    onClick={onLogout}
+                    className="w-full flex items-center justify-center gap-1.5 px-4 py-1.5 text-xs font-bold text-[#FF4444] hover:text-[#FF2222] transition-colors duration-150 cursor-pointer"
+                >
+                    <LogOut className="w-4 h-4" />
+                    LogOut
+                </button>
+            </div>
         </aside>
     );
 }

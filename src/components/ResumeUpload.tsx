@@ -12,9 +12,10 @@ type Step = "idle" | "parsing" | "review";
 interface ResumeUploadProps {
   onUploadSuccess: (resumeId: number, metadata?: ResumeMetadata) => void;
   existingResumeId?: number;
+  variant?: "default" | "minimal";
 }
 
-export default function ResumeUpload({ onUploadSuccess, existingResumeId }: ResumeUploadProps) {
+export default function ResumeUpload({ onUploadSuccess, existingResumeId, variant = "default" }: ResumeUploadProps) {
   const [step, setStep] = useState<Step>(existingResumeId ? "parsing" : "idle");
   const [currentResumeId, setCurrentResumeId] = useState<number | null>(existingResumeId || null);
   const [isDragging, setIsDragging] = useState(false);
@@ -68,6 +69,8 @@ export default function ResumeUpload({ onUploadSuccess, existingResumeId }: Resu
     setCurrentResumeId(null);
   };
 
+  const isMinimal = variant === "minimal";
+
   return (
     <div className="w-full">
       {/* Upload Zone - Flat Design */}
@@ -78,8 +81,8 @@ export default function ResumeUpload({ onUploadSuccess, existingResumeId }: Resu
           onDragOver={handleDrag}
           onDrop={handleDrop}
           className={`relative group overflow-hidden rounded-lg border-2 border-dashed transition-all duration-150 cursor-pointer ${isDragging
-              ? "border-[#0369A1] bg-[#F0F9FF] dark:bg-blue-900/10"
-              : "border-gray-300 dark:border-gray-700 hover:border-[#0369A1] dark:hover:border-[#0EA5E9] bg-white dark:bg-gray-900"
+            ? "border-[#0369A1] bg-[#F0F9FF] dark:bg-blue-900/10"
+            : "border-gray-300 dark:border-gray-700 hover:border-[#0369A1] dark:hover:border-[#0EA5E9] bg-white dark:bg-gray-900"
             }`}
         >
           <input
@@ -93,19 +96,19 @@ export default function ResumeUpload({ onUploadSuccess, existingResumeId }: Resu
 
           <label
             htmlFor="resume-upload"
-            className="cursor-pointer flex flex-col items-center justify-center py-12 px-8"
+            className={`cursor-pointer flex flex-col items-center justify-center ${isMinimal ? "py-6 px-4" : "py-12 px-8"}`}
           >
             {/* Icon - Flat Design */}
-            <div className="relative mb-6">
-              <div className={`w-16 h-16 rounded-lg flex items-center justify-center transition-all duration-150 ${isDragging ? "bg-[#0369A1] scale-105" : "bg-gray-100 dark:bg-gray-800 group-hover:bg-[#0369A1]/10"
+            <div className={`relative ${isMinimal ? "mb-3" : "mb-6"}`}>
+              <div className={`${isMinimal ? "w-10 h-10" : "w-16 h-16"} rounded-lg flex items-center justify-center transition-all duration-150 ${isDragging ? "bg-[#0369A1] scale-105" : "bg-gray-100 dark:bg-gray-800 group-hover:bg-[#0369A1]/10"
                 }`}>
                 {uploading ? (
-                  <div className="animate-spin rounded-full h-8 w-8 border-2 border-[#0369A1] border-t-transparent" />
+                  <div className={`animate-spin rounded-full border-2 border-[#0369A1] border-t-transparent ${isMinimal ? "h-5 w-5" : "h-8 w-8"}`} />
                 ) : (
-                  <Upload className={`w-8 h-8 transition-colors duration-150 ${isDragging ? "text-white" : "text-gray-400 group-hover:text-[#0369A1]"}`} />
+                  <Upload className={`${isMinimal ? "w-5 h-5" : "w-8 h-8"} transition-colors duration-150 ${isDragging ? "text-white" : "text-gray-400 group-hover:text-[#0369A1]"}`} />
                 )}
               </div>
-              {!uploading && (
+              {!uploading && !isMinimal && (
                 <div className="absolute -bottom-1 -right-1 bg-white dark:bg-gray-800 p-1.5 rounded-lg border border-gray-200 dark:border-gray-700 group-hover:scale-110 transition-all duration-150">
                   <FileText className="w-4 h-4 text-[#0369A1]" />
                 </div>
@@ -113,30 +116,34 @@ export default function ResumeUpload({ onUploadSuccess, existingResumeId }: Resu
             </div>
 
             {/* Text Content */}
-            <div className="text-center space-y-2">
-              <h3 className="text-xl font-bold text-[#0C4A6E] dark:text-gray-100">
-                {uploading ? "Uploading Resume..." : "Drop your Resume here"}
+            <div className="text-center space-y-1">
+              <h3 className={`${isMinimal ? "text-sm" : "text-xl"} font-bold text-[#0C4A6E] dark:text-gray-100`}>
+                {uploading ? "Uploading..." : "Drop your Resume here"}
               </h3>
-              <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">
-                We'll use AI to extract your experience
-              </p>
+              {!isMinimal && (
+                <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">
+                  We'll use AI to extract your experience
+                </p>
+              )}
             </div>
 
             {/* Features - Flat Design */}
-            <div className="mt-8 flex items-center gap-6 text-xs font-bold uppercase tracking-wide text-gray-500 dark:text-gray-400">
-              <div className="flex items-center gap-2">
-                <div className="w-1.5 h-1.5 rounded-full bg-[#0369A1]" />
-                PDF Only
+            {!isMinimal && (
+              <div className="mt-8 flex items-center gap-6 text-xs font-bold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                <div className="flex items-center gap-2">
+                  <div className="w-1.5 h-1.5 rounded-full bg-[#0369A1]" />
+                  PDF Only
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-1.5 h-1.5 rounded-full bg-[#0EA5E9]" />
+                  Max 5MB
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-1.5 h-1.5 rounded-full bg-[#22C55E]" />
+                  AI Powered
+                </div>
               </div>
-              <div className="flex items-center gap-2">
-                <div className="w-1.5 h-1.5 rounded-full bg-[#0EA5E9]" />
-                Max 5MB
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-1.5 h-1.5 rounded-full bg-[#22C55E]" />
-                AI Powered
-              </div>
-            </div>
+            )}
           </label>
         </div>
       )}
@@ -212,7 +219,7 @@ export default function ResumeUpload({ onUploadSuccess, existingResumeId }: Resu
       )}
 
       {/* Privacy Notice - Flat Design */}
-      {step === "idle" && (
+      {step === "idle" && !isMinimal && (
         <div className="mt-4 flex items-center gap-3 px-4 py-3 bg-[#F0F9FF] dark:bg-blue-900/10 rounded-lg border border-[#0EA5E9]/20 dark:border-blue-900/20">
           <Shield className="w-4 h-4 text-[#0369A1] dark:text-[#0EA5E9] flex-shrink-0" />
           <p className="text-xs font-medium text-gray-600 dark:text-gray-400 leading-snug">

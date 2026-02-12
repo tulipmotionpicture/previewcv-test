@@ -2,13 +2,32 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { api, ResumeMetadata } from "@/lib/api";
 import { Job, PdfResume, Resume } from "@/types/api";
 import { useAuth } from "@/context/AuthContext";
 import ResumeUpload from "@/components/ResumeUpload";
 import BookmarkButton from "@/components/BookmarkButton";
 import ResumeReview from "@/components/ResumeReview";
-import { Check, Send, Plus, ExternalLink, Zap, Eye, X, Briefcase, GraduationCap, Wrench, Languages, Building2, MapPin, Calendar, LogIn, Share2, Copy } from "lucide-react";
+import {
+  Check,
+  Send,
+  Plus,
+  ExternalLink,
+  Zap,
+  Eye,
+  X,
+  Briefcase,
+  GraduationCap,
+  Wrench,
+  Languages,
+  Sparkles,
+  UploadCloud,
+  Calendar,
+  LogIn,
+  MapPin,
+  Users
+} from "lucide-react";
 
 interface JobDetailsClientProps {
   job: Job;
@@ -33,12 +52,17 @@ export default function JobDetailsClient({ job, slug }: JobDetailsClientProps) {
   const [linkedEntities, setLinkedEntities] = useState<any>(null);
   const [showLinkedDataModal, setShowLinkedDataModal] = useState(false);
 
-  // Fetch bookmark status when authenticated
+  // Similar jobs state
+  const [similarJobs, setSimilarJobs] = useState<Job[]>([]);
+
+  // Fetch bookmark status and similar jobs when authenticated or mounted
   useEffect(() => {
     if (isAuthenticated) {
       fetchJobStatus();
       fetchResumes();
     }
+    fetchSimilarJobs();
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAuthenticated]);
 
@@ -51,6 +75,25 @@ export default function JobDetailsClient({ job, slug }: JobDetailsClientProps) {
       }
     } catch (error) {
       console.error("Failed to fetch bookmark status:", error);
+    }
+  };
+
+
+
+  const fetchSimilarJobs = async () => {
+    try {
+      const params = new URLSearchParams();
+      if (job.categories && job.categories.length > 0) {
+        params.append('category', job.categories[0]);
+      }
+      params.append('limit', '3');
+      const response = await api.getJobs(params);
+      if (response.data) {
+        // Filter out current job
+        setSimilarJobs(response.data.filter(j => j.id !== job.id).slice(0, 3));
+      }
+    } catch (error) {
+      console.error("Failed to fetch similar jobs", error);
     }
   };
 
@@ -139,240 +182,255 @@ export default function JobDetailsClient({ job, slug }: JobDetailsClientProps) {
     }
     fetchResumes();
   };
-
-  const handleShare = async () => {
-    try {
-      if (navigator.share) {
-        await navigator.share({
-          title: job.title,
-          text: `Check out this ${job.title} at ${job.company_name}`,
-          url: window.location.href,
-        });
-      } else {
-        await navigator.clipboard.writeText(window.location.href);
-        // Could enable a toast here, but for now simple alert or just success state
-        alert("Link copied to clipboard!");
-      }
-    } catch (err) {
-      console.error("Error sharing:", err);
-    }
+  const formatCurrency = (amount: number, currency: string) => {
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: currency,
+      maximumFractionDigits: 0,
+    }).format(amount);
   };
 
+
   return (
-    <>
-      {/* Sticky Application Card - Flat Design */}
-      <div className="sticky top-24 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg p-6 transition-all duration-150">
-        <div className="flex items-center justify-between mb-6 pb-4 border-b border-gray-100 dark:border-gray-800">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-[#F0F9FF] dark:bg-blue-900/20 rounded-lg flex items-center justify-center border border-[#0EA5E9]/20">
-              <Plus className="w-5 h-5 text-[#0369A1] dark:text-[#0EA5E9]" />
+    <div className="space-y-8">
+      {/* Sticky Application Card */}
+      <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg p-5 shadow-sm sticky top-24  ">
+        <div className="flex items-start justify-between mb-4">
+          <div className="flex items-start gap-3">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center shadow-md">
+              <Sparkles className="w-4 h-4 text-white" />
             </div>
-            <h3 className="text-xl font-bold text-[#0C4A6E] dark:text-gray-100">
-              Application
-            </h3>
+            <div>
+              <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100">Apply for this Job</h2>
+              <p className="text-xs text-gray-500 dark:text-gray-400">{job.company_name}</p>
+            </div>
           </div>
-          <div className="flex flex-col gap-2">
-            <BookmarkButton
-              jobId={job.id}
-              jobSlug={job.slug}
-              isBookmarked={isBookmarked}
-              onBookmarkChange={setIsBookmarked}
-              size="md"
-            />
-            <button
-              onClick={handleShare}
-              className="p-2 text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors rounded-full hover:bg-blue-50 dark:hover:bg-blue-900/20 flex items-center justify-center border border-transparent hover:border-blue-100 dark:hover:border-blue-900"
-              title="Share Job"
-            >
-              <Share2 className="w-5 h-5" />
-            </button>
-          </div>
+          <BookmarkButton
+            jobId={job.id}
+            jobSlug={job.slug}
+            isBookmarked={isBookmarked}
+            onBookmarkChange={setIsBookmarked}
+            size="sm"
+          />
         </div>
 
         {isApplied ? (
-          <div className="bg-[#DCFCE7] dark:bg-green-900/20 text-[#166534] dark:text-green-400 p-8 rounded-lg text-center border border-[#BBF7D0] dark:border-green-800">
-            <div className="w-16 h-16 bg-white dark:bg-green-800/20 rounded-lg flex items-center justify-center mx-auto mb-4 border border-[#BBF7D0] dark:border-green-700">
-              <Check className="w-8 h-8 text-[#166534] dark:text-green-400" />
+          <div className="bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 p-4 rounded-lg text-center border border-green-200 dark:border-green-800">
+            <div className="w-10 h-10 bg-white dark:bg-green-800/20 rounded-full flex items-center justify-center mx-auto mb-2 border border-green-200 dark:border-green-700">
+              <Check className="w-5 h-5 text-green-600 dark:text-green-400" />
             </div>
-            <p className="font-bold text-lg mb-2">Application Sent</p>
-            <p className="text-sm opacity-80">
+            <p className="font-bold mb-1 text-sm">Application Sent</p>
+            <p className="text-xs opacity-90">
               You've already applied for this position.
             </p>
           </div>
         ) : applySuccess ? (
-          <div className="bg-[#DCFCE7] dark:bg-green-900/20 text-[#166534] dark:text-green-400 p-8 rounded-lg text-center border border-[#BBF7D0] dark:border-green-800 animate-in fade-in zoom-in duration-200">
-            <div className="w-16 h-16 bg-white dark:bg-green-800/20 rounded-lg flex items-center justify-center mx-auto mb-4 border border-[#BBF7D0] dark:border-green-700">
-              <Check className="w-8 h-8 text-[#166534] dark:text-green-400" />
+          <div className="bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 p-4 rounded-lg text-center border border-green-200 dark:border-green-800 animate-in fade-in zoom-in duration-200">
+            <div className="w-10 h-10 bg-white dark:bg-green-800/20 rounded-full flex items-center justify-center mx-auto mb-2 border border-green-200 dark:border-green-700">
+              <Check className="w-5 h-5 text-green-600 dark:text-green-400" />
             </div>
-            <p className="font-bold text-lg mb-2">Awesome!</p>
-            <p className="text-sm opacity-80">
+            <p className="font-bold mb-1 text-sm">Success!</p>
+            <p className="text-xs opacity-90">
               Your application has been received.
             </p>
           </div>
         ) : (
-          <form onSubmit={handleApply} className="space-y-6">
+          <form onSubmit={handleApply} className="space-y-4">
             <div>
-              <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">
-                Cover Letter <span className="font-normal opacity-60">(Optional)</span>
+              <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5">
+                Cover Letter <span className="text-gray-400 font-normal">(Optional)</span>
               </label>
               <textarea
-                rows={4}
-                className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-1 focus:ring-[#0369A1] focus:border-[#0369A1] outline-none transition-all duration-150 text-sm placeholder-gray-400 dark:placeholder-gray-500"
-                placeholder="Tell the recruiter why you're a good fit..."
+                rows={3}
+                className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all text-sm resize-none"
+                placeholder="Tell us why you are perfect fit....."
                 value={coverLetter}
                 onChange={(e) => setCoverLetter(e.target.value)}
               />
             </div>
 
-            <div className="space-y-4">
-              <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">
+            <div>
+              <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5">
                 Resume <span className="text-red-500">*</span>
               </label>
 
               {loadingResumes ? (
-                <div className="flex items-center justify-center py-6">
-                  <div className="animate-spin rounded-full h-8 w-8 border-2 border-[#0369A1] border-t-transparent"></div>
+                <div className="flex items-center justify-center py-3 bg-gray-50 rounded-lg border border-dashed border-gray-200">
+                  <div className="animate-spin w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full"></div>
                 </div>
               ) : (
-                <div className="space-y-4">
-                  {(pdfResumes.length > 0 || builderResumes.length > 0) && (
-                    <select
-                      value={resumeId || ""}
-                      onChange={(e) => setResumeId(Number(e.target.value))}
-                      className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg outline-none text-sm font-bold cursor-pointer transition-colors duration-150 focus:border-[#0369A1]"
-                    >
-                      <option value="" disabled>Select from your resumes</option>
-                      {pdfResumes.length > 0 && (
-                        <optgroup label="Uploaded PDF Resumes">
-                          {pdfResumes.map((r) => (
-                            <option key={`pdf-${r.id}`} value={r.id}>{r.resume_name}</option>
-                          ))}
-                        </optgroup>
-                      )}
-                      {builderResumes.length > 0 && (
-                        <optgroup label="Resume Builder CVs">
-                          {builderResumes.map((r) => (
-                            <option key={`builder-${r.id}`} value={r.id}>{r.name}</option>
-                          ))}
-                        </optgroup>
-                      )}
-                    </select>
-                  )}
+                <div className="space-y-2">
+                  <select
+                    value={resumeId || ""}
+                    onChange={(e) => setResumeId(Number(e.target.value))}
+                    className="w-full px-3 py-2.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg outline-none text-sm font-medium cursor-pointer focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="" disabled>Select Resume</option>
+                    {pdfResumes.length > 0 && (
+                      <optgroup label="Uploaded PDF Resumes">
+                        {pdfResumes.map((r) => (
+                          <option key={`pdf-${r.id}`} value={r.id}>{r.resume_name}</option>
+                        ))}
+                      </optgroup>
+                    )}
+                    {builderResumes.length > 0 && (
+                      <optgroup label="Resume Builder CVs">
+                        {builderResumes.map((r) => (
+                          <option key={`builder-${r.id}`} value={r.id}>{r.name}</option>
+                        ))}
+                      </optgroup>
+                    )}
+                  </select>
 
                   {!resumeId && (
-                    <div className="p-1">
-                      <ResumeUpload onUploadSuccess={handleResumeUploadSuccess} />
-                    </div>
-                  )}
-
-                  {resumeId && (
-                    <div className="space-y-3">
-                      <div className="flex items-center justify-between p-4 bg-[#F0F9FF] dark:bg-blue-900/20 border border-[#0EA5E9]/20 rounded-lg">
-                        <div className="flex items-center gap-2 text-sm text-[#0369A1] dark:text-[#0EA5E9] font-bold">
-                          <Check className="w-4 h-4" />
-                          Resume Ready
-                        </div>
-                        <div className="flex items-center gap-4">
-                          <button
-                            type="button"
-                            onClick={() => setResumeId(null)}
-                            className="text-xs font-bold text-gray-500 hover:text-red-500 transition-colors duration-150 cursor-pointer"
-                          >
-                            Change
-                          </button>
-                          {(() => {
-                            const res = pdfResumes.find(r => r.id === resumeId);
-                            if (res?.permanent_link?.share_url) {
-                              return (
-                                <button
-                                  type="button"
-                                  onClick={() => window.open(res.permanent_link!.share_url, "_blank")}
-                                  className="text-xs font-bold text-[#0369A1] hover:text-[#0EA5E9] flex items-center gap-1 cursor-pointer"
-                                >
-                                  View <ExternalLink className="w-3 h-3" />
-                                </button>
-                              );
-                            }
-                            return null;
-                          })()}
-                        </div>
-                      </div>
-
-                      {pdfResumes.some(r => r.id === resumeId) && (
-                        <div className="flex gap-2">
-                          <button
-                            type="button"
-                            onClick={() => {
-                              if (pdfResumes.find(r => r.id === resumeId)) setParsingResumeId(resumeId);
-                            }}
-                            className="flex-1 flex items-center justify-center gap-2 px-3 py-2.5 bg-[#8B5CF6] hover:bg-[#7C3AED] text-white text-xs font-bold rounded-lg transition-colors duration-150 cursor-pointer"
-                          >
-                            <Zap className="w-4 h-4" />
-                            Revise with AI
-                          </button>
-
-                          <button
-                            type="button"
-                            onClick={async () => {
-                              try {
-                                const data = await api.getLinkedEntities(resumeId);
-                                setLinkedEntities(data);
-                                setShowLinkedDataModal(true);
-                              } catch (err) {
-                                alert("Failed to load saved data.");
-                              }
-                            }}
-                            className="flex-1 flex items-center justify-center gap-2 px-3 py-2.5 bg-white dark:bg-gray-800 border-2 border-[#8B5CF6] text-[#8B5CF6] dark:text-purple-400 text-xs font-bold rounded-lg hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-colors duration-150 cursor-pointer"
-                          >
-                            <Eye className="w-4 h-4" />
-                            Stored Info
-                          </button>
-                        </div>
-                      )}
+                    <div className="pt-1">
+                      <ResumeUpload onUploadSuccess={handleResumeUploadSuccess} variant="minimal" />
                     </div>
                   )}
                 </div>
               )}
             </div>
 
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  if (resumeId) setParsingResumeId(resumeId);
+                  else alert("Please select a resume first");
+                }}
+                className="flex items-center justify-center gap-1.5 px-3 py-2.5 bg-[#a855f7] hover:bg-[#9333ea] text-white rounded-lg text-xs font-bold transition-all shadow-sm shadow-purple-200 dark:shadow-none"
+              >
+                <Zap className="w-3.5 h-3.5" />
+                AI Parse
+              </button>
+              <button
+                type="button"
+                onClick={async () => {
+                  if (resumeId) {
+                    try {
+                      const data = await api.getLinkedEntities(resumeId);
+                      setLinkedEntities(data);
+                      setShowLinkedDataModal(true);
+                    } catch (err) {
+                      alert("Failed to load saved data.");
+                    }
+                  } else {
+                    alert("Please select a resume first");
+                  }
+                }}
+                className="flex items-center justify-center gap-1.5 px-3 py-2.5 bg-white hover:bg-gray-50 text-gray-700 border border-gray-200 rounded-lg text-xs font-bold transition-all"
+              >
+                <Eye className="w-3.5 h-3.5 text-blue-500" />
+                View Data
+              </button>
+            </div>
+
             {!isAuthenticated ? (
               <button
                 onClick={() => router.push(`/candidate/login?redirect=/job/${slug}`)}
-                className="w-full py-4 bg-[#0369A1] hover:bg-[#0284C7] text-white font-bold rounded-lg transition-all duration-150 flex items-center justify-center gap-2 cursor-pointer"
+                className="w-full py-3 bg-[#0077b5] hover:bg-[#006097] text-white font-bold rounded-lg transition-all shadow-lg shadow-blue-200 dark:shadow-none flex items-center justify-center gap-2 text-sm"
               >
-                <LogIn className="w-5 h-5" />
+                <LogIn className="w-4 h-4" />
                 Login to Apply
               </button>
             ) : (
               <button
                 type="submit"
                 disabled={applying || !resumeId}
-                className="w-full py-4 bg-[#0369A1] hover:bg-[#0284C7] text-white font-bold rounded-lg transition-all duration-150 flex items-center justify-center gap-2 disabled:opacity-50 disabled:grayscale cursor-pointer"
+                className="w-full py-3 bg-[#0077b5] hover:bg-[#006097] text-white font-bold rounded-lg transition-all shadow-lg shadow-blue-200 dark:shadow-none flex items-center justify-center gap-2 disabled:opacity-70 disabled:grayscale text-sm"
               >
                 {applying ? (
-                  <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent" />
+                  <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent" />
                 ) : (
                   <>
                     Submit Application
-                    <Send className="w-5 h-5" />
+                    <span className="text-lg">→</span>
                   </>
                 )}
               </button>
             )}
-
-            <p className="text-center text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest leading-relaxed">
-              Shared securely with {job.company_name}
-            </p>
           </form>
         )}
       </div>
 
-      {/* Linked Data Modal - Flat Design */}
+      {/* Similar Jobs Section */}
+      <div>
+        <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-3">Similar jobs</h3>
+        <div className="space-y-3">
+          {similarJobs.map(similarJob => (
+            <div key={similarJob.id} className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg p-5 shadow-sm hover:shadow-md transition-shadow group relative">
+              <div className="absolute top-4 right-4">
+                <BookmarkButton jobId={similarJob.id} jobSlug={similarJob.slug} isBookmarked={similarJob.is_bookmarked || false} onBookmarkChange={() => { }} size="sm" />
+              </div>
+
+              <div className="mb-2 pr-8">
+                <h4 className="font-bold text-gray-900 dark:text-gray-100 group-hover:text-blue-600 transition-colors text-base line-clamp-1">
+                  <Link href={`/job/${similarJob.slug}`}>{similarJob.title}</Link>
+                </h4>
+                <p className="text-xs text-gray-500 dark:text-gray-400">{similarJob.company_name}</p>
+              </div>
+
+              <div className="flex flex-wrap gap-3 mb-3 text-xs text-gray-600 dark:text-gray-400 font-medium">
+                <div className="flex items-center gap-1">
+                  <Briefcase className="w-3.5 h-3.5 text-gray-400" />
+                  {similarJob.experience_level ? `${similarJob.experience_level.replace("entry", "0-2").replace("mid", "2-5").replace("senior", "5+").replace("executive", "10+")} years` : 'Exp N/A'}
+                </div>
+                <div className="flex items-center gap-1">
+                  <span className="font-semibold text-gray-900 dark:text-gray-100">
+                    <span className="text-gray-500 font-normal mr-0.5">₹</span>
+                    {similarJob.salary_min ? formatCurrency(similarJob.salary_min, similarJob.salary_currency || 'USD').replace(/[^0-9,]/g, '') : 'N/A'}
+                  </span>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2 mb-3 text-xs text-gray-500">
+                <div className="flex items-center gap-1">
+                  <MapPin className="w-3.5 h-3.5" />
+                  {similarJob.location}
+                </div>
+                {similarJob.is_remote && (
+                  <span className="px-1.5 py-0.5 bg-yellow-50 text-yellow-700 border border-yellow-100 rounded text-[10px] uppercase font-bold">Remote</span>
+                )}
+                <span className="px-1.5 py-0.5 bg-purple-50 text-purple-700 border border-purple-100 rounded text-[10px] uppercase font-bold">
+                  {similarJob.experience_level || 'Mid Level'}
+                </span>
+              </div>
+
+              <div className="text-xs text-gray-500 font-medium mb-3 line-clamp-2">
+                Build cloud-native applications with <span className="font-bold text-gray-900 italic">AWS</span>
+              </div>
+
+              <div className="flex flex-wrap gap-1.5 mb-4">
+                {similarJob.required_skills?.slice(0, 3).map((skill, idx) => (
+                  <span key={idx} className="px-2 py-0.5 text-[10px] border border-blue-200 text-blue-600 rounded-full font-medium">
+                    {skill}
+                  </span>
+                ))}
+              </div>
+
+              <div className="flex items-center justify-between pt-3 border-t border-gray-100 dark:border-gray-800">
+                <div className="flex items-center gap-3 text-[10px] text-gray-400">
+                  <span>Posted {new Date(similarJob.posted_date).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}</span>
+                </div>
+
+                <Link href={`/job/${similarJob.slug}`} className="px-4 py-1.5 bg-[#0077b5] text-white text-xs font-bold rounded-lg hover:bg-[#006097] transition-colors">
+                  Apply
+                </Link>
+              </div>
+            </div>
+          ))}
+          {similarJobs.length === 0 && (
+            <div className="text-center py-8 text-gray-500 text-sm bg-gray-50 rounded-lg border border-dashed border-gray-200">
+              No similar jobs found at the moment.
+            </div>
+          )}
+        </div>
+      </div>
       {showLinkedDataModal && linkedEntities && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 animate-in fade-in duration-200">
           <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setShowLinkedDataModal(false)} />
           <div className="relative w-full max-w-4xl bg-white dark:bg-gray-950 rounded-lg border border-gray-200 dark:border-gray-800 shadow-2xl overflow-hidden flex flex-col max-h-[90vh] animate-in slide-in-from-bottom-4 duration-200">
-            {/* Modal Header */}
+            {/* ... Modal content similar to previous implementation ... */}
             <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-800 bg-[#F0F9FF] dark:bg-gray-900">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-[#22C55E] rounded-lg flex items-center justify-center">
@@ -388,105 +446,15 @@ export default function JobDetailsClient({ job, slug }: JobDetailsClientProps) {
             </div>
 
             <div className="flex-1 overflow-y-auto custom-scrollbar p-6">
-              <div className="flex justify-end mb-6">
-                <button
-                  onClick={() => {
-                    setShowLinkedDataModal(false);
-                    setParsingResumeId(resumeId);
-                  }}
-                  className="flex items-center gap-2 text-[#0369A1] dark:text-[#0EA5E9] font-bold text-sm hover:underline cursor-pointer"
-                >
-                  <Zap className="w-4 h-4" />
-                  Edit with AI Refiner
-                </button>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                {/* Work Experience */}
-                {linkedEntities.linked_entities?.work_experiences?.length > 0 && (
-                  <section className="space-y-4">
-                    <h3 className="text-sm font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2 uppercase tracking-wider">
-                      <Briefcase className="w-4 h-4 text-[#0369A1]" />
-                      Work Experience
-                    </h3>
-                    <div className="space-y-3">
-                      {linkedEntities.linked_entities.work_experiences.map((exp: any, idx: number) => (
-                        <div key={idx} className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
-                          <div className="font-bold text-gray-900 dark:text-gray-100">{exp.position}</div>
-                          <div className="text-sm text-[#0369A1] dark:text-[#0EA5E9] font-bold">{exp.company}</div>
-                          <div className="text-xs text-gray-500 dark:text-gray-400 mt-1 flex items-center gap-1">
-                            <Calendar className="w-3 h-3" />
-                            {exp.start_date} - {exp.end_date || "Present"}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </section>
-                )}
-
-                {/* Education */}
-                {linkedEntities.linked_entities?.education?.length > 0 && (
-                  <section className="space-y-4">
-                    <h3 className="text-sm font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2 uppercase tracking-wider">
-                      <GraduationCap className="w-4 h-4 text-[#22C55E]" />
-                      Education
-                    </h3>
-                    <div className="space-y-3">
-                      {linkedEntities.linked_entities.education.map((edu: any, idx: number) => (
-                        <div key={idx} className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
-                          <div className="font-bold text-gray-900 dark:text-gray-100">{edu.degree}</div>
-                          <div className="text-sm text-[#22C55E] dark:text-green-400 font-bold">{edu.university}</div>
-                          <div className="text-xs text-gray-500 dark:text-gray-400 mt-1 flex items-center gap-1">
-                            <Calendar className="w-3 h-3" />
-                            {edu.start_year} - {edu.end_year || "Present"}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </section>
-                )}
-              </div>
-
-              {/* Skills and Languages */}
-              <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-8">
-                {linkedEntities.linked_entities?.skills?.length > 0 && (
-                  <section className="space-y-4">
-                    <h3 className="text-sm font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2 uppercase tracking-wider">
-                      <Wrench className="w-4 h-4 text-[#F59E0B]" />
-                      Skills
-                    </h3>
-                    <div className="flex flex-wrap gap-2">
-                      {linkedEntities.linked_entities.skills.map((skill: any, idx: number) => (
-                        <span key={idx} className="px-3 py-1 bg-[#FFFBEB] dark:bg-amber-900/20 text-[#D97706] dark:text-amber-400 rounded-lg text-xs font-bold border border-[#FEF3C7] dark:border-amber-800">
-                          {skill.skill_name} • {skill.proficiency_level}/10
-                        </span>
-                      ))}
-                    </div>
-                  </section>
-                )}
-
-                {linkedEntities.linked_entities?.languages?.length > 0 && (
-                  <section className="space-y-4">
-                    <h3 className="text-sm font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2 uppercase tracking-wider">
-                      <Languages className="w-4 h-4 text-[#8B5CF6]" />
-                      Languages
-                    </h3>
-                    <div className="flex flex-wrap gap-2">
-                      {linkedEntities.linked_entities.languages.map((lang: any, idx: number) => (
-                        <span key={idx} className="px-3 py-1 bg-[#F5F3FF] dark:bg-purple-900/20 text-[#7C3AED] dark:text-purple-400 rounded-lg text-xs font-bold border border-[#EDE9FE] dark:border-purple-800 uppercase">
-                          {lang.language_name || lang.language} • {lang.proficiency_level}
-                        </span>
-                      ))}
-                    </div>
-                  </section>
-                )}
-              </div>
+              <pre className="text-xs bg-gray-50 p-4 rounded-lg overflow-auto max-h-[500px]">
+                {JSON.stringify(linkedEntities, null, 2)}
+              </pre>
             </div>
           </div>
         </div>
       )}
 
-      {/* AI Refiner Modal - Full View */}
+      {/* AI Refiner Modal - reused from before */}
       {parsingResumeId && (
         <div className="fixed inset-0 z-[200] bg-[#F0F9FF] dark:bg-gray-950 overflow-hidden flex flex-col animate-in fade-in duration-200">
           <div className="p-4 md:p-6 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between">
@@ -519,6 +487,6 @@ export default function JobDetailsClient({ job, slug }: JobDetailsClientProps) {
           </div>
         </div>
       )}
-    </>
+    </div>
   );
 }

@@ -14,6 +14,7 @@ import {
   SearchHistoryItem,
   SearchResultCountTrendResponse,
   SearchHistoryTrendItem,
+  CreditsBalance,
 } from "@/types/api";
 import {
   Search,
@@ -78,6 +79,9 @@ export default function CVSearchPage() {
   const [creditsStatus, setCreditsStatus] = useState<CVCreditsStatus | null>(
     null,
   );
+  const [creditsBalance, setCreditsBalance] = useState<CreditsBalance | null>(
+    null,
+  );
   const [loading, setLoading] = useState(false);
   const [unlockedResumes, setUnlockedResumes] = useState<Set<number>>(
     new Set(),
@@ -115,6 +119,15 @@ export default function CVSearchPage() {
       }
     };
 
+    const fetchCreditsBalance = async () => {
+      try {
+        const balance = await api.getCreditsBalance();
+        setCreditsBalance(balance);
+      } catch (error) {
+        console.error("Failed to fetch credits balance:", error);
+      }
+    };
+
     const fetchBuckets = async () => {
       try {
         const response = await api.listBuckets({ include_archived: false });
@@ -125,6 +138,7 @@ export default function CVSearchPage() {
     };
 
     fetchCreditsStatus();
+    fetchCreditsBalance();
     fetchBuckets();
   }, []);
 
@@ -483,53 +497,91 @@ export default function CVSearchPage() {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <div>
+        {/* <div>
           <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
             CV Search
           </h1>
           <p className="text-gray-600 dark:text-gray-400 mt-1">
             Search and unlock candidate profiles
           </p>
-        </div>
-        {creditsStatus && (
-          <div className="">
-            <div className="text-sm font-medium text-gray-600 dark:text-gray-300">
-              Available Credits
+        </div> */}
+        {creditsStatus && creditsBalance && (
+          <div className="flex items-center gap-5">
+            {/* Circular Progress */}
+            <div className="relative w-24 h-24">
+              <svg className="w-full h-full transform -rotate-90">
+                {/* Background Circle */}
+                <circle
+                  cx="48"
+                  cy="48"
+                  r="40"
+                  fill="none"
+                  className="stroke-gray-100 dark:stroke-gray-800"
+                  strokeWidth="8"
+                />
+                {/* Progress Circle */}
+                <circle
+                  cx="48"
+                  cy="48"
+                  r="40"
+                  fill="none"
+                  className="stroke-blue-500 transition-all duration-1000 ease-out"
+                  strokeWidth="8"
+                  strokeDasharray={`${2 * Math.PI * 40}`}
+                  strokeDashoffset={`${2 *
+                    Math.PI *
+                    40 *
+                    (1 -
+                      creditsBalance.credits_remaining /
+                      Math.max(creditsBalance.total_credits, 1))
+                    }`}
+                  strokeLinecap="round"
+                />
+              </svg>
+              <div className="absolute inset-0 flex items-center justify-center">
+                <span className="text-sm font-medium text-gray-900 dark:text-white">
+                  {creditsBalance.credits_remaining}/500
+                </span>
+              </div>
             </div>
-            <div className="text-3xl font-bold text-blue-600 dark:text-blue-400">
-              {creditsStatus.credits_remaining}
-            </div>
-            <div className="text-xs text-gray-500 mt-1">
-              {creditsStatus.active_unlocks} active unlocks
+
+            <div className="flex flex-col items-start">
+              <div className="text-sm font-semibold text-gray-700 dark:text-gray-200">
+                Available Credits
+              </div>
+              <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                {creditsStatus.active_unlocks} active unlocks
+              </div>
             </div>
           </div>
         )}
       </div>
 
       {/* Search Section */}
-      <div className="bg-white dark:bg-[#282727] rounded-xl border border-gray-200 dark:border-gray-700 p-6 space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      {/* Search Section */}
+      <div className="bg-white dark:bg-[#282727] rounded-xl border border-gray-200 dark:border-gray-700 p-5 space-y-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Keyword Search */}
           <div>
-            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5">
               Keyword Search
             </label>
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onKeyPress={(e) => e.key === "Enter" && handleSearch()}
                 placeholder="Search by skills, title, company..."
-                className="w-full pl-10 pr-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all placeholder-gray-400 dark:text-gray-200"
+                className="w-full pl-9 pr-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all placeholder-gray-400 dark:text-gray-200"
               />
             </div>
           </div>
 
           {/* Country Filter */}
           <div>
-            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5">
               Country
             </label>
             <input
@@ -539,13 +591,13 @@ export default function CVSearchPage() {
                 setFilters({ ...filters, country: e.target.value })
               }
               placeholder="e.g., United States"
-              className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all placeholder-gray-400 dark:text-gray-200"
+              className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all placeholder-gray-400 dark:text-gray-200"
             />
           </div>
 
           {/* State Filter */}
           <div>
-            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5">
               State
             </label>
             <input
@@ -555,13 +607,13 @@ export default function CVSearchPage() {
                 setFilters({ ...filters, state: e.target.value })
               }
               placeholder="e.g., California"
-              className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all placeholder-gray-400 dark:text-gray-200"
+              className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all placeholder-gray-400 dark:text-gray-200"
             />
           </div>
 
           {/* City Filter */}
           <div>
-            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5">
               City
             </label>
             <input
@@ -569,13 +621,13 @@ export default function CVSearchPage() {
               value={filters.city}
               onChange={(e) => setFilters({ ...filters, city: e.target.value })}
               placeholder="e.g., San Francisco"
-              className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all placeholder-gray-400 dark:text-gray-200"
+              className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all placeholder-gray-400 dark:text-gray-200"
             />
           </div>
 
           {/* Experience Range */}
           <div>
-            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5">
               Experience (Years)
             </label>
             <div className="flex gap-2">
@@ -590,7 +642,7 @@ export default function CVSearchPage() {
                   })
                 }
                 placeholder="Min"
-                className="flex-1 px-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none placeholder-gray-400 dark:text-gray-200"
+                className="flex-1 px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none placeholder-gray-400 dark:text-gray-200"
               />
               <input
                 type="number"
@@ -603,384 +655,39 @@ export default function CVSearchPage() {
                   })
                 }
                 placeholder="Max"
-                className="flex-1 px-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none placeholder-gray-400 dark:text-gray-200"
+                className="flex-1 px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none placeholder-gray-400 dark:text-gray-200"
               />
             </div>
           </div>
         </div>
 
-        {/* Advanced Filters Toggle */}
-        <button
-          onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
-          className="flex items-center justify-between w-full px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
-        >
-          <span>Advanced Filters</span>
-          {showAdvancedFilters ? (
-            <ChevronUp className="h-4 w-4" />
-          ) : (
-            <ChevronDown className="h-4 w-4" />
-          )}
-        </button>
-
-        {/* Advanced Filters Section */}
-        {showAdvancedFilters && (
-          <div className="space-y-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
-            {/* Skills */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Skills
-              </label>
-              <div className="flex gap-2 mb-2">
-                <input
-                  type="text"
-                  value={skillInput}
-                  onChange={(e) => setSkillInput(e.target.value)}
-                  onKeyDown={(e) =>
-                    e.key === "Enter" && (e.preventDefault(), addSkill())
-                  }
-                  placeholder="Add skill (e.g., React, Python)"
-                  className="flex-1 px-3 py-2 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-                <button
-                  onClick={addSkill}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-                >
-                  Add
-                </button>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {filters.skills.map((skill) => (
-                  <span
-                    key={skill}
-                    className="inline-flex items-center gap-1 px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded-full text-sm"
-                  >
-                    {skill}
-                    <button
-                      onClick={() => removeSkill(skill)}
-                      className="hover:text-blue-600"
-                    >
-                      <X className="h-3 w-3" />
-                    </button>
-                  </span>
-                ))}
-              </div>
-              <label className="flex items-center gap-2 mt-2">
-                <input
-                  type="checkbox"
-                  checked={filters.skills_match_all}
-                  onChange={(e) =>
-                    setFilters({
-                      ...filters,
-                      skills_match_all: e.target.checked,
-                    })
-                  }
-                  className="rounded border-gray-300 dark:border-gray-600"
-                />
-                <span className="text-sm text-gray-600 dark:text-gray-400">
-                  Match all skills (AND)
-                </span>
-              </label>
-            </div>
-
-            {/* Job Titles */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Job Titles
-              </label>
-              <div className="flex gap-2 mb-2">
-                <input
-                  type="text"
-                  value={jobTitleInput}
-                  onChange={(e) => setJobTitleInput(e.target.value)}
-                  onKeyDown={(e) =>
-                    e.key === "Enter" && (e.preventDefault(), addJobTitle())
-                  }
-                  placeholder="Add job title (e.g., Software Engineer)"
-                  className="flex-1 px-3 py-2 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-                <button
-                  onClick={addJobTitle}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-                >
-                  Add
-                </button>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {filters.job_titles.map((title) => (
-                  <span
-                    key={title}
-                    className="inline-flex items-center gap-1 px-3 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 rounded-full text-sm"
-                  >
-                    {title}
-                    <button
-                      onClick={() => removeJobTitle(title)}
-                      className="hover:text-green-600"
-                    >
-                      <X className="h-3 w-3" />
-                    </button>
-                  </span>
-                ))}
-              </div>
-            </div>
-
-            {/* Companies */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Companies
-              </label>
-              <div className="flex gap-2 mb-2">
-                <input
-                  type="text"
-                  value={companyInput}
-                  onChange={(e) => setCompanyInput(e.target.value)}
-                  onKeyDown={(e) =>
-                    e.key === "Enter" && (e.preventDefault(), addCompany())
-                  }
-                  placeholder="Add company (e.g., Google, Microsoft)"
-                  className="flex-1 px-3 py-2 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-                <button
-                  onClick={addCompany}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-                >
-                  Add
-                </button>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {filters.companies.map((company) => (
-                  <span
-                    key={company}
-                    className="inline-flex items-center gap-1 px-3 py-1 bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200 rounded-full text-sm"
-                  >
-                    {company}
-                    <button
-                      onClick={() => removeCompany(company)}
-                      className="hover:text-purple-600"
-                    >
-                      <X className="h-3 w-3" />
-                    </button>
-                  </span>
-                ))}
-              </div>
-            </div>
-
-            {/* Education Level */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Education Level
-              </label>
-              <select
-                value={filters.education_level}
-                onChange={(e) =>
-                  setFilters({ ...filters, education_level: e.target.value })
-                }
-                className="w-full px-3 py-2 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="">Any</option>
-                <option value="high_school">High School</option>
-                <option value="associate">Associate</option>
-                <option value="bachelor">Bachelor's</option>
-                <option value="master">Master's</option>
-                <option value="phd">PhD</option>
-              </select>
-            </div>
-
-            {/* Degrees */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Degrees
-              </label>
-              <div className="flex gap-2 mb-2">
-                <input
-                  type="text"
-                  value={degreeInput}
-                  onChange={(e) => setDegreeInput(e.target.value)}
-                  onKeyDown={(e) =>
-                    e.key === "Enter" && (e.preventDefault(), addDegree())
-                  }
-                  placeholder="Add degree (e.g., Computer Science, MBA)"
-                  className="flex-1 px-3 py-2 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-                <button
-                  onClick={addDegree}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-                >
-                  Add
-                </button>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {filters.degrees.map((degree) => (
-                  <span
-                    key={degree}
-                    className="inline-flex items-center gap-1 px-3 py-1 bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200 rounded-full text-sm"
-                  >
-                    {degree}
-                    <button
-                      onClick={() => removeDegree(degree)}
-                      className="hover:text-yellow-600"
-                    >
-                      <X className="h-3 w-3" />
-                    </button>
-                  </span>
-                ))}
-              </div>
-            </div>
-
-            {/* Languages */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Languages
-              </label>
-              <div className="flex gap-2 mb-2">
-                <input
-                  type="text"
-                  value={languageInput}
-                  onChange={(e) => setLanguageInput(e.target.value)}
-                  onKeyDown={(e) =>
-                    e.key === "Enter" && (e.preventDefault(), addLanguage())
-                  }
-                  placeholder="Add language (e.g., English, Spanish)"
-                  className="flex-1 px-3 py-2 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-                <button
-                  onClick={addLanguage}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-                >
-                  Add
-                </button>
-              </div>
-              <div className="flex flex-wrap gap-2 mb-2">
-                {filters.languages.map((language) => (
-                  <span
-                    key={language}
-                    className="inline-flex items-center gap-1 px-3 py-1 bg-indigo-100 dark:bg-indigo-900 text-indigo-800 dark:text-indigo-200 rounded-full text-sm"
-                  >
-                    {language}
-                    <button
-                      onClick={() => removeLanguage(language)}
-                      className="hover:text-indigo-600"
-                    >
-                      <X className="h-3 w-3" />
-                    </button>
-                  </span>
-                ))}
-              </div>
-              <select
-                value={filters.language_proficiency}
-                onChange={(e) =>
-                  setFilters({
-                    ...filters,
-                    language_proficiency: e.target.value,
-                  })
-                }
-                className="w-full px-3 py-2 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="">Any Proficiency</option>
-                <option value="basic">Basic</option>
-                <option value="intermediate">Intermediate</option>
-                <option value="advanced">Advanced</option>
-                <option value="fluent">Fluent</option>
-                <option value="native">Native</option>
-              </select>
-            </div>
-
-            {/* Employment Status Filters */}
-            <div className="space-y-2">
-              <label className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  checked={filters.open_to_work_only}
-                  onChange={(e) =>
-                    setFilters({
-                      ...filters,
-                      open_to_work_only: e.target.checked,
-                    })
-                  }
-                  className="rounded border-gray-300 dark:border-gray-600"
-                />
-                <span className="text-sm text-gray-700 dark:text-gray-300">
-                  Open to work only
-                </span>
-              </label>
-              <label className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  checked={filters.is_currently_employed === true}
-                  onChange={(e) =>
-                    setFilters({
-                      ...filters,
-                      is_currently_employed: e.target.checked
-                        ? true
-                        : undefined,
-                    })
-                  }
-                  className="rounded border-gray-300 dark:border-gray-600"
-                />
-                <span className="text-sm text-gray-700 dark:text-gray-300">
-                  Currently employed
-                </span>
-              </label>
-            </div>
-
-            {/* Sort Controls */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Sort By
-                </label>
-                <select
-                  value={filters.sort_by}
-                  onChange={(e) =>
-                    setFilters({ ...filters, sort_by: e.target.value })
-                  }
-                  className="w-full px-3 py-2 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="relevance">Relevance</option>
-                  <option value="created_at">Created Date</option>
-                  <option value="experience_years">Experience Years</option>
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Sort Order
-                </label>
-                <select
-                  value={filters.sort_order}
-                  onChange={(e) =>
-                    setFilters({
-                      ...filters,
-                      sort_order: e.target.value as "asc" | "desc",
-                    })
-                  }
-                  className="w-full px-3 py-2 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="desc">Descending</option>
-                  <option value="asc">Ascending</option>
-                </select>
-              </div>
-            </div>
-          </div>
-        )}
-
-        <div className="flex gap-3">
+        <div className="flex flex-wrap gap-3 pt-4 border-t border-gray-100 dark:border-gray-700 mt-4">
           <button
             onClick={handleSearch}
             disabled={loading}
-            className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors disabled:opacity-50 flex items-center gap-2"
+            className="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors disabled:opacity-50 flex items-center gap-2 text-sm"
           >
             {loading ? (
-              <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
             ) : (
-              <Search className="w-5 h-5" />
+              <Search className="w-4 h-4" />
             )}
             Search CVs
           </button>
 
           <button
-            onClick={fetchSearchHistory}
-            className="px-6 py-3 bg-gray-600 hover:bg-gray-700 text-white rounded-lg font-medium transition-colors flex items-center gap-2"
+            onClick={() => setShowAdvancedFilters(true)}
+            className="px-5 py-2.5 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600 rounded-lg font-medium transition-colors flex items-center gap-2 text-sm "
           >
-            <History className="w-5 h-5" />
+            <Filter className="w-4 h-4" />
+            Advanced Filters
+          </button>
+
+          <button
+            onClick={fetchSearchHistory}
+            className="px-5 py-2.5 bg-gray-600 hover:bg-gray-700 text-white rounded-md font-medium transition-colors flex items-center gap-2 text-sm"
+          >
+            <History className="w-4 h-4" />
             History
           </button>
 
@@ -993,22 +700,393 @@ export default function CVSearchPage() {
                   !creditsStatus ||
                   creditsStatus.credits_remaining < selectedResumes.size
                 }
-                className="px-6 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors disabled:opacity-50 flex items-center gap-2"
+                className="px-5 py-2.5 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors disabled:opacity-50 flex items-center gap-2 text-sm"
               >
-                <Unlock className="w-5 h-5" />
+                <Unlock className="w-4 h-4" />
                 Unlock {selectedResumes.size}
               </button>
-
               <button
                 onClick={() => setShowBucketModal(true)}
-                className="px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-medium transition-colors flex items-center gap-2"
+                className="px-5 py-2.5 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-medium transition-colors flex items-center gap-2 text-sm"
               >
-                <FolderPlus className="w-5 h-5" />
+                <FolderPlus className="w-4 h-4" />
                 Add to Bucket
               </button>
             </>
           )}
         </div>
+
+        {/* Advanced Filters Modal */}
+        {showAdvancedFilters && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-3xl max-h-[85vh] flex flex-col overflow-hidden animate-in zoom-in-95 duration-200   dark:border-gray-700">
+              <div className="flex items-center justify-between px-6 py-1 border-b  bg-slate-900 rounded-t-xl">
+                <h3 className="text-lg font-semibold text-white">Advanced Filters</h3>
+                <button
+                  onClick={() => setShowAdvancedFilters(false)}
+                  className="p-2 text-white/70 hover:text-white hover:bg-white/10 rounded-full transition-colors"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <div className="flex-1 overflow-y-auto p-6 space-y-6 custom-scrollbar">
+                {/* Skills */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                    Skills
+                  </label>
+                  <div className="flex gap-2 mb-2">
+                    <input
+                      type="text"
+                      value={skillInput}
+                      onChange={(e) => setSkillInput(e.target.value)}
+                      onKeyDown={(e) =>
+                        e.key === "Enter" && (e.preventDefault(), addSkill())
+                      }
+                      placeholder="Add skill (e.g., React, Python)"
+                      className="flex-1 px-3 py-2 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                    <button
+                      onClick={addSkill}
+                      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                    >
+                      Add
+                    </button>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {filters.skills.map((skill) => (
+                      <span
+                        key={skill}
+                        className="inline-flex items-center gap-1 px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded-full text-sm"
+                      >
+                        {skill}
+                        <button
+                          onClick={() => removeSkill(skill)}
+                          className="hover:text-blue-600"
+                        >
+                          <X className="h-3 w-3" />
+                        </button>
+                      </span>
+                    ))}
+                  </div>
+                  <label className="flex items-center gap-2 mt-2">
+                    <input
+                      type="checkbox"
+                      checked={filters.skills_match_all}
+                      onChange={(e) =>
+                        setFilters({
+                          ...filters,
+                          skills_match_all: e.target.checked,
+                        })
+                      }
+                      className="rounded border-gray-300 dark:border-gray-600"
+                    />
+                    <span className="text-sm text-gray-600 dark:text-gray-400">
+                      Match all skills (AND)
+                    </span>
+                  </label>
+                </div>
+
+                {/* Job Titles */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                    Job Titles
+                  </label>
+                  <div className="flex gap-2 mb-2">
+                    <input
+                      type="text"
+                      value={jobTitleInput}
+                      onChange={(e) => setJobTitleInput(e.target.value)}
+                      onKeyDown={(e) =>
+                        e.key === "Enter" && (e.preventDefault(), addJobTitle())
+                      }
+                      placeholder="Add job title (e.g., Software Engineer)"
+                      className="flex-1 px-3 py-2 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                    <button
+                      onClick={addJobTitle}
+                      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                    >
+                      Add
+                    </button>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {filters.job_titles.map((title) => (
+                      <span
+                        key={title}
+                        className="inline-flex items-center gap-1 px-3 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 rounded-full text-sm"
+                      >
+                        {title}
+                        <button
+                          onClick={() => removeJobTitle(title)}
+                          className="hover:text-green-600"
+                        >
+                          <X className="h-3 w-3" />
+                        </button>
+                      </span>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Companies */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                    Companies
+                  </label>
+                  <div className="flex gap-2 mb-2">
+                    <input
+                      type="text"
+                      value={companyInput}
+                      onChange={(e) => setCompanyInput(e.target.value)}
+                      onKeyDown={(e) =>
+                        e.key === "Enter" && (e.preventDefault(), addCompany())
+                      }
+                      placeholder="Add company (e.g., Google, Microsoft)"
+                      className="flex-1 px-3 py-2 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                    <button
+                      onClick={addCompany}
+                      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                    >
+                      Add
+                    </button>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {filters.companies.map((company) => (
+                      <span
+                        key={company}
+                        className="inline-flex items-center gap-1 px-3 py-1 bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200 rounded-full text-sm"
+                      >
+                        {company}
+                        <button
+                          onClick={() => removeCompany(company)}
+                          className="hover:text-purple-600"
+                        >
+                          <X className="h-3 w-3" />
+                        </button>
+                      </span>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Education Level */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                    Education Level
+                  </label>
+                  <select
+                    value={filters.education_level}
+                    onChange={(e) =>
+                      setFilters({ ...filters, education_level: e.target.value })
+                    }
+                    className="w-full px-3 py-2 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="">Any</option>
+                    <option value="high_school">High School</option>
+                    <option value="associate">Associate</option>
+                    <option value="bachelor">Bachelor's</option>
+                    <option value="master">Master's</option>
+                    <option value="phd">PhD</option>
+                  </select>
+                </div>
+
+                {/* Degrees */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                    Degrees
+                  </label>
+                  <div className="flex gap-2 mb-2">
+                    <input
+                      type="text"
+                      value={degreeInput}
+                      onChange={(e) => setDegreeInput(e.target.value)}
+                      onKeyDown={(e) =>
+                        e.key === "Enter" && (e.preventDefault(), addDegree())
+                      }
+                      placeholder="Add degree (e.g., Computer Science, MBA)"
+                      className="flex-1 px-3 py-2 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                    <button
+                      onClick={addDegree}
+                      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                    >
+                      Add
+                    </button>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {filters.degrees.map((degree) => (
+                      <span
+                        key={degree}
+                        className="inline-flex items-center gap-1 px-3 py-1 bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200 rounded-full text-sm"
+                      >
+                        {degree}
+                        <button
+                          onClick={() => removeDegree(degree)}
+                          className="hover:text-yellow-600"
+                        >
+                          <X className="h-3 w-3" />
+                        </button>
+                      </span>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Languages */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                    Languages
+                  </label>
+                  <div className="flex gap-2 mb-2">
+                    <input
+                      type="text"
+                      value={languageInput}
+                      onChange={(e) => setLanguageInput(e.target.value)}
+                      onKeyDown={(e) =>
+                        e.key === "Enter" && (e.preventDefault(), addLanguage())
+                      }
+                      placeholder="Add language (e.g., English, Spanish)"
+                      className="flex-1 px-3 py-2 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                    <button
+                      onClick={addLanguage}
+                      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                    >
+                      Add
+                    </button>
+                  </div>
+                  <div className="flex flex-wrap gap-2 mb-2">
+                    {filters.languages.map((language) => (
+                      <span
+                        key={language}
+                        className="inline-flex items-center gap-1 px-3 py-1 bg-indigo-100 dark:bg-indigo-900 text-indigo-800 dark:text-indigo-200 rounded-full text-sm"
+                      >
+                        {language}
+                        <button
+                          onClick={() => removeLanguage(language)}
+                          className="hover:text-indigo-600"
+                        >
+                          <X className="h-3 w-3" />
+                        </button>
+                      </span>
+                    ))}
+                  </div>
+                  <select
+                    value={filters.language_proficiency}
+                    onChange={(e) =>
+                      setFilters({
+                        ...filters,
+                        language_proficiency: e.target.value,
+                      })
+                    }
+                    className="w-full px-3 py-2 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="">Any Proficiency</option>
+                    <option value="basic">Basic</option>
+                    <option value="intermediate">Intermediate</option>
+                    <option value="advanced">Advanced</option>
+                    <option value="fluent">Fluent</option>
+                    <option value="native">Native</option>
+                  </select>
+                </div>
+
+                {/* Employment Status Filters */}
+                <div className="space-y-2">
+                  <label className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      checked={filters.open_to_work_only}
+                      onChange={(e) =>
+                        setFilters({
+                          ...filters,
+                          open_to_work_only: e.target.checked,
+                        })
+                      }
+                      className="rounded border-gray-300 dark:border-gray-600"
+                    />
+                    <span className="text-sm text-gray-700 dark:text-gray-300">
+                      Open to work only
+                    </span>
+                  </label>
+                  <label className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      checked={filters.is_currently_employed === true}
+                      onChange={(e) =>
+                        setFilters({
+                          ...filters,
+                          is_currently_employed: e.target.checked
+                            ? true
+                            : undefined,
+                        })
+                      }
+                      className="rounded border-gray-300 dark:border-gray-600"
+                    />
+                    <span className="text-sm text-gray-700 dark:text-gray-300">
+                      Currently employed
+                    </span>
+                  </label>
+                </div>
+
+                {/* Sort Controls */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                      Sort By
+                    </label>
+                    <select
+                      value={filters.sort_by}
+                      onChange={(e) =>
+                        setFilters({ ...filters, sort_by: e.target.value })
+                      }
+                      className="w-full px-3 py-2 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="relevance">Relevance</option>
+                      <option value="created_at">Created Date</option>
+                      <option value="experience_years">Experience Years</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                      Sort Order
+                    </label>
+                    <select
+                      value={filters.sort_order}
+                      onChange={(e) =>
+                        setFilters({
+                          ...filters,
+                          sort_order: e.target.value as "asc" | "desc",
+                        })
+                      }
+                      className="w-full px-3 py-2 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="desc">Descending</option>
+                      <option value="asc">Ascending</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              <div className="px-6 py-1 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 flex justify-end gap-3 rounded-b-xl">
+                <button
+                  onClick={() => setShowAdvancedFilters(false)}
+                  className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => {
+                    handleSearch();
+                    setShowAdvancedFilters(false);
+                  }}
+                  className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg shadow-sm hover:shadow transition-all"
+                >
+                  Apply Filters
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Results Section */}
@@ -1321,15 +1399,15 @@ export default function CVSearchPage() {
       {/* Search History Modal */}
       {showHistoryModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-3xl max-h-[80vh] flex flex-col">
-            <div className="p-6 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
-              <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-3xl max-h-[80vh] flex flex-col animate-in zoom-in-95 duration-200">
+            <div className="px-6 py-1 border-b bg-slate-900 rounded-t-xl flex justify-between items-center">
+              <h3 className="text-lg font-semibold text-white flex items-center gap-2">
                 <History className="w-5 h-5" />
                 Search History
               </h3>
               <button
                 onClick={() => setShowHistoryModal(false)}
-                className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                className="p-2 text-white/70 hover:text-white hover:bg-white/10 rounded-full transition-colors"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -1402,15 +1480,15 @@ export default function CVSearchPage() {
       {/* Trend Modal */}
       {showTrendModal && trendData && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-2xl">
-            <div className="p-6 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
-              <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
-                <TrendingUp className="w-5 h-5 text-purple-600" />
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-2xl animate-in zoom-in-95 duration-200">
+            <div className="px-6 py-1 border-b bg-slate-900 rounded-t-xl flex justify-between items-center">
+              <h3 className="text-lg font-semibold text-white flex items-center gap-2">
+                <TrendingUp className="w-5 h-5 text-white" />
                 Search Result Trend
               </h3>
               <button
                 onClick={() => setShowTrendModal(false)}
-                className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                className="p-2 text-white/70 hover:text-white hover:bg-white/10 rounded-full transition-colors"
               >
                 <X className="w-5 h-5" />
               </button>
