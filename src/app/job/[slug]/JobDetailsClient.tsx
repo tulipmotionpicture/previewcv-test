@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { api, ResumeMetadata } from "@/lib/api";
 import { Job, PdfResume, Resume } from "@/types/api";
 import { useAuth } from "@/context/AuthContext";
@@ -26,7 +27,9 @@ import {
   Calendar,
   LogIn,
   MapPin,
-  Users
+  Users,
+  Building2,
+  Share2
 } from "lucide-react";
 
 interface JobDetailsClientProps {
@@ -39,6 +42,7 @@ export default function JobDetailsClient({ job, slug }: JobDetailsClientProps) {
   const router = useRouter();
   const [applying, setApplying] = useState(false);
   const [applySuccess, setApplySuccess] = useState(false);
+  const isSharing = useRef(false);
   const [coverLetter, setCoverLetter] = useState("");
   const [isBookmarked, setIsBookmarked] = useState(job.is_bookmarked || false);
   const [isApplied, setIsApplied] = useState(job.is_applied || false);
@@ -54,6 +58,20 @@ export default function JobDetailsClient({ job, slug }: JobDetailsClientProps) {
 
   // Similar jobs state
   const [similarJobs, setSimilarJobs] = useState<Job[]>([]);
+  const [showStickyHeader, setShowStickyHeader] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 300) {
+        setShowStickyHeader(true);
+      } else {
+        setShowStickyHeader(false);
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   // Fetch bookmark status and similar jobs when authenticated or mounted
   useEffect(() => {
@@ -81,21 +99,24 @@ export default function JobDetailsClient({ job, slug }: JobDetailsClientProps) {
 
 
   const fetchSimilarJobs = async () => {
+    // Only fetch if recruiter_id is available to ensure we only show company jobs
+    if (!job.recruiter_id) return;
+
     try {
       const params = new URLSearchParams();
-      if (job.categories && job.categories.length > 0) {
-        params.append('category', job.categories[0]);
-      }
-      params.append('limit', '3');
+      params.append('recruiter_id', job.recruiter_id.toString());
+      params.append('limit', '10');
+
       const response = await api.getJobs(params);
       if (response.data) {
         // Filter out current job
-        setSimilarJobs(response.data.filter(j => j.id !== job.id).slice(0, 3));
+        setSimilarJobs(response.data.filter(j => j.id !== job.id));
       }
     } catch (error) {
-      console.error("Failed to fetch similar jobs", error);
+      console.error("Failed to fetch company jobs", error);
     }
   };
+
 
   const fetchResumes = async () => {
     setLoadingResumes(true);
@@ -194,7 +215,7 @@ export default function JobDetailsClient({ job, slug }: JobDetailsClientProps) {
   return (
     <div className="space-y-8">
       {/* Sticky Application Card */}
-      <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg p-5 shadow-sm sticky top-24  ">
+      <div id="application-card" className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg p-5 shadow-sm sticky top-18  ">
         <div className="flex items-start justify-between mb-4">
           <div className="flex items-start gap-3">
             <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center shadow-md">
@@ -205,13 +226,47 @@ export default function JobDetailsClient({ job, slug }: JobDetailsClientProps) {
               <p className="text-xs text-gray-500 dark:text-gray-400">{job.company_name}</p>
             </div>
           </div>
-          <BookmarkButton
-            jobId={job.id}
-            jobSlug={job.slug}
-            isBookmarked={isBookmarked}
-            onBookmarkChange={setIsBookmarked}
-            size="sm"
-          />
+          <div className="flex items-center gap-2">
+            <button
+              onClick={async () => {
+                if (isSharing.current) return;
+                isSharing.current = true;
+                if (navigator.share) {
+                  try {
+                    await navigator.share({
+                      title: job.title,
+                      text: `Check out this ${job.title} job at ${job.company_name}`,
+                      url: window.location.href,
+                    });
+                  } catch (err) {
+                    console.error("Error sharing:", err);
+                  } finally {
+                    isSharing.current = false;
+                  }
+                } else {
+                  try {
+                    await navigator.clipboard.writeText(window.location.href);
+                    alert("Link copied to clipboard!");
+                  } catch (err) {
+                    console.error("Failed to copy:", err);
+                  } finally {
+                    isSharing.current = false;
+                  }
+                }
+              }}
+              className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+              title="Share Job"
+            >
+              <Share2 className="w-5 h-5" />
+            </button>
+            <BookmarkButton
+              jobId={job.id}
+              jobSlug={job.slug}
+              isBookmarked={isBookmarked}
+              onBookmarkChange={setIsBookmarked}
+              size="sm"
+            />
+          </div>
         </div>
 
         {isApplied ? (
@@ -355,7 +410,7 @@ export default function JobDetailsClient({ job, slug }: JobDetailsClientProps) {
 
       {/* Similar Jobs Section */}
       <div>
-        <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-3">Similar jobs</h3>
+        <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-3">Jobs from {job.company_name}</h3>
         <div className="space-y-3">
           {similarJobs.map(similarJob => (
             <div key={similarJob.id} className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg p-5 shadow-sm hover:shadow-md transition-shadow group relative">
@@ -421,7 +476,7 @@ export default function JobDetailsClient({ job, slug }: JobDetailsClientProps) {
           ))}
           {similarJobs.length === 0 && (
             <div className="text-center py-8 text-gray-500 text-sm bg-gray-50 rounded-lg border border-dashed border-gray-200">
-              No similar jobs found at the moment.
+              No other jobs found from {job.company_name}.
             </div>
           )}
         </div>
@@ -487,6 +542,55 @@ export default function JobDetailsClient({ job, slug }: JobDetailsClientProps) {
           </div>
         </div>
       )}
+      {/* Sticky Job Header */}
+      <div
+        className={`fixed top-0 left-0 right-0 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 shadow-sm z-50 transform transition-transform duration-300 ${showStickyHeader ? "translate-y-0" : "-translate-y-full"
+          }`}
+      >
+        <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <div className="w-10 h-10 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 flex items-center justify-center p-1 overflow-hidden shrink-0">
+              {job.company_logo_url ? (
+                <Image
+                  src={job.company_logo_url}
+                  alt={job.company_name}
+                  width={32}
+                  height={32}
+                  className="object-contain w-full h-full"
+                />
+              ) : (
+                <Building2 className="w-5 h-5 text-gray-400" />
+              )}
+            </div>
+            <div>
+              <h3 className="text-sm font-bold text-gray-900 dark:text-gray-100 line-clamp-1">{job.title}</h3>
+              <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400 line-clamp-1">
+                <span>{job.company_name}</span>
+                <span>•</span>
+                <span>{job.location}</span>
+                <span className="hidden sm:inline-block text-gray-300 dark:text-gray-600">|</span>
+                <Link href={`/jobs?limit=10&category=${job.categories?.[0]}`} className="hidden sm:inline-block text-blue-600 hover:underline font-medium">
+                  Send me jobs like this
+                </Link>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <Link href={`/jobs?limit=10&category=${job.categories?.[0]}`} className="sm:hidden text-blue-600 text-xs font-medium hover:underline whitespace-nowrap">
+              Similar Jobs
+            </Link>
+            <button
+              onClick={() => {
+                document.getElementById('application-card')?.scrollIntoView({ behavior: 'smooth' });
+              }}
+              className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold rounded-lg transition-colors shadow-sm whitespace-nowrap"
+            >
+              Apply
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

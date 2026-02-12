@@ -85,6 +85,15 @@ export default async function JobDetailsPage({
   const { slug } = await params;
   const job = await getJobBySlug(slug);
 
+  let companyData = null;
+  if (job?.recruiter_username) {
+    try {
+      companyData = await api.getPublicGallery(job.recruiter_username);
+    } catch (e) {
+      console.error("Failed to fetch company data", e);
+    }
+  }
+
   if (!job) {
     notFound();
   }
@@ -110,11 +119,11 @@ export default async function JobDetailsPage({
       />
 
       <div className="pt-8 px-4 sm:px-6 lg:px-8 max-w-[1200px] mx-auto">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-2">
           {/* Main Content - Left */}
-          <div className="lg:col-span-8 space-y-6">
+          <div className="lg:col-span-8 space-y-2 pt-10">
             {/* Job Header Card */}
-            <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg p-6 shadow-sm">
+            <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg p-6 ">
               <div className="flex items-start gap-4">
                 <div className="w-16 h-16 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 flex items-center justify-center flex-shrink-0 p-1.5 overflow-hidden">
                   {job.company_logo_url ? (
@@ -202,118 +211,132 @@ export default async function JobDetailsPage({
             </div>
 
             {/* Job Description Card */}
-            <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg p-6 shadow-sm">
-              <section className="mb-6">
-                <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-3">
+            <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg overflow-hidden">
+              <div className="bg-[#005FFF] p-2">
+                <h2 className="text-md font-bold text-white">
                   About the Role
                 </h2>
-                <div
-                  className="prose prose-sm prose-slate dark:prose-invert max-w-none text-gray-600 dark:text-gray-300"
-                  dangerouslySetInnerHTML={{ __html: job.description }}
-                />
-              </section>
+              </div>
 
-              {job.responsibilities && (
+              <div className="p-6">
                 <section className="mb-6">
-                  <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-3">
-                    Responsibilities
-                  </h2>
-                  <div className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed whitespace-pre-line">
-                    {job.responsibilities}
-                  </div>
+                  <div
+                    className="prose prose-sm prose-slate dark:prose-invert max-w-none text-gray-600 dark:text-gray-300"
+                    dangerouslySetInnerHTML={{ __html: job.description }}
+                  />
                 </section>
-              )}
 
-              {job.requirements && (
-                <section className="">
-                  <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-3">
-                    Requirements
-                  </h2>
-                  <div className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed whitespace-pre-line">
-                    {job.requirements}
-                  </div>
-                </section>
-              )}
-            </div>
+                {job.responsibilities && (
+                  <section className="mb-6">
+                    <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-3">
+                      Responsibilities
+                    </h2>
+                    <div className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed whitespace-pre-line">
+                      {job.responsibilities}
+                    </div>
+                  </section>
+                )}
 
-            {/* Skills Card */}
-            <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg p-6 shadow-sm">
-              <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-3">
-                Key Skills
-              </h3>
-              <div className="flex flex-wrap gap-2">
-                {job.required_skills?.map((skill, index) => (
-                  <span
-                    key={index}
-                    className="inline-flex items-center px-4 py-1.5 bg-white dark:bg-gray-800 text-blue-600 dark:text-blue-400 text-sm font-medium rounded-full border border-blue-200 dark:border-blue-900"
-                  >
-                    {skill}
-                  </span>
-                ))}
-                {(!job.required_skills || job.required_skills.length === 0) && (
-                  <span className="text-sm text-gray-500">No specific skills listed</span>
+                {job.requirements && (
+                  <section className="">
+                    <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-3">
+                      Requirements
+                    </h2>
+                    <div className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed whitespace-pre-line">
+                      {job.requirements}
+                    </div>
+                  </section>
                 )}
               </div>
             </div>
 
+            {/* Skills Card */}
+            <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg overflow-hidden">
+              <div className="bg-[#005FFF] p-2">
+                <h3 className="text-md font-bold text-white">
+                  Key Skills
+                </h3>
+              </div>
+              <div className="p-6">
+                <div className="flex flex-wrap gap-2">
+                  {job.required_skills?.map((skill, index) => (
+                    <span
+                      key={index}
+                      className="inline-flex items-center px-4 py-1.5 bg-white dark:bg-gray-800 text-blue-600 dark:text-blue-400 text-sm font-medium rounded-full border border-blue-200 dark:border-blue-900"
+                    >
+                      {skill}
+                    </span>
+                  ))}
+                  {(!job.required_skills || job.required_skills.length === 0) && (
+                    <span className="text-sm text-gray-500">No specific skills listed</span>
+                  )}
+                </div>
+              </div>
+            </div>
+
             {/* About the Company Card */}
-            <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg p-6 shadow-sm">
-              <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-4">
-                About the company
-              </h3>
-              <div className="flex items-center justify-between mb-6">
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 flex items-center justify-center overflow-hidden p-1">
-                    {job.company_logo_url ? (
-                      <Image
-                        src={job.company_logo_url}
-                        alt={job.company_name}
-                        width={48}
-                        height={48}
-                        className="object-contain w-full h-full"
-                      />
-                    ) : (
-                      <Building2 className="w-6 h-6 text-gray-400" />
-                    )}
-                  </div>
-                  <div>
-                    <h4 className="text-lg font-bold text-gray-900 dark:text-gray-100">{job.company_name}</h4>
-                    <div className="flex items-center gap-4 text-sm text-gray-500 mt-1">
-                      <div className="flex items-center gap-1">
-                        <MapPin className="w-4 h-4" />
-                        {job.location}
+            <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg overflow-hidden">
+              <div className="bg-[#005FFF] p-2">
+                <h3 className="text-md font-bold text-white">
+                  About the company
+                </h3>
+              </div>
+              <div className="p-6">
+                <div className="flex items-center justify-between mb-6">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 flex items-center justify-center overflow-hidden p-1">
+                      {companyData?.company_logo_url || job.company_logo_url ? (
+                        <Image
+                          src={companyData?.company_logo_url || job.company_logo_url || ""}
+                          alt={companyData?.company_name || job.company_name}
+                          width={48}
+                          height={48}
+                          className="object-contain w-full h-full"
+                        />
+                      ) : (
+                        <Building2 className="w-6 h-6 text-gray-400" />
+                      )}
+                    </div>
+                    <div>
+                      <h4 className="text-lg font-bold text-gray-900 dark:text-gray-100">{companyData?.company_name || job.company_name}</h4>
+                      <div className="flex items-center gap-4 text-sm text-gray-500 mt-1">
+                        <div className="flex items-center gap-1">
+                          <MapPin className="w-4 h-4" />
+                          {companyData?.location || job.location}
+                        </div>
+                        {companyData?.company_website && (
+                          <Link href={companyData.company_website} target="_blank" className="flex items-center gap-1 hover:text-blue-600">
+                            <ExternalLink className="w-4 h-4" />
+                            visit website
+                          </Link>
+                        )}
+                        {companyData?.linkedin_url && (
+                          <Link href={companyData.linkedin_url} target="_blank" className="text-blue-600 hover:text-blue-700">
+                            <div className="w-5 h-5 bg-[#0077b5] text-white rounded flex items-center justify-center text-[10px] font-bold">in</div>
+                          </Link>
+                        )}
                       </div>
-                      <Link href="#" className="flex items-center gap-1 hover:text-blue-600">
-                        <ExternalLink className="w-4 h-4" />
-                        visit website
-                      </Link>
-                      <Link href="#" className="text-blue-600 hover:text-blue-700">
-                        <div className="w-5 h-5 bg-[#0077b5] text-white rounded flex items-center justify-center text-[10px] font-bold">in</div>
-                      </Link>
                     </div>
                   </div>
                 </div>
-              </div>
 
-              <div className="space-y-4">
-                <h5 className="font-bold text-gray-900 dark:text-gray-100">Overview</h5>
-                <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
-                  {/* Placeholder overview text since it's not in Job object */}
-                  From Strategy to Execution with {job.company_name}. Become better, leaner, and future-ready. At {job.company_name}, we work shoulder to shoulder with our clients—not just advising, but executing transformation. With deep industry and... <span className="text-blue-600 cursor-pointer">read more</span>
-                </p>
-              </div>
+                <div className="space-y-4">
+                  <h5 className="font-bold text-gray-900 dark:text-gray-100">Overview</h5>
+                  <div className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed whitespace-pre-wrap">
+                    {companyData?.bio || `Join our team at ${job.company_name}. We are passionate about innovation and excellence.`}
+                  </div>
+                </div>
 
-              {/* Placeholder Images for "About Company" Carousel */}
-              <div className="grid grid-cols-3 gap-3 mt-4">
-                <div className="h-32 rounded-lg bg-gray-100 dark:bg-gray-800 overflow-hidden relative">
-                  <Image src="https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=300&q=80" alt="Office" fill className="object-cover" />
-                </div>
-                <div className="h-32 rounded-lg bg-gray-100 dark:bg-gray-800 overflow-hidden relative">
-                  <Image src="https://images.unsplash.com/photo-1556761175-5973dc0f32e7?auto=format&fit=crop&w=300&q=80" alt="Team" fill className="object-cover" />
-                </div>
-                <div className="h-32 rounded-lg bg-gray-100 dark:bg-gray-800 overflow-hidden relative">
-                  <Image src="https://images.unsplash.com/photo-1600880292203-757bb62b4baf?auto=format&fit=crop&w=300&q=80" alt="Meeting" fill className="object-cover" />
-                </div>
+                {/* Company Gallery Images */}
+                {companyData?.gallery_images && companyData.gallery_images.length > 0 && (
+                  <div className="grid grid-cols-3 gap-3 mt-4">
+                    {companyData.gallery_images.slice(0, 3).map((img: any, idx: number) => (
+                      <div key={idx} className="h-32 rounded-lg bg-gray-100 dark:bg-gray-800 overflow-hidden relative">
+                        <Image src={img.image_url} alt={`Company image ${idx + 1}`} fill className="object-cover" />
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           </div>
