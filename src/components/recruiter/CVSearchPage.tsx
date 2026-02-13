@@ -38,6 +38,7 @@ import {
   TrendingUp,
   RotateCw,
   Clock,
+  Eye,
 } from "lucide-react";
 
 export default function CVSearchPage() {
@@ -108,6 +109,14 @@ export default function CVSearchPage() {
   const [trendData, setTrendData] =
     useState<SearchResultCountTrendResponse | null>(null);
   const [trendLoading, setTrendLoading] = useState(false);
+
+  // Resume Detail Modal states
+  const [showResumeModal, setShowResumeModal] = useState(false);
+  const [resumeDetailData, setResumeDetailData] =
+    useState<CVUnlockResponse | null>(null);
+  const [loadingResumeDetail, setLoadingResumeDetail] = useState<Set<number>>(
+    new Set(),
+  );
 
   // Fetch credits status and buckets
   useEffect(() => {
@@ -271,14 +280,14 @@ export default function CVSearchPage() {
         ? { ...currentFilters, ...overrides }
         : currentFilters;
 
-      if (
-        !searchQuery.trim() &&
-        activeFilters.skills.length === 0 &&
-        activeFilters.job_titles.length === 0
-      ) {
-        showToast("Please enter a search keyword or select filters", "error");
-        return;
-      }
+      // if (
+      //   !searchQuery.trim() ||
+      //   (activeFilters.skills.length === 0 &&
+      //     activeFilters.job_titles.length === 0)
+      // ) {
+      //   showToast("Please enter a search keyword or select filters", "error");
+      //   return;
+      // }
 
       setLoading(true);
 
@@ -340,12 +349,16 @@ export default function CVSearchPage() {
   const handleUnlockResume = async (resumeId: number) => {
     setUnlockingIds((prev) => new Set([...prev, resumeId]));
     try {
-      await api.unlockCVProfile(resumeId, "search");
+      const response = await api.unlockCVProfile(resumeId, "search");
       setUnlockedResumes((prev) => new Set([...prev, resumeId]));
 
       // Refresh credits
       const status = await api.getCVCreditsStatus();
       setCreditsStatus(status);
+
+      // Show resume details in modal
+      setResumeDetailData(response);
+      setShowResumeModal(true);
 
       showToast("Resume unlocked successfully!", "success");
     } catch (error: any) {
@@ -399,10 +412,35 @@ export default function CVSearchPage() {
     }
   };
 
-  // Download resume
+  // View/Download resume - fetch data and show in modal
   const handleDownloadResume = async (resumeId: number) => {
+    setLoadingResumeDetail((prev) => new Set([...prev, resumeId]));
     try {
-      const response = await api.downloadUnlockedResume(resumeId, "url", true);
+      // Call unlock API to get resume data (already unlocked, so just retrieves data)
+      const response = await api.unlockCVProfile(resumeId, "search");
+      setResumeDetailData(response);
+      setShowResumeModal(true);
+    } catch (error) {
+      console.error("Failed to load resume:", error);
+      showToast("Failed to load resume details.", "error");
+    } finally {
+      setLoadingResumeDetail((prev) => {
+        const newSet = new Set(prev);
+        newSet.delete(resumeId);
+        return newSet;
+      });
+    }
+  };
+
+  // Download PDF from modal
+  const handleDownloadPDF = async () => {
+    if (!resumeDetailData) return;
+    try {
+      const response = await api.downloadUnlockedResume(
+        resumeDetailData.resume_id,
+        "url",
+        true,
+      );
       if (response.download_url) {
         window.open(response.download_url, "_blank");
       }
@@ -1278,12 +1316,18 @@ export default function CVSearchPage() {
                   unlockedResumes.has(result.resume_id) ? (
                     <button
                       onClick={() => handleDownloadResume(result.resume_id)}
+                      disabled={loadingResumeDetail.has(result.resume_id)}
                       className="w-full px-4 py-2 rounded-xl text-sm font-semibold
                        bg-emerald-600 hover:bg-emerald-700
-                       text-white shadow-md transition flex items-center justify-center gap-2"
+                       text-white shadow-md transition flex items-center justify-center gap-2
+                       disabled:opacity-50"
                     >
-                      <Download className="w-4 h-4" />
-                      Download CV
+                      {loadingResumeDetail.has(result.resume_id) ? (
+                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      ) : (
+                        <Eye className="w-4 h-4" />
+                      )}
+                      View / Download CV
                     </button>
                   ) : (
                     <button
@@ -1304,7 +1348,7 @@ export default function CVSearchPage() {
                       ) : (
                         <Unlock className="w-4 h-4" />
                       )}
-                      Unlock (1 credit)
+                      View / Unlock (1 credit)
                     </button>
                   )}
                 </div>
@@ -1316,12 +1360,10 @@ export default function CVSearchPage() {
           {searchResults.total_pages > 1 && (
             <div className="flex items-center justify-center gap-2 mt-6">
               <button
-                onClick={() =>
-                  setFilters({
-                    ...filters,
-                    page: Math.max(1, filters.page - 1),
-                  })
-                }
+                onClick={() => {
+                  const newPage = Math.max(1, filters.page - 1);
+                  handleSearch({ page: newPage });
+                }}
                 disabled={filters.page === 1}
                 className="p-2 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 disabled:opacity-50"
               >
@@ -1331,12 +1373,13 @@ export default function CVSearchPage() {
                 Page {filters.page} of {searchResults.total_pages}
               </span>
               <button
-                onClick={() =>
-                  setFilters({
-                    ...filters,
-                    page: Math.min(searchResults.total_pages, filters.page + 1),
-                  })
-                }
+                onClick={() => {
+                  const newPage = Math.min(
+                    searchResults.total_pages,
+                    filters.page + 1,
+                  );
+                  handleSearch({ page: newPage });
+                }}
                 disabled={filters.page === searchResults.total_pages}
                 className="p-2 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 disabled:opacity-50"
               >
@@ -1696,6 +1739,876 @@ export default function CVSearchPage() {
                   </div>
                 </div>
               )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Resume Detail Modal */}
+      {showResumeModal && resumeDetailData && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-7xl max-h-[90vh] flex flex-col animate-in zoom-in-95 duration-200">
+            <div className="px-6 py-4 border-b bg-slate-900 rounded-t-xl flex justify-between items-center">
+              <h3 className="text-lg font-semibold text-white flex items-center gap-2">
+                <Download className="w-5 h-5" />
+                Resume Details - {resumeDetailData.resume_name}
+              </h3>
+              <button
+                onClick={() => setShowResumeModal(false)}
+                className="p-2 text-white/70 hover:text-white hover:bg-white/10 rounded-full transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto p-6 space-y-6">
+              {/* Personal Info */}
+              {resumeDetailData.resume_data?.personalInfo && (
+                <div>
+                  <h4 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-3">
+                    Personal Information
+                  </h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-gray-50 dark:bg-gray-900 p-4 rounded-lg">
+                    {resumeDetailData.resume_data.personalInfo.fullName && (
+                      <div>
+                        <span className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                          Full Name
+                        </span>
+                        <p className="text-gray-900 dark:text-gray-100">
+                          {resumeDetailData.resume_data.personalInfo.fullName}
+                        </p>
+                      </div>
+                    )}
+                    {resumeDetailData.resume_data.personalInfo
+                      .professionalTitle && (
+                      <div>
+                        <span className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                          Professional Title
+                        </span>
+                        <p className="text-gray-900 dark:text-gray-100 font-semibold">
+                          {
+                            resumeDetailData.resume_data.personalInfo
+                              .professionalTitle
+                          }
+                        </p>
+                      </div>
+                    )}
+                    {resumeDetailData.resume_data.personalInfo.email && (
+                      <div>
+                        <span className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                          Email
+                        </span>
+                        <p className="text-gray-900 dark:text-gray-100">
+                          {resumeDetailData.resume_data.personalInfo.email}
+                        </p>
+                      </div>
+                    )}
+                    {resumeDetailData.resume_data.personalInfo.phone && (
+                      <div>
+                        <span className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                          Phone
+                        </span>
+                        <p className="text-gray-900 dark:text-gray-100">
+                          {resumeDetailData.resume_data.personalInfo.phone}
+                        </p>
+                      </div>
+                    )}
+                    {resumeDetailData.resume_data.personalInfo.dateOfBirth && (
+                      <div>
+                        <span className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                          Date of Birth
+                        </span>
+                        <p className="text-gray-900 dark:text-gray-100">
+                          {
+                            resumeDetailData.resume_data.personalInfo
+                              .dateOfBirth
+                          }
+                        </p>
+                      </div>
+                    )}
+                    {resumeDetailData.resume_data.personalInfo.gender && (
+                      <div>
+                        <span className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                          Gender
+                        </span>
+                        <p className="text-gray-900 dark:text-gray-100 capitalize">
+                          {resumeDetailData.resume_data.personalInfo.gender}
+                        </p>
+                      </div>
+                    )}
+                    {resumeDetailData.resume_data.personalInfo.nationality && (
+                      <div>
+                        <span className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                          Nationality
+                        </span>
+                        <p className="text-gray-900 dark:text-gray-100">
+                          {
+                            resumeDetailData.resume_data.personalInfo
+                              .nationality
+                          }
+                        </p>
+                      </div>
+                    )}
+                    {resumeDetailData.resume_data.personalInfo.country && (
+                      <div>
+                        <span className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                          Country
+                        </span>
+                        <p className="text-gray-900 dark:text-gray-100">
+                          {resumeDetailData.resume_data.personalInfo.country}
+                        </p>
+                      </div>
+                    )}
+                    {resumeDetailData.resume_data.personalInfo.state && (
+                      <div>
+                        <span className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                          State
+                        </span>
+                        <p className="text-gray-900 dark:text-gray-100">
+                          {resumeDetailData.resume_data.personalInfo.state}
+                        </p>
+                      </div>
+                    )}
+                    {resumeDetailData.resume_data.personalInfo.city && (
+                      <div>
+                        <span className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                          City
+                        </span>
+                        <p className="text-gray-900 dark:text-gray-100">
+                          {resumeDetailData.resume_data.personalInfo.city}
+                        </p>
+                      </div>
+                    )}
+                    {resumeDetailData.resume_data.personalInfo.address && (
+                      <div className="col-span-2">
+                        <span className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                          Address
+                        </span>
+                        <p className="text-gray-900 dark:text-gray-100">
+                          {resumeDetailData.resume_data.personalInfo.address}
+                        </p>
+                      </div>
+                    )}
+                    {resumeDetailData.resume_data.personalInfo.streetNumber && (
+                      <div>
+                        <span className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                          Street Number
+                        </span>
+                        <p className="text-gray-900 dark:text-gray-100">
+                          {
+                            resumeDetailData.resume_data.personalInfo
+                              .streetNumber
+                          }
+                        </p>
+                      </div>
+                    )}
+                    {resumeDetailData.resume_data.personalInfo
+                      .postalZipCode && (
+                      <div>
+                        <span className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                          Postal/ZIP Code
+                        </span>
+                        <p className="text-gray-900 dark:text-gray-100">
+                          {
+                            resumeDetailData.resume_data.personalInfo
+                              .postalZipCode
+                          }
+                        </p>
+                      </div>
+                    )}
+                    {resumeDetailData.resume_data.personalInfo.countryCode && (
+                      <div>
+                        <span className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                          Country Code
+                        </span>
+                        <p className="text-gray-900 dark:text-gray-100">
+                          {
+                            resumeDetailData.resume_data.personalInfo
+                              .countryCode
+                          }
+                        </p>
+                      </div>
+                    )}
+                    {resumeDetailData.resume_data.personalInfo
+                      .profileDescription && (
+                      <div className="col-span-2">
+                        <span className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                          Profile Description
+                        </span>
+                        <p className="text-gray-900 dark:text-gray-100 text-sm">
+                          {
+                            resumeDetailData.resume_data.personalInfo
+                              .profileDescription
+                          }
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Work Experience */}
+              {resumeDetailData.resume_data?.sections?.workExperience &&
+                resumeDetailData.resume_data.sections.workExperience.length >
+                  0 && (
+                  <div>
+                    <h4 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-3 flex items-center gap-2">
+                      <Briefcase className="w-5 h-5 text-blue-500" />
+                      Work Experience
+                    </h4>
+                    <div className="space-y-4">
+                      {resumeDetailData.resume_data.sections.workExperience.map(
+                        (exp: any, idx: number) => (
+                          <div
+                            key={idx}
+                            className="bg-gray-50 dark:bg-gray-900 p-4 rounded-lg"
+                          >
+                            <h5 className="font-semibold text-gray-900 dark:text-gray-100">
+                              {exp.position}
+                            </h5>
+                            <p className="text-sm text-gray-600 dark:text-gray-400">
+                              {exp.is_current && "current"}
+                            </p>
+                            <p className="text-sm text-gray-600 dark:text-gray-400">
+                              {exp.start_date} • {exp.end_date}
+                            </p>
+                            <p className="text-sm text-gray-600 dark:text-gray-400">
+                              {exp.company} • {exp.location}
+                            </p>
+                            {exp.description && (
+                              <p className="text-sm text-gray-700 dark:text-gray-300 mt-2">
+                                {exp.description}
+                              </p>
+                            )}
+                          </div>
+                        ),
+                      )}
+                    </div>
+                  </div>
+                )}
+
+              {/* Education */}
+              {resumeDetailData.resume_data?.sections?.education &&
+                resumeDetailData.resume_data.sections.education.length > 0 && (
+                  <div>
+                    <h4 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-3 flex items-center gap-2">
+                      <GraduationCap className="w-5 h-5 text-blue-500" />
+                      Education
+                    </h4>
+                    <div className="space-y-4">
+                      {resumeDetailData.resume_data.sections.education.map(
+                        (edu: any, idx: number) => (
+                          <div
+                            key={idx}
+                            className="bg-gray-50 dark:bg-gray-900 p-4 rounded-lg"
+                          >
+                            <h5 className="font-semibold text-gray-900 dark:text-gray-100">
+                              {edu.degree}
+                            </h5>
+                            <p className="text-sm text-gray-600 dark:text-gray-400">
+                              {edu.university} • {edu.field_of_study}
+                            </p>
+                            {edu.location && (
+                              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                                {edu.location}
+                              </p>
+                            )}
+                            {edu.start_year && (
+                              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                                Start:- {edu.start_year} End :-{" "}
+                                {edu.end_year ? edu.end_year : "Current "}
+                              </p>
+                            )}
+                            {edu.gpa && (
+                              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                                GPA:- {edu.gpa}
+                              </p>
+                            )}
+                          </div>
+                        ),
+                      )}
+                    </div>
+                  </div>
+                )}
+
+              {/* Skills */}
+              {resumeDetailData.resume_data?.sections?.skills &&
+                resumeDetailData.resume_data.sections.skills.length > 0 && (
+                  <div>
+                    <h4 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-3">
+                      Skills
+                    </h4>
+                    <div className="flex flex-wrap gap-2">
+                      {resumeDetailData.resume_data.sections.skills.map(
+                        (skill: any, idx: number) => (
+                          <span
+                            key={idx}
+                            className="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded-full text-sm font-medium"
+                          >
+                            {skill.skillName}
+                          </span>
+                        ),
+                      )}
+                    </div>
+                  </div>
+                )}
+
+              {/* Languages */}
+              {resumeDetailData.resume_data?.sections?.languages &&
+                resumeDetailData.resume_data.sections.languages.length > 0 && (
+                  <div>
+                    <h4 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-3">
+                      Languages
+                    </h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      {resumeDetailData.resume_data.sections.languages.map(
+                        (lang: any, idx: number) => (
+                          <div
+                            key={idx}
+                            className="bg-gray-50 dark:bg-gray-900 p-3 rounded-lg"
+                          >
+                            <p className="font-medium text-gray-900 dark:text-gray-100">
+                              {lang.language}
+                            </p>
+                            <p className="text-sm text-gray-600 dark:text-gray-400 capitalize">
+                              {lang.proficiencyLevel}
+                            </p>
+                          </div>
+                        ),
+                      )}
+                    </div>
+                  </div>
+                )}
+
+              {/* Projects */}
+              {resumeDetailData.resume_data?.sections?.projects &&
+                resumeDetailData.resume_data.sections.projects.length > 0 && (
+                  <div>
+                    <h4 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-3">
+                      Projects
+                    </h4>
+                    <div className="space-y-4">
+                      {resumeDetailData.resume_data.sections.projects.map(
+                        (project: any, idx: number) => (
+                          <div
+                            key={idx}
+                            className="bg-gray-50 dark:bg-gray-900 p-4 rounded-lg"
+                          >
+                            <h5 className="font-semibold text-gray-900 dark:text-gray-100">
+                              {project.name}
+                            </h5>
+                            {project.description && (
+                              <p className="text-sm text-gray-700 dark:text-gray-300 mt-2">
+                                {project.description}
+                              </p>
+                            )}
+                            {(project.projectUrl || project.githubUrl) && (
+                              <div className="flex gap-4 mt-2 text-sm">
+                                {project.projectUrl && (
+                                  <a
+                                    href={project.projectUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-blue-600 dark:text-blue-400 hover:underline"
+                                  >
+                                    {project.projectUrl}
+                                  </a>
+                                )}
+                                {project.githubUrl && (
+                                  <a
+                                    href={project.githubUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-blue-600 dark:text-blue-400 hover:underline"
+                                  >
+                                    {project.githubUrl}
+                                  </a>
+                                )}
+                              </div>
+                            )}
+                          </div>
+                        ),
+                      )}
+                    </div>
+                  </div>
+                )}
+
+              {/* Certifications */}
+              {resumeDetailData.resume_data?.sections?.certifications &&
+                resumeDetailData.resume_data.sections.certifications.length >
+                  0 && (
+                  <div>
+                    <h4 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-3 flex items-center gap-2">
+                      <Award className="w-5 h-5 text-blue-500" />
+                      Certifications
+                    </h4>
+                    <div className="space-y-4">
+                      {resumeDetailData.resume_data.sections.certifications.map(
+                        (cert: any, idx: number) => (
+                          <div
+                            key={idx}
+                            className="bg-gray-50 dark:bg-gray-900 p-4 rounded-lg"
+                          >
+                            <h5 className="font-semibold text-gray-900 dark:text-gray-100">
+                              {cert.name}
+                            </h5>
+                            <p className="text-sm text-gray-600 dark:text-gray-400">
+                              {cert.authority}
+                            </p>
+                            {cert.certificationDate && (
+                              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                                {new Date(
+                                  cert.certificationDate,
+                                ).toLocaleDateString()}
+                              </p>
+                            )}
+                            {cert.certificationDescription && (
+                              <p className="text-sm text-gray-700 dark:text-gray-300 mt-2">
+                                {cert.certificationDescription}
+                              </p>
+                            )}
+                            {cert.certificationUrl && (
+                              <a
+                                href={cert.certificationUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-blue-600 dark:text-blue-400 hover:underline text-sm"
+                              >
+                                {cert.certificationUrl}
+                              </a>
+                            )}
+                          </div>
+                        ),
+                      )}
+                    </div>
+                  </div>
+                )}
+
+              {/* Accomplishments */}
+              {resumeDetailData.resume_data?.sections?.accomplishments &&
+                resumeDetailData.resume_data.sections.accomplishments.length >
+                  0 && (
+                  <div>
+                    <h4 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-3">
+                      Accomplishments
+                    </h4>
+                    <div className="space-y-3">
+                      {resumeDetailData.resume_data.sections.accomplishments.map(
+                        (acc: any, idx: number) => (
+                          <div
+                            key={idx}
+                            className="bg-gray-50 dark:bg-gray-900 p-4 rounded-lg"
+                          >
+                            <div className="flex justify-between">
+                              <h5 className="font-medium text-gray-900 dark:text-gray-100">
+                                {acc.title}
+                              </h5>
+                              {acc.date && (
+                                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                                  {new Date(acc.date).toLocaleDateString()}
+                                </p>
+                              )}
+                            </div>
+                            {acc.category && (
+                              <p className="text-sm text-gray-600 dark:text-gray-400">
+                                Category :- {acc.category}
+                              </p>
+                            )}
+                            {acc.organization && (
+                              <p className="text-sm text-gray-600 dark:text-gray-400">
+                                {acc.organization}
+                              </p>
+                            )}
+                            {acc.description && (
+                              <p className="text-sm text-gray-700 dark:text-gray-300 mt-1">
+                                {acc.description}
+                              </p>
+                            )}
+                          </div>
+                        ),
+                      )}
+                    </div>
+                  </div>
+                )}
+
+              {/* Volunteering */}
+              {resumeDetailData.resume_data?.sections?.volunteering &&
+                resumeDetailData.resume_data.sections.volunteering.length >
+                  0 && (
+                  <div>
+                    <h4 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-3">
+                      Volunteering
+                    </h4>
+                    <div className="space-y-4">
+                      {resumeDetailData.resume_data.sections.volunteering.map(
+                        (vol: any, idx: number) => (
+                          <div
+                            key={idx}
+                            className="bg-gray-50 dark:bg-gray-900 p-4 rounded-lg"
+                          >
+                            <h5 className="font-semibold text-gray-900 dark:text-gray-100">
+                              {vol.role}
+                            </h5>
+                            <p className="text-sm text-gray-600 dark:text-gray-400">
+                              {vol.institutionName}
+                            </p>
+                            {vol.description && (
+                              <p className="text-sm text-gray-700 dark:text-gray-300 mt-2">
+                                {vol.description}
+                              </p>
+                            )}
+                            {vol.city && (
+                              <p className="text-sm text-gray-700 dark:text-gray-300 mt-2">
+                                {vol.city}
+                              </p>
+                            )}
+                            {vol.country && (
+                              <p className="text-sm text-gray-700 dark:text-gray-300 mt-2">
+                                {vol.country}
+                              </p>
+                            )}
+                            {vol.startDate && (
+                              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                                {new Date(vol.startDate).toLocaleDateString()}
+                              </p>
+                            )}
+                            {vol.endDate && (
+                              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                                {new Date(vol.endDate).toLocaleDateString()}
+                              </p>
+                            )}
+                          </div>
+                        ),
+                      )}
+                    </div>
+                  </div>
+                )}
+
+              {/* Internships */}
+              {resumeDetailData.resume_data?.sections?.internships &&
+                resumeDetailData.resume_data.sections.internships.length >
+                  0 && (
+                  <div>
+                    <h4 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-3">
+                      Internships
+                    </h4>
+                    <div className="space-y-4">
+                      {resumeDetailData.resume_data.sections.internships.map(
+                        (intern: any, idx: number) => (
+                          <div
+                            key={idx}
+                            className="bg-gray-50 dark:bg-gray-900 p-4 rounded-lg"
+                          >
+                            <h5 className="font-semibold text-gray-900 dark:text-gray-100">
+                              {intern.role}
+                            </h5>
+                            <p className="text-sm text-gray-600 dark:text-gray-400">
+                              {intern.employerName}
+                            </p>
+                            {intern.description && (
+                              <p className="text-sm text-gray-700 dark:text-gray-300 mt-2">
+                                {intern.description}
+                              </p>
+                            )}
+                            {intern.city && (
+                              <p className="text-sm text-gray-700 dark:text-gray-300 mt-2">
+                                {intern.city}
+                              </p>
+                            )}
+                            {intern.country && (
+                              <p className="text-sm text-gray-700 dark:text-gray-300 mt-2">
+                                {intern.country}
+                              </p>
+                            )}
+                            {intern.startDate && (
+                              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                                {new Date(
+                                  intern.startDate,
+                                ).toLocaleDateString()}
+                              </p>
+                            )}
+                            {intern.endDate && (
+                              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                                {new Date(intern.endDate).toLocaleDateString()}
+                              </p>
+                            )}
+                          </div>
+                        ),
+                      )}
+                    </div>
+                  </div>
+                )}
+
+              {/* Publications */}
+              {resumeDetailData.resume_data?.sections?.publications &&
+                resumeDetailData.resume_data.sections.publications.length >
+                  0 && (
+                  <div>
+                    <h4 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-3">
+                      Publications
+                    </h4>
+                    <div className="space-y-4">
+                      {resumeDetailData.resume_data.sections.publications.map(
+                        (pub: any, idx: number) => (
+                          <div
+                            key={idx}
+                            className="bg-gray-50 dark:bg-gray-900 p-4 rounded-lg"
+                          >
+                            <h5 className="font-semibold text-gray-900 dark:text-gray-100">
+                              {pub.title}
+                            </h5>
+                            <p className="text-sm text-gray-600 dark:text-gray-400">
+                              {pub.publisher}
+                            </p>
+                            {pub.publicationDescription && (
+                              <p className="text-sm text-gray-700 dark:text-gray-300 mt-2">
+                                {pub.publicationDescription}
+                              </p>
+                            )}
+                            {pub.publicationUrl && (
+                              <a
+                                href={pub.publicationUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-blue-600 dark:text-blue-400 hover:underline text-sm"
+                              >
+                                {pub.publicationUrl}
+                              </a>
+                            )}
+                            {pub.publicationDate && (
+                              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                                {new Date(
+                                  pub.publicationDate,
+                                ).toLocaleDateString()}
+                              </p>
+                            )}
+                          </div>
+                        ),
+                      )}
+                    </div>
+                  </div>
+                )}
+
+              {/* References */}
+              {resumeDetailData.resume_data?.sections?.references &&
+                resumeDetailData.resume_data.sections.references.length > 0 && (
+                  <div>
+                    <h4 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-3">
+                      References
+                    </h4>
+                    <div className="space-y-4">
+                      {resumeDetailData.resume_data.sections.references.map(
+                        (ref: any, idx: number) => (
+                          <div
+                            key={idx}
+                            className="bg-gray-50 dark:bg-gray-900 p-4 rounded-lg"
+                          >
+                            <h5 className="font-semibold text-gray-900 dark:text-gray-100">
+                              {ref.employeeName}
+                            </h5>
+                            <p className="text-sm text-gray-600 dark:text-gray-400">
+                              {ref.designation} at {ref.employer}
+                            </p>
+                            {ref.contactNumber && (
+                              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                                {ref.contactNumber}
+                              </p>
+                            )}
+                          </div>
+                        ),
+                      )}
+                    </div>
+                  </div>
+                )}
+
+              {/* Social Media */}
+              {resumeDetailData.resume_data?.sections?.socialMedia &&
+                resumeDetailData.resume_data.sections.socialMedia.length >
+                  0 && (
+                  <div>
+                    <h4 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-3">
+                      Social Media
+                    </h4>
+                    <div className="flex flex-wrap gap-3">
+                      {resumeDetailData.resume_data.sections.socialMedia.map(
+                        (social: any, idx: number) => (
+                          <a
+                            key={idx}
+                            href={social.socialLink}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="px-4 py-2 bg-gray-50 dark:bg-gray-900 rounded-lg text-sm text-blue-600 dark:text-blue-400 hover:underline"
+                          >
+                            {social.socialMediaName} :- {social.socialLink}
+                          </a>
+                        ),
+                      )}
+                    </div>
+                  </div>
+                )}
+
+              {/* Interests */}
+              {resumeDetailData.resume_data?.sections?.interests &&
+                resumeDetailData.resume_data.sections.interests.length > 0 && (
+                  <div>
+                    <h4 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-3">
+                      Interests
+                    </h4>
+                    <div className="flex flex-wrap gap-2">
+                      {resumeDetailData.resume_data.sections.interests.map(
+                        (interest: any, idx: number) => (
+                          <div key={idx}>
+                            <span className="px-3 py-1 bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200 rounded-full text-sm">
+                              {interest.interestName}
+                            </span>
+                            <p>{interest.category}</p>
+                            <p>{interest.description}</p>
+                          </div>
+                        ),
+                      )}
+                    </div>
+                  </div>
+                )}
+
+              {/* Affiliations */}
+              {resumeDetailData.resume_data?.sections?.affiliations &&
+                resumeDetailData.resume_data.sections.affiliations.length >
+                  0 && (
+                  <div>
+                    <h4 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-3">
+                      Affiliations
+                    </h4>
+                    <div className="flex flex-wrap gap-2">
+                      {resumeDetailData.resume_data.sections.affiliations.map(
+                        (aff: any, idx: number) => (
+                          <span
+                            key={idx}
+                            className="px-3 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 rounded-full text-sm"
+                          >
+                            {aff.organization}
+                          </span>
+                        ),
+                      )}
+                    </div>
+                  </div>
+                )}
+
+              {/* Strengths */}
+              {resumeDetailData.resume_data?.sections?.strengths &&
+                resumeDetailData.resume_data.sections.strengths.length > 0 && (
+                  <div>
+                    <h4 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-3">
+                      Strengths
+                    </h4>
+                    <div className="space-y-3">
+                      {resumeDetailData.resume_data.sections.strengths.map(
+                        (strength: any, idx: number) => (
+                          <div
+                            key={idx}
+                            className="bg-gray-50 dark:bg-gray-900 p-3 rounded-lg"
+                          >
+                            <h5 className="font-medium text-gray-900 dark:text-gray-100">
+                              {strength.strengthName}
+                            </h5>
+                            {strength.strengthDescription && (
+                              <p className="text-sm text-gray-700 dark:text-gray-300 mt-1">
+                                {strength.strengthDescription}
+                              </p>
+                            )}
+                          </div>
+                        ),
+                      )}
+                    </div>
+                  </div>
+                )}
+
+              {/* Summaries */}
+              {resumeDetailData.resume_data?.sections?.summaries &&
+                resumeDetailData.resume_data.sections.summaries.length > 0 && (
+                  <div>
+                    <h4 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-3">
+                      Professional Summary
+                    </h4>
+                    <div className="space-y-3">
+                      {resumeDetailData.resume_data.sections.summaries.map(
+                        (summary: any, idx: number) => (
+                          <div
+                            key={idx}
+                            className="bg-gray-50 dark:bg-gray-900 p-4 rounded-lg"
+                          >
+                            {summary.title && (
+                              <h5 className="font-medium text-gray-900 dark:text-gray-100 mb-2">
+                                {summary.title}
+                              </h5>
+                            )}
+                            <p className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-line">
+                              {summary.content}
+                            </p>
+                          </div>
+                        ),
+                      )}
+                    </div>
+                  </div>
+                )}
+
+              {/* Custom Sections */}
+              {resumeDetailData.resume_data?.sections?.customSections &&
+                resumeDetailData.resume_data.sections.customSections.length >
+                  0 && (
+                  <div>
+                    <h4 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-3">
+                      Additional Information
+                    </h4>
+                    <div className="space-y-4">
+                      {resumeDetailData.resume_data.sections.customSections.map(
+                        (section: any, idx: number) =>
+                          section.isActive && (
+                            <div
+                              key={idx}
+                              className="bg-gray-50 dark:bg-gray-900 p-4 rounded-lg"
+                            >
+                              <h5 className="font-semibold text-gray-900 dark:text-gray-100 mb-2">
+                                {section.sectionTitle}
+                              </h5>
+                              {section.content && (
+                                <p className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-line">
+                                  {section.content}
+                                </p>
+                              )}
+                            </div>
+                          ),
+                      )}
+                    </div>
+                  </div>
+                )}
+
+              {/* Unlock Info */}
+              <div className="bg-green-50 dark:bg-green-900/20 p-4 rounded-lg border border-green-200 dark:border-green-800">
+                <p className="text-sm text-gray-700 dark:text-gray-300">
+                  <span className="font-semibold">Unlocked:</span>{" "}
+                  {new Date(resumeDetailData.unlocked_at).toLocaleString()}
+                </p>
+                <p className="text-sm text-gray-700 dark:text-gray-300 mt-1">
+                  <span className="font-semibold">Valid Until:</span>{" "}
+                  {new Date(resumeDetailData.unlocked_until).toLocaleString()}
+                </p>
+              </div>
+            </div>
+
+            <div className="px-6 py-4 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 flex justify-end gap-3 rounded-b-xl">
+              <button
+                onClick={() => setShowResumeModal(false)}
+                className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+              >
+                Close
+              </button>
+              <button
+                onClick={handleDownloadPDF}
+                className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg shadow-sm hover:shadow transition-all flex items-center gap-2"
+              >
+                <Download className="w-4 h-4" />
+                Download PDF
+              </button>
             </div>
           </div>
         </div>

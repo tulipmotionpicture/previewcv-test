@@ -2131,6 +2131,42 @@ export class ApiClient {
     );
   }
 
+  // Move resumes between buckets
+  async moveResumesBetweenBuckets(data: {
+    from_bucket_id: number;
+    to_bucket_id: number;
+    item_ids: number[];
+    keep_in_source?: boolean;
+  }): Promise<AddResumesToBucketResponse> {
+    return this.request<AddResumesToBucketResponse>(
+      `/api/v1/recruiter/buckets/move-resumes`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      },
+      true,
+      true,
+    );
+  }
+
+  // Reorder bucket items
+  async reorderBucketItems(
+    bucketId: number,
+    itemOrders: { item_id: number; display_order: number }[],
+  ): Promise<any> {
+    return this.request<any>(
+      `/api/v1/recruiter/buckets/${bucketId}/resumes/reorder`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ item_orders: itemOrders }),
+      },
+      true,
+      true,
+    );
+  }
+
   // Get bucket activity logs
   async getBucketActivity(
     bucketId: number,
