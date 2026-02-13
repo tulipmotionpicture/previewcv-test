@@ -220,7 +220,7 @@ function JobsPageContent() {
         }}
         showAuthButtons={true}
       />
-      <div className="pt-18 pb-8 px-12 max-w-7xl mx-auto" >
+      <div className="pt-18 pb-8 px-12 max-w-7xl mx-auto">
         {/* Search Bar Container */}
         {/* Search Bar Container */}
         <div className="border-1 border-[#E1E8F1] rounded-xl dark:border-gray-700 p-4 bg-white dark:bg-gray-900 mb-3">
@@ -241,8 +241,18 @@ function JobsPageContent() {
             >
               {/* Keyword Input */}
               <div className="flex-[2] bg-white dark:bg-gray-900 rounded-lg border border-blue-200 dark:border-gray-700 flex items-center px-4   hover:border-blue-400 transition-colors">
-                <svg className="w-6 h-6 text-gray-400 mr-3 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                <svg
+                  className="w-6 h-6 text-gray-400 mr-3 shrink-0"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                  />
                 </svg>
                 <input
                   type="text"
@@ -255,9 +265,24 @@ function JobsPageContent() {
 
               {/* Location Input */}
               <div className="flex-[1.5] bg-white dark:bg-gray-900 rounded-lg border border-blue-200 dark:border-gray-700 flex items-center px-4 py-3 hover:border-blue-400 transition-colors">
-                <svg className="w-6 h-6 text-gray-400 mr-3 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a2 2 0 01-2.828 0l-4.243-4.243a8 8 0 1111.314 0z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                <svg
+                  className="w-6 h-6 text-gray-400 mr-3 shrink-0"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M17.657 16.657L13.414 20.9a2 2 0 01-2.828 0l-4.243-4.243a8 8 0 1111.314 0z"
+                  />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                  />
                 </svg>
                 <input
                   type="text"
@@ -270,7 +295,9 @@ function JobsPageContent() {
 
               {/* Experience Input */}
               <div className="flex-[1.5] bg-white dark:bg-gray-900 rounded-lg border border-blue-200 dark:border-gray-700 flex items-center px-4 py-3 hover:border-blue-400 transition-colors">
-                <span className="w-6 h-6 text-gray-400 mr-3 flex items-center justify-center font-bold text-lg shrink-0">₹</span>
+                <span className="w-6 h-6 text-gray-400 mr-3 flex items-center justify-center font-bold text-lg shrink-0">
+                  ₹
+                </span>
                 <input
                   type="text"
                   placeholder="Enter Salary"
@@ -306,7 +333,6 @@ function JobsPageContent() {
           </div>*/}
         </div>
 
-
         <JobsLayout
           filters={
             <JobsFilters
@@ -319,12 +345,29 @@ function JobsPageContent() {
               {/* Header for Job List */}
               <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-2">
                 <h2 className="text-slate-500 text-[15px] font-medium">
-                  Showing <span className="font-bold text-slate-900 dark:text-white">{total}</span> jobs
-                  {keyword && <span className="font-bold text-slate-900 dark:text-white"> {keyword}</span>}
-                  {location && <> in <span className="font-bold text-slate-900 dark:text-white">{location}</span></>}
+                  Showing{" "}
+                  <span className="font-bold text-slate-900 dark:text-white">
+                    {total}
+                  </span>{" "}
+                  jobs
+                  {keyword && (
+                    <span className="font-bold text-slate-900 dark:text-white">
+                      {" "}
+                      {keyword}
+                    </span>
+                  )}
+                  {location && (
+                    <>
+                      {" "}
+                      in{" "}
+                      <span className="font-bold text-slate-900 dark:text-white">
+                        {location}
+                      </span>
+                    </>
+                  )}
                 </h2>
 
-                <div className="flex items-center gap-2 bg-white dark:bg-gray-900 rounded-lg border border-blue-200 dark:border-gray-700 flex items-center px-1 py-1 hover:border-blue-400 transition-colors">
+                <div className="gap-2 bg-white dark:bg-gray-900 rounded-lg border border-blue-200 dark:border-gray-700 flex items-center px-1 py-1 hover:border-blue-400 transition-colors">
                   <span className="text-slate-500 text-sm">Sort by :</span>
                   <div className="relative group cursor-pointer">
                     <select className="appearance-none bg-transparent text-sm font-bold text-slate-900 dark:text-white border-none focus:ring-0 cursor-pointer  py-1 px-1">
@@ -333,8 +376,17 @@ function JobsPageContent() {
                       <option>Salary</option>
                     </select>
                     <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center text-slate-900 dark:text-white">
-                      <svg className="h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                        <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+                      <svg
+                        className="h-4 w-4"
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 20 20"
+                        fill="currentColor"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                          clipRule="evenodd"
+                        />
                       </svg>
                     </div>
                   </div>
