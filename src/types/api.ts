@@ -813,6 +813,8 @@ export interface Bucket {
 export interface BucketWithStats extends Bucket {
   item_count: number;
   avg_rating?: number;
+  locked_count?: number;
+  unlocked_count?: number;
 }
 
 export interface BucketListResponse {
