@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import config from "@/config";
-import Header from "@/components/Header";
+import FloatingHeader from "@/components/FloatingHeader";
 import HeroSection from "@/components/HeroSection";
 import FAQSection from "@/components/shared/FAQSection";
 import { useEffect, useState } from "react";
@@ -130,10 +130,10 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-white dark:bg-gray-950 dark:text-gray-100 transition-colors duration-300">
       {/* Navigation */}
-      <Header
+      <FloatingHeader
         links={[
-          { label: "Candidate Login", href: "/candidate/login" },
-          { label: "Recruiter Login", href: "/recruiter/login" },
+          { label: "Candidate", href: "/candidate/login" },
+          { label: "Recruiter", href: "/recruiter/login" },
         ]}
         cta={{
           label: "Get Started",
@@ -141,6 +141,7 @@ export default function Home() {
           variant: "primary",
         }}
         showAuthButtons={true}
+        logoSrc="/preview-cv-main-logo.png"
       />
 
       <section>

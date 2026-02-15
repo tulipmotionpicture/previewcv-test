@@ -1,5 +1,5 @@
 import Link from "next/link";
-import Header from "@/components/Header";
+import FloatingHeader from "@/components/FloatingHeader";
 import HeroSection from "@/components/HeroSection";
 import {
   ArrowRight,
@@ -15,7 +15,7 @@ import {
 export default function CandidateLanding() {
   return (
     <div className="min-h-screen">
-      <Header
+      <FloatingHeader
         links={[{ label: "Browse Jobs", href: "/jobs" }]}
         cta={{
           label: "Candidate Login",

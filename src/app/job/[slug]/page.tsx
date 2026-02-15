@@ -5,7 +5,7 @@ import config from "@/config";
 import { Job } from "@/types/api";
 import JobDetailsClient from "./JobDetailsClient";
 import JobDetailsSidebar from "@/components/JobDetailsSidebar";
-import Header from "@/components/Header";
+import FloatingHeader from "@/components/FloatingHeader";
 import { notFound } from "next/navigation";
 import { api } from "@/lib/api";
 import {
@@ -108,7 +108,7 @@ export default async function JobDetailsPage({
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-950 transition-colors duration-200">
-      <Header
+      <FloatingHeader
         links={[{ label: "Candidate Login", href: "/candidate/login" }]}
         cta={{
           label: "Recruiter Access",
@@ -116,6 +116,7 @@ export default async function JobDetailsPage({
           variant: "dark",
         }}
         showAuthButtons={true}
+        hideOnScroll={true}
       />
 
       <div className="pt-8 px-4 sm:px-6 lg:px-8 max-w-[1200px] mx-auto">

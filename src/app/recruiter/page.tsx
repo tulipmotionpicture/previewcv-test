@@ -5,7 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useRecruiterAuth } from "@/context/RecruiterAuthContext";
-import Header from "@/components/Header";
+import FloatingHeader from "@/components/FloatingHeader";
 import HeroSection from "@/components/HeroSection";
 
 const MagnifyingGlassIcon = () => (
@@ -68,7 +68,7 @@ export default function RecruiterLanding() {
   return (
     <div className="min-h-screen bg-white dark:bg-gray-950 text-gray-950 dark:text-gray-100 transition-colors duration-300">
       {/* SaaS Nav */}
-      <Header
+      <FloatingHeader
         links={[
           { label: "Features", href: "#features" },
           { label: "Sign Up", href: "/recruiter/signup" },

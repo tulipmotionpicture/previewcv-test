@@ -498,7 +498,7 @@ export default function RecruiterDashboard() {
       />
 
       {/* Main Content */}
-      <main className="flex-1 p-5 max-w-7xl mx-auto overflow-x-hidden">
+      <main className="flex-1 p-5 max-w-7xl  overflow-x-hidden">
         {/* Dashboard Header */}
         <header className="flex items-center justify-end mb-6">
           <div className="flex items-center gap-4 text-right">

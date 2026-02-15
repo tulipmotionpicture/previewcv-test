@@ -6,7 +6,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { api } from "@/lib/api";
 import { BlogPost, BlogCategory } from "@/types";
-import Header from "@/components/Header";
+import FloatingHeader from "@/components/FloatingHeader";
 import {
   Search,
   Calendar,
@@ -115,7 +115,7 @@ function BlogListingContent() {
 
   return (
     <div className="min-h-screen bg-white dark:bg-gray-950">
-      <Header
+      <FloatingHeader
         links={[
           { label: "Home", href: "/" },
           { label: "Jobs", href: "/jobs" },
@@ -169,11 +169,10 @@ function BlogListingContent() {
           <div className="flex gap-2 overflow-x-auto pb-2 no-scrollbar">
             <button
               onClick={() => handleCategoryChange(null)}
-              className={`px-4 py-2 rounded-lg font-medium whitespace-nowrap transition-colors ${
-                !selectedCategory
-                  ? "bg-blue-600 text-white"
-                  : "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700"
-              }`}
+              className={`px-4 py-2 rounded-lg font-medium whitespace-nowrap transition-colors ${!selectedCategory
+                ? "bg-blue-600 text-white"
+                : "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700"
+                }`}
             >
               All Articles
             </button>
@@ -183,11 +182,10 @@ function BlogListingContent() {
                 <button
                   key={category.id}
                   onClick={() => handleCategoryChange(category.slug)}
-                  className={`px-4 py-2 rounded-lg font-medium whitespace-nowrap transition-colors ${
-                    selectedCategory === category.slug
-                      ? "bg-blue-600 text-white"
-                      : "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700"
-                  }`}
+                  className={`px-4 py-2 rounded-lg font-medium whitespace-nowrap transition-colors ${selectedCategory === category.slug
+                    ? "bg-blue-600 text-white"
+                    : "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700"
+                    }`}
                 >
                   {category.name} ({category.post_count})
                 </button>
@@ -301,11 +299,10 @@ function BlogListingContent() {
                           <button
                             key={page}
                             onClick={() => handlePageChange(page)}
-                            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                              currentPage === page
-                                ? "bg-blue-600 text-white"
-                                : "border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800"
-                            }`}
+                            className={`px-4 py-2 rounded-lg font-medium transition-colors ${currentPage === page
+                              ? "bg-blue-600 text-white"
+                              : "border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800"
+                              }`}
                           >
                             {page}
                           </button>
@@ -349,7 +346,7 @@ export default function BlogListingPage() {
     <Suspense
       fallback={
         <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
-          <Header />
+          <FloatingHeader />
           <div className="flex items-center justify-center min-h-[60vh]">
             <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
           </div>

@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import { api } from "@/lib/api";
 import type { JobPlan, CvPlan } from "@/types/api";
 import { Check, Crown, Star, Zap } from "lucide-react";
-import Header from "./Header";
+import FloatingHeader from "./FloatingHeader";
 import FAQSection from "./shared/FAQSection";
 
 interface PricingPageProps {
@@ -89,7 +89,7 @@ const PricingPage: React.FC<PricingPageProps> = ({ onNavigate }) => {
 
   return (
     <>
-      <Header
+      <FloatingHeader
         links={[
           { label: "Home", href: "/" },
           { label: "Jobs", href: "/jobs" },
@@ -136,11 +136,10 @@ const PricingPage: React.FC<PricingPageProps> = ({ onNavigate }) => {
         {/* Currency Toggle */}
         <div className="flex items-center justify-center gap-3 mb-12">
           <span
-            className={`text-sm font-medium ${
-              currency === "usd"
-                ? "text-gray-900 dark:text-white"
-                : "text-gray-500 dark:text-gray-400"
-            }`}
+            className={`text-sm font-medium ${currency === "usd"
+              ? "text-gray-900 dark:text-white"
+              : "text-gray-500 dark:text-gray-400"
+              }`}
           >
             USD
           </span>
@@ -149,17 +148,15 @@ const PricingPage: React.FC<PricingPageProps> = ({ onNavigate }) => {
             className="relative w-14 h-7 bg-gray-200 dark:bg-gray-700 rounded-full transition-colors"
           >
             <div
-              className={`absolute top-0.5 left-0.5 w-6 h-6 bg-blue-600 rounded-full transition-transform ${
-                currency === "inr" ? "translate-x-7" : ""
-              }`}
+              className={`absolute top-0.5 left-0.5 w-6 h-6 bg-blue-600 rounded-full transition-transform ${currency === "inr" ? "translate-x-7" : ""
+                }`}
             />
           </button>
           <span
-            className={`text-sm font-medium ${
-              currency === "inr"
-                ? "text-gray-900 dark:text-white"
-                : "text-gray-500 dark:text-gray-400"
-            }`}
+            className={`text-sm font-medium ${currency === "inr"
+              ? "text-gray-900 dark:text-white"
+              : "text-gray-500 dark:text-gray-400"
+              }`}
           >
             INR
           </span>

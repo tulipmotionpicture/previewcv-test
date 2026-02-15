@@ -6,7 +6,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { api } from "@/lib/api";
 import { BlogPost } from "@/types";
-import Header from "@/components/Header";
+import FloatingHeader from "@/components/FloatingHeader";
 import Footer from "@/components/Footer";
 import {
   Calendar,
@@ -100,7 +100,7 @@ export default function BlogDetailPage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-white dark:bg-gray-950">
-        <Header
+        <FloatingHeader
           links={[
             { label: "Home", href: "/" },
             { label: "Jobs", href: "/jobs" },
@@ -123,7 +123,7 @@ export default function BlogDetailPage() {
   if (error || !post) {
     return (
       <div className="min-h-screen bg-white dark:bg-gray-950">
-        <Header
+        <FloatingHeader
           links={[
             { label: "Home", href: "/" },
             { label: "Jobs", href: "/jobs" },
@@ -154,7 +154,7 @@ export default function BlogDetailPage() {
 
   return (
     <div className="min-h-screen bg-white dark:bg-gray-950">
-      <Header
+      <FloatingHeader
         links={[
           { label: "Home", href: "/" },
           { label: "Jobs", href: "/jobs" },

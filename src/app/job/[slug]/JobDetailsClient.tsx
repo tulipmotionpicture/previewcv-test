@@ -542,14 +542,16 @@ export default function JobDetailsClient({ job, slug }: JobDetailsClientProps) {
           </div>
         </div>
       )}
-      {/* Sticky Job Header */}
+
       <div
-        className={`fixed top-0 left-0 right-0 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 shadow-sm z-50 transform transition-transform duration-300 ${showStickyHeader ? "translate-y-0" : "-translate-y-full"
+        className={`fixed z-[60] left-1/2 -translate-x-1/2 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md border border-gray-200 dark:border-gray-700 shadow-xl rounded-2xl transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] ${showStickyHeader
+          ? "top-4 w-[95%] md:max-w-4xl opacity-100"
+          : "-top-24 w-[95%] md:max-w-4xl opacity-0 pointer-events-none"
           }`}
       >
-        <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <div className="w-10 h-10 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 flex items-center justify-center p-1 overflow-hidden shrink-0">
+        <div className="w-full px-3 py-2 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 flex items-center justify-center p-1 overflow-hidden shrink-0">
               {job.company_logo_url ? (
                 <Image
                   src={job.company_logo_url}
@@ -559,34 +561,29 @@ export default function JobDetailsClient({ job, slug }: JobDetailsClientProps) {
                   className="object-contain w-full h-full"
                 />
               ) : (
-                <Building2 className="w-5 h-5 text-gray-400" />
+                <Building2 className="w-4 h-4 text-gray-400" />
               )}
             </div>
             <div>
               <h3 className="text-sm font-bold text-gray-900 dark:text-gray-100 line-clamp-1">{job.title}</h3>
-              <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400 line-clamp-1">
+              <div className="flex items-center gap-2 text-[10px] text-gray-500 dark:text-gray-400 line-clamp-1">
                 <span>{job.company_name}</span>
-                <span>•</span>
-                <span>{job.location}</span>
                 <span className="hidden sm:inline-block text-gray-300 dark:text-gray-600">|</span>
                 <Link href={`/jobs?limit=10&category=${job.categories?.[0]}`} className="hidden sm:inline-block text-blue-600 hover:underline font-medium">
-                  Send me jobs like this
+                  Similar Jobs
                 </Link>
               </div>
             </div>
           </div>
 
           <div className="flex items-center gap-3">
-            <Link href={`/jobs?limit=10&category=${job.categories?.[0]}`} className="sm:hidden text-blue-600 text-xs font-medium hover:underline whitespace-nowrap">
-              Similar Jobs
-            </Link>
             <button
               onClick={() => {
                 document.getElementById('application-card')?.scrollIntoView({ behavior: 'smooth' });
               }}
-              className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold rounded-lg transition-colors shadow-sm whitespace-nowrap"
+              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-lg transition-colors shadow-sm whitespace-nowrap"
             >
-              Apply
+              Apply Now
             </button>
           </div>
         </div>

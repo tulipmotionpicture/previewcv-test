@@ -1,6 +1,6 @@
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
-import Header from "@/components/Header";
+import FloatingHeader from "@/components/FloatingHeader";
 import { api } from "@/lib/api";
 import type { SEOJobsResponse } from "@/types/jobs";
 import SEOJobsListWithLayout from "@/components/jobs/SEOJobsListWithLayout";
@@ -70,7 +70,7 @@ export default async function SEOJobsPage({
 
   return (
     <div className="min-h-screen transition-colors duration-300">
-      <Header
+      <FloatingHeader
         links={[{ label: "Candidate Login", href: "/candidate/login" }]}
         cta={{
           label: "Recruiter Access",

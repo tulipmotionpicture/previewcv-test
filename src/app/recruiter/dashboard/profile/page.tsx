@@ -175,7 +175,7 @@ export default function RecruiterProfileEdit() {
   if (authLoading) {
     return (
       <div className="min-h-screen bg-gray-50 p-8">
-        <div className="max-w-5xl mx-auto space-y-6">
+        <div className="max-w-5xl  space-y-6">
           <LoadingSkeleton className="h-12 w-64" />
           <LoadingSkeleton className="h-96 w-full" />
         </div>
@@ -187,7 +187,7 @@ export default function RecruiterProfileEdit() {
 
   return (
     <div className="min-h-screen pb-20">
-      <div className="max-w-5xl mx-auto space-y-5">
+      <div className="max-w-5xl  space-y-5">
 
         {/* Profile Information Section */}
         <div className="rounded-lg overflow-hidden shadow-sm border border-gray-100">

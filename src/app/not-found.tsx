@@ -4,10 +4,19 @@
  */
 
 import Link from 'next/link';
+import FloatingHeader from '@/components/FloatingHeader';
 
 export default function NotFound() {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-950 flex flex-col items-center justify-center px-4 transition-colors duration-300">
+      <FloatingHeader
+        links={[{ label: "Home", href: "/" }]}
+        cta={{
+          label: "Get Started",
+          href: "/candidate/signup",
+          variant: "primary",
+        }}
+      />
       <div className="max-w-md w-full text-center">
         <div className="mb-8">
           <div className="text-6xl mb-4">📄</div>

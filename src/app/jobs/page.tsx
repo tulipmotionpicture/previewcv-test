@@ -5,7 +5,7 @@ import JobsLayout from "@/components/JobsLayout";
 import JobsFilters from "@/components/JobsFilters";
 import JobList from "@/components/JobList";
 import JobsSidebar from "@/components/JobsSidebar";
-import Header from "@/components/Header";
+import FloatingHeader from "@/components/FloatingHeader";
 import { api } from "@/lib/api";
 import { Job } from "@/types/api";
 import type { CardsSummaryResponse } from "@/types/jobs";
@@ -209,9 +209,19 @@ function JobsPageContent() {
     return () => clearTimeout(timeoutId);
   }, [jobs.length, hasMore, loading, loadingMore, handleLoadMore]);
 
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 20);
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
   return (
     <div className="min-h-screen transition-colors duration-300 bg-gray-50 dark:bg-gray-950">
-      <Header
+      <FloatingHeader
         links={[{ label: "Candidate Login", href: "/candidate/login" }]}
         cta={{
           label: "Recruiter Access",
@@ -219,12 +229,13 @@ function JobsPageContent() {
           variant: "dark",
         }}
         showAuthButtons={true}
+        hideOnScroll={true}
       />
       <div className="pt-18 pb-8 px-12 max-w-7xl mx-auto">
         {/* Search Bar Container */}
         {/* Search Bar Container */}
-        <div className="border-1 border-[#E1E8F1] rounded-xl dark:border-gray-700 p-4 bg-white dark:bg-gray-900 mb-3">
-          <div className="mb-4">
+        <div className={`sticky top-4 z-40 transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] ${scrolled ? 'mx-auto w-[95%] md:max-w-4xl bg-white/90 dark:bg-gray-900/90 backdrop-blur-md border border-blue-200/50 dark:border-blue-900/30 rounded-2xl shadow-2xl p-2' : 'w-full bg-white dark:bg-gray-900 border-1 border-[#E1E8F1] dark:border-gray-700 rounded-xl shadow-md p-4'} mb-3`}>
+          <div className="">
             <form
               onSubmit={(e) => {
                 e.preventDefault();
@@ -237,7 +248,7 @@ function JobsPageContent() {
                 setOffset(0);
                 fetchJobs(0, false);
               }}
-              className="flex flex-col lg:flex-row items-stretch gap-3"
+              className={`flex flex-col lg:flex-row items-stretch transition-all duration-500 ${scrolled ? 'gap-2' : 'gap-3'}`}
             >
               {/* Keyword Input */}
               <div className="flex-[2] bg-white dark:bg-gray-900 rounded-lg border border-blue-200 dark:border-gray-700 flex items-center px-4   hover:border-blue-400 transition-colors">
@@ -308,7 +319,7 @@ function JobsPageContent() {
               {/* Search Button */}
               <button
                 type="submit"
-                className="px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors shadow-sm whitespace-nowrap min-w-[140px]"
+                className={`bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-all duration-500 shadow-sm whitespace-nowrap ${scrolled ? 'px-4 py-2 min-w-[100px] text-sm' : 'px-8 py-3 min-w-[140px]'}`}
               >
                 Search Job
               </button>

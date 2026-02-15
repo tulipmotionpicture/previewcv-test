@@ -23,6 +23,7 @@ interface HeaderProps {
   };
   logoHref?: string;
   showAuthButtons?: boolean;
+  logoSrc?: string;
 }
 
 const NAV_ITEMS = [
@@ -43,6 +44,7 @@ export default function Header({
   cta,
   logoHref = "/",
   showAuthButtons = false,
+  logoSrc,
 }: HeaderProps) {
   const pathname = usePathname();
   const router = useRouter();
@@ -123,7 +125,7 @@ export default function Header({
             className="flex items-center gap-3 hover:opacity-90 transition-opacity"
           >
             <Image
-              src={config.app.logoUrl}
+              src={logoSrc || config.app.logoUrl}
               alt={config.app.name}
               width={160}
               height={50}
