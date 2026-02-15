@@ -780,6 +780,19 @@ export class ApiClient {
     );
   }
 
+  async getJobsByRecruiter(
+    recruiterSlug: string,
+    params?: URLSearchParams,
+  ): Promise<PaginatedResponse<Job>> {
+    const queryString = params ? `?${params.toString()}` : "";
+    return this.request<PaginatedResponse<Job>>(
+      `/api/v1/jobs/list-by-recruiter/${recruiterSlug}${queryString}`,
+      {},
+      true,
+      false,
+    );
+  }
+
   async getRelevantJobs(params?: {
     limit?: number;
     offset?: number;
