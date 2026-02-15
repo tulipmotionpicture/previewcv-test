@@ -1,4 +1,3 @@
-
 import { useRef, useEffect, useState } from "react";
 import Image from "next/image";
 import { api } from "@/lib/api";
@@ -65,7 +64,7 @@ function CompanyGallerySection({
 
   /* ------------------ FORM HANDLERS ------------------ */
   const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -173,10 +172,8 @@ function CompanyGallerySection({
   /* ------------------ UI ------------------ */
   return (
     <div className="max-w-7xl mx-auto p-6 animate-in fade-in bg-white dark:bg-[#1E1E1E] min-h-screen pt-20">
-
       {/* Header section with Purple Banner */}
       <div className="relative mb-8">
-
         {/* Logo Overlapping Banner */}
         <div className="absolute -bottom-16 left-8 flex items-end">
           <div className="relative group">
@@ -231,19 +228,25 @@ function CompanyGallerySection({
             <Globe className="w-5 h-5" />
           </div>
           <div>
-            <h3 className="text-sm font-semibold text-gray-900 dark:text-white">Public Profile Link</h3>
-            <p className="text-xs text-blue-500">Share this URL with candidates to showcase your culture.</p>
+            <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
+              Public Profile Link
+            </h3>
+            <p className="text-xs text-blue-500">
+              Share this URL with candidates to showcase your culture.
+            </p>
           </div>
         </div>
 
         <div className="flex items-center gap-3 w-full md:w-auto">
           <div className="flex items-center bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg px-3 py-2 flex-1 md:w-80">
             <span className="text-xs text-gray-500 truncate mr-2 flex-1">
-              https://previewcv.com/profile/{recruiter.username || "username"}
+              https://previewcv.com/recruiter/{recruiter.username || "username"}
             </span>
             <button
               onClick={() => {
-                navigator.clipboard.writeText(`https://previewcv.com/profile/${recruiter.username}`);
+                navigator.clipboard.writeText(
+                  `https://previewcv.com/recruiter/${recruiter.username}`,
+                );
                 toast?.success("Link copied!");
               }}
               className="text-gray-400 hover:text-gray-600 dark:text-gray-400 dark:hover:text-gray-200"
@@ -259,12 +262,13 @@ function CompanyGallerySection({
 
       {/* Main Content Layout: Form Left, Gallery Right */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-
         {/* Left Column: Form */}
         <div className="lg:col-span-2 space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5 uppercase">Display Name</label>
+              <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5 uppercase">
+                Display Name
+              </label>
               <input
                 type="text"
                 name="display_name"
@@ -275,7 +279,9 @@ function CompanyGallerySection({
               />
             </div>
             <div>
-              <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5 uppercase">Username</label>
+              <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5 uppercase">
+                Username
+              </label>
               <input
                 type="text"
                 name="username"
@@ -289,7 +295,9 @@ function CompanyGallerySection({
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5 uppercase">Company Name</label>
+              <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5 uppercase">
+                Company Name
+              </label>
               <input
                 type="text"
                 name="company_name"
@@ -300,7 +308,9 @@ function CompanyGallerySection({
               />
             </div>
             <div>
-              <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5 uppercase">Email</label>
+              <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5 uppercase">
+                Email
+              </label>
               <input
                 type="text"
                 value={recruiter.email || ""}
@@ -312,7 +322,9 @@ function CompanyGallerySection({
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5 uppercase">About Company</label>
+            <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5 uppercase">
+              About Company
+            </label>
             <RichTextEditor
               value={formData.bio}
               onChange={(content: string) =>
@@ -325,12 +337,17 @@ function CompanyGallerySection({
 
         {/* Right Column: Office Gallery */}
         <div className="lg:col-span-1">
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Office Gallery</h2>
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+            Office Gallery
+          </h2>
 
           <div className="grid grid-cols-2 gap-4">
             {/* Gallery Images */}
             {gallery.map((img, index) => (
-              <div key={index} className="aspect-square relative group rounded-xl overflow-hidden border border-gray-100 dark:border-gray-700">
+              <div
+                key={index}
+                className="aspect-square relative group rounded-xl overflow-hidden border border-gray-100 dark:border-gray-700"
+              >
                 <Image
                   src={img}
                   alt={`Gallery ${index}`}
@@ -371,7 +388,6 @@ function CompanyGallerySection({
             />
           </div>
         </div>
-
       </div>
 
       <div className=" pt-2">
@@ -390,7 +406,6 @@ function CompanyGallerySection({
           )}
         </button>
       </div>
-
     </div>
   );
 }

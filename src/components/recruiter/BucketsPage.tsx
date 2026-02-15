@@ -229,7 +229,12 @@ export default function BucketsPage() {
 
   // Navigate to next resume
   const handleNavigateNext = async () => {
-    if (!bucketItems?.items || currentResumeIndex >= bucketItems.items.length - 1 || isNavigating) return;
+    if (
+      !bucketItems?.items ||
+      currentResumeIndex >= bucketItems.items.length - 1 ||
+      isNavigating
+    )
+      return;
 
     setIsNavigating(true);
     try {
@@ -238,7 +243,8 @@ export default function BucketsPage() {
       setCurrentResumeIndex(nextIndex);
 
       // Check if the next resume is locked
-      const isNextLocked = !nextItem.is_unlocked && !unlockedResumes.has(nextItem.resume_id);
+      const isNextLocked =
+        !nextItem.is_unlocked && !unlockedResumes.has(nextItem.resume_id);
 
       if (isNextLocked) {
         setCurrentResumeIsLocked(true);
@@ -252,7 +258,10 @@ export default function BucketsPage() {
         });
       } else {
         // Load the next resume
-        const response = await api.unlockCVProfile(nextItem.resume_id, "bucket");
+        const response = await api.unlockCVProfile(
+          nextItem.resume_id,
+          "bucket",
+        );
         setResumeDetailData(response);
         setCurrentResumeIsLocked(false);
         setLockedResumeInfo(null);
@@ -276,7 +285,8 @@ export default function BucketsPage() {
       setCurrentResumeIndex(prevIndex);
 
       // Check if the previous resume is locked
-      const isPrevLocked = !prevItem.is_unlocked && !unlockedResumes.has(prevItem.resume_id);
+      const isPrevLocked =
+        !prevItem.is_unlocked && !unlockedResumes.has(prevItem.resume_id);
 
       if (isPrevLocked) {
         setCurrentResumeIsLocked(true);
@@ -290,7 +300,10 @@ export default function BucketsPage() {
         });
       } else {
         // Load the previous resume
-        const response = await api.unlockCVProfile(prevItem.resume_id, "bucket");
+        const response = await api.unlockCVProfile(
+          prevItem.resume_id,
+          "bucket",
+        );
         setResumeDetailData(response);
         setCurrentResumeIsLocked(false);
         setLockedResumeInfo(null);
@@ -1088,17 +1101,19 @@ export default function BucketsPage() {
                     borderColor: `${bucket.color || "#3B82F6"}30`,
                   }}
                 >
-
                   <div className="flex items-center gap-1.5 text-gray-600 dark:text-gray-400 text-[10px] mb-0.5">
                     Unlocked / Locked
                   </div>
                   <div className="text-xl font-bold text-gray-900 dark:text-gray-100">
-                    <span className="text-green-500">{bucket.unlocked_count ?? 0}</span> / <span className="text-red-500">{bucket.locked_count ?? 0}</span>
+                    <span className="text-green-500">
+                      {bucket.unlocked_count ?? 0}
+                    </span>{" "}
+                    /{" "}
+                    <span className="text-red-500">
+                      {bucket.locked_count ?? 0}
+                    </span>
                   </div>
-
                 </div>
-
-
               </div>
 
               {/* Actions */}
@@ -1191,10 +1206,11 @@ export default function BucketsPage() {
                       onClick={() =>
                         setBucketForm({ ...bucketForm, color: color.value })
                       }
-                      className={`h-10 rounded-lg border-2 transition-all ${bucketForm.color === color.value
-                        ? "border-gray-900 dark:border-white scale-110"
-                        : "border-transparent hover:scale-105"
-                        }`}
+                      className={`h-10 rounded-lg border-2 transition-all ${
+                        bucketForm.color === color.value
+                          ? "border-gray-900 dark:border-white scale-110"
+                          : "border-transparent hover:scale-105"
+                      }`}
                       style={{ backgroundColor: color.value }}
                       title={color.label}
                     />
@@ -1280,10 +1296,11 @@ export default function BucketsPage() {
                       onClick={() =>
                         setBucketForm({ ...bucketForm, color: color.value })
                       }
-                      className={`h-10 rounded-lg border-2 transition-all ${bucketForm.color === color.value
-                        ? "border-gray-900 dark:border-white scale-110"
-                        : "border-transparent hover:scale-105"
-                        }`}
+                      className={`h-10 rounded-lg border-2 transition-all ${
+                        bucketForm.color === color.value
+                          ? "border-gray-900 dark:border-white scale-110"
+                          : "border-transparent hover:scale-105"
+                      }`}
                       style={{ backgroundColor: color.value }}
                       title={color.label}
                     />
@@ -1360,7 +1377,6 @@ export default function BucketsPage() {
           </div>
         </div>
       )}
-
 
       {/* Bucket Items Modal */}
       {showBucketItems && selectedBucket && (
@@ -1491,77 +1507,79 @@ export default function BucketsPage() {
             </div>
 
             {/* Modal Body */}
-            <div>
-              <div className="flex-1 overflow-y-auto p-6">
-                {loadingItems ? (
-                  <div className="flex justify-center items-center py-12">
-                    <div
-                      className="w-8 h-8 border-4 border-t-transparent rounded-full animate-spin"
-                      style={{
-                        borderColor: `${selectedBucket.color || "#3B82F6"}40`,
-                        borderTopColor: "transparent",
-                      }}
-                    />
-                  </div>
-                ) : bucketItems?.items?.length === 0 ? (
-                  <div className="text-center py-12">
-                    <Users className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                    <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
-                      No resumes yet
-                    </h3>
-                    <p className="text-gray-600 dark:text-gray-400">
-                      Add resumes to this bucket from the CV Search page
-                    </p>
-                  </div>
-                ) : (
-                  <>
-                    <div className="grid gap-6 grid-cols-1 md:grid-cols-3 xl:grid-cols-4">
-                      {bucketItems?.items?.map((item: any, index: number) => (
-                        <div
-                          key={item.id}
-                          draggable={isReordering}
-                          onDragStart={(e) => handleDragStart(e, index)}
-                          onDragOver={(e) => handleDragOver(e, index)}
-                          onDragLeave={handleDragLeave}
-                          onDrop={(e) => handleDrop(e, index)}
-                          onDragEnd={handleDragEnd}
-                          className={`group relative rounded-2xl border bg-white dark:bg-gray-800 p-6 shadow-sm transition-all duration-200 flex flex-col ${isReordering
+            <div className="flex-1 overflow-y-auto p-6">
+              {loadingItems ? (
+                <div className="flex justify-center items-center py-12">
+                  <div
+                    className="w-8 h-8 border-4 border-t-transparent rounded-full animate-spin"
+                    style={{
+                      borderColor: `${selectedBucket.color || "#3B82F6"}40`,
+                      borderTopColor: "transparent",
+                    }}
+                  />
+                </div>
+              ) : bucketItems?.items?.length === 0 ? (
+                <div className="text-center py-12">
+                  <Users className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
+                    No resumes yet
+                  </h3>
+                  <p className="text-gray-600 dark:text-gray-400">
+                    Add resumes to this bucket from the CV Search page
+                  </p>
+                </div>
+              ) : (
+                <>
+                  <div className="grid gap-6 grid-cols-1 md:grid-cols-3 xl:grid-cols-4">
+                    {bucketItems?.items?.map((item: any, index: number) => (
+                      <div
+                        key={item.id}
+                        draggable={isReordering}
+                        onDragStart={(e) => handleDragStart(e, index)}
+                        onDragOver={(e) => handleDragOver(e, index)}
+                        onDragLeave={handleDragLeave}
+                        onDrop={(e) => handleDrop(e, index)}
+                        onDragEnd={handleDragEnd}
+                        className={`group relative rounded-2xl border bg-white dark:bg-gray-800 p-6 shadow-sm transition-all duration-200 flex flex-col ${
+                          isReordering
                             ? "cursor-move"
                             : "hover:shadow-xl hover:-translate-y-0.5"
-                            } ${draggedIndex === index ? "opacity-50 scale-95" : ""
-                            } ${dragOverIndex === index && draggedIndex !== index
-                              ? "border-4 scale-105"
-                              : "border border-gray-200 dark:border-gray-700"
-                            }`}
-                          style={
-                            dragOverIndex === index && draggedIndex !== index
-                              ? { borderColor: selectedBucket.color || "#3B82F6" }
-                              : {}
-                          }
-                        >
-                          {/* Drag Handle or Checkbox */}
-                          <div className="absolute top-4 right-4 z-10">
-                            {isReordering ? (
-                              <div className="p-2 bg-gray-100 dark:bg-gray-700 rounded cursor-move">
-                                <GripVertical className="w-5 h-5 text-gray-600 dark:text-gray-400" />
-                              </div>
-                            ) : (
-                              <input
-                                type="checkbox"
-                                checked={selectedItems.has(item.id)}
-                                onChange={() => toggleItemSelection(item.id)}
-                                className="w-5 h-5 rounded border-gray-300 dark:border-gray-600 cursor-pointer"
-                                style={{
-                                  accentColor: selectedBucket.color || "#3B82F6",
-                                }}
-                              />
-                            )}
-                          </div>
+                        } ${
+                          draggedIndex === index ? "opacity-50 scale-95" : ""
+                        } ${
+                          dragOverIndex === index && draggedIndex !== index
+                            ? "border-4 scale-105"
+                            : "border border-gray-200 dark:border-gray-700"
+                        }`}
+                        style={
+                          dragOverIndex === index && draggedIndex !== index
+                            ? { borderColor: selectedBucket.color || "#3B82F6" }
+                            : {}
+                        }
+                      >
+                        {/* Drag Handle or Checkbox */}
+                        <div className="absolute top-4 right-4 z-10">
+                          {isReordering ? (
+                            <div className="p-2 bg-gray-100 dark:bg-gray-700 rounded cursor-move">
+                              <GripVertical className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+                            </div>
+                          ) : (
+                            <input
+                              type="checkbox"
+                              checked={selectedItems.has(item.id)}
+                              onChange={() => toggleItemSelection(item.id)}
+                              className="w-5 h-5 rounded border-gray-300 dark:border-gray-600 cursor-pointer"
+                              style={{
+                                accentColor: selectedBucket.color || "#3B82F6",
+                              }}
+                            />
+                          )}
+                        </div>
 
-                          {/* Resume Header */}
-                          <div className="flex items-start justify-between gap-4 mb-4 pr-8">
-                            <div className="flex items-center gap-3 flex-1 min-w-0">
-                              {/* <div
+                        {/* Resume Header */}
+                        <div className="flex items-start justify-between gap-4 mb-4 pr-8">
+                          <div className="flex items-center gap-3 flex-1 min-w-0">
+                            {/* <div
                               className="w-12 h-12 rounded-full flex items-center justify-center text-white font-semibold text-lg"
                               style={{
                                 backgroundColor:
@@ -1570,30 +1588,30 @@ export default function BucketsPage() {
                             >
                               {item.resume?.name?.[0]?.toUpperCase() || "R"}
                             </div> */}
-                              <div className="flex-1 min-w-0">
-                                <h3 className="font-semibold text-gray-900 dark:text-gray-100 truncate">
-                                  {item.resume?.name || "Untitled Resume"}
-                                </h3>
-                                <p className="text-sm text-gray-600 dark:text-gray-400 truncate">
-                                  Resume ID: {item.resume_id}
-                                </p>
-                              </div>
-                            </div>
-                          </div>
-
-                          {/* Resume Info */}
-                          <div className="grid grid-cols-2 gap-y-3 gap-x-4 text-sm text-gray-600 dark:text-gray-400 mb-4">
-                            <div className="col-span-2">
-                              <span className="text-gray-500 dark:text-gray-500">
-                                Created
-                              </span>
-                              <p className="text-gray-900 dark:text-gray-100 font-medium">
-                                {new Date(
-                                  item.resume?.created_at,
-                                ).toLocaleDateString()}
+                            <div className="flex-1 min-w-0">
+                              <h3 className="font-semibold text-gray-900 dark:text-gray-100 truncate">
+                                {item.resume?.name || "Untitled Resume"}
+                              </h3>
+                              <p className="text-sm text-gray-600 dark:text-gray-400 truncate">
+                                Resume ID: {item.resume_id}
                               </p>
                             </div>
-                            {/* <div className="col-span-2">
+                          </div>
+                        </div>
+
+                        {/* Resume Info */}
+                        <div className="grid grid-cols-2 gap-y-3 gap-x-4 text-sm text-gray-600 dark:text-gray-400 mb-4">
+                          <div className="col-span-2">
+                            <span className="text-gray-500 dark:text-gray-500">
+                              Created
+                            </span>
+                            <p className="text-gray-900 dark:text-gray-100 font-medium">
+                              {new Date(
+                                item.resume?.created_at,
+                              ).toLocaleDateString()}
+                            </p>
+                          </div>
+                          {/* <div className="col-span-2">
                             <span className="text-gray-500 dark:text-gray-500">
                               Last Updated
                             </span>
@@ -1603,206 +1621,206 @@ export default function BucketsPage() {
                               ).toLocaleDateString()}
                             </p>
                           </div> */}
-                          </div>
+                        </div>
 
-                          {/* Bucket Meta */}
-                          <div className="mb-4 p-3 bg-gray-50 dark:bg-gray-900 rounded-lg space-y-2">
+                        {/* Bucket Meta */}
+                        <div className="mb-4 p-3 bg-gray-50 dark:bg-gray-900 rounded-lg space-y-2">
+                          <div className="flex items-center justify-between text-sm">
+                            <span className="text-gray-600 dark:text-gray-400">
+                              Added to Bucket
+                            </span>
+                            <span className="text-gray-900 dark:text-gray-100 font-medium">
+                              {new Date(item.added_at).toLocaleDateString()}
+                            </span>
+                          </div>
+                          {item.rating && (
                             <div className="flex items-center justify-between text-sm">
                               <span className="text-gray-600 dark:text-gray-400">
-                                Added to Bucket
+                                Rating
                               </span>
-                              <span className="text-gray-900 dark:text-gray-100 font-medium">
-                                {new Date(item.added_at).toLocaleDateString()}
-                              </span>
-                            </div>
-                            {item.rating && (
-                              <div className="flex items-center justify-between text-sm">
-                                <span className="text-gray-600 dark:text-gray-400">
-                                  Rating
-                                </span>
-                                <div className="flex items-center gap-1">
-                                  {[...Array(5)].map((_, i) => (
-                                    <Star
-                                      key={i}
-                                      className={`w-4 h-4 ${i < item.rating
+                              <div className="flex items-center gap-1">
+                                {[...Array(5)].map((_, i) => (
+                                  <Star
+                                    key={i}
+                                    className={`w-4 h-4 ${
+                                      i < item.rating
                                         ? "text-yellow-400 fill-yellow-400"
                                         : "text-gray-300 dark:text-gray-600"
-                                        }`}
-                                    />
-                                  ))}
-                                </div>
+                                    }`}
+                                  />
+                                ))}
                               </div>
-                            )}
-                            {item.status && (
-                              <div className="flex items-center justify-between text-sm">
-                                <span className="text-gray-600 dark:text-gray-400">
-                                  Status
-                                </span>
-                                <span
-                                  className="px-2 py-1 rounded text-xs font-medium"
-                                  style={{
-                                    backgroundColor: `${selectedBucket.color || "#3B82F6"}20`,
-                                    color: selectedBucket.color || "#3B82F6",
-                                  }}
-                                >
-                                  {item.status}
-                                </span>
-                              </div>
-                            )}
-                          </div>
-
-                          {/* Notes */}
-                          {item.notes && (
-                            <div className="mb-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-                              <p className="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
-                                Notes
-                              </p>
-                              <p className="text-sm text-gray-600 dark:text-gray-400">
-                                {item.notes}
-                              </p>
                             </div>
                           )}
-
-                          {/* Lock Status Indicator */}
-                          {item.is_unlocked ||
-                            unlockedResumes.has(item.resume_id) ? (
-                            <div className="mb-3 flex items-center gap-2 text-sm text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/20 px-3 py-2 rounded-lg">
-                              <Unlock className="w-4 h-4" />
-                              <span>Unlocked</span>
-                              {item.unlocked_until && (
-                                <span className="text-xs text-gray-500 dark:text-gray-400 ml-auto">
-                                  until{" "}
-                                  {new Date(
-                                    item.unlocked_until,
-                                  ).toLocaleDateString()}
-                                </span>
-                              )}
-                            </div>
-                          ) : (
-                            <div className="mb-3 flex items-center gap-2 text-sm text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 px-3 py-2 rounded-lg">
-                              <Lock className="w-4 h-4" />
-                              <span>Locked - Unlock to view</span>
-                            </div>
-                          )}
-
-                          {/* Actions */}
-                          <div className="mt-auto pt-4 border-t border-gray-200 dark:border-gray-700 space-y-2">
-                            {/* View/Unlock Button */}
-                            {item.is_unlocked ||
-                              unlockedResumes.has(item.resume_id) ? (
-                              <button
-                                onClick={() => {
-                                  setCurrentResumeIndex(index);
-                                  setCurrentResumeIsLocked(false);
-                                  setLockedResumeInfo(null);
-                                  handleViewResume(item.resume_id);
-                                }}
-                                disabled={loadingResumeDetail.has(item.resume_id)}
-                                className="w-full px-4 py-2 rounded-lg text-sm font-medium text-white transition-colors flex items-center justify-center gap-2 hover:opacity-90 disabled:opacity-50"
+                          {item.status && (
+                            <div className="flex items-center justify-between text-sm">
+                              <span className="text-gray-600 dark:text-gray-400">
+                                Status
+                              </span>
+                              <span
+                                className="px-2 py-1 rounded text-xs font-medium"
                                 style={{
-                                  backgroundColor:
-                                    selectedBucket.color || "#3B82F6",
+                                  backgroundColor: `${selectedBucket.color || "#3B82F6"}20`,
+                                  color: selectedBucket.color || "#3B82F6",
                                 }}
                               >
-                                {loadingResumeDetail.has(item.resume_id) ? (
-                                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                                ) : (
-                                  <Eye className="w-4 h-4" />
-                                )}
-                                View Resume
-                              </button>
-                            ) : (
-                              <button
-                                onClick={() => {
-                                  setCurrentResumeIndex(index);
-                                  setCurrentResumeIsLocked(false);
-                                  setLockedResumeInfo({
-                                    name: item.resume?.name,
-                                    resume_id: item.resume_id,
-                                    created_at: item.created_at,
-                                    updated_at: item.updated_at,
-                                  });
-                                  handleUnlockResume(item.resume_id);
-                                }}
-                                disabled={
-                                  unlockingIds.has(item.resume_id) ||
-                                  !creditsStatus ||
-                                  creditsStatus.credits_remaining < 1
-                                }
-                                className="w-full px-4 py-2 rounded-lg text-sm font-semibold
+                                {item.status}
+                              </span>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Notes */}
+                        {item.notes && (
+                          <div className="mb-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                            <p className="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                              Notes
+                            </p>
+                            <p className="text-sm text-gray-600 dark:text-gray-400">
+                              {item.notes}
+                            </p>
+                          </div>
+                        )}
+
+                        {/* Lock Status Indicator */}
+                        {item.is_unlocked ||
+                        unlockedResumes.has(item.resume_id) ? (
+                          <div className="mb-3 flex items-center gap-2 text-sm text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/20 px-3 py-2 rounded-lg">
+                            <Unlock className="w-4 h-4" />
+                            <span>Unlocked</span>
+                            {item.unlocked_until && (
+                              <span className="text-xs text-gray-500 dark:text-gray-400 ml-auto">
+                                until{" "}
+                                {new Date(
+                                  item.unlocked_until,
+                                ).toLocaleDateString()}
+                              </span>
+                            )}
+                          </div>
+                        ) : (
+                          <div className="mb-3 flex items-center gap-2 text-sm text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 px-3 py-2 rounded-lg">
+                            <Lock className="w-4 h-4" />
+                            <span>Locked - Unlock to view</span>
+                          </div>
+                        )}
+
+                        {/* Actions */}
+                        <div className="mt-auto pt-4 border-t border-gray-200 dark:border-gray-700 space-y-2">
+                          {/* View/Unlock Button */}
+                          {item.is_unlocked ||
+                          unlockedResumes.has(item.resume_id) ? (
+                            <button
+                              onClick={() => {
+                                setCurrentResumeIndex(index);
+                                setCurrentResumeIsLocked(false);
+                                setLockedResumeInfo(null);
+                                handleViewResume(item.resume_id);
+                              }}
+                              disabled={loadingResumeDetail.has(item.resume_id)}
+                              className="w-full px-4 py-2 rounded-lg text-sm font-medium text-white transition-colors flex items-center justify-center gap-2 hover:opacity-90 disabled:opacity-50"
+                              style={{
+                                backgroundColor:
+                                  selectedBucket.color || "#3B82F6",
+                              }}
+                            >
+                              {loadingResumeDetail.has(item.resume_id) ? (
+                                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                              ) : (
+                                <Eye className="w-4 h-4" />
+                              )}
+                              View Resume
+                            </button>
+                          ) : (
+                            <button
+                              onClick={() => {
+                                setCurrentResumeIndex(index);
+                                setCurrentResumeIsLocked(false);
+                                setLockedResumeInfo({
+                                  name: item.resume?.name,
+                                  resume_id: item.resume_id,
+                                  created_at: item.created_at,
+                                  updated_at: item.updated_at,
+                                });
+                                handleUnlockResume(item.resume_id);
+                              }}
+                              disabled={
+                                unlockingIds.has(item.resume_id) ||
+                                !creditsStatus ||
+                                creditsStatus.credits_remaining < 1
+                              }
+                              className="w-full px-4 py-2 rounded-lg text-sm font-semibold
                                bg-gradient-to-r from-blue-600 to-indigo-600
                                hover:from-blue-700 hover:to-indigo-700
                                text-white shadow-md transition
                                disabled:opacity-50 flex items-center justify-center gap-2"
-                              >
-                                {unlockingIds.has(item.resume_id) ? (
-                                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                                ) : (
-                                  <Unlock className="w-4 h-4" />
-                                )}
-                                Unlock (1 credit)
-                              </button>
-                            )}
-
-                            {/* Edit Button */}
-                            <button
-                              onClick={() => handleEditItem(item)}
-                              className="w-full px-4 py-2 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors flex items-center justify-center gap-2"
                             >
-                              <Edit2 className="w-4 h-4" />
-                              Edit Notes & Rating
+                              {unlockingIds.has(item.resume_id) ? (
+                                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                              ) : (
+                                <Unlock className="w-4 h-4" />
+                              )}
+                              Unlock (1 credit)
                             </button>
+                          )}
 
-                            <button
-                              onClick={() =>
-                                handleRemoveItem(
-                                  item.id,
-                                  item.resume?.name || "this resume",
-                                )
-                              }
-                              className="w-full px-4 py-2 rounded-lg text-sm font-medium text-red-600 dark:text-red-400 border border-red-300 dark:border-red-800 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors flex items-center justify-center gap-2"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                              Remove from Bucket
-                            </button>
-                          </div>
+                          {/* Edit Button */}
+                          <button
+                            onClick={() => handleEditItem(item)}
+                            className="w-full px-4 py-2 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors flex items-center justify-center gap-2"
+                          >
+                            <Edit2 className="w-4 h-4" />
+                            Edit Notes & Rating
+                          </button>
+
+                          <button
+                            onClick={() =>
+                              handleRemoveItem(
+                                item.id,
+                                item.resume?.name || "this resume",
+                              )
+                            }
+                            className="w-full px-4 py-2 rounded-lg text-sm font-medium text-red-600 dark:text-red-400 border border-red-300 dark:border-red-800 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors flex items-center justify-center gap-2"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                            Remove from Bucket
+                          </button>
                         </div>
-                      ))}
-                    </div>
-
-                    {/* Pagination */}
-                    {bucketItems && bucketItems.total > itemsPerPage && (
-                      <div className="flex items-center justify-center gap-2 mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
-                        <button
-                          onClick={() =>
-                            fetchBucketItems(selectedBucket, itemsPage - 1)
-                          }
-                          disabled={itemsPage === 1}
-                          className="p-2 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 disabled:opacity-50"
-                        >
-                          <ChevronLeft className="w-5 h-5" />
-                        </button>
-                        <span className="text-sm text-gray-600 dark:text-gray-400">
-                          Page {itemsPage} of{" "}
-                          {Math.ceil(bucketItems.total / itemsPerPage)}
-                        </span>
-                        <button
-                          onClick={() =>
-                            fetchBucketItems(selectedBucket, itemsPage + 1)
-                          }
-                          disabled={
-                            itemsPage >=
-                            Math.ceil(bucketItems.total / itemsPerPage)
-                          }
-                          className="p-2 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 disabled:opacity-50"
-                        >
-                          <ChevronRightIcon className="w-5 h-5" />
-                        </button>
                       </div>
-                    )}
-                  </>
-                )}
-              </div>
+                    ))}
+                  </div>
+
+                  {/* Pagination */}
+                  {bucketItems && bucketItems.total > itemsPerPage && (
+                    <div className="flex items-center justify-center gap-2 mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
+                      <button
+                        onClick={() =>
+                          fetchBucketItems(selectedBucket, itemsPage - 1)
+                        }
+                        disabled={itemsPage === 1}
+                        className="p-2 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 disabled:opacity-50"
+                      >
+                        <ChevronLeft className="w-5 h-5" />
+                      </button>
+                      <span className="text-sm text-gray-600 dark:text-gray-400">
+                        Page {itemsPage} of{" "}
+                        {Math.ceil(bucketItems.total / itemsPerPage)}
+                      </span>
+                      <button
+                        onClick={() =>
+                          fetchBucketItems(selectedBucket, itemsPage + 1)
+                        }
+                        disabled={
+                          itemsPage >=
+                          Math.ceil(bucketItems.total / itemsPerPage)
+                        }
+                        className="p-2 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 disabled:opacity-50"
+                      >
+                        <ChevronRightIcon className="w-5 h-5" />
+                      </button>
+                    </div>
+                  )}
+                </>
+              )}
             </div>
           </div>
         </div>
@@ -2020,8 +2038,6 @@ export default function BucketsPage() {
                                   </div>
                                 </div>
                               )}
-
-
                           </div>
                         </div>
                       </div>
@@ -2058,14 +2074,22 @@ export default function BucketsPage() {
         onDownloadPDF={handleDownloadPDF}
         onNavigateNext={handleNavigateNext}
         onNavigatePrevious={handleNavigatePrevious}
-        hasNext={bucketItems?.items ? currentResumeIndex < bucketItems.items.length - 1 : false}
+        hasNext={
+          bucketItems?.items
+            ? currentResumeIndex < bucketItems.items.length - 1
+            : false
+        }
         hasPrevious={currentResumeIndex > 0}
         currentIndex={currentResumeIndex}
         totalCount={bucketItems?.items?.length || 0}
         isNavigating={isNavigating}
         isLocked={currentResumeIsLocked}
         onUnlock={handleUnlockFromModal}
-        unlocking={bucketItems?.items ? unlockingIds.has(bucketItems.items[currentResumeIndex]?.resume_id) : false}
+        unlocking={
+          bucketItems?.items
+            ? unlockingIds.has(bucketItems.items[currentResumeIndex]?.resume_id)
+            : false
+        }
         lockedResumeInfo={lockedResumeInfo}
       />
 
@@ -2126,10 +2150,11 @@ export default function BucketsPage() {
                       className="transition-transform hover:scale-110"
                     >
                       <Star
-                        className={`w-8 h-8 ${itemForm.rating && itemForm.rating >= rating
-                          ? "fill-yellow-400 text-yellow-400"
-                          : "text-gray-300 dark:text-gray-600"
-                          }`}
+                        className={`w-8 h-8 ${
+                          itemForm.rating && itemForm.rating >= rating
+                            ? "fill-yellow-400 text-yellow-400"
+                            : "text-gray-300 dark:text-gray-600"
+                        }`}
                       />
                     </button>
                   ))}

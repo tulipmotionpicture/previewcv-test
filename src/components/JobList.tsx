@@ -1,8 +1,9 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { Job } from "@/types/api";
 import Link from "next/link";
 import BookmarkButton from "./BookmarkButton";
+import { useToast } from "@/context/ToastContext";
 
 interface JobListProps {
   jobs: Job[];
@@ -12,14 +13,17 @@ interface JobListProps {
 
 function formatSalary(job: Job) {
   if (job.salary_min && job.salary_max) {
-    return `${job.salary_currency || "USD"} ${job.salary_min} - ${job.salary_max
-      }`;
+    return `${job.salary_currency || "USD"} ${job.salary_min} - ${
+      job.salary_max
+    }`;
   }
   return "Competitive Salary";
 }
 
 export default function JobList({ jobs, loading, error }: JobListProps) {
   const [jobsState, setJobsState] = useState(jobs);
+  const sharingJobId = useRef<number | null>(null);
+  const { success } = useToast();
 
   // Update jobs state when props change
   React.useEffect(() => {
@@ -45,6 +49,38 @@ export default function JobList({ jobs, loading, error }: JobListProps) {
     return `${diffInDays}d ago`;
   };
 
+  const handleShare = async (job: Job) => {
+    if (sharingJobId.current === job.id) return;
+    sharingJobId.current = job.id;
+    const jobUrl = `${window.location.origin}/job/${job.slug}`;
+
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: job.title,
+          url: jobUrl,
+        });
+        success("Job shared successfully!");
+      } catch (err) {
+        // Ignore AbortError (user canceled the share)
+        if (err instanceof Error && err.name !== "AbortError") {
+          console.error("Error sharing:", err);
+        }
+      } finally {
+        sharingJobId.current = null;
+      }
+    } else {
+      try {
+        await navigator.clipboard.writeText(jobUrl);
+        success("Link copied to clipboard!");
+      } catch (err) {
+        console.error("Failed to copy:", err);
+      } finally {
+        sharingJobId.current = null;
+      }
+    }
+  };
+
   return (
     <div className="relative pt-10">
       {error ? (
@@ -65,7 +101,11 @@ export default function JobList({ jobs, loading, error }: JobListProps) {
                   {/* Logo */}
                   <div className="w-12 h-12 rounded-xl bg-gray-50 dark:bg-gray-800 flex items-center justify-center p-1.5 border border-gray-100 dark:border-gray-700 shrink-0">
                     {job.company_logo_url ? (
-                      <img src={job.company_logo_url} alt={job.company_name} className="w-full h-full object-contain" />
+                      <img
+                        src={job.company_logo_url}
+                        alt={job.company_name}
+                        className="w-full h-full object-contain"
+                      />
                     ) : (
                       <span className="text-2xl font-bold text-green-600">
                         {job.company_name?.charAt(0) || "C"}
@@ -79,8 +119,14 @@ export default function JobList({ jobs, loading, error }: JobListProps) {
                       {job.title}
                     </h3>
                     <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
-                      <span className="text-gray-900 dark:text-gray-300 font-semibold">{job.company_name}</span>
-                      {job.location && <span className="text-gray-400 ml-1">in {job.location}</span>}
+                      <span className="text-gray-900 dark:text-gray-300 font-semibold">
+                        {job.company_name}
+                      </span>
+                      {job.location && (
+                        <span className="text-gray-400 ml-1">
+                          in {job.location}
+                        </span>
+                      )}
                     </p>
                   </div>
                 </div>
@@ -91,11 +137,27 @@ export default function JobList({ jobs, loading, error }: JobListProps) {
                     jobId={job.id}
                     jobSlug={job.slug}
                     isBookmarked={job.is_bookmarked || false}
-                    onBookmarkChange={(isBookmarked) => handleBookmarkChange(job.id, isBookmarked)}
+                    onBookmarkChange={(isBookmarked) =>
+                      handleBookmarkChange(job.id, isBookmarked)
+                    }
                     size="sm"
                   />
-                  <button className="p-1 text-gray-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <button
+                    onClick={() => handleShare(job)}
+                    className="p-1 text-gray-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
+                    title="Share Job"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
                       <circle cx="18" cy="5" r="3"></circle>
                       <circle cx="6" cy="12" r="3"></circle>
                       <circle cx="18" cy="19" r="3"></circle>
@@ -115,8 +177,11 @@ export default function JobList({ jobs, loading, error }: JobListProps) {
 
               {/* Tags */}
               <div className="flex flex-wrap gap-2 mb-3">
-                {job.required_skills?.slice(0, 3).map(skill => (
-                  <span key={skill} className="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-2.5 py-1 rounded-md text-xs font-medium">
+                {job.required_skills?.slice(0, 3).map((skill) => (
+                  <span
+                    key={skill}
+                    className="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-2.5 py-1 rounded-md text-xs font-medium"
+                  >
                     {skill}
                   </span>
                 ))}
@@ -129,10 +194,15 @@ export default function JobList({ jobs, loading, error }: JobListProps) {
               <div className="flex flex-wrap items-center gap-2 mb-3">
                 <div className="flex items-baseline">
                   <span className="text-lg font-bold text-blue-600 dark:text-blue-400">
-                    {formatSalary(job).split(' ')[0] === 'USD' ? '$' : formatSalary(job).split(' ')[0]}
-                    {formatSalary(job).split(' ').slice(1).join(' ').replace("Competitive Salary", "Competitive")}
+                    {formatSalary(job).split(" ")[0] === "USD"
+                      ? "$"
+                      : formatSalary(job).split(" ")[0]}
+                    {formatSalary(job)
+                      .split(" ")
+                      .slice(1)
+                      .join(" ")
+                      .replace("Competitive Salary", "Competitive")}
                   </span>
-
                 </div>
 
                 {job.is_remote && (
@@ -155,15 +225,48 @@ export default function JobList({ jobs, loading, error }: JobListProps) {
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div className="flex flex-col gap-1.5">
                   <div className="text-gray-500 dark:text-gray-400 text-xs font-medium">
-                    Posted {new Date(job.posted_date).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                    Posted{" "}
+                    {new Date(job.posted_date).toLocaleDateString("en-US", {
+                      month: "short",
+                      day: "numeric",
+                      year: "numeric",
+                    })}
                   </div>
                   <div className="flex items-center gap-4">
                     <span className="flex items-center text-gray-500 dark:text-gray-400 text-xs font-medium gap-1">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="14"
+                        height="14"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="9" cy="7" r="4"></circle>
+                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                      </svg>
                       {job.application_count || 0} applicants
                     </span>
                     <span className="flex items-center text-gray-500 dark:text-gray-400 text-xs font-medium gap-1">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="14"
+                        height="14"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"></path>
+                        <circle cx="12" cy="12" r="3"></circle>
+                      </svg>
                       {job.view_count || 0} Views
                     </span>
                   </div>
@@ -190,8 +293,8 @@ export default function JobList({ jobs, loading, error }: JobListProps) {
 }
 
 function stripHtml(html: string) {
-  if (typeof window === 'undefined') {
-    return html.replace(/<[^>]*>?/gm, '');
+  if (typeof window === "undefined") {
+    return html.replace(/<[^>]*>?/gm, "");
   }
   const tmp = document.createElement("DIV");
   tmp.innerHTML = html;

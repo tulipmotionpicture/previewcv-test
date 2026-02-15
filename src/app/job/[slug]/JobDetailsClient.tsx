@@ -7,6 +7,7 @@ import Image from "next/image";
 import { api, ResumeMetadata } from "@/lib/api";
 import { Job, PdfResume, Resume } from "@/types/api";
 import { useAuth } from "@/context/AuthContext";
+import { useToast } from "@/context/ToastContext";
 import ResumeUpload from "@/components/ResumeUpload";
 import BookmarkButton from "@/components/BookmarkButton";
 import ResumeReview from "@/components/ResumeReview";
@@ -29,7 +30,7 @@ import {
   MapPin,
   Users,
   Building2,
-  Share2
+  Share2,
 } from "lucide-react";
 
 interface JobDetailsClientProps {
@@ -39,6 +40,7 @@ interface JobDetailsClientProps {
 
 export default function JobDetailsClient({ job, slug }: JobDetailsClientProps) {
   const { isAuthenticated } = useAuth();
+  const { success } = useToast();
   const router = useRouter();
   const [applying, setApplying] = useState(false);
   const [applySuccess, setApplySuccess] = useState(false);
@@ -96,27 +98,36 @@ export default function JobDetailsClient({ job, slug }: JobDetailsClientProps) {
     }
   };
 
-
-
   const fetchSimilarJobs = async () => {
-    // Only fetch if recruiter_id is available to ensure we only show company jobs
-    if (!job.recruiter_id) return;
+    // Only fetch if recruiter_username is available
+    if (!job.recruiter_username) return;
 
     try {
       const params = new URLSearchParams();
-      params.append('recruiter_id', job.recruiter_id.toString());
-      params.append('limit', '10');
+      params.append("limit", "10");
 
-      const response = await api.getJobs(params);
-      if (response.data) {
+      const response = await api.getJobsByRecruiter(
+        job.recruiter_username,
+        params,
+      );
+
+      if (response.jobs) {
         // Filter out current job
-        setSimilarJobs(response.data.filter(j => j.id !== job.id));
+        const filtered = response.jobs.filter((j) => j.id !== job.id);
+        setSimilarJobs(filtered);
+      } else if (response.data) {
+        // Handle alternative response structure
+        const filtered = response.data.filter((j) => j.id !== job.id);
+        setSimilarJobs(filtered);
+      } else if (response.items) {
+        // Handle another alternative response structure
+        const filtered = response.items.filter((j) => j.id !== job.id);
+        setSimilarJobs(filtered);
       }
     } catch (error) {
-      console.error("Failed to fetch company jobs", error);
+      console.error("Failed to fetch recruiter jobs", error);
     }
   };
-
 
   const fetchResumes = async () => {
     setLoadingResumes(true);
@@ -140,8 +151,12 @@ export default function JobDetailsClient({ job, slug }: JobDetailsClientProps) {
       if (storedResumeId) {
         const id = parseInt(storedResumeId, 10);
         const exists =
-          (Array.isArray(pdfRes) ? pdfRes : pdfRes.resumes || []).some((r) => r.id === id) ||
-          (Array.isArray(builderRes) ? builderRes : []).some((r) => r.id === id);
+          (Array.isArray(pdfRes) ? pdfRes : pdfRes.resumes || []).some(
+            (r) => r.id === id,
+          ) ||
+          (Array.isArray(builderRes) ? builderRes : []).some(
+            (r) => r.id === id,
+          );
         if (exists) {
           setResumeId(id);
         }
@@ -183,7 +198,7 @@ export default function JobDetailsClient({ job, slug }: JobDetailsClientProps) {
 
       await api.applyToJob(job.id, applicationData);
       setApplySuccess(true);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      window.scrollTo({ top: 0, behavior: "smooth" });
     } catch (err: unknown) {
       if (err instanceof Error) {
         alert(err.message);
@@ -211,19 +226,25 @@ export default function JobDetailsClient({ job, slug }: JobDetailsClientProps) {
     }).format(amount);
   };
 
-
   return (
-    <div className="space-y-8">
-      {/* Sticky Application Card */}
-      <div id="application-card" className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg p-5 shadow-sm sticky top-18  ">
+    <div className="space-y-8 pt-10">
+      {/* Application Card */}
+      <div
+        id="application-card"
+        className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg p-5 shadow-sm"
+      >
         <div className="flex items-start justify-between mb-4">
           <div className="flex items-start gap-3">
             <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center shadow-md">
               <Sparkles className="w-4 h-4 text-white" />
             </div>
             <div>
-              <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100">Apply for this Job</h2>
-              <p className="text-xs text-gray-500 dark:text-gray-400">{job.company_name}</p>
+              <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100">
+                Apply for this Job
+              </h2>
+              <p className="text-xs text-gray-500 dark:text-gray-400">
+                {job.company_name}
+              </p>
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -231,22 +252,26 @@ export default function JobDetailsClient({ job, slug }: JobDetailsClientProps) {
               onClick={async () => {
                 if (isSharing.current) return;
                 isSharing.current = true;
+                const jobUrl = `${window.location.origin}/job/${job.slug}`;
                 if (navigator.share) {
                   try {
                     await navigator.share({
                       title: job.title,
-                      text: `Check out this ${job.title} job at ${job.company_name}`,
-                      url: window.location.href,
+                      url: jobUrl,
                     });
+                    success("Job shared successfully!");
                   } catch (err) {
-                    console.error("Error sharing:", err);
+                    // Ignore AbortError (user canceled the share)
+                    if (err instanceof Error && err.name !== "AbortError") {
+                      console.error("Error sharing:", err);
+                    }
                   } finally {
                     isSharing.current = false;
                   }
                 } else {
                   try {
-                    await navigator.clipboard.writeText(window.location.href);
-                    alert("Link copied to clipboard!");
+                    await navigator.clipboard.writeText(jobUrl);
+                    success("Link copied to clipboard!");
                   } catch (err) {
                     console.error("Failed to copy:", err);
                   } finally {
@@ -293,7 +318,8 @@ export default function JobDetailsClient({ job, slug }: JobDetailsClientProps) {
           <form onSubmit={handleApply} className="space-y-4">
             <div>
               <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5">
-                Cover Letter <span className="text-gray-400 font-normal">(Optional)</span>
+                Cover Letter{" "}
+                <span className="text-gray-400 font-normal">(Optional)</span>
               </label>
               <textarea
                 rows={3}
@@ -320,18 +346,24 @@ export default function JobDetailsClient({ job, slug }: JobDetailsClientProps) {
                     onChange={(e) => setResumeId(Number(e.target.value))}
                     className="w-full px-3 py-2.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg outline-none text-sm font-medium cursor-pointer focus:ring-2 focus:ring-blue-500"
                   >
-                    <option value="" disabled>Select Resume</option>
+                    <option value="" disabled>
+                      Select Resume
+                    </option>
                     {pdfResumes.length > 0 && (
                       <optgroup label="Uploaded PDF Resumes">
                         {pdfResumes.map((r) => (
-                          <option key={`pdf-${r.id}`} value={r.id}>{r.resume_name}</option>
+                          <option key={`pdf-${r.id}`} value={r.id}>
+                            {r.resume_name}
+                          </option>
                         ))}
                       </optgroup>
                     )}
                     {builderResumes.length > 0 && (
                       <optgroup label="Resume Builder CVs">
                         {builderResumes.map((r) => (
-                          <option key={`builder-${r.id}`} value={r.id}>{r.name}</option>
+                          <option key={`builder-${r.id}`} value={r.id}>
+                            {r.name}
+                          </option>
                         ))}
                       </optgroup>
                     )}
@@ -339,7 +371,10 @@ export default function JobDetailsClient({ job, slug }: JobDetailsClientProps) {
 
                   {!resumeId && (
                     <div className="pt-1">
-                      <ResumeUpload onUploadSuccess={handleResumeUploadSuccess} variant="minimal" />
+                      <ResumeUpload
+                        onUploadSuccess={handleResumeUploadSuccess}
+                        variant="minimal"
+                      />
                     </div>
                   )}
                 </div>
@@ -382,7 +417,9 @@ export default function JobDetailsClient({ job, slug }: JobDetailsClientProps) {
 
             {!isAuthenticated ? (
               <button
-                onClick={() => router.push(`/candidate/login?redirect=/job/${slug}`)}
+                onClick={() =>
+                  router.push(`/candidate/login?redirect=/job/${slug}`)
+                }
                 className="w-full py-3 bg-[#0077b5] hover:bg-[#006097] text-white font-bold rounded-lg transition-all shadow-lg shadow-blue-200 dark:shadow-none flex items-center justify-center gap-2 text-sm"
               >
                 <LogIn className="w-4 h-4" />
@@ -409,81 +446,121 @@ export default function JobDetailsClient({ job, slug }: JobDetailsClientProps) {
       </div>
 
       {/* Similar Jobs Section */}
-      <div>
-        <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-3">Jobs from {job.company_name}</h3>
-        <div className="space-y-3">
-          {similarJobs.map(similarJob => (
-            <div key={similarJob.id} className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg p-5 shadow-sm hover:shadow-md transition-shadow group relative">
-              <div className="absolute top-4 right-4">
-                <BookmarkButton jobId={similarJob.id} jobSlug={similarJob.slug} isBookmarked={similarJob.is_bookmarked || false} onBookmarkChange={() => { }} size="sm" />
-              </div>
-
-              <div className="mb-2 pr-8">
-                <h4 className="font-bold text-gray-900 dark:text-gray-100 group-hover:text-blue-600 transition-colors text-base line-clamp-1">
-                  <Link href={`/job/${similarJob.slug}`}>{similarJob.title}</Link>
-                </h4>
-                <p className="text-xs text-gray-500 dark:text-gray-400">{similarJob.company_name}</p>
-              </div>
-
-              <div className="flex flex-wrap gap-3 mb-3 text-xs text-gray-600 dark:text-gray-400 font-medium">
-                <div className="flex items-center gap-1">
-                  <Briefcase className="w-3.5 h-3.5 text-gray-400" />
-                  {similarJob.experience_level ? `${similarJob.experience_level.replace("entry", "0-2").replace("mid", "2-5").replace("senior", "5+").replace("executive", "10+")} years` : 'Exp N/A'}
+      {similarJobs.length > 0 && (
+        <div className="mt-8 h-[1000px] overflow-x-auto">
+          <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-3">
+            Jobs from {job.company_name}
+          </h3>
+          <div className="space-y-3">
+            {similarJobs.map((similarJob) => (
+              <div
+                key={similarJob.id}
+                className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg p-5 shadow-sm hover:shadow-md transition-shadow group relative"
+              >
+                <div className="absolute top-4 right-4">
+                  <BookmarkButton
+                    jobId={similarJob.id}
+                    jobSlug={similarJob.slug}
+                    isBookmarked={similarJob.is_bookmarked || false}
+                    onBookmarkChange={() => { }}
+                    size="sm"
+                  />
                 </div>
-                <div className="flex items-center gap-1">
-                  <span className="font-semibold text-gray-900 dark:text-gray-100">
-                    <span className="text-gray-500 font-normal mr-0.5">₹</span>
-                    {similarJob.salary_min ? formatCurrency(similarJob.salary_min, similarJob.salary_currency || 'USD').replace(/[^0-9,]/g, '') : 'N/A'}
+
+                <div className="mb-2 pr-8">
+                  <h4 className="font-bold text-gray-900 dark:text-gray-100 group-hover:text-blue-600 transition-colors text-base line-clamp-1">
+                    <Link href={`/job/${similarJob.slug}`}>
+                      {similarJob.title}
+                    </Link>
+                  </h4>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                    {similarJob.company_name}
+                  </p>
+                </div>
+
+                <div className="flex flex-wrap gap-3 mb-3 text-xs text-gray-600 dark:text-gray-400 font-medium">
+                  <div className="flex items-center gap-1">
+                    <Briefcase className="w-3.5 h-3.5 text-gray-400" />
+                    {similarJob.experience_level
+                      ? `${similarJob.experience_level.replace("entry", "0-2").replace("mid", "2-5").replace("senior", "5+").replace("executive", "10+")} years`
+                      : "Exp N/A"}
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <span className="font-semibold text-gray-900 dark:text-gray-100">
+                      <span className="text-gray-500 font-normal mr-0.5">
+                        ₹
+                      </span>
+                      {similarJob.salary_min
+                        ? formatCurrency(
+                          similarJob.salary_min,
+                          similarJob.salary_currency || "USD",
+                        ).replace(/[^0-9,]/g, "")
+                        : "N/A"}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2 mb-3 text-xs text-gray-500">
+                  <div className="flex items-center gap-1">
+                    <MapPin className="w-3.5 h-3.5" />
+                    {similarJob.location}
+                  </div>
+                  {similarJob.is_remote && (
+                    <span className="px-1.5 py-0.5 bg-yellow-50 text-yellow-700 border border-yellow-100 rounded text-[10px] uppercase font-bold">
+                      Remote
+                    </span>
+                  )}
+                  <span className="px-1.5 py-0.5 bg-purple-50 text-purple-700 border border-purple-100 rounded text-[10px] uppercase font-bold">
+                    {similarJob.experience_level || "Mid Level"}
                   </span>
                 </div>
-              </div>
 
-              <div className="flex items-center gap-2 mb-3 text-xs text-gray-500">
-                <div className="flex items-center gap-1">
-                  <MapPin className="w-3.5 h-3.5" />
-                  {similarJob.location}
-                </div>
-                {similarJob.is_remote && (
-                  <span className="px-1.5 py-0.5 bg-yellow-50 text-yellow-700 border border-yellow-100 rounded text-[10px] uppercase font-bold">Remote</span>
-                )}
-                <span className="px-1.5 py-0.5 bg-purple-50 text-purple-700 border border-purple-100 rounded text-[10px] uppercase font-bold">
-                  {similarJob.experience_level || 'Mid Level'}
-                </span>
-              </div>
-
-              <div className="text-xs text-gray-500 font-medium mb-3 line-clamp-2">
-                Build cloud-native applications with <span className="font-bold text-gray-900 italic">AWS</span>
-              </div>
-
-              <div className="flex flex-wrap gap-1.5 mb-4">
-                {similarJob.required_skills?.slice(0, 3).map((skill, idx) => (
-                  <span key={idx} className="px-2 py-0.5 text-[10px] border border-blue-200 text-blue-600 rounded-full font-medium">
-                    {skill}
-                  </span>
-                ))}
-              </div>
-
-              <div className="flex items-center justify-between pt-3 border-t border-gray-100 dark:border-gray-800">
-                <div className="flex items-center gap-3 text-[10px] text-gray-400">
-                  <span>Posted {new Date(similarJob.posted_date).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}</span>
+                <div className="text-xs text-gray-500 font-medium mb-3 line-clamp-2">
+                  Build cloud-native applications with{" "}
+                  <span className="font-bold text-gray-900 italic">AWS</span>
                 </div>
 
-                <Link href={`/job/${similarJob.slug}`} className="px-4 py-1.5 bg-[#0077b5] text-white text-xs font-bold rounded-lg hover:bg-[#006097] transition-colors">
-                  Apply
-                </Link>
+                <div className="flex flex-wrap gap-1.5 mb-4">
+                  {similarJob.required_skills?.slice(0, 3).map((skill, idx) => (
+                    <span
+                      key={idx}
+                      className="px-2 py-0.5 text-[10px] border border-blue-200 text-blue-600 rounded-full font-medium"
+                    >
+                      {skill}
+                    </span>
+                  ))}
+                </div>
+
+                <div className="flex items-center justify-between pt-3 border-t border-gray-100 dark:border-gray-800">
+                  <div className="flex items-center gap-3 text-[10px] text-gray-400">
+                    <span>
+                      Posted{" "}
+                      {new Date(similarJob.posted_date).toLocaleDateString(
+                        "en-US",
+                        { month: "short", day: "numeric", year: "numeric" },
+                      )}
+                    </span>
+                  </div>
+
+                  <Link
+                    href={`/job/${similarJob.slug}`}
+                    className="px-4 py-1.5 bg-[#0077b5] text-white text-xs font-bold rounded-lg hover:bg-[#006097] transition-colors"
+                  >
+                    Apply
+                  </Link>
+                </div>
               </div>
-            </div>
-          ))}
-          {similarJobs.length === 0 && (
-            <div className="text-center py-8 text-gray-500 text-sm bg-gray-50 rounded-lg border border-dashed border-gray-200">
-              No other jobs found from {job.company_name}.
-            </div>
-          )}
+            ))}
+          </div>
         </div>
-      </div>
+      )}
+
       {showLinkedDataModal && linkedEntities && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 animate-in fade-in duration-200">
-          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setShowLinkedDataModal(false)} />
+          <div
+            className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+            onClick={() => setShowLinkedDataModal(false)}
+          />
           <div className="relative w-full max-w-4xl bg-white dark:bg-gray-950 rounded-lg border border-gray-200 dark:border-gray-800 shadow-2xl overflow-hidden flex flex-col max-h-[90vh] animate-in slide-in-from-bottom-4 duration-200">
             {/* ... Modal content similar to previous implementation ... */}
             <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-800 bg-[#F0F9FF] dark:bg-gray-900">
@@ -495,7 +572,10 @@ export default function JobDetailsClient({ job, slug }: JobDetailsClientProps) {
                   Stored Profile Data
                 </h2>
               </div>
-              <button onClick={() => setShowLinkedDataModal(false)} className="p-2 hover:bg-gray-200 dark:hover:bg-gray-800 rounded-lg transition-colors duration-150 cursor-pointer">
+              <button
+                onClick={() => setShowLinkedDataModal(false)}
+                className="p-2 hover:bg-gray-200 dark:hover:bg-gray-800 rounded-lg transition-colors duration-150 cursor-pointer"
+              >
                 <X className="w-5 h-5 text-gray-400" />
               </button>
             </div>
@@ -518,11 +598,18 @@ export default function JobDetailsClient({ job, slug }: JobDetailsClientProps) {
                 <Zap className="w-5 h-5 text-white" />
               </div>
               <div>
-                <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100">AI Resume Refiner</h3>
-                <p className="text-xs font-bold text-gray-500 uppercase tracking-widest">Optimize your data for this application</p>
+                <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100">
+                  AI Resume Refiner
+                </h3>
+                <p className="text-xs font-bold text-gray-500 uppercase tracking-widest">
+                  Optimize your data for this application
+                </p>
               </div>
             </div>
-            <button onClick={() => setParsingResumeId(null)} className="flex items-center gap-2 px-4 py-2 text-sm font-bold text-gray-500 hover:text-gray-900 border border-gray-200 hover:border-gray-300 rounded-lg transition-all duration-150 cursor-pointer bg-white dark:bg-gray-800">
+            <button
+              onClick={() => setParsingResumeId(null)}
+              className="flex items-center gap-2 px-4 py-2 text-sm font-bold text-gray-500 hover:text-gray-900 border border-gray-200 hover:border-gray-300 rounded-lg transition-all duration-150 cursor-pointer bg-white dark:bg-gray-800"
+            >
               <X className="w-5 h-5" />
               Discard Changes
             </button>
@@ -544,9 +631,7 @@ export default function JobDetailsClient({ job, slug }: JobDetailsClientProps) {
       )}
 
       <div
-        className={`fixed z-[60] left-1/2 -translate-x-1/2 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md border border-gray-200 dark:border-gray-700 shadow-xl rounded-2xl transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] ${showStickyHeader
-          ? "top-4 w-[95%] md:max-w-4xl opacity-100"
-          : "-top-24 w-[95%] md:max-w-4xl opacity-0 pointer-events-none"
+        className={`fixed top-0 left-0 right-0 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 shadow-sm z-50 transform transition-transform duration-300 ${showStickyHeader ? "translate-y-0" : "-translate-y-full"
           }`}
       >
         <div className="w-full px-3 py-2 flex items-center justify-between">
@@ -565,21 +650,38 @@ export default function JobDetailsClient({ job, slug }: JobDetailsClientProps) {
               )}
             </div>
             <div>
-              <h3 className="text-sm font-bold text-gray-900 dark:text-gray-100 line-clamp-1">{job.title}</h3>
-              <div className="flex items-center gap-2 text-[10px] text-gray-500 dark:text-gray-400 line-clamp-1">
+              <h3 className="text-sm font-bold text-gray-900 dark:text-gray-100 line-clamp-1">
+                {job.title}
+              </h3>
+              <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400 line-clamp-1">
                 <span>{job.company_name}</span>
-                <span className="hidden sm:inline-block text-gray-300 dark:text-gray-600">|</span>
-                <Link href={`/jobs?limit=10&category=${job.categories?.[0]}`} className="hidden sm:inline-block text-blue-600 hover:underline font-medium">
-                  Similar Jobs
+                <span>•</span>
+                <span>{job.location}</span>
+                <span className="hidden sm:inline-block text-gray-300 dark:text-gray-600">
+                  |
+                </span>
+                <Link
+                  href={`/jobs?limit=10&category=${job.categories?.[0]}`}
+                  className="hidden sm:inline-block text-blue-600 hover:underline font-medium"
+                >
+                  Send me jobs like this
                 </Link>
               </div>
             </div>
           </div>
 
           <div className="flex items-center gap-3">
+            <Link
+              href={`/jobs?limit=10&category=${job.categories?.[0]}`}
+              className="sm:hidden text-blue-600 text-xs font-medium hover:underline whitespace-nowrap"
+            >
+              Similar Jobs
+            </Link>
             <button
               onClick={() => {
-                document.getElementById('application-card')?.scrollIntoView({ behavior: 'smooth' });
+                document
+                  .getElementById("application-card")
+                  ?.scrollIntoView({ behavior: "smooth" });
               }}
               className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-lg transition-colors shadow-sm whitespace-nowrap"
             >
