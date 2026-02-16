@@ -76,6 +76,7 @@ export default function CVSearchPage() {
   const [degreeInput, setDegreeInput] = useState("");
   const [languageInput, setLanguageInput] = useState("");
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
+  const [showMoreFilters, setShowMoreFilters] = useState(false);
 
   const [searchResults, setSearchResults] = useState<CVSearchResponse | null>(
     null,
@@ -748,1177 +749,1169 @@ export default function CVSearchPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        {/* <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
-            CV Search
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+            Search Candidate
           </h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-1">
-            Search and unlock candidate profiles
-          </p>
-        </div> */}
-        {creditsStatus && creditsBalance && (
-          <div className="flex items-center gap-5">
-            {/* Circular Progress */}
-            <div className="relative w-24 h-24">
-              <svg className="w-full h-full transform -rotate-90">
-                {/* Background Circle */}
-                <circle
-                  cx="48"
-                  cy="48"
-                  r="40"
-                  fill="none"
-                  className="stroke-gray-100 dark:stroke-gray-800"
-                  strokeWidth="8"
-                />
-                {/* Progress Circle */}
-                <circle
-                  cx="48"
-                  cy="48"
-                  r="40"
-                  fill="none"
-                  className="stroke-blue-500 transition-all duration-1000 ease-out"
-                  strokeWidth="8"
-                  strokeDasharray={`${2 * Math.PI * 40}`}
-                  strokeDashoffset={`${2 *
-                    Math.PI *
-                    40 *
-                    (1 -
-                      creditsBalance.credits_remaining /
-                      Math.max(creditsBalance.total_credits, 1))
-                    }`}
-                  strokeLinecap="round"
-                />
-              </svg>
-              <div className="absolute inset-0 flex items-center justify-center">
-                <span className="text-sm font-medium text-gray-900 dark:text-white">
-                  {creditsBalance.credits_remaining}/500
+        </div>
+
+        <div className="flex flex-col items-end gap-3">
+          {creditsStatus && creditsBalance && (
+            <div className="w-full max-w-[320px]">
+              <div className="flex items-baseline gap-2 mb-1.5">
+                <span className="text-lg font-bold text-gray-900 dark:text-white">
+                  {creditsBalance.credits_remaining}/
+                  500
+                </span>
+                <span className="text-xs text-gray-900 dark:text-gray-100 font-medium">
+                  Available Credits
+                </span>
+                <span className="text-[10px] text-gray-500 dark:text-gray-400 ml-1">
+                  {creditsStatus.active_unlocks} active unlocks
                 </span>
               </div>
+              <div className="w-full h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden border border-gray-100 dark:border-gray-600">
+                <div
+                  className="h-full bg-blue-500 rounded-full transition-all duration-1000 ease-out"
+                  style={{
+                    width: `${Math.min(
+                      100,
+                      (creditsBalance.credits_remaining / 500) * 100,
+                    )}%`,
+                  }}
+                />
+              </div>
             </div>
+          )}
 
-            <div className="flex flex-col items-start">
-              <div className="text-sm font-semibold text-gray-700 dark:text-gray-200">
-                Available Credits
-              </div>
-              <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                {creditsStatus.active_unlocks} active unlocks
-              </div>
-            </div>
+          <div className="flex items-center gap-2 w-full max-w-[320px]">
+            <button
+              onClick={() => setShowAdvancedFilters(true)}
+              className="flex-1 py-2 bg-white dark:bg-gray-800 border border-gray-400 dark:border-gray-600 text-gray-900 dark:text-white rounded-lg font-medium transition-colors flex items-center justify-center gap-2 text-sm shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700"
+            >
+              <Filter className="w-4 h-4 fill-current" />
+              Advanced Filter
+            </button>
+            <button
+              onClick={fetchSearchHistory}
+              className="flex-1 py-2 bg-[#4B5563] hover:bg-[#374151] text-white rounded-lg font-medium transition-colors flex items-center justify-center gap-2 text-sm shadow-sm"
+            >
+              <History className="w-4 h-4" />
+              History
+            </button>
           </div>
-        )}
+        </div>
       </div>
 
-      {/* Search Section */}
-      {/* Search Section */}
-      <div className="bg-white dark:bg-[#282727] rounded-xl border border-gray-200 dark:border-gray-700 p-5 space-y-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {/* Keyword Search */}
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5">
+      {/* Search Card */}
+      <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 shadow-sm">
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
+          {/* Keyword Search - Full width on mobile, 4 cols on desktop */}
+          <div className="md:col-span-4">
+            <label className="block text-sm font-bold text-gray-900 dark:text-gray-100 mb-1.5">
               Keyword Search
             </label>
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-300 pointer-events-none" />
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onKeyPress={(e) => e.key === "Enter" && handleSearch()}
                 placeholder="Search by skills, title, company..."
-                className="w-full pl-9 pr-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all placeholder-gray-400 dark:text-gray-200"
+                className="w-full pl-10 pr-4 py-3 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg text-sm text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all placeholder-gray-300"
               />
             </div>
           </div>
 
-          {/* Country Filter */}
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5">
+          {/* Country - 3 cols */}
+          <div className="md:col-span-3">
+            <label className="block text-sm font-bold text-gray-900 dark:text-gray-100 mb-1.5">
               Country
             </label>
             <input
               type="text"
               value={filters.country}
-              onChange={(e) =>
-                setFilters({ ...filters, country: e.target.value })
-              }
-              placeholder="e.g., United States"
-              className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all placeholder-gray-400 dark:text-gray-200"
+              onChange={(e) => setFilters({ ...filters, country: e.target.value })}
+              placeholder="e.g. India"
+              className="w-full px-4 py-3 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg text-sm text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all placeholder-gray-300"
             />
           </div>
 
-          {/* State Filter */}
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5">
+          {/* State - 3 cols */}
+          <div className="md:col-span-3">
+            <label className="block text-sm font-bold text-gray-900 dark:text-gray-100 mb-1.5">
               State
             </label>
             <input
               type="text"
               value={filters.state}
-              onChange={(e) =>
-                setFilters({ ...filters, state: e.target.value })
-              }
-              placeholder="e.g., California"
-              className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all placeholder-gray-400 dark:text-gray-200"
+              onChange={(e) => setFilters({ ...filters, state: e.target.value })}
+              placeholder="e.g. Maharashtra"
+              className="w-full px-4 py-3 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg text-sm text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all placeholder-gray-300"
             />
           </div>
 
-          {/* City Filter */}
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5">
-              City
-            </label>
-            <input
-              type="text"
-              value={filters.city}
-              onChange={(e) => setFilters({ ...filters, city: e.target.value })}
-              placeholder="e.g., San Francisco"
-              className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all placeholder-gray-400 dark:text-gray-200"
-            />
-          </div>
-
-          {/* Experience Range */}
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5">
-              Experience (Years)
-            </label>
-            <div className="flex gap-2">
-              <input
-                type="number"
-                min="0"
-                value={filters.min_experience_years}
-                onChange={(e) =>
-                  setFilters({
-                    ...filters,
-                    min_experience_years: parseInt(e.target.value) || 0,
-                  })
-                }
-                placeholder="Min"
-                className="flex-1 px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none placeholder-gray-400 dark:text-gray-200"
-              />
-              <input
-                type="number"
-                min="0"
-                value={filters.max_experience_years}
-                onChange={(e) =>
-                  setFilters({
-                    ...filters,
-                    max_experience_years: parseInt(e.target.value) || 50,
-                  })
-                }
-                placeholder="Max"
-                className="flex-1 px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none placeholder-gray-400 dark:text-gray-200"
-              />
-            </div>
+          {/* Search Button - 2 cols */}
+          <div className="md:col-span-2">
+            <button
+              onClick={() => handleSearch()}
+              disabled={loading}
+              className="w-full h-[46px] bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-bold transition-all disabled:opacity-50 flex items-center justify-center gap-2 shadow-md hover:shadow-lg active:scale-95"
+            >
+              {loading ? (
+                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              ) : (
+                <Search className="w-5 h-5" />
+              )}
+              Search CVs
+            </button>
           </div>
         </div>
 
-        <div className="flex flex-wrap gap-3 pt-4 border-t border-gray-100 dark:border-gray-700 mt-4">
-          <button
-            onClick={() => handleSearch()}
-            disabled={loading}
-            className="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors disabled:opacity-50 flex items-center gap-2 text-sm"
-          >
-            {loading ? (
-              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-            ) : (
-              <Search className="w-4 h-4" />
+        {/* Collapsible Section */}
+        {showMoreFilters && (
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end mt-4 animate-in slide-in-from-top-2 duration-200">
+            {/* City */}
+            <div className="md:col-span-4">
+              <label className="block text-sm font-bold text-gray-900 dark:text-gray-100 mb-1.5">
+                City / Location
+              </label>
+              <input
+                type="text"
+                value={filters.city}
+                onChange={(e) => setFilters({ ...filters, city: e.target.value })}
+                placeholder="e.g. Mumbai"
+                className="w-full px-4 py-3 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg text-sm text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all placeholder-gray-300"
+              />
+            </div>
+
+            {/* Experience */}
+            <div className="md:col-span-4">
+              <label className="block text-sm font-bold text-gray-900 dark:text-gray-100 mb-1.5">
+                Experience (years)
+              </label>
+              <div className="flex gap-3">
+                <div className="flex-1 text-center">
+                  <input
+                    type="number"
+                    min="0"
+                    value={filters.min_experience_years}
+                    onChange={(e) => setFilters({ ...filters, min_experience_years: parseInt(e.target.value) || 0 })}
+                    placeholder="0"
+                    className="w-full px-4 py-3 text-center bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg text-lg font-medium text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                  />
+                </div>
+                <div className="flex-1 text-center">
+                  <input
+                    type="number"
+                    min="0"
+                    value={filters.max_experience_years}
+                    onChange={(e) => setFilters({ ...filters, max_experience_years: parseInt(e.target.value) || 50 })}
+                    placeholder="2"
+                    className="w-full px-4 py-3 text-center bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg text-lg font-medium text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Action Buttons if Resumes Selected */}
+            {selectedResumes.size > 0 && (
+              <div className="md:col-span-4 flex gap-2">
+                <button
+                  onClick={handleBulkUnlock}
+                  disabled={loading || !creditsStatus || creditsStatus.credits_remaining < selectedResumes.size}
+                  className="flex-1 h-[46px] bg-green-600 hover:bg-green-700 text-white rounded-lg font-bold transition-all disabled:opacity-50 flex items-center justify-center gap-2 text-sm shadow-sm"
+                >
+                  <Unlock className="w-4 h-4" />
+                  Unlock {selectedResumes.size}
+                </button>
+                <button
+                  onClick={() => setShowBucketModal(true)}
+                  className="flex-1 h-[46px] bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-bold transition-all flex items-center justify-center gap-2 text-sm shadow-sm"
+                >
+                  <FolderPlus className="w-4 h-4" />
+                  Add to Bucket
+                </button>
+              </div>
             )}
-            Search CVs
-          </button>
-
-          <button
-            onClick={() => setShowAdvancedFilters(true)}
-            className="px-5 py-2.5 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600 rounded-lg font-medium transition-colors flex items-center gap-2 text-sm "
-          >
-            <Filter className="w-4 h-4" />
-            Advanced Filters
-          </button>
-
-          <button
-            onClick={fetchSearchHistory}
-            className="px-5 py-2.5 bg-gray-600 hover:bg-gray-700 text-white rounded-md font-medium transition-colors flex items-center gap-2 text-sm"
-          >
-            <History className="w-4 h-4" />
-            History
-          </button>
-
-          {selectedResumes.size > 0 && (
-            <>
-              <button
-                onClick={handleBulkUnlock}
-                disabled={
-                  loading ||
-                  !creditsStatus ||
-                  creditsStatus.credits_remaining < selectedResumes.size
-                }
-                className="px-5 py-2.5 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors disabled:opacity-50 flex items-center gap-2 text-sm"
-              >
-                <Unlock className="w-4 h-4" />
-                Unlock {selectedResumes.size}
-              </button>
-              <button
-                onClick={() => setShowBucketModal(true)}
-                className="px-5 py-2.5 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-medium transition-colors flex items-center gap-2 text-sm"
-              >
-                <FolderPlus className="w-4 h-4" />
-                Add to Bucket
-              </button>
-            </>
-          )}
-        </div>
-
-        {/* Advanced Filters Modal */}
-        {showAdvancedFilters && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
-            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-3xl max-h-[85vh] flex flex-col overflow-hidden animate-in zoom-in-95 duration-200   dark:border-gray-700">
-              <div className="flex items-center justify-between px-6 py-1 border-b  bg-slate-900 rounded-t-xl">
-                <h3 className="text-lg font-semibold text-white">
-                  Advanced Filters
-                </h3>
-                <button
-                  onClick={() => setShowAdvancedFilters(false)}
-                  className="p-2 text-white/70 hover:text-white hover:bg-white/10 rounded-full transition-colors"
-                >
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
-
-              <div className="flex-1 overflow-y-auto p-6 space-y-6 custom-scrollbar">
-                {/* Skills */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                    Skills
-                  </label>
-                  <div className="flex gap-2 mb-2">
-                    <input
-                      type="text"
-                      value={skillInput}
-                      onChange={(e) => setSkillInput(e.target.value)}
-                      onKeyDown={(e) =>
-                        e.key === "Enter" && (e.preventDefault(), addSkill())
-                      }
-                      placeholder="Add skill (e.g., React, Python)"
-                      className="flex-1 px-3 py-2 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                    <button
-                      onClick={addSkill}
-                      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-                    >
-                      Add
-                    </button>
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    {filters.skills.map((skill) => (
-                      <span
-                        key={skill}
-                        className="inline-flex items-center gap-1 px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded-full text-sm"
-                      >
-                        {skill}
-                        <button
-                          onClick={() => removeSkill(skill)}
-                          className="hover:text-blue-600"
-                        >
-                          <X className="h-3 w-3" />
-                        </button>
-                      </span>
-                    ))}
-                  </div>
-                  <label className="flex items-center gap-2 mt-2">
-                    <input
-                      type="checkbox"
-                      checked={filters.skills_match_all}
-                      onChange={(e) =>
-                        setFilters({
-                          ...filters,
-                          skills_match_all: e.target.checked,
-                        })
-                      }
-                      className="rounded border-gray-300 dark:border-gray-600"
-                    />
-                    <span className="text-sm text-gray-600 dark:text-gray-400">
-                      Match all skills (AND)
-                    </span>
-                  </label>
-                </div>
-
-                {/* Job Titles */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                    Job Titles
-                  </label>
-                  <div className="flex gap-2 mb-2">
-                    <input
-                      type="text"
-                      value={jobTitleInput}
-                      onChange={(e) => setJobTitleInput(e.target.value)}
-                      onKeyDown={(e) =>
-                        e.key === "Enter" && (e.preventDefault(), addJobTitle())
-                      }
-                      placeholder="Add job title (e.g., Software Engineer)"
-                      className="flex-1 px-3 py-2 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                    <button
-                      onClick={addJobTitle}
-                      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-                    >
-                      Add
-                    </button>
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    {filters.job_titles.map((title) => (
-                      <span
-                        key={title}
-                        className="inline-flex items-center gap-1 px-3 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 rounded-full text-sm"
-                      >
-                        {title}
-                        <button
-                          onClick={() => removeJobTitle(title)}
-                          className="hover:text-green-600"
-                        >
-                          <X className="h-3 w-3" />
-                        </button>
-                      </span>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Companies */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                    Companies
-                  </label>
-                  <div className="flex gap-2 mb-2">
-                    <input
-                      type="text"
-                      value={companyInput}
-                      onChange={(e) => setCompanyInput(e.target.value)}
-                      onKeyDown={(e) =>
-                        e.key === "Enter" && (e.preventDefault(), addCompany())
-                      }
-                      placeholder="Add company (e.g., Google, Microsoft)"
-                      className="flex-1 px-3 py-2 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                    <button
-                      onClick={addCompany}
-                      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-                    >
-                      Add
-                    </button>
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    {filters.companies.map((company) => (
-                      <span
-                        key={company}
-                        className="inline-flex items-center gap-1 px-3 py-1 bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200 rounded-full text-sm"
-                      >
-                        {company}
-                        <button
-                          onClick={() => removeCompany(company)}
-                          className="hover:text-purple-600"
-                        >
-                          <X className="h-3 w-3" />
-                        </button>
-                      </span>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Excluded Companies */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                    Exclude Companies
-                  </label>
-                  <div className="flex gap-2 mb-2">
-                    <input
-                      type="text"
-                      value={excludedCompanyInput}
-                      onChange={(e) => setExcludedCompanyInput(e.target.value)}
-                      onKeyDown={(e) =>
-                        e.key === "Enter" &&
-                        (e.preventDefault(), addExcludedCompany())
-                      }
-                      placeholder="Exclude company (e.g., Competitor Inc)"
-                      className="flex-1 px-3 py-2 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                    <button
-                      onClick={addExcludedCompany}
-                      className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
-                    >
-                      Add
-                    </button>
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    {filters.excluded_companies.map((company) => (
-                      <span
-                        key={company}
-                        className="inline-flex items-center gap-1 px-3 py-1 bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 rounded-full text-sm"
-                      >
-                        {company}
-                        <button
-                          onClick={() => removeExcludedCompany(company)}
-                          className="hover:text-red-900 dark:hover:text-red-100"
-                        >
-                          <X className="h-3 w-3" />
-                        </button>
-                      </span>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Education Level */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                    Education Level
-                  </label>
-                  <select
-                    value={filters.education_level}
-                    onChange={(e) =>
-                      setFilters({
-                        ...filters,
-                        education_level: e.target.value,
-                      })
-                    }
-                    className="w-full px-3 py-2 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
-                    <option value="">Any</option>
-                    <option value="high_school">High School</option>
-                    <option value="associate">Associate</option>
-                    <option value="bachelor">Bachelor's</option>
-                    <option value="master">Master's</option>
-                    <option value="phd">PhD</option>
-                  </select>
-                </div>
-
-                {/* Degrees */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                    Degrees
-                  </label>
-                  <div className="flex gap-2 mb-2">
-                    <input
-                      type="text"
-                      value={degreeInput}
-                      onChange={(e) => setDegreeInput(e.target.value)}
-                      onKeyDown={(e) =>
-                        e.key === "Enter" && (e.preventDefault(), addDegree())
-                      }
-                      placeholder="Add degree (e.g., Computer Science, MBA)"
-                      className="flex-1 px-3 py-2 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                    <button
-                      onClick={addDegree}
-                      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-                    >
-                      Add
-                    </button>
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    {filters.degrees.map((degree) => (
-                      <span
-                        key={degree}
-                        className="inline-flex items-center gap-1 px-3 py-1 bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200 rounded-full text-sm"
-                      >
-                        {degree}
-                        <button
-                          onClick={() => removeDegree(degree)}
-                          className="hover:text-yellow-600"
-                        >
-                          <X className="h-3 w-3" />
-                        </button>
-                      </span>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Languages */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                    Languages
-                  </label>
-                  <div className="flex gap-2 mb-2">
-                    <input
-                      type="text"
-                      value={languageInput}
-                      onChange={(e) => setLanguageInput(e.target.value)}
-                      onKeyDown={(e) =>
-                        e.key === "Enter" && (e.preventDefault(), addLanguage())
-                      }
-                      placeholder="Add language (e.g., English, Spanish)"
-                      className="flex-1 px-3 py-2 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                    <button
-                      onClick={addLanguage}
-                      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-                    >
-                      Add
-                    </button>
-                  </div>
-                  <div className="flex flex-wrap gap-2 mb-2">
-                    {filters.languages.map((language) => (
-                      <span
-                        key={language}
-                        className="inline-flex items-center gap-1 px-3 py-1 bg-indigo-100 dark:bg-indigo-900 text-indigo-800 dark:text-indigo-200 rounded-full text-sm"
-                      >
-                        {language}
-                        <button
-                          onClick={() => removeLanguage(language)}
-                          className="hover:text-indigo-600"
-                        >
-                          <X className="h-3 w-3" />
-                        </button>
-                      </span>
-                    ))}
-                  </div>
-                  <select
-                    value={filters.language_proficiency}
-                    onChange={(e) =>
-                      setFilters({
-                        ...filters,
-                        language_proficiency: e.target.value,
-                      })
-                    }
-                    className="w-full px-3 py-2 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
-                    <option value="">Any Proficiency</option>
-                    <option value="basic">Basic</option>
-                    <option value="intermediate">Intermediate</option>
-                    <option value="advanced">Advanced</option>
-                    <option value="fluent">Fluent</option>
-                    <option value="native">Native</option>
-                  </select>
-                </div>
-
-                {/* Employment Status Filters */}
-                <div className="space-y-2">
-                  <label className="flex items-center gap-2">
-                    <input
-                      type="checkbox"
-                      checked={filters.open_to_work_only}
-                      onChange={(e) =>
-                        setFilters({
-                          ...filters,
-                          open_to_work_only: e.target.checked,
-                        })
-                      }
-                      className="rounded border-gray-300 dark:border-gray-600"
-                    />
-                    <span className="text-sm text-gray-700 dark:text-gray-300">
-                      Open to work only
-                    </span>
-                  </label>
-                  <label className="flex items-center gap-2">
-                    <input
-                      type="checkbox"
-                      checked={filters.is_currently_employed === true}
-                      onChange={(e) =>
-                        setFilters({
-                          ...filters,
-                          is_currently_employed: e.target.checked
-                            ? true
-                            : undefined,
-                        })
-                      }
-                      className="rounded border-gray-300 dark:border-gray-600"
-                    />
-                    <span className="text-sm text-gray-700 dark:text-gray-300">
-                      Currently employed
-                    </span>
-                  </label>
-                </div>
-
-                {/* Sort Controls */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                      Sort By
-                    </label>
-                    <select
-                      value={filters.sort_by}
-                      onChange={(e) =>
-                        setFilters({ ...filters, sort_by: e.target.value })
-                      }
-                      className="w-full px-3 py-2 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    >
-                      <option value="relevance">Relevance</option>
-                      <option value="recent_activity">Recent Activity</option>
-                      <option value="experience">Experience</option>
-                      <option value="education">Education</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                      Sort Order
-                    </label>
-                    <select
-                      value={filters.sort_order}
-                      onChange={(e) =>
-                        setFilters({
-                          ...filters,
-                          sort_order: e.target.value as "asc" | "desc",
-                        })
-                      }
-                      className="w-full px-3 py-2 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    >
-                      <option value="desc">Descending</option>
-                      <option value="asc">Ascending</option>
-                    </select>
-                  </div>
-                </div>
-              </div>
-
-              <div className="px-6 py-1 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 flex justify-end gap-3 rounded-b-xl">
-                <button
-                  onClick={() => setShowAdvancedFilters(false)}
-                  className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={() => {
-                    handleSearch();
-                    setShowAdvancedFilters(false);
-                  }}
-                  className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg shadow-sm hover:shadow transition-all"
-                >
-                  Apply Filters
-                </button>
-              </div>
-            </div>
           </div>
         )}
+
+        <div className="flex justify-center mt-6">
+          <button
+            onClick={() => setShowMoreFilters(!showMoreFilters)}
+            className="group flex flex-col items-center gap-1 text-sm font-bold text-gray-900 dark:text-gray-100 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+          >
+            Show {showMoreFilters ? "less" : "more"}
+            {showMoreFilters ? (
+              <ChevronUp className="w-5 h-5 text-gray-900 dark:text-gray-100 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-transform" strokeWidth={3} />
+            ) : (
+              <ChevronDown className="w-5 h-5 text-gray-900 dark:text-gray-100 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-transform" strokeWidth={3} />
+            )}
+          </button>
+        </div>
       </div>
 
+      {/* Advanced Filters Modal */}
+      {showAdvancedFilters && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-3xl max-h-[85vh] flex flex-col overflow-hidden animate-in zoom-in-95 duration-200   dark:border-gray-700">
+            <div className="flex items-center justify-between px-6 py-1 border-b  bg-slate-900 rounded-t-xl">
+              <h3 className="text-lg font-semibold text-white">
+                Advanced Filters
+              </h3>
+              <button
+                onClick={() => setShowAdvancedFilters(false)}
+                className="p-2 text-white/70 hover:text-white hover:bg-white/10 rounded-full transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto p-6 space-y-6 custom-scrollbar">
+              {/* Skills */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                  Skills
+                </label>
+                <div className="flex gap-2 mb-2">
+                  <input
+                    type="text"
+                    value={skillInput}
+                    onChange={(e) => setSkillInput(e.target.value)}
+                    onKeyDown={(e) =>
+                      e.key === "Enter" && (e.preventDefault(), addSkill())
+                    }
+                    placeholder="Add skill (e.g., React, Python)"
+                    className="flex-1 px-3 py-2 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                  <button
+                    onClick={addSkill}
+                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                  >
+                    Add
+                  </button>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {filters.skills.map((skill) => (
+                    <span
+                      key={skill}
+                      className="inline-flex items-center gap-1 px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded-full text-sm"
+                    >
+                      {skill}
+                      <button
+                        onClick={() => removeSkill(skill)}
+                        className="hover:text-blue-600"
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    </span>
+                  ))}
+                </div>
+                <label className="flex items-center gap-2 mt-2">
+                  <input
+                    type="checkbox"
+                    checked={filters.skills_match_all}
+                    onChange={(e) =>
+                      setFilters({
+                        ...filters,
+                        skills_match_all: e.target.checked,
+                      })
+                    }
+                    className="rounded border-gray-300 dark:border-gray-600"
+                  />
+                  <span className="text-sm text-gray-600 dark:text-gray-400">
+                    Match all skills (AND)
+                  </span>
+                </label>
+              </div>
+
+              {/* Job Titles */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                  Job Titles
+                </label>
+                <div className="flex gap-2 mb-2">
+                  <input
+                    type="text"
+                    value={jobTitleInput}
+                    onChange={(e) => setJobTitleInput(e.target.value)}
+                    onKeyDown={(e) =>
+                      e.key === "Enter" && (e.preventDefault(), addJobTitle())
+                    }
+                    placeholder="Add job title (e.g., Software Engineer)"
+                    className="flex-1 px-3 py-2 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                  <button
+                    onClick={addJobTitle}
+                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                  >
+                    Add
+                  </button>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {filters.job_titles.map((title) => (
+                    <span
+                      key={title}
+                      className="inline-flex items-center gap-1 px-3 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 rounded-full text-sm"
+                    >
+                      {title}
+                      <button
+                        onClick={() => removeJobTitle(title)}
+                        className="hover:text-green-600"
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              {/* Companies */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                  Companies
+                </label>
+                <div className="flex gap-2 mb-2">
+                  <input
+                    type="text"
+                    value={companyInput}
+                    onChange={(e) => setCompanyInput(e.target.value)}
+                    onKeyDown={(e) =>
+                      e.key === "Enter" && (e.preventDefault(), addCompany())
+                    }
+                    placeholder="Add company (e.g., Google, Microsoft)"
+                    className="flex-1 px-3 py-2 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                  <button
+                    onClick={addCompany}
+                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                  >
+                    Add
+                  </button>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {filters.companies.map((company) => (
+                    <span
+                      key={company}
+                      className="inline-flex items-center gap-1 px-3 py-1 bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200 rounded-full text-sm"
+                    >
+                      {company}
+                      <button
+                        onClick={() => removeCompany(company)}
+                        className="hover:text-purple-600"
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              {/* Excluded Companies */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                  Exclude Companies
+                </label>
+                <div className="flex gap-2 mb-2">
+                  <input
+                    type="text"
+                    value={excludedCompanyInput}
+                    onChange={(e) => setExcludedCompanyInput(e.target.value)}
+                    onKeyDown={(e) =>
+                      e.key === "Enter" &&
+                      (e.preventDefault(), addExcludedCompany())
+                    }
+                    placeholder="Exclude company (e.g., Competitor Inc)"
+                    className="flex-1 px-3 py-2 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                  <button
+                    onClick={addExcludedCompany}
+                    className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
+                  >
+                    Add
+                  </button>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {filters.excluded_companies.map((company) => (
+                    <span
+                      key={company}
+                      className="inline-flex items-center gap-1 px-3 py-1 bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 rounded-full text-sm"
+                    >
+                      {company}
+                      <button
+                        onClick={() => removeExcludedCompany(company)}
+                        className="hover:text-red-900 dark:hover:text-red-100"
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              {/* Education Level */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                  Education Level
+                </label>
+                <select
+                  value={filters.education_level}
+                  onChange={(e) =>
+                    setFilters({
+                      ...filters,
+                      education_level: e.target.value,
+                    })
+                  }
+                  className="w-full px-3 py-2 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="">Any</option>
+                  <option value="high_school">High School</option>
+                  <option value="associate">Associate</option>
+                  <option value="bachelor">Bachelor's</option>
+                  <option value="master">Master's</option>
+                  <option value="phd">PhD</option>
+                </select>
+              </div>
+
+              {/* Degrees */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                  Degrees
+                </label>
+                <div className="flex gap-2 mb-2">
+                  <input
+                    type="text"
+                    value={degreeInput}
+                    onChange={(e) => setDegreeInput(e.target.value)}
+                    onKeyDown={(e) =>
+                      e.key === "Enter" && (e.preventDefault(), addDegree())
+                    }
+                    placeholder="Add degree (e.g., Computer Science, MBA)"
+                    className="flex-1 px-3 py-2 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                  <button
+                    onClick={addDegree}
+                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                  >
+                    Add
+                  </button>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {filters.degrees.map((degree) => (
+                    <span
+                      key={degree}
+                      className="inline-flex items-center gap-1 px-3 py-1 bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200 rounded-full text-sm"
+                    >
+                      {degree}
+                      <button
+                        onClick={() => removeDegree(degree)}
+                        className="hover:text-yellow-600"
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              {/* Languages */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                  Languages
+                </label>
+                <div className="flex gap-2 mb-2">
+                  <input
+                    type="text"
+                    value={languageInput}
+                    onChange={(e) => setLanguageInput(e.target.value)}
+                    onKeyDown={(e) =>
+                      e.key === "Enter" && (e.preventDefault(), addLanguage())
+                    }
+                    placeholder="Add language (e.g., English, Spanish)"
+                    className="flex-1 px-3 py-2 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                  <button
+                    onClick={addLanguage}
+                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                  >
+                    Add
+                  </button>
+                </div>
+                <div className="flex flex-wrap gap-2 mb-2">
+                  {filters.languages.map((language) => (
+                    <span
+                      key={language}
+                      className="inline-flex items-center gap-1 px-3 py-1 bg-indigo-100 dark:bg-indigo-900 text-indigo-800 dark:text-indigo-200 rounded-full text-sm"
+                    >
+                      {language}
+                      <button
+                        onClick={() => removeLanguage(language)}
+                        className="hover:text-indigo-600"
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    </span>
+                  ))}
+                </div>
+                <select
+                  value={filters.language_proficiency}
+                  onChange={(e) =>
+                    setFilters({
+                      ...filters,
+                      language_proficiency: e.target.value,
+                    })
+                  }
+                  className="w-full px-3 py-2 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="">Any Proficiency</option>
+                  <option value="basic">Basic</option>
+                  <option value="intermediate">Intermediate</option>
+                  <option value="advanced">Advanced</option>
+                  <option value="fluent">Fluent</option>
+                  <option value="native">Native</option>
+                </select>
+              </div>
+
+              {/* Employment Status Filters */}
+              <div className="space-y-2">
+                <label className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    checked={filters.open_to_work_only}
+                    onChange={(e) =>
+                      setFilters({
+                        ...filters,
+                        open_to_work_only: e.target.checked,
+                      })
+                    }
+                    className="rounded border-gray-300 dark:border-gray-600"
+                  />
+                  <span className="text-sm text-gray-700 dark:text-gray-300">
+                    Open to work only
+                  </span>
+                </label>
+                <label className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    checked={filters.is_currently_employed === true}
+                    onChange={(e) =>
+                      setFilters({
+                        ...filters,
+                        is_currently_employed: e.target.checked
+                          ? true
+                          : undefined,
+                      })
+                    }
+                    className="rounded border-gray-300 dark:border-gray-600"
+                  />
+                  <span className="text-sm text-gray-700 dark:text-gray-300">
+                    Currently employed
+                  </span>
+                </label>
+              </div>
+
+              {/* Sort Controls */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                    Sort By
+                  </label>
+                  <select
+                    value={filters.sort_by}
+                    onChange={(e) =>
+                      setFilters({ ...filters, sort_by: e.target.value })
+                    }
+                    className="w-full px-3 py-2 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="relevance">Relevance</option>
+                    <option value="recent_activity">Recent Activity</option>
+                    <option value="experience">Experience</option>
+                    <option value="education">Education</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                    Sort Order
+                  </label>
+                  <select
+                    value={filters.sort_order}
+                    onChange={(e) =>
+                      setFilters({
+                        ...filters,
+                        sort_order: e.target.value as "asc" | "desc",
+                      })
+                    }
+                    className="w-full px-3 py-2 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="desc">Descending</option>
+                    <option value="asc">Ascending</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <div className="px-6 py-1 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 flex justify-end gap-3 rounded-b-xl">
+              <button
+                onClick={() => setShowAdvancedFilters(false)}
+                className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  handleSearch();
+                  setShowAdvancedFilters(false);
+                }}
+                className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg shadow-sm hover:shadow transition-all"
+              >
+                Apply Filters
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Results Section */}
-      {searchResults && (
-        <div className="space-y-4">
-          <div className="grid gap-6 grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
-            {searchResults.results.map((result) => (
-              <div
-                key={result.resume_id}
-                className="group relative rounded-2xl border border-gray-200 dark:border-gray-700
+      {
+        searchResults && (
+          <div className="space-y-4">
+            <div className="grid gap-6 grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
+              {searchResults.results.map((result) => (
+                <div
+                  key={result.resume_id}
+                  className="group relative rounded-2xl border border-gray-200 dark:border-gray-700
                  bg-white dark:bg-[#282727]
                  p-6 shadow-sm
                  hover:shadow-xl hover:-translate-y-0.5
                  transition-all duration-200
                  flex flex-col"
-              >
-                {/* Card Header */}
-                <div className="flex items-start justify-between gap-4 mb-5">
-                  <div className="flex items-center gap-4">
-                    <div>
-                      <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 leading-tight">
-                        {result.full_name}
-                      </h3>
-                      <p className="text-sm font-medium text-blue-600 dark:text-blue-400">
-                        {result.professional_title}
+                >
+                  {/* Card Header */}
+                  <div className="flex items-start justify-between gap-4 mb-5">
+                    <div className="flex items-center gap-4">
+                      <div>
+                        <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 leading-tight">
+                          {result.full_name}
+                        </h3>
+                        <p className="text-sm font-medium text-blue-600 dark:text-blue-400">
+                          {result.professional_title}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Select */}
+                    <label className="flex items-center gap-2 text-xs text-gray-500 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={selectedResumes.has(result.resume_id)}
+                        onChange={() => toggleSelectResume(result.resume_id)}
+                        className="w-4 h-4 rounded border-gray-300"
+                      />
+                      Select
+                    </label>
+                  </div>
+
+                  {/* Meta Info */}
+                  <div className="grid grid-cols-2 gap-y-3 gap-x-4 text-sm text-gray-600 dark:text-gray-400 mb-5">
+                    <div className="flex items-center gap-2">
+                      <MapPin className="w-4 h-4 text-gray-400" />
+                      {result.location}
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Briefcase className="w-4 h-4 text-gray-400" />
+                      {result.experience_years} yrs
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <GraduationCap className="w-4 h-4 text-gray-400" />
+                      {result.highest_education}
+                    </div>
+                    {result.current_company && (
+                      <div className="flex items-center gap-2 col-span-2">
+                        <Award className="w-4 h-4 text-gray-400" />
+                        {result.current_company}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Skills */}
+                  {result.skills?.length > 0 && (
+                    <div className="mb-6">
+                      <p className="text-[11px] font-semibold tracking-wide text-gray-500 dark:text-gray-400 uppercase mb-2">
+                        Skills
                       </p>
-                    </div>
-                  </div>
-
-                  {/* Select */}
-                  <label className="flex items-center gap-2 text-xs text-gray-500 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={selectedResumes.has(result.resume_id)}
-                      onChange={() => toggleSelectResume(result.resume_id)}
-                      className="w-4 h-4 rounded border-gray-300"
-                    />
-                    Select
-                  </label>
-                </div>
-
-                {/* Meta Info */}
-                <div className="grid grid-cols-2 gap-y-3 gap-x-4 text-sm text-gray-600 dark:text-gray-400 mb-5">
-                  <div className="flex items-center gap-2">
-                    <MapPin className="w-4 h-4 text-gray-400" />
-                    {result.location}
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Briefcase className="w-4 h-4 text-gray-400" />
-                    {result.experience_years} yrs
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <GraduationCap className="w-4 h-4 text-gray-400" />
-                    {result.highest_education}
-                  </div>
-                  {result.current_company && (
-                    <div className="flex items-center gap-2 col-span-2">
-                      <Award className="w-4 h-4 text-gray-400" />
-                      {result.current_company}
-                    </div>
-                  )}
-                </div>
-
-                {/* Skills */}
-                {result.skills?.length > 0 && (
-                  <div className="mb-6">
-                    <p className="text-[11px] font-semibold tracking-wide text-gray-500 dark:text-gray-400 uppercase mb-2">
-                      Skills
-                    </p>
-                    <div className="flex flex-wrap gap-2">
-                      {result.skills.slice(0, 5).map((skill, idx) => (
-                        <span
-                          key={idx}
-                          className="px-3 py-1 rounded-full text-xs font-medium
+                      <div className="flex flex-wrap gap-2">
+                        {result.skills.slice(0, 5).map((skill, idx) => (
+                          <span
+                            key={idx}
+                            className="px-3 py-1 rounded-full text-xs font-medium
                            bg-blue-50 text-blue-700
                            dark:bg-blue-900/30 dark:text-blue-300"
-                        >
-                          {skill}
-                        </span>
-                      ))}
-                      {result.skills.length > 5 && (
-                        <span
-                          className="px-3 py-1 rounded-full text-xs font-medium
+                          >
+                            {skill}
+                          </span>
+                        ))}
+                        {result.skills.length > 5 && (
+                          <span
+                            className="px-3 py-1 rounded-full text-xs font-medium
                                bg-gray-100 dark:bg-gray-800
                                text-gray-700 dark:text-gray-300"
-                        >
-                          +{result.skills.length - 5} more
-                        </span>
-                      )}
+                          >
+                            +{result.skills.length - 5} more
+                          </span>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                )}
+                  )}
 
-                {/* Actions */}
-                <div className="mt-auto">
-                  {result.is_unlocked ||
-                    unlockedResumes.has(result.resume_id) ? (
-                    <button
-                      onClick={() => handleDownloadResume(result.resume_id)}
-                      disabled={loadingResumeDetail.has(result.resume_id)}
-                      className="w-full px-4 py-2 rounded-xl text-sm font-semibold
+                  {/* Actions */}
+                  <div className="mt-auto">
+                    {result.is_unlocked ||
+                      unlockedResumes.has(result.resume_id) ? (
+                      <button
+                        onClick={() => handleDownloadResume(result.resume_id)}
+                        disabled={loadingResumeDetail.has(result.resume_id)}
+                        className="w-full px-4 py-2 rounded-xl text-sm font-semibold
                        bg-emerald-600 hover:bg-emerald-700
                        text-white shadow-md transition flex items-center justify-center gap-2
                        disabled:opacity-50"
-                    >
-                      {loadingResumeDetail.has(result.resume_id) ? (
-                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                      ) : (
-                        <Eye className="w-4 h-4" />
-                      )}
-                      View / Download CV
-                    </button>
-                  ) : (
-                    <button
-                      onClick={() => handleUnlockResume(result.resume_id)}
-                      disabled={
-                        unlockingIds.has(result.resume_id) ||
-                        !creditsStatus ||
-                        creditsStatus.credits_remaining < 1
-                      }
-                      className="w-full px-4 py-2 rounded-xl text-sm font-semibold
+                      >
+                        {loadingResumeDetail.has(result.resume_id) ? (
+                          <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                        ) : (
+                          <Eye className="w-4 h-4" />
+                        )}
+                        View / Download CV
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => handleUnlockResume(result.resume_id)}
+                        disabled={
+                          unlockingIds.has(result.resume_id) ||
+                          !creditsStatus ||
+                          creditsStatus.credits_remaining < 1
+                        }
+                        className="w-full px-4 py-2 rounded-xl text-sm font-semibold
                        bg-gradient-to-r from-blue-600 to-indigo-600
                        hover:from-blue-700 hover:to-indigo-700
                        text-white shadow-md transition
                        disabled:opacity-50 flex items-center justify-center gap-2"
-                    >
-                      {unlockingIds.has(result.resume_id) ? (
-                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                      ) : (
-                        <Unlock className="w-4 h-4" />
-                      )}
-                      View / Unlock (1 credit)
-                    </button>
-                  )}
+                      >
+                        {unlockingIds.has(result.resume_id) ? (
+                          <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                        ) : (
+                          <Unlock className="w-4 h-4" />
+                        )}
+                        View / Unlock (1 credit)
+                      </button>
+                    )}
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Pagination */}
-          {searchResults.total_pages > 1 && (
-            <div className="flex items-center justify-center gap-2 mt-6">
-              <button
-                onClick={() => {
-                  const newPage = Math.max(1, filters.page - 1);
-                  handleSearch({ page: newPage });
-                }}
-                disabled={filters.page === 1}
-                className="p-2 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 disabled:opacity-50"
-              >
-                <ChevronLeft className="w-5 h-5" />
-              </button>
-              <span className="text-sm text-gray-600 dark:text-gray-400">
-                Page {filters.page} of {searchResults.total_pages}
-              </span>
-              <button
-                onClick={() => {
-                  const newPage = Math.min(
-                    searchResults.total_pages,
-                    filters.page + 1,
-                  );
-                  handleSearch({ page: newPage });
-                }}
-                disabled={filters.page === searchResults.total_pages}
-                className="p-2 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 disabled:opacity-50"
-              >
-                <ChevronRight className="w-5 h-5" />
-              </button>
+              ))}
             </div>
-          )}
-        </div>
-      )}
+
+            {/* Pagination */}
+            {searchResults.total_pages > 1 && (
+              <div className="flex items-center justify-center gap-2 mt-6">
+                <button
+                  onClick={() => {
+                    const newPage = Math.max(1, filters.page - 1);
+                    handleSearch({ page: newPage });
+                  }}
+                  disabled={filters.page === 1}
+                  className="p-2 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 disabled:opacity-50"
+                >
+                  <ChevronLeft className="w-5 h-5" />
+                </button>
+                <span className="text-sm text-gray-600 dark:text-gray-400">
+                  Page {filters.page} of {searchResults.total_pages}
+                </span>
+                <button
+                  onClick={() => {
+                    const newPage = Math.min(
+                      searchResults.total_pages,
+                      filters.page + 1,
+                    );
+                    handleSearch({ page: newPage });
+                  }}
+                  disabled={filters.page === searchResults.total_pages}
+                  className="p-2 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 disabled:opacity-50"
+                >
+                  <ChevronRight className="w-5 h-5" />
+                </button>
+              </div>
+            )}
+          </div>
+        )
+      }
 
       {/* Bucket Modal */}
-      {showBucketModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-[#282727] rounded-xl shadow-xl max-w-md w-full max-h-[80vh] overflow-hidden flex flex-col">
-            {/* Modal Header */}
-            <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-              <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
-                Add to Bucket
-              </h2>
-              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                {selectedResumes.size} resume
-                {selectedResumes.size > 1 ? "s" : ""} selected
-              </p>
-            </div>
+      {
+        showBucketModal && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white dark:bg-[#282727] rounded-xl shadow-xl max-w-md w-full max-h-[80vh] overflow-hidden flex flex-col">
+              {/* Modal Header */}
+              <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
+                  Add to Bucket
+                </h2>
+                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                  {selectedResumes.size} resume
+                  {selectedResumes.size > 1 ? "s" : ""} selected
+                </p>
+              </div>
 
-            {/* Modal Body */}
-            <div className="p-6 overflow-y-auto flex-1">
-              {!showCreateBucket ? (
-                <div className="space-y-4">
-                  {/* Bucket List */}
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                      Select a bucket
-                    </label>
-                    {buckets.length > 0 ? (
-                      <div className="space-y-2 max-h-60 overflow-y-auto">
-                        {buckets.map((bucket) => (
-                          <label
-                            key={bucket.id}
-                            className="flex items-center gap-3 p-3 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer"
-                          >
-                            <input
-                              type="radio"
-                              name="bucket"
-                              value={bucket.id}
-                              checked={selectedBucketId === bucket.id}
-                              onChange={() => setSelectedBucketId(bucket.id)}
-                              className="w-4 h-4 text-blue-600"
-                            />
-                            <div className="flex-1">
-                              <div className="flex items-center gap-2">
-                                {bucket.color && (
-                                  <div
-                                    className="w-3 h-3 rounded-full"
-                                    style={{ backgroundColor: bucket.color }}
-                                  />
-                                )}
-                                <span className="font-medium text-gray-900 dark:text-gray-100">
-                                  {bucket.name}
+              {/* Modal Body */}
+              <div className="p-6 overflow-y-auto flex-1">
+                {!showCreateBucket ? (
+                  <div className="space-y-4">
+                    {/* Bucket List */}
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                        Select a bucket
+                      </label>
+                      {buckets.length > 0 ? (
+                        <div className="space-y-2 max-h-60 overflow-y-auto">
+                          {buckets.map((bucket) => (
+                            <label
+                              key={bucket.id}
+                              className="flex items-center gap-3 p-3 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer"
+                            >
+                              <input
+                                type="radio"
+                                name="bucket"
+                                value={bucket.id}
+                                checked={selectedBucketId === bucket.id}
+                                onChange={() => setSelectedBucketId(bucket.id)}
+                                className="w-4 h-4 text-blue-600"
+                              />
+                              <div className="flex-1">
+                                <div className="flex items-center gap-2">
+                                  {bucket.color && (
+                                    <div
+                                      className="w-3 h-3 rounded-full"
+                                      style={{ backgroundColor: bucket.color }}
+                                    />
+                                  )}
+                                  <span className="font-medium text-gray-900 dark:text-gray-100">
+                                    {bucket.name}
+                                  </span>
+                                </div>
+                                <span className="text-xs text-gray-500">
+                                  {bucket.item_count} items
                                 </span>
                               </div>
-                              <span className="text-xs text-gray-500">
-                                {bucket.item_count} items
-                              </span>
-                            </div>
-                          </label>
-                        ))}
-                      </div>
-                    ) : (
-                      <p className="text-sm text-gray-500 text-center py-4">
-                        No buckets yet. Create one to organize your resumes.
-                      </p>
-                    )}
-                  </div>
-
-                  {/* Create New Bucket Button */}
-                  <button
-                    onClick={() => setShowCreateBucket(true)}
-                    className="w-full px-4 py-2 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 hover:border-blue-500 hover:text-blue-600 dark:hover:text-blue-400 transition-colors flex items-center justify-center gap-2"
-                  >
-                    <Plus className="w-4 h-4" />
-                    Create New Bucket
-                  </button>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      Bucket Name
-                    </label>
-                    <input
-                      type="text"
-                      value={newBucketName}
-                      onChange={(e) => setNewBucketName(e.target.value)}
-                      placeholder="e.g., Senior Developers"
-                      className="w-full px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      autoFocus
-                    />
-                  </div>
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => setShowCreateBucket(false)}
-                      className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800"
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      onClick={handleCreateBucket}
-                      disabled={isCreatingBucket}
-                      className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
-                    >
-                      {isCreatingBucket ? "Creating..." : "Create"}
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Modal Footer */}
-            <div className="px-6 py-4 border-t border-gray-200 dark:border-gray-700 flex gap-3">
-              <button
-                onClick={() => {
-                  setShowBucketModal(false);
-                  setShowCreateBucket(false);
-                  setSelectedBucketId(null);
-                  setNewBucketName("");
-                }}
-                className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800"
-              >
-                Cancel
-              </button>
-              {!showCreateBucket && (
-                <button
-                  onClick={handleAddToBucket}
-                  disabled={!selectedBucketId || addingToBucket}
-                  className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
-                >
-                  {addingToBucket ? "Adding..." : "Add to Bucket"}
-                </button>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
-      {/* Search History Modal */}
-      {showHistoryModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-3xl max-h-[80vh] flex flex-col animate-in zoom-in-95 duration-200">
-            <div className="px-6 py-1 border-b bg-slate-900 rounded-t-xl flex justify-between items-center">
-              <h3 className="text-lg font-semibold text-white flex items-center gap-2">
-                <History className="w-5 h-5" />
-                Search History
-              </h3>
-              <button
-                onClick={() => setShowHistoryModal(false)}
-                className="p-2 text-white/70 hover:text-white hover:bg-white/10 rounded-full transition-colors"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-            <div className="flex-1 overflow-y-auto p-6">
-              {historyLoading ? (
-                <div className="flex justify-center p-8">
-                  <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
-                </div>
-              ) : historyError ? (
-                <div className="text-center text-red-500 py-8">
-                  {historyError}
-                </div>
-              ) : !searchHistory || searchHistory.length === 0 ? (
-                <div className="text-center text-gray-500 dark:text-gray-400 py-8">
-                  No search history found.
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {searchHistory.map((item) => (
-                    <div
-                      key={item.id}
-                      className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:border-blue-500 transition-colors bg-gray-50 dark:bg-gray-900/50 cursor-pointer"
-                      onClick={() => handleLoadHistoryItem(item.id)}
-                    >
-                      <div className="flex justify-between items-start gap-4">
-                        <div className="flex-1">
-                          {/* Search Name/Title */}
-                          <h4 className="font-semibold text-gray-900 dark:text-gray-100 mb-2">
-                            {item.search_name || "Untitled Search"}
-                          </h4>
-
-                          {/* Filter badges */}
-                          <div className="flex flex-wrap gap-2 mb-3">
-                            {item.search_filters &&
-                              Object.entries(item.search_filters).map(
-                                ([key, value]) => {
-                                  // Skip internal/pagination fields
-                                  if (
-                                    !value ||
-                                    key === "page" ||
-                                    key === "limit" ||
-                                    key === "page_size" ||
-                                    key === "sort_by" ||
-                                    key === "sort_order" ||
-                                    key === "skills_match_all" ||
-                                    key === "not_in_any_bucket" ||
-                                    key === "open_to_work_only"
-                                  )
-                                    return null;
-
-                                  // Format the display value
-                                  let displayValue = String(value);
-                                  if (Array.isArray(value)) {
-                                    displayValue = value.join(", ");
-                                  } else if (typeof value === "boolean") {
-                                    displayValue = value ? "Yes" : "No";
-                                  }
-
-                                  return (
-                                    <span
-                                      key={key}
-                                      className="px-2 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-xs rounded-full"
-                                    >
-                                      {key.replace(/_/g, " ")}: {displayValue}
-                                    </span>
-                                  );
-                                },
-                              )}
-                          </div>
-
-                          {/* Metadata */}
-                          <div className="flex flex-wrap items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
-                            <span className="flex items-center gap-1">
-                              <Clock className="w-3 h-3" />
-                              {new Date(item.created_at).toLocaleDateString()}
-                            </span>
-                            <span>{item.latest_result_count} results</span>
-                            <span>
-                              Used {item.use_count}{" "}
-                              {item.use_count === 1 ? "time" : "times"}
-                            </span>
-                            {item.result_count_change != null &&
-                              item.result_count_change !== 0 && (
-                                <span
-                                  className={`flex items-center gap-1 ${item.result_count_change > 0
-                                    ? "text-green-600 dark:text-green-400"
-                                    : "text-red-600 dark:text-red-400"
-                                    }`}
-                                >
-                                  <TrendingUp className="w-3 h-3" />
-                                  {item.result_count_change > 0 ? "+" : ""}
-                                  {item.result_count_change}
-                                </span>
-                              )}
-                          </div>
+                            </label>
+                          ))}
                         </div>
-
-                        {/* Actions */}
-                        <div className="flex gap-2">
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleShowTrend(item.id);
-                            }}
-                            className="p-2 text-purple-600 hover:bg-purple-50 dark:hover:bg-purple-900/20 rounded-lg transition-colors"
-                            title="View Trend"
-                          >
-                            <TrendingUp className="w-4 h-4" />
-                          </button>
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleRerunSearch(item.id);
-                            }}
-                            className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-lg flex items-center gap-1 transition-colors"
-                          >
-                            <RotateCw className="w-3 h-3" />
-                            Rerun
-                          </button>
-                        </div>
-                      </div>
+                      ) : (
+                        <p className="text-sm text-gray-500 text-center py-4">
+                          No buckets yet. Create one to organize your resumes.
+                        </p>
+                      )}
                     </div>
-                  ))}
-                </div>
-              )}
+
+                    {/* Create New Bucket Button */}
+                    <button
+                      onClick={() => setShowCreateBucket(true)}
+                      className="w-full px-4 py-2 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 hover:border-blue-500 hover:text-blue-600 dark:hover:text-blue-400 transition-colors flex items-center justify-center gap-2"
+                    >
+                      <Plus className="w-4 h-4" />
+                      Create New Bucket
+                    </button>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Bucket Name
+                      </label>
+                      <input
+                        type="text"
+                        value={newBucketName}
+                        onChange={(e) => setNewBucketName(e.target.value)}
+                        placeholder="e.g., Senior Developers"
+                        className="w-full px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        autoFocus
+                      />
+                    </div>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => setShowCreateBucket(false)}
+                        className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        onClick={handleCreateBucket}
+                        disabled={isCreatingBucket}
+                        className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+                      >
+                        {isCreatingBucket ? "Creating..." : "Create"}
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Modal Footer */}
+              <div className="px-6 py-4 border-t border-gray-200 dark:border-gray-700 flex gap-3">
+                <button
+                  onClick={() => {
+                    setShowBucketModal(false);
+                    setShowCreateBucket(false);
+                    setSelectedBucketId(null);
+                    setNewBucketName("");
+                  }}
+                  className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800"
+                >
+                  Cancel
+                </button>
+                {!showCreateBucket && (
+                  <button
+                    onClick={handleAddToBucket}
+                    disabled={!selectedBucketId || addingToBucket}
+                    className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+                  >
+                    {addingToBucket ? "Adding..." : "Add to Bucket"}
+                  </button>
+                )}
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )
+      }
+      {/* Search History Modal */}
+      {
+        showHistoryModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-3xl max-h-[80vh] flex flex-col animate-in zoom-in-95 duration-200">
+              <div className="px-6 py-1 border-b bg-slate-900 rounded-t-xl flex justify-between items-center">
+                <h3 className="text-lg font-semibold text-white flex items-center gap-2">
+                  <History className="w-5 h-5" />
+                  Search History
+                </h3>
+                <button
+                  onClick={() => setShowHistoryModal(false)}
+                  className="p-2 text-white/70 hover:text-white hover:bg-white/10 rounded-full transition-colors"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+              <div className="flex-1 overflow-y-auto p-6">
+                {historyLoading ? (
+                  <div className="flex justify-center p-8">
+                    <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
+                  </div>
+                ) : historyError ? (
+                  <div className="text-center text-red-500 py-8">
+                    {historyError}
+                  </div>
+                ) : !searchHistory || searchHistory.length === 0 ? (
+                  <div className="text-center text-gray-500 dark:text-gray-400 py-8">
+                    No search history found.
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {searchHistory.map((item) => (
+                      <div
+                        key={item.id}
+                        className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:border-blue-500 transition-colors bg-gray-50 dark:bg-gray-900/50 cursor-pointer"
+                        onClick={() => handleLoadHistoryItem(item.id)}
+                      >
+                        <div className="flex justify-between items-start gap-4">
+                          <div className="flex-1">
+                            {/* Search Name/Title */}
+                            <h4 className="font-semibold text-gray-900 dark:text-gray-100 mb-2">
+                              {item.search_name || "Untitled Search"}
+                            </h4>
+
+                            {/* Filter badges */}
+                            <div className="flex flex-wrap gap-2 mb-3">
+                              {item.search_filters &&
+                                Object.entries(item.search_filters).map(
+                                  ([key, value]) => {
+                                    // Skip internal/pagination fields
+                                    if (
+                                      !value ||
+                                      key === "page" ||
+                                      key === "limit" ||
+                                      key === "page_size" ||
+                                      key === "sort_by" ||
+                                      key === "sort_order" ||
+                                      key === "skills_match_all" ||
+                                      key === "not_in_any_bucket" ||
+                                      key === "open_to_work_only"
+                                    )
+                                      return null;
+
+                                    // Format the display value
+                                    let displayValue = String(value);
+                                    if (Array.isArray(value)) {
+                                      displayValue = value.join(", ");
+                                    } else if (typeof value === "boolean") {
+                                      displayValue = value ? "Yes" : "No";
+                                    }
+
+                                    return (
+                                      <span
+                                        key={key}
+                                        className="px-2 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-xs rounded-full"
+                                      >
+                                        {key.replace(/_/g, " ")}: {displayValue}
+                                      </span>
+                                    );
+                                  },
+                                )}
+                            </div>
+
+                            {/* Metadata */}
+                            <div className="flex flex-wrap items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
+                              <span className="flex items-center gap-1">
+                                <Clock className="w-3 h-3" />
+                                {new Date(item.created_at).toLocaleDateString()}
+                              </span>
+                              <span>{item.latest_result_count} results</span>
+                              <span>
+                                Used {item.use_count}{" "}
+                                {item.use_count === 1 ? "time" : "times"}
+                              </span>
+                              {item.result_count_change != null &&
+                                item.result_count_change !== 0 && (
+                                  <span
+                                    className={`flex items-center gap-1 ${item.result_count_change > 0
+                                      ? "text-green-600 dark:text-green-400"
+                                      : "text-red-600 dark:text-red-400"
+                                      }`}
+                                  >
+                                    <TrendingUp className="w-3 h-3" />
+                                    {item.result_count_change > 0 ? "+" : ""}
+                                    {item.result_count_change}
+                                  </span>
+                                )}
+                            </div>
+                          </div>
+
+                          {/* Actions */}
+                          <div className="flex gap-2">
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleShowTrend(item.id);
+                              }}
+                              className="p-2 text-purple-600 hover:bg-purple-50 dark:hover:bg-purple-900/20 rounded-lg transition-colors"
+                              title="View Trend"
+                            >
+                              <TrendingUp className="w-4 h-4" />
+                            </button>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleRerunSearch(item.id);
+                              }}
+                              className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-lg flex items-center gap-1 transition-colors"
+                            >
+                              <RotateCw className="w-3 h-3" />
+                              Rerun
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )
+      }
 
       {/* Trend Modal */}
-      {showTrendModal && trendData && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-2xl animate-in zoom-in-95 duration-200">
-            <div className="px-6 py-1 border-b bg-slate-900 rounded-t-xl flex justify-between items-center">
-              <h3 className="text-lg font-semibold text-white flex items-center gap-2">
-                <TrendingUp className="w-5 h-5 text-white" />
-                Search Result Trend
-              </h3>
-              <button
-                onClick={() => setShowTrendModal(false)}
-                className="p-2 text-white/70 hover:text-white hover:bg-white/10 rounded-full transition-colors"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-            <div className="p-6">
-              {trendLoading ? (
-                <div className="flex justify-center p-8">
-                  <div className="w-8 h-8 border-4 border-purple-600 border-t-transparent rounded-full animate-spin" />
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  <div className="flex justify-between items-center mb-4">
-                    <span className="text-sm text-gray-500">
-                      Total Records: {trendData.total_records}
-                    </span>
+      {
+        showTrendModal && trendData && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-2xl animate-in zoom-in-95 duration-200">
+              <div className="px-6 py-1 border-b bg-slate-900 rounded-t-xl flex justify-between items-center">
+                <h3 className="text-lg font-semibold text-white flex items-center gap-2">
+                  <TrendingUp className="w-5 h-5 text-white" />
+                  Search Result Trend
+                </h3>
+                <button
+                  onClick={() => setShowTrendModal(false)}
+                  className="p-2 text-white/70 hover:text-white hover:bg-white/10 rounded-full transition-colors"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+              <div className="p-6">
+                {trendLoading ? (
+                  <div className="flex justify-center p-8">
+                    <div className="w-8 h-8 border-4 border-purple-600 border-t-transparent rounded-full animate-spin" />
                   </div>
-                  <div className="relative h-64 border-l border-b border-gray-300 dark:border-gray-600">
-                    <div className="absolute inset-0 flex items-end justify-around px-2">
-                      {trendData.history?.map((point, index) => {
-                        const history = trendData.history || [];
-                        const maxCount = Math.max(
-                          ...history.map((h) => h.result_count),
-                          1,
-                        );
-                        const height = (point.result_count / maxCount) * 100;
-                        return (
-                          <div
-                            key={index}
-                            className="flex flex-col items-center group w-8"
-                          >
+                ) : (
+                  <div className="space-y-4">
+                    <div className="flex justify-between items-center mb-4">
+                      <span className="text-sm text-gray-500">
+                        Total Records: {trendData.total_records}
+                      </span>
+                    </div>
+                    <div className="relative h-64 border-l border-b border-gray-300 dark:border-gray-600">
+                      <div className="absolute inset-0 flex items-end justify-around px-2">
+                        {trendData.history?.map((point, index) => {
+                          const history = trendData.history || [];
+                          const maxCount = Math.max(
+                            ...history.map((h) => h.result_count),
+                            1,
+                          );
+                          const height = (point.result_count / maxCount) * 100;
+                          return (
                             <div
-                              className="w-full bg-purple-500 rounded-t transition-all group-hover:bg-purple-600 relative"
-                              style={{ height: `${height}%` }}
+                              key={index}
+                              className="flex flex-col items-center group w-8"
                             >
-                              <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10">
-                                {point.result_count} results
-                                <br />
-                                {new Date(
-                                  point.recorded_at,
-                                ).toLocaleDateString()}
+                              <div
+                                className="w-full bg-purple-500 rounded-t transition-all group-hover:bg-purple-600 relative"
+                                style={{ height: `${height}%` }}
+                              >
+                                <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10">
+                                  {point.result_count} results
+                                  <br />
+                                  {new Date(
+                                    point.recorded_at,
+                                  ).toLocaleDateString()}
+                                </div>
                               </div>
                             </div>
-                          </div>
-                        );
-                      })}
+                          );
+                        })}
+                      </div>
+                    </div>
+                    <div className="flex justify-between text-xs text-gray-500 mt-2 px-2">
+                      {trendData.history?.length > 0 && (
+                        <>
+                          <span>
+                            {new Date(
+                              trendData.history[0].recorded_at,
+                            ).toLocaleDateString()}
+                          </span>
+                          <span>
+                            {new Date(
+                              trendData.history[trendData.history.length - 1]
+                                .recorded_at,
+                            ).toLocaleDateString()}
+                          </span>
+                        </>
+                      )}
                     </div>
                   </div>
-                  <div className="flex justify-between text-xs text-gray-500 mt-2 px-2">
-                    {trendData.history?.length > 0 && (
-                      <>
-                        <span>
-                          {new Date(
-                            trendData.history[0].recorded_at,
-                          ).toLocaleDateString()}
-                        </span>
-                        <span>
-                          {new Date(
-                            trendData.history[trendData.history.length - 1]
-                              .recorded_at,
-                          ).toLocaleDateString()}
-                        </span>
-                      </>
-                    )}
-                  </div>
-                </div>
-              )}
+                )}
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )
+      }
       <ResumeDetailModal
         isOpen={showResumeModal}
         onClose={() => {
@@ -1949,6 +1942,6 @@ export default function CVSearchPage() {
         }
         lockedResumeInfo={lockedResumeInfo}
       />
-    </div>
+    </div >
   );
 }

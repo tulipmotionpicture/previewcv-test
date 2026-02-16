@@ -631,7 +631,9 @@ export default function JobDetailsClient({ job, slug }: JobDetailsClientProps) {
       )}
 
       <div
-        className={`fixed top-0 left-0 right-0 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 shadow-sm z-50 transform transition-transform duration-300 ${showStickyHeader ? "translate-y-0" : "-translate-y-full"
+        className={`fixed z-[60] left-1/2 -translate-x-1/2 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md border border-gray-200 dark:border-gray-700 shadow-xl rounded-2xl transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] ${showStickyHeader
+          ? "top-4 w-[95%] md:max-w-4xl opacity-100"
+          : "-top-24 w-[95%] md:max-w-4xl opacity-0 pointer-events-none"
           }`}
       >
         <div className="w-full px-3 py-2 flex items-center justify-between">
