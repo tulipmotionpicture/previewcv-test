@@ -35,6 +35,7 @@ import {
   Lock,
   Minimize2,
   Maximize2,
+  Download,
 } from "lucide-react";
 import ResumeDetailModal from "./ResumeDetailModal";
 
@@ -123,6 +124,14 @@ export default function BucketsPage() {
     status: "",
   });
   const [savingItem, setSavingItem] = useState(false);
+
+  // Bulk download state
+  const [showBulkDownloadModal, setShowBulkDownloadModal] = useState(false);
+  const [downloadPreview, setDownloadPreview] = useState<any>(null);
+  const [loadingPreview, setLoadingPreview] = useState(false);
+  const [downloadingBulk, setDownloadingBulk] = useState(false);
+  const [downloadTaskId, setDownloadTaskId] = useState<string | null>(null);
+  const [downloadProgress, setDownloadProgress] = useState<number | null>(null);
 
   // Fetch buckets
   const fetchBuckets = async () => {
@@ -930,6 +939,113 @@ export default function BucketsPage() {
     return String(value);
   };
 
+  // Bulk download handlers
+  const handleBulkDownloadClick = async () => {
+    if (!selectedBucket) return;
+
+    setShowBulkDownloadModal(true);
+    setLoadingPreview(true);
+
+    try {
+      const preview = await api.getBucketDownloadPreview(selectedBucket.id);
+      setDownloadPreview(preview);
+    } catch (error: any) {
+      console.error("Failed to fetch download preview:", error);
+      showToast(error?.message || "Failed to load download preview", "error");
+      setShowBulkDownloadModal(false);
+    } finally {
+      setLoadingPreview(false);
+    }
+  };
+
+  const handleStartBulkDownload = async (includeLocked: boolean) => {
+    if (!selectedBucket) return;
+
+    setDownloadingBulk(true);
+    setDownloadProgress(0);
+
+    try {
+      const response = await api.prepareBucketBulkDownload(
+        selectedBucket.id,
+        includeLocked,
+      );
+      setDownloadTaskId(response.task_id);
+      setShowBulkDownloadModal(false);
+
+      // Poll for status
+      const pollInterval = setInterval(async () => {
+        try {
+          const status = await api.getBucketTaskStatus(response.task_id);
+
+          if (status.progress !== undefined) {
+            setDownloadProgress(status.progress);
+          }
+
+          // Accept multiple possible completion status values from API
+          const doneStates = ["completed", "success", "finished"];
+          if (doneStates.includes(String(status.status))) {
+            clearInterval(pollInterval);
+            setDownloadingBulk(false);
+            setDownloadProgress(null);
+            setDownloadTaskId(null);
+
+            // Prefer top-level file_url, then result.download_url
+            const downloadUrlCandidate =
+              (status as any).file_url || status.result?.download_url || null;
+
+            if (downloadUrlCandidate) {
+              // Auto-download
+              window.open(downloadUrlCandidate, "_blank");
+              const count = status.result?.total_resumes || 0;
+              showToast(
+                `Successfully prepared ${count} resumes for download!`,
+                "success",
+              );
+              // Refresh bucket to update unlocked counts
+              fetchBucketItems(selectedBucket, itemsPage);
+            } else {
+              showToast(
+                "Download completed but file URL was not provided.",
+                "error",
+              );
+            }
+          } else if (String(status.status) === "failed") {
+            clearInterval(pollInterval);
+            setDownloadingBulk(false);
+            setDownloadProgress(null);
+            setDownloadTaskId(null);
+            showToast(
+              `Download failed: ${status.error || "Unknown error"}`,
+              "error",
+            );
+          }
+        } catch (error) {
+          console.error("Error polling status:", error);
+        }
+      }, 2000); // Poll every 2 seconds
+
+      // Set timeout to stop polling after 5 minutes
+      setTimeout(() => {
+        clearInterval(pollInterval);
+        if (downloadingBulk) {
+          setDownloadingBulk(false);
+          setDownloadProgress(null);
+          setDownloadTaskId(null);
+          showToast("Download preparation timeout. Please try again.", "error");
+        }
+      }, 300000);
+    } catch (error: any) {
+      console.error("Failed to prepare bulk download:", error);
+      setDownloadingBulk(false);
+      setDownloadProgress(null);
+      setDownloadTaskId(null);
+      showToast(
+        error?.message || "Failed to prepare download. Please try again.",
+        "error",
+      );
+    }
+  };
+
   const filteredBuckets = buckets;
 
   const colorOptions = [
@@ -1450,13 +1566,36 @@ export default function BucketsPage() {
                         </button>
                       )}
                     {selectedItems.size === 0 && (
-                      <button
-                        onClick={() => fetchBucketActivity(selectedBucket.id)}
-                        className="px-4 py-2 bg-white/20 hover:bg-white/30 text-white rounded-lg transition-colors text-sm font-medium flex items-center gap-2"
-                      >
-                        <Clock className="w-4 h-4" />
-                        Activity
-                      </button>
+                      <>
+                        <button
+                          onClick={handleBulkDownloadClick}
+                          disabled={
+                            downloadingBulk || !bucketItems?.items?.length
+                          }
+                          className="px-4 py-2 bg-white/20 hover:bg-white/30 text-white rounded-lg transition-colors text-sm font-medium flex items-center gap-2 disabled:opacity-50"
+                        >
+                          {downloadingBulk ? (
+                            <>
+                              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                              {downloadProgress !== null
+                                ? `${downloadProgress}%`
+                                : "Preparing..."}
+                            </>
+                          ) : (
+                            <>
+                              <Download className="w-4 h-4" />
+                              Download All
+                            </>
+                          )}
+                        </button>
+                        <button
+                          onClick={() => fetchBucketActivity(selectedBucket.id)}
+                          className="px-4 py-2 bg-white/20 hover:bg-white/30 text-white rounded-lg transition-colors text-sm font-medium flex items-center gap-2"
+                        >
+                          <Clock className="w-4 h-4" />
+                          Activity
+                        </button>
+                      </>
                     )}
                     {selectedItems.size > 0 && (
                       <>
@@ -1601,15 +1740,25 @@ export default function BucketsPage() {
 
                         {/* Resume Info */}
                         <div className="grid grid-cols-2 gap-y-3 gap-x-4 text-sm text-gray-600 dark:text-gray-400 mb-4">
-                          <div className="col-span-2">
-                            <span className="text-gray-500 dark:text-gray-500">
-                              Created
-                            </span>
-                            <p className="text-gray-900 dark:text-gray-100 font-medium">
-                              {new Date(
-                                item.resume?.created_at,
-                              ).toLocaleDateString()}
-                            </p>
+                          <div className="col-span-2 flex justify-between">
+                            <div>
+                              <span className="text-gray-500 dark:text-gray-500">
+                                Created
+                              </span>
+                              <p className="text-gray-900 dark:text-gray-100 font-medium">
+                                {new Date(
+                                  item.resume?.created_at,
+                                ).toLocaleDateString()}
+                              </p>
+                            </div>
+                            <div>
+                              <span className="text-gray-500 dark:text-gray-500">
+                                Added to Bucket
+                              </span>
+                              <p className="text-gray-900 dark:text-gray-100 font-medium">
+                                {new Date(item.added_at).toLocaleDateString()}
+                              </p>
+                            </div>
                           </div>
                           {/* <div className="col-span-2">
                             <span className="text-gray-500 dark:text-gray-500">
@@ -1624,51 +1773,45 @@ export default function BucketsPage() {
                         </div>
 
                         {/* Bucket Meta */}
-                        <div className="mb-4 p-3 bg-gray-50 dark:bg-gray-900 rounded-lg space-y-2">
-                          <div className="flex items-center justify-between text-sm">
-                            <span className="text-gray-600 dark:text-gray-400">
-                              Added to Bucket
-                            </span>
-                            <span className="text-gray-900 dark:text-gray-100 font-medium">
-                              {new Date(item.added_at).toLocaleDateString()}
-                            </span>
-                          </div>
-                          {item.rating && (
-                            <div className="flex items-center justify-between text-sm">
-                              <span className="text-gray-600 dark:text-gray-400">
-                                Rating
-                              </span>
-                              <div className="flex items-center gap-1">
-                                {[...Array(5)].map((_, i) => (
-                                  <Star
-                                    key={i}
-                                    className={`w-4 h-4 ${
-                                      i < item.rating
-                                        ? "text-yellow-400 fill-yellow-400"
-                                        : "text-gray-300 dark:text-gray-600"
-                                    }`}
-                                  />
-                                ))}
+                        {(item.rating || item.status) && (
+                          <div className="mb-4 p-3 bg-gray-50 dark:bg-gray-900 rounded-lg space-y-2">
+                            {item.rating && (
+                              <div className="flex items-center justify-between text-sm">
+                                <span className="text-gray-600 dark:text-gray-400">
+                                  Rating
+                                </span>
+                                <div className="flex items-center gap-1">
+                                  {[...Array(5)].map((_, i) => (
+                                    <Star
+                                      key={i}
+                                      className={`w-4 h-4 ${
+                                        i < item.rating
+                                          ? "text-yellow-400 fill-yellow-400"
+                                          : "text-gray-300 dark:text-gray-600"
+                                      }`}
+                                    />
+                                  ))}
+                                </div>
                               </div>
-                            </div>
-                          )}
-                          {item.status && (
-                            <div className="flex items-center justify-between text-sm">
-                              <span className="text-gray-600 dark:text-gray-400">
-                                Status
-                              </span>
-                              <span
-                                className="px-2 py-1 rounded text-xs font-medium"
-                                style={{
-                                  backgroundColor: `${selectedBucket.color || "#3B82F6"}20`,
-                                  color: selectedBucket.color || "#3B82F6",
-                                }}
-                              >
-                                {item.status}
-                              </span>
-                            </div>
-                          )}
-                        </div>
+                            )}
+                            {item.status && (
+                              <div className="flex items-center justify-between text-sm">
+                                <span className="text-gray-600 dark:text-gray-400">
+                                  Status
+                                </span>
+                                <span
+                                  className="px-2 py-1 rounded text-xs font-medium"
+                                  style={{
+                                    backgroundColor: `${selectedBucket.color || "#3B82F6"}20`,
+                                    color: selectedBucket.color || "#3B82F6",
+                                  }}
+                                >
+                                  {item.status}
+                                </span>
+                              </div>
+                            )}
+                          </div>
+                        )}
 
                         {/* Notes */}
                         {item.notes && (
@@ -1919,6 +2062,186 @@ export default function BucketsPage() {
                 ) : (
                   <>{keepInSource ? "Copy" : "Move"} Resumes</>
                 )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Bulk Download Modal */}
+      {showBulkDownloadModal && selectedBucket && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[60] p-4">
+          <div className="bg-white dark:bg-[#282727] rounded-xl shadow-xl max-w-lg w-full">
+            <div
+              className="px-6 py-4 border-b rounded-t-xl"
+              style={{ backgroundColor: selectedBucket.color || "#3B82F6" }}
+            >
+              <h2 className="text-xl font-semibold text-white">
+                Download All Resumes
+              </h2>
+              <p className="text-white/80 text-sm mt-1">
+                {selectedBucket.name}
+              </p>
+            </div>
+
+            <div className="p-6">
+              {loadingPreview ? (
+                <div className="flex items-center justify-center py-8">
+                  <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
+                </div>
+              ) : downloadPreview ? (
+                <div className="space-y-6">
+                  {/* Summary */}
+                  <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 space-y-3">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-gray-600 dark:text-gray-400">
+                        Total Resumes in Bucket
+                      </span>
+                      <span className="font-semibold text-gray-900 dark:text-gray-100">
+                        {downloadPreview.total_resumes_in_bucket}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400">
+                        <Unlock className="w-4 h-4" />
+                        Already Unlocked
+                      </span>
+                      <span className="font-semibold text-emerald-600 dark:text-emerald-400">
+                        {downloadPreview.unlocked_resume_count}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="flex items-center gap-2 text-amber-600 dark:text-amber-400">
+                        <Lock className="w-4 h-4" />
+                        Locked
+                      </span>
+                      <span className="font-semibold text-amber-600 dark:text-amber-400">
+                        {downloadPreview.locked_resume_count}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Download Options */}
+                  <div className="space-y-3">
+                    {/* Unlocked Only */}
+                    <div
+                      className="border-2 rounded-lg p-4 cursor-pointer transition-all hover:border-blue-500 bg-white dark:bg-gray-800"
+                      style={{
+                        borderColor: selectedBucket.color || "#3B82F6",
+                      }}
+                    >
+                      <div className="flex items-start justify-between mb-2">
+                        <div>
+                          <h3 className="font-semibold text-gray-900 dark:text-gray-100">
+                            Download Unlocked Only
+                          </h3>
+                          <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                            {downloadPreview.unlocked_only.file_count} resumes
+                          </p>
+                        </div>
+                        <div className="text-right">
+                          <div className="text-sm text-gray-600 dark:text-gray-400">
+                            Credits Cost
+                          </div>
+                          <div className="text-xl font-bold text-emerald-600 dark:text-emerald-400">
+                            {downloadPreview.unlocked_only.credits_cost}
+                          </div>
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => handleStartBulkDownload(false)}
+                        disabled={
+                          downloadPreview.unlocked_only.file_count === 0
+                        }
+                        className="w-full mt-3 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        style={{
+                          backgroundColor: selectedBucket.color || "#3B82F6",
+                        }}
+                      >
+                        Download ({downloadPreview.unlocked_only.file_count}{" "}
+                        files)
+                      </button>
+                    </div>
+
+                    {/* Include Locked */}
+                    {downloadPreview.locked_resume_count > 0 && (
+                      <div className="border-2 border-amber-200 dark:border-amber-800 rounded-lg p-4 bg-amber-50 dark:bg-amber-900/20">
+                        <div className="flex items-start justify-between mb-2">
+                          <div>
+                            <h3 className="font-semibold text-gray-900 dark:text-gray-100">
+                              Download All (Unlock + Download)
+                            </h3>
+                            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                              {downloadPreview.include_locked.file_count}{" "}
+                              resumes (includes{" "}
+                              {downloadPreview.locked_resume_count} locked)
+                            </p>
+                          </div>
+                          <div className="text-right">
+                            <div className="text-sm text-gray-600 dark:text-gray-400">
+                              Credits Cost
+                            </div>
+                            <div className="text-xl font-bold text-amber-600 dark:text-amber-400">
+                              {downloadPreview.include_locked.credits_cost}
+                            </div>
+                          </div>
+                        </div>
+                        <button
+                          onClick={() => handleStartBulkDownload(true)}
+                          disabled={
+                            !creditsStatus ||
+                            creditsStatus.credits_remaining <
+                              downloadPreview.include_locked.credits_cost
+                          }
+                          className="w-full mt-3 px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          Unlock & Download (
+                          {downloadPreview.include_locked.file_count} files)
+                        </button>
+                        {creditsStatus &&
+                          creditsStatus.credits_remaining <
+                            downloadPreview.include_locked.credits_cost && (
+                            <p className="text-xs text-red-600 dark:text-red-400 mt-2">
+                              Insufficient credits. You have{" "}
+                              {creditsStatus.credits_remaining} credits, but
+                              need {downloadPreview.include_locked.credits_cost}
+                              .
+                            </p>
+                          )}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Credits Info */}
+                  {creditsStatus && (
+                    <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-3 text-sm">
+                      <div className="flex items-center justify-between">
+                        <span className="text-gray-600 dark:text-gray-400">
+                          Your Available Credits
+                        </span>
+                        <span className="font-semibold text-gray-900 dark:text-gray-100">
+                          {creditsStatus.credits_remaining}
+                        </span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="text-center py-8 text-gray-500">
+                  Failed to load preview
+                </div>
+              )}
+            </div>
+
+            <div className="px-6 py-4 border-t border-gray-200 dark:border-gray-700 flex justify-end">
+              <button
+                onClick={() => {
+                  setShowBulkDownloadModal(false);
+                  setDownloadPreview(null);
+                }}
+                className="px-4 py-2 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700"
+              >
+                Cancel
               </button>
             </div>
           </div>

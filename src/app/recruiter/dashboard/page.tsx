@@ -34,6 +34,7 @@ import {
   CVSearchPage,
   BucketsPage,
 } from "@/components/recruiter";
+import JobsTable from "@/components/recruiter/JobsTable";
 import type {
   DashboardTab,
   JobFormState,
@@ -42,10 +43,6 @@ import type {
 import {
   ArrowRight,
   Clock,
-  Eye,
-  MoreHorizontal,
-  Pencil,
-  Trash2,
   Shield,
   Search,
   Bell,
@@ -61,20 +58,6 @@ interface JobFilters {
   application_deadline_from?: string;
   application_deadline_to?: string;
   search_keyword?: string;
-}
-
-function formatTimeAgo(dateString: string) {
-  const date = new Date(dateString);
-  const now = new Date();
-  const seconds = Math.floor((now.getTime() - date.getTime()) / 1000);
-
-  if (seconds < 60) return "Just now";
-  const minutes = Math.floor(seconds / 60);
-  if (minutes < 60) return `${minutes}m ago`;
-  const hours = Math.floor(minutes / 60);
-  if (hours < 24) return `${hours}h ago`;
-  const days = Math.floor(hours / 24);
-  return `${days} days ago`;
 }
 
 export default function RecruiterDashboard() {
@@ -132,9 +115,6 @@ export default function RecruiterDashboard() {
   // Job Management View State
   const [jobManagementView, setJobManagementView] =
     useState<JobManagementTab>("manage");
-
-  // Action Menu State
-  const [openMenuJobId, setOpenMenuJobId] = useState<number | null>(null);
 
   useEffect(() => {
     if (!authLoading && !isAuthenticated) {
@@ -438,12 +418,12 @@ export default function RecruiterDashboard() {
         setSelectedApplicationDetail((prev) =>
           prev
             ? {
-              ...prev,
-              application: {
-                ...prev.application,
-                status: newStatus as Application["status"],
-              },
-            }
+                ...prev,
+                application: {
+                  ...prev.application,
+                  status: newStatus as Application["status"],
+                },
+              }
             : null,
         );
       }
@@ -563,7 +543,7 @@ export default function RecruiterDashboard() {
                 <DashboardStats stats={dashboardStats} loading={loadingStats} />
 
                 {/* Recent Job Posting and Onboarding Status */}
-                <div className="mt-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div className="mt-6 grid grid-cols-1 lg:grid-cols-3 gap-2">
                   {/* Recent Job Posting Column */}
                   <div className="lg:col-span-2 flex flex-col gap-4">
                     <div className="flex items-end justify-between">
@@ -571,7 +551,6 @@ export default function RecruiterDashboard() {
                         <h2 className="text-xl font-medium text-gray-900 dark:text-gray-100 ">
                           Recent Job Posting
                         </h2>
-
                       </div>
                       <button
                         onClick={() => {
@@ -585,161 +564,16 @@ export default function RecruiterDashboard() {
                       </button>
                     </div>
 
-                    <div className="bg-white dark:bg-[#282727] rounded-xl border border-[#E1E8F1] dark:border-gray-700  overflow-hidden flex flex-col sticky top-5 h-[calc(100vh-140px)]">
-                      {/* Job Table */}
-                      <div className="overflow-y-auto overflow-x-auto flex-1 custom-scrollbar">
-                        {loadingJobs ? (
-                          <div className="flex items-center justify-center py-12 ">
-                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 "></div>
-                          </div>
-                        ) : jobs.length === 0 ? (
-                          <div className="text-center py-12">
-                            <p className="text-[#60768D] dark:text-gray-400">
-                              No jobs found
-                            </p>
-                          </div>
-                        ) : (
-                          <>
-                            <table className="w-full border-collapse">
-                              <thead className="sticky top-0 z-10">
-                                <tr className="border-b border-gray-100 dark:border-gray-700">
-                                  {["ROLE", "STATUS", "POSTED", "ACTIONS"].map(
-                                    (heading, index) => (
-                                      <th
-                                        key={heading}
-                                        className={`px-4 py-3 text-left text-xs bg-[#0B172B] font-bold uppercase text-white dark:text-gray-400 ${index === 3 ? "text-right pr-4" : ""}`}
-                                      >
-                                        {heading}
-                                      </th>
-                                    ),
-                                  )}
-                                </tr>
-                              </thead>
-
-                              <tbody>
-                                {jobs.map((job) => (
-                                  <tr
-                                    key={job.id}
-                                    className="border-b border-gray-100 dark:border-gray-700/50 hover:bg-gray-50 dark:hover:bg-gray-800/40 transition"
-                                  >
-                                    {/* ROLE */}
-                                    <td className="py-3">
-                                      <div className="space-y-1 px-4">
-                                        <p className="font-bold text-gray-900 dark:text-gray-100 text-[15px]">
-                                          {job.title}
-                                        </p>
-                                        <p className="text-xs text-[#60768D] dark:text-gray-400 font-medium">
-                                          Engineering Full Time
-                                        </p>
-                                      </div>
-                                    </td>
-
-                                    {/* STATUS */}
-                                    <td className="py-3">
-                                      <span
-                                        className={`inline-flex items-center rounded px-3 py-1 text-xs font-medium ${job.is_active
-                                          ? "bg-[#E6F4EA] text-[#1E7F3A] dark:bg-green-900/30 dark:text-green-400"
-                                          : "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-400"
-                                          }`}
-                                      >
-                                        {job.is_active ? "Active" : "Inactive"}
-                                      </span>
-                                    </td>
-
-                                    {/* POSTED */}
-                                    <td className="py-3">
-                                      <div className="flex items-center gap-2 text-sm text-[#60768D] dark:text-gray-400 font-medium">
-                                        <Clock className="h-4 w-4" />
-                                        {formatTimeAgo(job.posted_date)}
-                                      </div>
-                                    </td>
-
-                                    {/* ACTIONS */}
-                                    <td className="py-3 pr-4 text-right">
-                                      <div className="relative inline-block text-left">
-                                        <button
-                                          onClick={() =>
-                                            setOpenMenuJobId(
-                                              openMenuJobId === job.id
-                                                ? null
-                                                : job.id,
-                                            )
-                                          }
-                                          className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"
-                                        >
-                                          <MoreHorizontal className="w-5 h-5" />
-                                        </button>
-
-                                        {openMenuJobId === job.id && (
-                                          <>
-                                            <div
-                                              className="fixed inset-0 z-10"
-                                              onClick={() =>
-                                                setOpenMenuJobId(null)
-                                              }
-                                            />
-                                            <div className="absolute right-0 top-8 z-20 w-48 bg-white dark:bg-[#282727] rounded-lg shadow-xl border border-gray-100 dark:border-gray-700 py-1 animate-in fade-in zoom-in-95 duration-200">
-                                              <button
-                                                onClick={() => {
-                                                  handleViewApplications(
-                                                    job.id,
-                                                  );
-                                                  setOpenMenuJobId(null);
-                                                }}
-                                                className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-[#60768D] dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors font-medium"
-                                              >
-                                                <Eye className="h-4 w-4 text-gray-400" />
-                                                View Application
-                                              </button>
-
-                                              <button
-                                                onClick={() => {
-                                                  handleEditJob(job);
-                                                  setOpenMenuJobId(null);
-                                                }}
-                                                className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-[#60768D] dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors font-medium"
-                                              >
-                                                <Pencil className="h-4 w-4 text-gray-400" />
-                                                Edit Job
-                                              </button>
-
-                                              <button
-                                                onClick={() => {
-                                                  setDeleteJobId(job.id);
-                                                  setOpenMenuJobId(null);
-                                                }}
-                                                className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors font-medium"
-                                              >
-                                                <Trash2 className="h-4 w-4" />
-                                                Delete
-                                              </button>
-                                            </div>
-                                          </>
-                                        )}
-                                      </div>
-                                    </td>
-                                  </tr>
-                                ))}
-                              </tbody>
-                            </table>
-
-                            {/* Pagination */}
-
-                            <div className="flex items-center justify-center  ">
-                              <Button
-                                className="text-sm text-gray-600 dark:text-gray-400 "
-                                variant="ghost"
-                                onClick={() => {
-                                  setActiveTab("jobs");
-                                }}
-                              >
-                                Showing More <ArrowRight className="w-4 h-4" />
-                              </Button>
-                            </div>
-                          </>
-                        )}
-                      </div>
-                    </div>
+                    <JobsTable
+                      jobs={jobs.slice(0, 8)}
+                      loadingJobs={loadingJobs}
+                      currentPage={1}
+                      totalPages={1}
+                      onPageChange={() => {}}
+                      onEditJob={handleEditJob}
+                      onDeleteJob={(jobId) => setDeleteJobId(jobId)}
+                      onViewApplications={handleViewApplications}
+                    />
                   </div>
 
                   {/* Help Guide - Takes 1 column */}
@@ -751,51 +585,51 @@ export default function RecruiterDashboard() {
                       <div className="divide-y divide-gray-100 dark:divide-gray-700">
                         {applications.slice(0, 6).length > 0
                           ? applications.slice(0, 6).map((app) => (
-                            <div
-                              key={app.id}
-                              className="flex items-center gap-4 p-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors cursor-pointer group first:rounded-t-2xl last:rounded-b-2xl"
-                              onClick={() => handleViewApplicationDetail(app)}
-                            >
-                              <div className="w-10 h-10 rounded-full bg-[#0B172B] flex items-center justify-center text-white font-bold text-sm shadow-sm flex-shrink-0">
-                                {app.candidate_name
-                                  ?.substring(0, 2)
-                                  .toUpperCase() || "JD"}
-                              </div>
-                              <div className="flex-1 min-w-0">
-                                <div className="font-bold text-gray-900 dark:text-gray-100 truncate text-[15px]">
-                                  {app.candidate_name || "John Deo"}
+                              <div
+                                key={app.id}
+                                className="flex items-center gap-4 p-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors cursor-pointer group first:rounded-t-2xl last:rounded-b-2xl"
+                                onClick={() => handleViewApplicationDetail(app)}
+                              >
+                                <div className="w-10 h-10 rounded-full bg-[#0B172B] flex items-center justify-center text-white font-bold text-sm shadow-sm flex-shrink-0">
+                                  {app.candidate_name
+                                    ?.substring(0, 2)
+                                    .toUpperCase() || "JD"}
                                 </div>
-                                <div className="text-xs text-[#60768D] dark:text-gray-400 font-medium mt-0.5">
-                                  Application Review
+                                <div className="flex-1 min-w-0">
+                                  <div className="font-bold text-gray-900 dark:text-gray-100 truncate text-[15px]">
+                                    {app.candidate_name || "John Deo"}
+                                  </div>
+                                  <div className="text-xs text-[#60768D] dark:text-gray-400 font-medium mt-0.5">
+                                    Application Review
+                                  </div>
+                                </div>
+                                <div className="w-10 h-10 rounded-full border border-gray-200 dark:border-gray-700 flex items-center justify-center bg-white dark:bg-[#282727] group-hover:bg-gray-50 dark:group-hover:bg-gray-700 transition-colors">
+                                  <Clock className="w-5 h-5 text-gray-400 group-hover:text-gray-600 dark:group-hover:text-gray-300 stroke-1" />
                                 </div>
                               </div>
-                              <div className="w-10 h-10 rounded-full border border-gray-200 dark:border-gray-700 flex items-center justify-center bg-white dark:bg-[#282727] group-hover:bg-gray-50 dark:group-hover:bg-gray-700 transition-colors">
-                                <Clock className="w-5 h-5 text-gray-400 group-hover:text-gray-600 dark:group-hover:text-gray-300 stroke-1" />
-                              </div>
-                            </div>
-                          ))
+                            ))
                           : // Fallback mock items
-                          [1, 2, 3, 4, 5, 6].map((i) => (
-                            <div
-                              key={i}
-                              className="flex items-center gap-4 p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors cursor-pointer group first:rounded-t-2xl last:rounded-b-2xl"
-                            >
-                              <div className="w-12 h-12 rounded-full bg-[#0B172B] flex items-center justify-center text-white font-bold text-sm shadow-sm flex-shrink-0">
-                                JD
-                              </div>
-                              <div className="flex-1 min-w-0">
-                                <div className="font-bold text-gray-900 dark:text-gray-100 truncate text-[15px]">
-                                  John Deo
+                            [1, 2, 3, 4, 5, 6].map((i) => (
+                              <div
+                                key={i}
+                                className="flex items-center gap-4 p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors cursor-pointer group first:rounded-t-2xl last:rounded-b-2xl"
+                              >
+                                <div className="w-12 h-12 rounded-full bg-[#0B172B] flex items-center justify-center text-white font-bold text-sm shadow-sm flex-shrink-0">
+                                  JD
                                 </div>
-                                <div className="text-xs text-[#60768D] dark:text-gray-400 font-medium mt-0.5">
-                                  Application Review
+                                <div className="flex-1 min-w-0">
+                                  <div className="font-bold text-gray-900 dark:text-gray-100 truncate text-[15px]">
+                                    John Deo
+                                  </div>
+                                  <div className="text-xs text-[#60768D] dark:text-gray-400 font-medium mt-0.5">
+                                    Application Review
+                                  </div>
+                                </div>
+                                <div className="w-10 h-10 rounded-full border border-gray-200 dark:border-gray-700 flex items-center justify-center bg-white dark:bg-[#282727] group-hover:bg-gray-50 dark:group-hover:bg-gray-700 transition-colors">
+                                  <Clock className="w-5 h-5 text-gray-400 group-hover:text-gray-600 dark:group-hover:text-gray-300 stroke-1" />
                                 </div>
                               </div>
-                              <div className="w-10 h-10 rounded-full border border-gray-200 dark:border-gray-700 flex items-center justify-center bg-white dark:bg-[#282727] group-hover:bg-gray-50 dark:group-hover:bg-gray-700 transition-colors">
-                                <Clock className="w-5 h-5 text-gray-400 group-hover:text-gray-600 dark:group-hover:text-gray-300 stroke-1" />
-                              </div>
-                            </div>
-                          ))}
+                            ))}
                       </div>
                       <div className="p-4 border-t border-gray-100 dark:border-gray-700"></div>
                     </div>

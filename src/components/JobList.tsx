@@ -120,7 +120,9 @@ export default function JobList({ jobs, loading, error }: JobListProps) {
                     </h3>
                     <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
                       <span className="text-gray-900 dark:text-gray-300 font-semibold">
-                        {job.company_name}
+                        <Link href={job.recruiter_profile_url || ""}>
+                          {job.company_name}
+                        </Link>
                       </span>
                       {job.location && (
                         <span className="text-gray-400 ml-1">

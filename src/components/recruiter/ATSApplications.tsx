@@ -106,21 +106,33 @@ export default function ATSApplications({
             setDownloadProgress(status.progress);
           }
 
-          if (status.status === "completed") {
+          // Accept multiple possible completion status values from API
+          const doneStates = ["completed", "success", "finished"];
+          if (doneStates.includes(String(status.status))) {
             clearInterval(pollInterval);
             setDownloadingBulk(false);
             setDownloadProgress(null);
 
-            if (status.result?.download_url) {
-              setDownloadUrl(status.result.download_url);
+            // Prefer top-level file_url, then result.download_url
+            const downloadUrlCandidate =
+              (status as any).file_url || status.result?.download_url || null;
+
+            if (downloadUrlCandidate) {
+              setDownloadUrl(downloadUrlCandidate);
               // Auto-download
-              window.open(status.result.download_url, "_blank");
+              window.open(downloadUrlCandidate, "_blank");
+              const count = status.result?.total_resumes || 0;
               showToast(
-                `Successfully prepared ${status.result.total_resumes} resumes for download!`,
+                `Successfully prepared ${count} resumes for download!`,
                 "success",
               );
+            } else {
+              showToast(
+                "Download completed but file URL was not provided.",
+                "error",
+              );
             }
-          } else if (status.status === "failed") {
+          } else if (String(status.status) === "failed") {
             clearInterval(pollInterval);
             setDownloadingBulk(false);
             setDownloadProgress(null);
@@ -328,12 +340,6 @@ export default function ATSApplications({
                               className="text-gray-900 bg-white"
                             >
                               Rejected
-                            </option>
-                            <option
-                              value="withdrawn"
-                              className="text-gray-900 bg-white"
-                            >
-                              Withdrawn
                             </option>
                           </select>
                           <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-white pointer-events-none" />

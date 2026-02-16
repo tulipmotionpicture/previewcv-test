@@ -1,7 +1,15 @@
-
 import { useCallback, useEffect, useState } from "react";
 import { api } from "@/lib/api";
-import { Plus, Search, Calendar, ChevronLeft, ChevronRight, Edit2, Trash2, X } from "lucide-react";
+import {
+  Plus,
+  Search,
+  Calendar,
+  ChevronLeft,
+  ChevronRight,
+  Edit2,
+  Trash2,
+  X,
+} from "lucide-react";
 import RichTextEditor from "./ui/RichTextEditor";
 // Removed 'sonner' import since it is not installed. Relying on toast prop.
 
@@ -25,7 +33,7 @@ const EVENT_FORM_INITIAL: EventFormState = {
 
 // --- Calendar Component (Mock) ---
 const CustomCalendar = () => {
-  // This is a visual mock to match the screenshot. 
+  // This is a visual mock to match the screenshot.
   // In a real app, use a library like react-day-picker or build full logic.
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 w-full">
@@ -37,20 +45,53 @@ const CustomCalendar = () => {
         </div>
       </div>
       <div className="grid grid-cols-7 text-center text-xs text-gray-400 mb-2">
-        <div>SEN</div><div>SEL</div><div>RAB</div><div>KAM</div><div>JUM</div><div>SAB</div><div>MIN</div>
+        <div>SEN</div>
+        <div>SEL</div>
+        <div>RAB</div>
+        <div>KAM</div>
+        <div>JUM</div>
+        <div>SAB</div>
+        <div>MIN</div>
       </div>
       <div className="grid grid-cols-7 text-center text-xs gap-y-3 font-medium text-gray-600">
         {/* Mock dates */}
-        <div className="bg-[#0B6BCB] text-white rounded-full w-6 h-6 flex items-center justify-center mx-auto">1</div>
-        <div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div>
-        <div>8</div><div>9</div><div>10</div><div>11</div><div>12</div><div>13</div><div>14</div>
-        <div>15</div><div>16</div><div>17</div><div>18</div><div>19</div><div>20</div><div>21</div>
-        <div>22</div><div>23</div><div>24</div><div>25</div><div>26</div><div>27</div><div>28</div>
-        <div>29</div><div>30</div><div>31</div>
+        <div className="bg-[#0B6BCB] text-white rounded-full w-6 h-6 flex items-center justify-center mx-auto">
+          1
+        </div>
+        <div>2</div>
+        <div>3</div>
+        <div>4</div>
+        <div>5</div>
+        <div>6</div>
+        <div>7</div>
+        <div>8</div>
+        <div>9</div>
+        <div>10</div>
+        <div>11</div>
+        <div>12</div>
+        <div>13</div>
+        <div>14</div>
+        <div>15</div>
+        <div>16</div>
+        <div>17</div>
+        <div>18</div>
+        <div>19</div>
+        <div>20</div>
+        <div>21</div>
+        <div>22</div>
+        <div>23</div>
+        <div>24</div>
+        <div>25</div>
+        <div>26</div>
+        <div>27</div>
+        <div>28</div>
+        <div>29</div>
+        <div>30</div>
+        <div>31</div>
       </div>
     </div>
-  )
-}
+  );
+};
 
 export default function RecruiterGalleryEventsSection({
   toast,
@@ -60,14 +101,17 @@ export default function RecruiterGalleryEventsSection({
 }) {
   const [events, setEvents] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
-  const [eventForm, setEventForm] = useState<EventFormState>(EVENT_FORM_INITIAL);
+  const [eventForm, setEventForm] =
+    useState<EventFormState>(EVENT_FORM_INITIAL);
   const [creating, setCreating] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [editingEventId, setEditingEventId] = useState<number | null>(null);
   const [updating, setUpdating] = useState(false);
 
   // Filter state
-  const [activeTab, setActiveTab] = useState<"Active" | "Draft" | "Closed">("Active");
+  const [activeTab, setActiveTab] = useState<"Active" | "Draft" | "Closed">(
+    "Active",
+  );
   const [searchQuery, setSearchQuery] = useState("");
 
   const fetchEvents = useCallback(async () => {
@@ -89,7 +133,9 @@ export default function RecruiterGalleryEventsSection({
 
   // Derived state for filtered events
   const filteredEvents = events.filter((event) => {
-    const matchesSearch = event.title?.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesSearch = event.title
+      ?.toLowerCase()
+      .includes(searchQuery.toLowerCase());
 
     // Status Logic
     const eventDate = new Date(event.event_date);
@@ -115,7 +161,7 @@ export default function RecruiterGalleryEventsSection({
   });
 
   const handleFormChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
     const { name, value, type } = e.target;
     if (type === "checkbox") {
@@ -234,11 +280,12 @@ export default function RecruiterGalleryEventsSection({
 
   return (
     <div className="flex flex-col lg:flex-row gap-6 animate-in fade-in bg-gray-50 dark:bg-[#1C1D1F] min-h-screen p-6">
-
       {/* LEFT COLUMN: Event List */}
       <div className="flex-1">
         <div className="flex items-center justify-between mb-6">
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Recruiter Gallery Events</h1>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+            Recruiter Gallery Events
+          </h1>
           {!showForm && (
             <button
               onClick={() => setShowForm(true)}
@@ -253,11 +300,10 @@ export default function RecruiterGalleryEventsSection({
         {/* Create/Edit Form (Collapsible) */}
         {/* Create/Edit Modal */}
         {showForm && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-            <div className="bg-white dark:bg-[#313234] w-full max-w-3xl rounded-xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
-
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 overflow-y-auto">
+            <div className="bg-white dark:bg-[#313234] w-full max-w-3xl rounded-xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200 my-8">
               {/* Modal Header */}
-              <div className="bg-[#0B172B] px-6 py-4 flex justify-between items-center text-white">
+              <div className="bg-[#0B172B] px-6 py-4 flex justify-between items-center text-white sticky top-0 z-10">
                 <h3 className="text-lg font-medium">
                   {editingEventId ? "Edit Event" : "Create New Event"}
                 </h3>
@@ -270,9 +316,13 @@ export default function RecruiterGalleryEventsSection({
               </div>
 
               {/* Modal Body */}
-              <div className="p-8">
-                <form onSubmit={editingEventId ? handleUpdateEvent : handleCreateEvent} className="space-y-6">
-
+              <div className="p-8 max-h-[calc(100vh-200px)] overflow-y-auto">
+                <form
+                  onSubmit={
+                    editingEventId ? handleUpdateEvent : handleCreateEvent
+                  }
+                  className="space-y-6"
+                >
                   {/* Title and Date Row */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2">
@@ -312,7 +362,10 @@ export default function RecruiterGalleryEventsSection({
                     <RichTextEditor
                       value={eventForm.description}
                       onChange={(content: string) =>
-                        setEventForm((prev) => ({ ...prev, description: content }))
+                        setEventForm((prev) => ({
+                          ...prev,
+                          description: content,
+                        }))
                       }
                       placeholder="Event Description"
                     />
@@ -320,7 +373,6 @@ export default function RecruiterGalleryEventsSection({
 
                   {/* Bottom Row: Order + Buttons */}
                   <div className="flex flex-col md:flex-row items-end justify-between gap-6 pt-2">
-
                     {/* Order Input */}
                     <div className="w-full md:w-1/3 space-y-2">
                       <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -384,7 +436,6 @@ export default function RecruiterGalleryEventsSection({
                       </label>
                     )}
                   </div>
-
                 </form>
               </div>
             </div>
@@ -393,9 +444,8 @@ export default function RecruiterGalleryEventsSection({
 
         {/* Event List Table */}
         <div className="bg-white dark:bg-[#313234] rounded-xl border border-gray-100 dark:border-gray-800 shadow-sm overflow-hidden flex flex-col h-[600px]">
-
           {/* Table Header */}
-          <div className="grid grid-cols-12 px-6 py-3 bg-[#0B172B] text-white dark:bg-gray-800/50 border-b border-gray-100 dark:border-gray-800 text-xs font-semibold text-gray-500 uppercase sticky top-0 z-10 backdrop-blur-sm">
+          <div className="grid grid-cols-12 px-6 py-3 bg-[#0B172B] dark:bg-gray-800/50 border-b border-gray-100 dark:border-gray-800 text-xs font-semibold text-gray-500 uppercase sticky top-0 z-10 backdrop-blur-sm">
             <div className="col-span-6">Event Name</div>
             <div className="col-span-3">Status</div>
             <div className="col-span-3 text-right">Actions</div>
@@ -403,10 +453,14 @@ export default function RecruiterGalleryEventsSection({
 
           <div className="overflow-y-auto flex-1 custom-scrollbar">
             {loading ? (
-              <div className="p-8 text-center text-gray-500 text-sm">Loading events...</div>
+              <div className="p-8 text-center text-gray-500 text-sm">
+                Loading events...
+              </div>
             ) : filteredEvents.length === 0 ? (
               <div className="p-8 text-center text-gray-500 text-sm">
-                {searchQuery ? "No matching events found." : "No events found in this tab."}
+                {searchQuery
+                  ? "No matching events found."
+                  : "No events found in this tab."}
               </div>
             ) : (
               <div className="divide-y divide-gray-100 dark:divide-gray-800">
@@ -415,31 +469,56 @@ export default function RecruiterGalleryEventsSection({
                   const isPast = new Date(event.event_date) < new Date();
                   // Determine display status based on conditions
                   let statusLabel = "Active";
-                  let statusClass = "bg-[#E6F6EC] text-[#037847] dark:bg-green-900/30 dark:text-green-400";
+                  let statusClass =
+                    "bg-[#E6F6EC] text-[#037847] dark:bg-green-900/30 dark:text-green-400";
 
                   if (!isActive) {
                     statusLabel = "Inactive";
-                    statusClass = "bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400";
+                    statusClass =
+                      "bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400";
                   } else if (isPast) {
                     statusLabel = "Closed";
-                    statusClass = "bg-orange-50 text-orange-600 dark:bg-orange-900/20 dark:text-orange-400";
+                    statusClass =
+                      "bg-orange-50 text-orange-600 dark:bg-orange-900/20 dark:text-orange-400";
                   }
 
                   return (
-                    <div key={event.id} className="grid grid-cols-12 px-6 py-4 items-center hover:bg-gray-50 dark:hover:bg-gray-800/30 transition-colors">
+                    <div
+                      key={event.id}
+                      className="grid grid-cols-12 px-6 py-4 items-center hover:bg-gray-50 dark:hover:bg-gray-800/30 transition-colors"
+                    >
                       <div className="col-span-6">
-                        <h4 className="text-sm font-bold text-gray-900 dark:text-gray-100 line-clamp-1">{event.title || `Event #${event.id}`}</h4>
+                        <h4 className="text-sm font-bold text-gray-900 dark:text-gray-100 line-clamp-1">
+                          {event.title || `Event #${event.id}`}
+                        </h4>
                         <div className="flex items-center gap-3 mt-1 text-xs text-gray-500">
                           <span className="flex items-center gap-1">
                             <Calendar className="w-3 h-3" />
-                            {event.event_date ? new Date(event.event_date).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric", hour: "2-digit", minute: "2-digit" }) : "No date"}
+                            {event.event_date
+                              ? new Date(event.event_date).toLocaleDateString(
+                                  "en-US",
+                                  {
+                                    month: "short",
+                                    day: "numeric",
+                                    year: "numeric",
+                                    hour: "2-digit",
+                                    minute: "2-digit",
+                                  },
+                                )
+                              : "No date"}
                           </span>
                           <span>Order: {event.display_order}</span>
-                          {event.is_featured && <span className="text-blue-600 font-medium">Featured</span>}
+                          {event.is_featured && (
+                            <span className="text-blue-600 font-medium">
+                              Featured
+                            </span>
+                          )}
                         </div>
                       </div>
                       <div className="col-span-3">
-                        <span className={`inline-flex px-2.5 py-1 rounded text-xs font-medium ${statusClass}`}>
+                        <span
+                          className={`inline-flex px-2.5 py-1 rounded text-xs font-medium ${statusClass}`}
+                        >
                           {statusLabel}
                         </span>
                       </div>
@@ -470,16 +549,19 @@ export default function RecruiterGalleryEventsSection({
 
       {/* RIGHT COLUMN: Filters & Calendar */}
       <div className="w-full lg:w-64 space-y-6">
-
         <div className="bg-white dark:bg-[#313234] rounded-xl border border-gray-100 dark:border-gray-700 overflow-hidden">
           <div className="bg-[#0B172B] px-4 py-3">
-            <h2 className="text-sm font-bold text-white uppercase tracking-wider">Filters</h2>
+            <h2 className="text-sm font-bold text-white uppercase tracking-wider">
+              Filters
+            </h2>
           </div>
 
           <div className="p-4 space-y-4">
             {/* Search */}
             <div>
-              <label className="text-xs font-bold text-gray-500 uppercase mb-2 block">Event Name</label>
+              <label className="text-xs font-bold text-gray-500 uppercase mb-2 block">
+                Event Name
+              </label>
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                 <input
@@ -494,18 +576,24 @@ export default function RecruiterGalleryEventsSection({
 
             {/* Filter Options */}
             <div>
-              <label className="text-xs font-bold text-gray-500 uppercase mb-2 block">Status</label>
+              <label className="text-xs font-bold text-gray-500 uppercase mb-2 block">
+                Status
+              </label>
               <div className="space-y-2">
                 {["Active", "Draft", "Closed"].map((tab) => (
                   <div
                     key={tab}
-                    className={`border rounded-lg p-3 cursor-pointer transition-all flex items-center justify-between group ${activeTab === tab ? 'bg-blue-50 border-blue-200 dark:bg-blue-900/20 dark:border-blue-800' : 'bg-white dark:bg-[#313234] border-gray-100 dark:border-gray-700 hover:border-blue-200'}`}
+                    className={`border rounded-lg p-3 cursor-pointer transition-all flex items-center justify-between group ${activeTab === tab ? "bg-blue-50 border-blue-200 dark:bg-blue-900/20 dark:border-blue-800" : "bg-white dark:bg-[#313234] border-gray-100 dark:border-gray-700 hover:border-blue-200"}`}
                     onClick={() => setActiveTab(tab as any)}
                   >
-                    <span className={`text-sm ${activeTab === tab ? 'text-blue-700 dark:text-blue-400 font-semibold' : 'text-gray-600 dark:text-gray-400'}`}>
+                    <span
+                      className={`text-sm ${activeTab === tab ? "text-blue-700 dark:text-blue-400 font-semibold" : "text-gray-600 dark:text-gray-400"}`}
+                    >
                       {tab}
                     </span>
-                    {activeTab === tab && <div className="w-2 h-2 rounded-full bg-blue-500"></div>}
+                    {activeTab === tab && (
+                      <div className="w-2 h-2 rounded-full bg-blue-500"></div>
+                    )}
                   </div>
                 ))}
               </div>
@@ -516,15 +604,17 @@ export default function RecruiterGalleryEventsSection({
         {/* Calendar (Visual Only) */}
         <div>
           <div className="flex items-center gap-2 mb-3 px-1">
-            <span className="text-xs font-bold text-gray-500 uppercase">Dates</span>
+            <span className="text-xs font-bold text-gray-500 uppercase">
+              Dates
+            </span>
             <span className="text-gray-300">|</span>
-            <span className="text-xs font-bold text-gray-500 uppercase">Time</span>
+            <span className="text-xs font-bold text-gray-500 uppercase">
+              Time
+            </span>
           </div>
           <CustomCalendar />
         </div>
-
       </div>
-
     </div>
   );
 }

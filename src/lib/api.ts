@@ -2214,6 +2214,45 @@ export class ApiClient {
       true,
     );
   }
+
+  // ===== BUCKET BULK DOWNLOAD APIs =====
+
+  // Get bucket download preview
+  async getBucketDownloadPreview(bucketId: number): Promise<any> {
+    return this.request<any>(
+      `/api/v1/recruiter/buckets/${bucketId}/resumes/download-preview`,
+      { method: "GET" },
+      true,
+      true,
+    );
+  }
+
+  // Prepare bucket bulk download
+  async prepareBucketBulkDownload(
+    bucketId: number,
+    includeLocked: boolean = false,
+  ): Promise<any> {
+    return this.request<any>(
+      `/api/v1/recruiter/buckets/${bucketId}/resumes/prepare-bulk-download`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ include_locked: includeLocked }),
+      },
+      true,
+      true,
+    );
+  }
+
+  // Get bucket task status
+  async getBucketTaskStatus(taskId: string): Promise<TaskStatusResponse> {
+    return this.request<TaskStatusResponse>(
+      `/api/v1/recruiter/buckets/tasks/${taskId}/status`,
+      { method: "GET" },
+      true,
+      true,
+    );
+  }
 }
 
 // Resume Metadata types for parsed resume

@@ -144,7 +144,9 @@ export default async function JobDetailsPage({
                     {job.title}
                   </h1>
                   <p className="text-base text-gray-600 dark:text-gray-400 font-medium mb-3">
-                    {job.company_name}
+                    <Link href={job.recruiter_profile_url || ""}>
+                      {job.company_name}
+                    </Link>
                   </p>
 
                   <div className="flex flex-wrap items-center gap-3 text-sm text-gray-600 dark:text-gray-400 mb-4">
@@ -155,11 +157,15 @@ export default async function JobDetailsPage({
                     <div className="w-px h-4 bg-gray-300 dark:bg-gray-700"></div>
                     <div className="flex items-center gap-1.5">
                       <Briefcase className="w-4 h-4 text-gray-400" />
-                      {job.experience_level ? `${job.experience_level.replace("entry", "0-2").replace("mid", "2-5").replace("senior", "5+").replace("executive", "10+")} years` : "Experience not specified"}
+                      {job.experience_level
+                        ? `${job.experience_level.replace("entry", "0-2").replace("mid", "2-5").replace("senior", "5+").replace("executive", "10+")} years`
+                        : "Experience not specified"}
                     </div>
                     <div className="flex items-center gap-1.5">
                       <Briefcase className="w-4 h-4 text-gray-400" />
-                      {job.experience_level ? `${job.experience_level.replace("entry", "0-2").replace("mid", "2-5").replace("senior", "5+").replace("executive", "10+")} years` : "Experience not specified"}
+                      {job.experience_level
+                        ? `${job.experience_level.replace("entry", "0-2").replace("mid", "2-5").replace("senior", "5+").replace("executive", "10+")} years`
+                        : "Experience not specified"}
                     </div>
                   </div>
 
@@ -168,10 +174,20 @@ export default async function JobDetailsPage({
                       <div className="inline-flex items-center gap-1.5 font-semibold text-gray-900 dark:text-gray-100">
                         <span className="text-gray-500">₹</span>
                         {job.salary_min
-                          ? formatCurrency(job.salary_min, job.salary_currency || "USD").replace("US$", "").replace("$", "")
+                          ? formatCurrency(
+                              job.salary_min,
+                              job.salary_currency || "USD",
+                            )
+                              .replace("US$", "")
+                              .replace("$", "")
                           : ""}
                         {job.salary_max
-                          ? ` - ${formatCurrency(job.salary_max, job.salary_currency || "USD").replace("US$", "").replace("$", "")}`
+                          ? ` - ${formatCurrency(
+                              job.salary_max,
+                              job.salary_currency || "USD",
+                            )
+                              .replace("US$", "")
+                              .replace("$", "")}`
                           : ""}
                       </div>
                     )}
@@ -190,10 +206,11 @@ export default async function JobDetailsPage({
                   <div className="pt-4 border-t border-gray-100 dark:border-gray-800 flex flex-wrap items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
                     <div className="flex items-center gap-1.5">
                       <Zap className="w-3.5 h-3.5" />
-                      Posted {new Date(job.posted_date).toLocaleDateString("en-US", {
+                      Posted{" "}
+                      {new Date(job.posted_date).toLocaleDateString("en-US", {
                         month: "short",
                         day: "numeric",
-                        year: "numeric"
+                        year: "numeric",
                       })}
                     </div>
                     <div className="w-px h-3 bg-gray-300 dark:bg-gray-700"></div>
@@ -214,9 +231,7 @@ export default async function JobDetailsPage({
             {/* Job Description Card */}
             <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg overflow-hidden">
               <div className="bg-[#005FFF] p-2">
-                <h2 className="text-md font-bold text-white">
-                  About the Role
-                </h2>
+                <h2 className="text-md font-bold text-white">About the Role</h2>
               </div>
 
               <div className="p-6">
@@ -254,9 +269,7 @@ export default async function JobDetailsPage({
             {/* Skills Card */}
             <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg overflow-hidden">
               <div className="bg-[#005FFF] p-2">
-                <h3 className="text-md font-bold text-white">
-                  Key Skills
-                </h3>
+                <h3 className="text-md font-bold text-white">Key Skills</h3>
               </div>
               <div className="p-6">
                 <div className="flex flex-wrap gap-2">
@@ -268,8 +281,11 @@ export default async function JobDetailsPage({
                       {skill}
                     </span>
                   ))}
-                  {(!job.required_skills || job.required_skills.length === 0) && (
-                    <span className="text-sm text-gray-500">No specific skills listed</span>
+                  {(!job.required_skills ||
+                    job.required_skills.length === 0) && (
+                    <span className="text-sm text-gray-500">
+                      No specific skills listed
+                    </span>
                   )}
                 </div>
               </div>
@@ -288,7 +304,11 @@ export default async function JobDetailsPage({
                     <div className="w-12 h-12 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 flex items-center justify-center overflow-hidden p-1">
                       {companyData?.company_logo_url || job.company_logo_url ? (
                         <Image
-                          src={companyData?.company_logo_url || job.company_logo_url || ""}
+                          src={
+                            companyData?.company_logo_url ||
+                            job.company_logo_url ||
+                            ""
+                          }
                           alt={companyData?.company_name || job.company_name}
                           width={48}
                           height={48}
@@ -299,21 +319,33 @@ export default async function JobDetailsPage({
                       )}
                     </div>
                     <div>
-                      <h4 className="text-lg font-bold text-gray-900 dark:text-gray-100">{companyData?.company_name || job.company_name}</h4>
+                      <h4 className="text-lg font-bold text-gray-900 dark:text-gray-100">
+                        {companyData?.company_name || job.company_name}
+                      </h4>
                       <div className="flex items-center gap-4 text-sm text-gray-500 mt-1">
                         <div className="flex items-center gap-1">
                           <MapPin className="w-4 h-4" />
                           {companyData?.location || job.location}
                         </div>
                         {companyData?.company_website && (
-                          <Link href={companyData.company_website} target="_blank" className="flex items-center gap-1 hover:text-blue-600">
+                          <Link
+                            href={companyData.company_website}
+                            target="_blank"
+                            className="flex items-center gap-1 hover:text-blue-600"
+                          >
                             <ExternalLink className="w-4 h-4" />
                             visit website
                           </Link>
                         )}
                         {companyData?.linkedin_url && (
-                          <Link href={companyData.linkedin_url} target="_blank" className="text-blue-600 hover:text-blue-700">
-                            <div className="w-5 h-5 bg-[#0077b5] text-white rounded flex items-center justify-center text-[10px] font-bold">in</div>
+                          <Link
+                            href={companyData.linkedin_url}
+                            target="_blank"
+                            className="text-blue-600 hover:text-blue-700"
+                          >
+                            <div className="w-5 h-5 bg-[#0077b5] text-white rounded flex items-center justify-center text-[10px] font-bold">
+                              in
+                            </div>
                           </Link>
                         )}
                       </div>
@@ -322,22 +354,36 @@ export default async function JobDetailsPage({
                 </div>
 
                 <div className="space-y-4">
-                  <h5 className="font-bold text-gray-900 dark:text-gray-100">Overview</h5>
+                  <h5 className="font-bold text-gray-900 dark:text-gray-100">
+                    Overview
+                  </h5>
                   <div className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed whitespace-pre-wrap">
-                    {companyData?.bio || `Join our team at ${job.company_name}. We are passionate about innovation and excellence.`}
+                    {companyData?.bio ||
+                      `Join our team at ${job.company_name}. We are passionate about innovation and excellence.`}
                   </div>
                 </div>
 
                 {/* Company Gallery Images */}
-                {companyData?.gallery_images && companyData.gallery_images.length > 0 && (
-                  <div className="grid grid-cols-3 gap-3 mt-4">
-                    {companyData.gallery_images.slice(0, 3).map((img: any, idx: number) => (
-                      <div key={idx} className="h-32 rounded-lg bg-gray-100 dark:bg-gray-800 overflow-hidden relative">
-                        <Image src={img.image_url} alt={`Company image ${idx + 1}`} fill className="object-cover" />
-                      </div>
-                    ))}
-                  </div>
-                )}
+                {companyData?.gallery_images &&
+                  companyData.gallery_images.length > 0 && (
+                    <div className="grid grid-cols-3 gap-3 mt-4">
+                      {companyData.gallery_images
+                        .slice(0, 3)
+                        .map((img: any, idx: number) => (
+                          <div
+                            key={idx}
+                            className="h-32 rounded-lg bg-gray-100 dark:bg-gray-800 overflow-hidden relative"
+                          >
+                            <Image
+                              src={img.image_url}
+                              alt={`Company image ${idx + 1}`}
+                              fill
+                              className="object-cover"
+                            />
+                          </div>
+                        ))}
+                    </div>
+                  )}
               </div>
             </div>
           </div>
