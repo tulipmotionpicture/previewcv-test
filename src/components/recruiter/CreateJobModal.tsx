@@ -2,6 +2,9 @@ import React from "react";
 import { X, ChevronDown, Plus } from "lucide-react";
 import { JobFormState } from "./JobManagement";
 import RichTextEditor from "../ui/RichTextEditor";
+import CountrySearch from "../location/CountrySearch";
+import StateSearch from "../location/StateSearch";
+import CitySearch from "../location/CitySearch";
 
 interface CreateJobModalProps {
   isOpen: boolean;
@@ -74,43 +77,84 @@ export default function CreateJobModal({
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                 Country
               </label>
-              <input
-                type="text"
-                name="country"
-                value={jobForm.country}
-                onChange={onChange}
-                placeholder="Enter country"
-                className="w-full px-4 py-2.5 bg-white dark:bg-[#282727] border border-gray-200 dark:border-gray-700 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all placeholder-gray-400 dark:text-white"
+              <CountrySearch
+                country={jobForm.country}
+                renderInput={({ value, onChange, onFocus, onBlur, onKeyDown }) => (
+                  <input
+                    type="text"
+                    value={value}
+                    onChange={onChange}
+                    onFocus={onFocus}
+                    onBlur={onBlur}
+                    onKeyDown={onKeyDown}
+                    placeholder="e.g. USA"
+                    className="w-full px-4 py-2 bg-white dark:bg-[#282727] border border-gray-200 dark:border-gray-700 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all placeholder-gray-400 dark:text-white"
+                    required
+                  />
+                )}
+                onChange={(c) => {
+                  onChange({ target: { name: "country", value: c ? c.name : "" } } as any);
+                  onChange({ target: { name: "countryCode", value: c ? c.code : "" } } as any);
+                  onChange({ target: { name: "state", value: "" } } as any);
+                  onChange({ target: { name: "stateCode", value: "" } } as any);
+                  onChange({ target: { name: "city", value: "" } } as any);
+                }}
               />
             </div>
             <div className="space-y-2">
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                State / Region
+                State
               </label>
-              <input
-                type="text"
-                name="state"
-                value={jobForm.state}
-                onChange={onChange}
-                placeholder="Enter state or region"
-                className="w-full px-4 py-2.5 bg-white dark:bg-[#282727] border border-gray-200 dark:border-gray-700 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all placeholder-gray-400 dark:text-white"
+              <StateSearch
+                state={jobForm.state}
+                countryCode={jobForm.countryCode}
+                renderInput={({ value, onChange, onFocus, onBlur, onKeyDown }) => (
+                  <input
+                    type="text"
+                    value={value}
+                    onChange={onChange}
+                    onFocus={onFocus}
+                    onBlur={onBlur}
+                    onKeyDown={onKeyDown}
+                    placeholder="e.g. California"
+                    className="w-full px-4 py-2 bg-white dark:bg-[#282727] border border-gray-200 dark:border-gray-700 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all placeholder-gray-400 dark:text-white"
+                    required
+                  />
+                )}
+                onChange={(s) => {
+                  onChange({ target: { name: "state", value: s ? s.name : "" } } as any);
+                  onChange({ target: { name: "stateCode", value: s ? s.code : "" } } as any);
+                  onChange({ target: { name: "city", value: "" } } as any);
+                }}
               />
             </div>
             <div className="space-y-2">
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                 City
               </label>
-              <input
-                type="text"
-                name="city"
-                value={jobForm.city}
-                onChange={onChange}
-                placeholder="Enter city"
-                className="w-full px-4 py-2.5 bg-white dark:bg-[#282727] border border-gray-200 dark:border-gray-700 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all placeholder-gray-400 dark:text-white"
+              <CitySearch
+                city={jobForm.city}
+                countryCode={jobForm.countryCode}
+                stateCode={jobForm.stateCode}
+                renderInput={({ value, onChange, onFocus, onBlur, onKeyDown }) => (
+                  <input
+                    type="text"
+                    value={value}
+                    onChange={onChange}
+                    onFocus={onFocus}
+                    onBlur={onBlur}
+                    onKeyDown={onKeyDown}
+                    placeholder="e.g. San Francisco"
+                    className="w-full px-4 py-2 bg-white dark:bg-[#282727] border border-gray-200 dark:border-gray-700 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all placeholder-gray-400 dark:text-white"
+                    required
+                  />
+                )}
+                onChange={(c) => {
+                  onChange({ target: { name: "city", value: c ? c.name : "" } } as any);
+                }}
               />
             </div>
           </div>
-
           {/* Row 2: Monthly Salary */}
           <div className="space-y-2">
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">

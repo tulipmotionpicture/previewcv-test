@@ -11,24 +11,26 @@ export type JobManagementTab = "create" | "manage";
 export type JobFormState = {
   title: string;
   country: string;
+  countryCode?: string;
   state: string;
+  stateCode?: string;
   city: string;
   job_type:
-    | "full_time"
-    | "part_time"
-    | "contract"
-    | "internship"
-    | "temporary"
-    | "freelance"
-    | "other";
+  | "full_time"
+  | "part_time"
+  | "contract"
+  | "internship"
+  | "temporary"
+  | "freelance"
+  | "other";
   experience_level:
-    | "entry"
-    | "junior"
-    | "mid"
-    | "senior"
-    | "lead"
-    | "director"
-    | "executive";
+  | "entry"
+  | "junior"
+  | "mid"
+  | "senior"
+  | "lead"
+  | "director"
+  | "executive";
   description: string;
   requirements: string;
   responsibilities: string;
@@ -44,7 +46,9 @@ export type JobFormState = {
 export const JOB_FORM_INITIAL: JobFormState = {
   title: "",
   country: "",
+  countryCode: "",
   state: "",
+  stateCode: "",
   city: "",
   job_type: "full_time",
   experience_level: "entry",

@@ -1,32 +1,32 @@
 "use client";
 import { useEffect, useState, useCallback, Suspense } from "react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import JobsLayout from "@/components/JobsLayout";
 import JobsFilters from "@/components/JobsFilters";
 import JobList from "@/components/JobList";
 import JobsSidebar from "@/components/JobsSidebar";
+import { CountrySearch } from "@/components/location";
 import FloatingHeader from "@/components/FloatingHeader";
 import { api } from "@/lib/api";
 import { Job } from "@/types/api";
-import type { CardsSummaryResponse } from "@/types/jobs";
 import { useInfiniteScroll } from "@/hooks/useInfiniteScroll";
 
 function JobsPageContent() {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const initialKeyword = searchParams.get("keyword") || "";
+  const initialCountry = searchParams.get("country") || "";
   const [jobs, setJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState("");
-  const [cardsData, setCardsData] = useState<CardsSummaryResponse | null>(null);
-  const [cardsLoading, setCardsLoading] = useState(true);
   // Store selected filters as a dynamic object
   const [selectedFilters, setSelectedFilters] = useState<
     Record<string, string[]>
   >({});
   // State for search bar
   const [keyword, setKeyword] = useState(initialKeyword);
-  const [location, setLocation] = useState("");
+  const [country, setCountry] = useState(initialCountry);
   // Pagination state
   const [offset, setOffset] = useState(0);
   const [hasMore, setHasMore] = useState(true);
@@ -37,15 +37,19 @@ function JobsPageContent() {
   // Track if filters are initialized from URL
   const [filtersInitialized, setFiltersInitialized] = useState(false);
   useEffect(() => {
-    if (initialKeyword) {
+    const updates: Record<string, string[]> = {};
+    if (initialKeyword) updates.skill_search = [initialKeyword];
+    if (initialCountry) updates.country = [initialCountry];
+
+    if (Object.keys(updates).length > 0) {
       setSelectedFilters((prev) => ({
         ...prev,
-        skill_search: [initialKeyword],
+        ...updates,
       }));
     }
     setFiltersInitialized(true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [initialKeyword]);
+  }, [initialKeyword, initialCountry]);
 
   // Helper to build params from selectedFilters
   const buildJobFilterParams = useCallback(
@@ -63,21 +67,6 @@ function JobsPageContent() {
     [],
   );
 
-  // Fetch job cards data
-  useEffect(() => {
-    const fetchCards = async () => {
-      setCardsLoading(true);
-      try {
-        const response = await api.getCardsSummary();
-        setCardsData(response);
-      } catch (err) {
-        console.error("Failed to load job cards:", err);
-      } finally {
-        setCardsLoading(false);
-      }
-    };
-    fetchCards();
-  }, []);
 
   // Fetch jobs function
   const fetchJobs = useCallback(
@@ -239,11 +228,22 @@ function JobsPageContent() {
             <form
               onSubmit={(e) => {
                 e.preventDefault();
+
+                const params = new URLSearchParams(searchParams.toString());
+                if (keyword) params.set("keyword", keyword);
+                else params.delete("keyword");
+
+                if (country) params.set("country", country);
+                else params.delete("country");
+
+                router.push(`/jobs?${params.toString()}`);
+
                 setSelectedFilters((prev) => ({
                   ...prev,
                   skill_search: keyword ? [keyword] : [],
-                  location: location ? [location] : [],
+                  country: country ? [country] : [],
                 }));
+
                 // Trigger fetch
                 setOffset(0);
                 fetchJobs(0, false);
@@ -274,33 +274,39 @@ function JobsPageContent() {
                 />
               </div>
 
-              {/* Location Input */}
-              <div className="flex-[1.5] bg-white dark:bg-gray-900 rounded-lg border border-blue-200 dark:border-gray-700 flex items-center px-4 py-3 hover:border-blue-400 transition-colors">
-                <svg
-                  className="w-6 h-6 text-gray-400 mr-3 shrink-0"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M17.657 16.657L13.414 20.9a2 2 0 01-2.828 0l-4.243-4.243a8 8 0 1111.314 0z"
-                  />
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-                  />
-                </svg>
-                <input
-                  type="text"
-                  placeholder="Enter City or County"
-                  value={location}
-                  onChange={(e) => setLocation(e.target.value)}
-                  className="w-full bg-transparent border-none outline-none text-gray-700 dark:text-gray-200 placeholder-gray-400 text-sm font-medium focus:ring-0 p-0"
+              {/* Country Input */}
+              <div className="flex-[1.5]">
+                <CountrySearch
+                  country={country}
+                  onChange={(c) => setCountry(c ? c.name : "")}
+                  placeholder="Enter Country"
+                  renderInput={({ value, onChange, onFocus, onBlur, onKeyDown }) => (
+                    <div className="bg-white dark:bg-gray-900 rounded-lg border border-blue-200 dark:border-gray-700 flex items-center px-4 py-3 hover:border-blue-400 transition-colors h-full">
+                      <svg
+                        className="w-6 h-6 text-gray-400 mr-3 shrink-0"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                        />
+                      </svg>
+                      <input
+                        type="text"
+                        placeholder="Enter Country"
+                        value={value}
+                        onChange={onChange}
+                        onFocus={onFocus}
+                        onBlur={onBlur}
+                        onKeyDown={onKeyDown}
+                        className="w-full bg-transparent border-none outline-none text-gray-700 dark:text-gray-200 placeholder-gray-400 text-sm font-medium focus:ring-0 p-0"
+                      />
+                    </div>
+                  )}
                 />
               </div>
 
@@ -367,12 +373,12 @@ function JobsPageContent() {
                       {keyword}
                     </span>
                   )}
-                  {location && (
+                  {country && (
                     <>
                       {" "}
                       in{" "}
                       <span className="font-bold text-slate-900 dark:text-white">
-                        {location}
+                        {country}
                       </span>
                     </>
                   )}

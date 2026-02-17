@@ -3,6 +3,10 @@
 import { useState, useEffect } from "react";
 import { Job } from "@/types/api";
 import Button from "./ui/Button";
+import CountrySearch from "./location/CountrySearch";
+import StateSearch from "./location/StateSearch";
+import CitySearch from "./location/CitySearch";
+import RichTextEditor from "./ui/RichTextEditor";
 
 interface EditJobModalProps {
   isOpen: boolean;
@@ -23,7 +27,9 @@ export default function EditJobModal({
     title: "",
     company_name: "",
     country: "",
+    countryCode: "",
     state: "",
+    stateCode: "",
     city: "",
     job_type: "full_time" as Job["job_type"],
     experience_level: "mid" as Job["experience_level"],
@@ -53,6 +59,8 @@ export default function EditJobModal({
         country: job.country || "",
         state: job.state || "",
         city: job.city || "",
+        countryCode: "",
+        stateCode: "",
         job_type: job.job_type || "full_time",
         experience_level: job.experience_level || "mid",
         description: job.description || "",
@@ -310,42 +318,90 @@ export default function EditJobModal({
               <label className="block text-xs font-black uppercase tracking-widest text-gray-400 dark:text-gray-500 mb-2 ml-1">
                 Country
               </label>
-              <input
-                type="text"
-                value={formData.country}
-                onChange={(e) =>
-                  setFormData({ ...formData, country: e.target.value })
+              <CountrySearch
+                country={formData.country}
+                renderInput={({ value, onChange, onFocus, onBlur, onKeyDown }) => (
+                  <input
+                    type="text"
+                    value={value}
+                    onChange={onChange}
+                    onFocus={onFocus}
+                    onBlur={onBlur}
+                    onKeyDown={onKeyDown}
+                    className="w-full px-6 py-4 bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl focus:ring-2 focus:ring-indigo-600 outline-none hover:bg-gray-100 dark:hover:bg-gray-750 transition-all font-medium text-gray-900 dark:text-gray-100"
+                    placeholder="Enter country"
+                    required
+                  />
+                )}
+                onChange={(c) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    country: c ? c.name : "",
+                    countryCode: c ? c.code : "",
+                    state: "",
+                    stateCode: "",
+                    city: "",
+                  }))
                 }
-                className="w-full px-6 py-4 bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl focus:ring-2 focus:ring-indigo-600 outline-none hover:bg-gray-100 dark:hover:bg-gray-750 transition-all font-medium text-gray-900 dark:text-gray-100"
-                required
               />
             </div>
             <div>
               <label className="block text-xs font-black uppercase tracking-widest text-gray-400 dark:text-gray-500 mb-2 ml-1">
                 State / Region
               </label>
-              <input
-                type="text"
-                value={formData.state}
-                onChange={(e) =>
-                  setFormData({ ...formData, state: e.target.value })
+              <StateSearch
+                state={formData.state}
+                countryCode={formData.countryCode}
+                renderInput={({ value, onChange, onFocus, onBlur, onKeyDown }) => (
+                  <input
+                    type="text"
+                    value={value}
+                    onChange={onChange}
+                    onFocus={onFocus}
+                    onBlur={onBlur}
+                    onKeyDown={onKeyDown}
+                    className="w-full px-6 py-4 bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl focus:ring-2 focus:ring-indigo-600 outline-none hover:bg-gray-100 dark:hover:bg-gray-750 transition-all font-medium text-gray-900 dark:text-gray-100"
+                    placeholder="Enter state"
+                    required
+                  />
+                )}
+                onChange={(s) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    state: s ? s.name : "",
+                    stateCode: s ? s.code : "",
+                    city: "",
+                  }))
                 }
-                className="w-full px-6 py-4 bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl focus:ring-2 focus:ring-indigo-600 outline-none hover:bg-gray-100 dark:hover:bg-gray-750 transition-all font-medium text-gray-900 dark:text-gray-100"
-                required
               />
             </div>
             <div>
               <label className="block text-xs font-black uppercase tracking-widest text-gray-400 dark:text-gray-500 mb-2 ml-1">
                 City
               </label>
-              <input
-                type="text"
-                value={formData.city}
-                onChange={(e) =>
-                  setFormData({ ...formData, city: e.target.value })
+              <CitySearch
+                city={formData.city}
+                countryCode={formData.countryCode}
+                stateCode={formData.stateCode}
+                renderInput={({ value, onChange, onFocus, onBlur, onKeyDown }) => (
+                  <input
+                    type="text"
+                    value={value}
+                    onChange={onChange}
+                    onFocus={onFocus}
+                    onBlur={onBlur}
+                    onKeyDown={onKeyDown}
+                    className="w-full px-6 py-4 bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl focus:ring-2 focus:ring-indigo-600 outline-none hover:bg-gray-100 dark:hover:bg-gray-750 transition-all font-medium text-gray-900 dark:text-gray-100"
+                    placeholder="Enter city"
+                    required
+                  />
+                )}
+                onChange={(c) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    city: c ? c.name : "",
+                  }))
                 }
-                className="w-full px-6 py-4 bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl focus:ring-2 focus:ring-indigo-600 outline-none hover:bg-gray-100 dark:hover:bg-gray-750 transition-all font-medium text-gray-900 dark:text-gray-100"
-                required
               />
             </div>
           </div>
@@ -480,14 +536,12 @@ export default function EditJobModal({
             <label className="block text-xs font-black uppercase tracking-widest text-gray-400 dark:text-gray-500 mb-2 ml-1">
               Description
             </label>
-            <textarea
+            <RichTextEditor
               value={formData.description}
-              onChange={(e) =>
-                setFormData({ ...formData, description: e.target.value })
+              onChange={(content: string) =>
+                setFormData({ ...formData, description: content })
               }
-              rows={4}
-              className="w-full px-6 py-4 bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl focus:ring-2 focus:ring-indigo-600 outline-none hover:bg-gray-100 dark:hover:bg-gray-750 transition-all font-medium text-gray-900 dark:text-gray-100 resize-none"
-              required
+              placeholder="Describe the opportunity, team and impact"
             />
           </div>
 

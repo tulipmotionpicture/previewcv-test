@@ -41,6 +41,8 @@ import {
   Eye,
 } from "lucide-react";
 import ResumeDetailModal from "./ResumeDetailModal";
+import { CountrySearch, StateSearch, CitySearch } from "@/components/location";
+import { Country, State, City } from "@/types/location";
 
 export default function CVSearchPage() {
   const { showToast } = useToast();
@@ -51,7 +53,9 @@ export default function CVSearchPage() {
     min_experience_years: 0,
     max_experience_years: 50,
     country: "",
+    countryCode: "",
     state: "",
+    stateCode: "",
     city: "",
     job_titles: [] as string[],
     companies: [] as string[],
@@ -830,12 +834,30 @@ export default function CVSearchPage() {
             <label className="block text-sm font-bold text-gray-900 dark:text-gray-100 mb-1.5">
               Country
             </label>
-            <input
-              type="text"
-              value={filters.country}
-              onChange={(e) => setFilters({ ...filters, country: e.target.value })}
-              placeholder="e.g. India"
-              className="w-full px-4 py-3 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg text-sm text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all placeholder-gray-300"
+            <CountrySearch
+              country={filters.country}
+              renderInput={({ value, onChange, onFocus, onBlur, onKeyDown }) => (
+                <input
+                  type="text"
+                  value={value}
+                  onChange={onChange}
+                  onFocus={onFocus}
+                  onBlur={onBlur}
+                  onKeyDown={onKeyDown}
+                  placeholder="e.g. India"
+                  className="w-full px-4 py-3 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg text-sm text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all placeholder-gray-300"
+                />
+              )}
+              onChange={(c) =>
+                setFilters({
+                  ...filters,
+                  country: c ? c.name : "",
+                  countryCode: c ? c.code : "",
+                  state: "",
+                  stateCode: "",
+                  city: "",
+                })
+              }
             />
           </div>
 
@@ -844,12 +866,29 @@ export default function CVSearchPage() {
             <label className="block text-sm font-bold text-gray-900 dark:text-gray-100 mb-1.5">
               State
             </label>
-            <input
-              type="text"
-              value={filters.state}
-              onChange={(e) => setFilters({ ...filters, state: e.target.value })}
-              placeholder="e.g. Maharashtra"
-              className="w-full px-4 py-3 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg text-sm text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all placeholder-gray-300"
+            <StateSearch
+              state={filters.state}
+              countryCode={filters.countryCode}
+              renderInput={({ value, onChange, onFocus, onBlur, onKeyDown }) => (
+                <input
+                  type="text"
+                  value={value}
+                  onChange={onChange}
+                  onFocus={onFocus}
+                  onBlur={onBlur}
+                  onKeyDown={onKeyDown}
+                  placeholder="e.g. Maharashtra"
+                  className="w-full px-4 py-3 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg text-sm text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all placeholder-gray-300"
+                />
+              )}
+              onChange={(s) =>
+                setFilters({
+                  ...filters,
+                  state: s ? s.name : "",
+                  stateCode: s ? s.code : "",
+                  city: "",
+                })
+              }
             />
           </div>
 
@@ -878,12 +917,25 @@ export default function CVSearchPage() {
               <label className="block text-sm font-bold text-gray-900 dark:text-gray-100 mb-1.5">
                 City / Location
               </label>
-              <input
-                type="text"
-                value={filters.city}
-                onChange={(e) => setFilters({ ...filters, city: e.target.value })}
-                placeholder="e.g. Mumbai"
-                className="w-full px-4 py-3 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg text-sm text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all placeholder-gray-300"
+              <CitySearch
+                city={filters.city}
+                countryCode={filters.countryCode}
+                stateCode={filters.stateCode}
+                renderInput={({ value, onChange, onFocus, onBlur, onKeyDown }) => (
+                  <input
+                    type="text"
+                    value={value}
+                    onChange={onChange}
+                    onFocus={onFocus}
+                    onBlur={onBlur}
+                    onKeyDown={onKeyDown}
+                    placeholder="e.g. Mumbai"
+                    className="w-full px-4 py-3 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg text-sm text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all placeholder-gray-300"
+                  />
+                )}
+                onChange={(c) =>
+                  setFilters({ ...filters, city: c ? c.name : "" })
+                }
               />
             </div>
 
