@@ -39,7 +39,7 @@ export default function RecruiterProfileContent({
   const hasJobs = Array.isArray(jobs) && jobs.length > 0;
   const hasEvents = Array.isArray(events) && events.length > 0;
   const defaultTab = hasJobs ? "jobs" : "events";
-  
+
   const [activeTab, setActiveTab] = useState<TabType>(defaultTab);
   const [isGalleryOpen, setIsGalleryOpen] = useState(false);
   const [galleryImages, setGalleryImages] = useState<string[]>([]);
@@ -57,60 +57,56 @@ export default function RecruiterProfileContent({
   }
 
   return (
-    <div className="py-16 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-950 border-t border-gray-200 dark:border-gray-800">
+    <div className="py-8 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-950 border-t border-gray-200 dark:border-gray-800">
       <div className="max-w-6xl mx-auto">
         {/* Section Header */}
-        <div className="mb-8 text-center">
-          <h2 className="text-3xl md:text-4xl font-black text-gray-900 dark:text-gray-100 mb-2">
+        <div className="mb-4 text-center">
+          <h2 className="text-3xl md:text-3xl font-black text-gray-900 dark:text-gray-100 mb-2">
             {hasJobs && hasEvents ? "Opportunities & Events" : hasJobs ? "Open Positions" : "Company Events"}
           </h2>
-          <p className="text-gray-600 dark:text-gray-400 text-sm md:text-base">
-            {hasJobs && hasEvents 
+          <p className="text-gray-600 dark:text-gray-400 text-sm">
+            {hasJobs && hasEvents
               ? "Explore our latest job openings and upcoming events"
-              : hasJobs 
-              ? "Join our team and grow your career"
-              : "Stay updated with our latest activities"}
+              : hasJobs
+                ? "Join our team and grow your career"
+                : "Stay updated with our latest activities"}
           </p>
         </div>
 
         {/* Tab Switcher - Only show if both exist */}
         {hasJobs && hasEvents && (
-          <div className="mb-8 flex justify-center">
-            <div className="bg-white dark:bg-gray-900 rounded-2xl p-1.5 inline-flex gap-1 shadow-lg border border-gray-200 dark:border-gray-800">
+          <div className="mb-4 flex justify-center">
+            <div className="bg-white dark:bg-gray-900 rounded-xl p-1 inline-flex gap-1 shadow-md border border-gray-200 dark:border-gray-800">
               <button
                 onClick={() => setActiveTab("jobs")}
-                className={`relative px-6 md:px-8 py-3 rounded-xl font-bold text-sm tracking-wide transition-all duration-300 ${
-                  activeTab === "jobs"
-                    ? "text-white bg-gradient-to-r from-blue-600 to-blue-700 shadow-md"
-                    : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800"
-                }`}
+                className={`relative px-4 md:px-6 py-2 rounded-lg font-bold text-xs tracking-wide transition-all duration-300 ${activeTab === "jobs"
+                  ? "text-white bg-gradient-to-r from-blue-600 to-blue-700 shadow-sm"
+                  : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800"
+                  }`}
               >
-                <span className="relative z-10 flex items-center gap-2">
+                <span className="relative z-10 flex items-center gap-1.5">
                   Job Openings
-                  <span className={`text-xs px-2 py-0.5 rounded-full ${
-                    activeTab === "jobs" 
-                      ? "bg-white/20" 
-                      : "bg-gray-200 dark:bg-gray-700"
-                  }`}>
+                  <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${activeTab === "jobs"
+                    ? "bg-white/20"
+                    : "bg-gray-200 dark:bg-gray-700"
+                    }`}>
                     {jobs.length}
                   </span>
                 </span>
               </button>
               <button
                 onClick={() => setActiveTab("events")}
-                className={`relative px-6 md:px-8 py-3 rounded-xl font-bold text-sm tracking-wide transition-all duration-300 ${
-                  activeTab === "events"
-                    ? "text-white bg-gradient-to-r from-blue-600 to-blue-700 shadow-md"
-                    : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800"
-                }`}
+                className={`relative px-4 md:px-6 py-2 rounded-lg font-bold text-xs tracking-wide transition-all duration-300 ${activeTab === "events"
+                  ? "text-white bg-gradient-to-r from-blue-600 to-blue-700 shadow-sm"
+                  : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800"
+                  }`}
               >
-                <span className="relative z-10 flex items-center gap-2">
+                <span className="relative z-10 flex items-center gap-1.5">
                   Events
-                  <span className={`text-xs px-2 py-0.5 rounded-full ${
-                    activeTab === "events" 
-                      ? "bg-white/20" 
-                      : "bg-gray-200 dark:bg-gray-700"
-                  }`}>
+                  <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${activeTab === "events"
+                    ? "bg-white/20"
+                    : "bg-gray-200 dark:bg-gray-700"
+                    }`}>
                     {events.length}
                   </span>
                 </span>
@@ -128,7 +124,7 @@ export default function RecruiterProfileContent({
 
         {activeTab === "events" && hasEvents && (
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {events.map((event: Event) => (
                 <div
                   key={event.id}
@@ -152,7 +148,7 @@ export default function RecruiterProfileContent({
                           </div>
                         ))}
                       </div>
-                      
+
                       {/* Hover overlay */}
                       <div className="absolute inset-0 bg-black/0 group-hover/gallery:bg-black/40 transition-colors duration-300 flex items-center justify-center">
                         <div className="opacity-0 group-hover/gallery:opacity-100 transition-opacity duration-300 bg-white/90 dark:bg-gray-900/90 px-4 py-2 rounded-full flex items-center gap-2 text-sm font-semibold">
@@ -162,7 +158,7 @@ export default function RecruiterProfileContent({
                           View {event.images.length} {event.images.length === 1 ? 'image' : 'images'}
                         </div>
                       </div>
-                      
+
                       {event.images.length > 3 && (
                         <div className="absolute bottom-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded-full pointer-events-none">
                           +{event.images.length - 3} more

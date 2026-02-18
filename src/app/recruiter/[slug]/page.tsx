@@ -150,20 +150,20 @@ export default function RecruiterProfilePage({
       {galleryImages.length > 0 && (
         <button
           onClick={() => openGallery(0)}
-          className="relative w-full h-120 overflow-hidden group cursor-pointer"
+          className="relative w-full h-64 overflow-hidden group cursor-pointer"
         >
           <Image
             src={galleryImages[0]}
             alt="Company gallery background"
             width={1920}
             height={400}
-            className="h-120 w-full object-fill group-hover:scale-105 transition-transform duration-300"
+            className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-300"
             priority
           />
           <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300 flex items-center justify-center">
-            <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-white/90 dark:bg-gray-900/90 px-4 py-2 rounded-full flex items-center gap-2 text-sm font-semibold">
+            <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-white/90 dark:bg-gray-900/90 px-3 py-1.5 rounded-full flex items-center gap-2 text-xs font-semibold">
               <svg
-                className="w-5 h-5"
+                className="w-4 h-4"
                 fill="none"
                 stroke="currentColor"
                 strokeWidth="2"
@@ -191,23 +191,23 @@ export default function RecruiterProfilePage({
       />
 
       {/* Hero Section */}
-      <section className="relative pb-12 mt-34">
+      <section className="relative pb-8 mt-4">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="flex flex-col md:flex-row items-start gap-8">
+          <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
             {/* Logo/Avatar */}
             <div className="relative flex-shrink-0">
-              <div className="w-32 h-32 md:w-40 md:h-40 bg-white dark:bg-gray-800 rounded-2xl border-4 border-white dark:border-gray-700 shadow-xl overflow-hidden flex items-center justify-center p-4 -mt-[60px]">
+              <div className="w-24 h-24 md:w-32 md:h-32 bg-white dark:bg-gray-800 rounded-xl border-4 border-white dark:border-gray-700 shadow-lg overflow-hidden flex items-center justify-center p-2 -mt-12 md:-mt-16">
                 {profile.company_logo_url ? (
                   <Image
                     src={profile.company_logo_url}
                     alt={displayName || "Company logo"}
-                    width={160}
-                    height={160}
+                    width={128}
+                    height={128}
                     className="object-contain w-full h-full"
                   />
                 ) : (
                   <div
-                    className="text-6xl"
+                    className="text-4xl"
                     aria-label={isCompany ? "Company" : "Recruiter"}
                   >
                     {isCompany ? "🏢" : "👤"}
@@ -215,12 +215,12 @@ export default function RecruiterProfilePage({
                 )}
               </div>
               {profile.is_verified && (
-                <div className="absolute -bottom-2 -right-2 w-12 h-12 bg-green-500 rounded-full flex items-center justify-center border-4 border-white dark:border-gray-900 shadow-lg">
+                <div className="absolute -bottom-1.5 -right-1.5 w-8 h-8 bg-green-500 rounded-full flex items-center justify-center border-2 border-white dark:border-gray-900 shadow-md">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     viewBox="0 0 24 24"
                     fill="currentColor"
-                    className="w-6 h-6 text-white"
+                    className="w-4 h-4 text-white"
                   >
                     <path
                       fillRule="evenodd"
@@ -233,67 +233,59 @@ export default function RecruiterProfilePage({
             </div>
 
             {/* Info */}
-            <div className="flex-1">
-              <div className="mt-2 flex flex-row justify-between">
-                <h1 className="text-4xl md:text-5xl font-black text-gray-900 dark:text-gray-100 mb-3 leading-tight">
-                  {displayName}
-                </h1>
-                {profile.is_verified && (
-                  <span className="inline-flex items-center gap-2 px-3 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 text-xs font-bold rounded-full border border-green-200 dark:border-green-800">
-                    <svg
-                      className="w-4 h-4"
-                      fill="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    Verified
-                  </span>
-                )}
-                {/* Company Details */}
+            <div className="flex-1 w-full text-center md:text-left">
+              <div className="mt-1 mb-3">
+                <div className="flex flex-col md:flex-row md:items-baseline gap-2 md:gap-3 justify-center md:justify-start">
+                  <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-gray-100 leading-tight">
+                    {displayName}
+                  </h1>
+                  {profile.is_verified && (
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 text-[10px] font-bold rounded-full border border-green-200 dark:border-green-800 self-center">
+                      <svg
+                        className="w-3 h-3"
+                        fill="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      Verified
+                    </span>
+                  )}
+                </div>
+
+                {/* Company Details - Industry & Size */}
                 {isCompany && (profile.company_size || profile.industry) && (
-                  <div className="flex flex-wrap gap-6 mb-2">
+                  <div className="flex flex-wrap items-center justify-center md:justify-start gap-2 mt-1.5 text-xs text-gray-500 dark:text-gray-400 font-medium">
                     {profile.industry && (
-                      <div>
-                        <span className="font-bold tracking-wider text-sm">
-                          Industry
-                        </span>
-                        <p className="text-gray-900 dark:text-gray-100 mt-1 text-xs">
-                          {profile.industry}
-                        </p>
-                      </div>
+                      <span className="uppercase tracking-wide">{profile.industry}</span>
+                    )}
+                    {profile.industry && profile.company_size && (
+                      <span className="w-1 h-1 rounded-full bg-gray-300 dark:bg-gray-600" />
                     )}
                     {profile.company_size && (
-                      <div>
-                        <span className="font-bold tracking-wider text-sm">
-                          Company Size
-                        </span>
-                        <p className="text-gray-900 dark:text-gray-100 mt-1 text-xs">
-                          {profile.company_size}+ employees
-                        </p>
-                      </div>
+                      <span>{profile.company_size}+ employees</span>
                     )}
                   </div>
                 )}
               </div>
 
               {profile.bio && (
-                <p className="text-gray-700 dark:text-gray-300 text-base leading-relaxed mb-6 whitespace-pre-line">
+                <p className="text-gray-600 dark:text-gray-300 text-sm leading-relaxed mb-4 whitespace-pre-line max-w-3xl mx-auto md:mx-0">
                   {profile.bio}
                 </p>
               )}
 
               {/* Contact Info Grid */}
-              <div className="grid grid-cols-2 sm:grid-cols-6 gap-3 mb-6">
+              <div className="flex flex-wrap items-center justify-center md:justify-start gap-2 mb-4">
                 {profile.location && (
-                  <div className="flex items-center gap-3 p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+                  <div className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-100 dark:border-gray-700">
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
                       fill="none"
                       viewBox="0 0 24 24"
                       strokeWidth={2}
                       stroke="currentColor"
-                      className="w-5 h-5 text-blue-600 dark:text-blue-400 flex-shrink-0"
+                      className="w-3.5 h-3.5 text-gray-400"
                     >
                       <path
                         strokeLinecap="round"
@@ -306,7 +298,7 @@ export default function RecruiterProfilePage({
                         d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z"
                       />
                     </svg>
-                    <span className="font-medium text-sm text-gray-700 dark:text-gray-300">
+                    <span className="text-xs font-medium text-gray-600 dark:text-gray-300">
                       {profile.location}
                     </span>
                   </div>
@@ -316,7 +308,7 @@ export default function RecruiterProfilePage({
                     href={profile.company_website}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-3 p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-blue-500 dark:hover:border-blue-500 transition-colors group"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-blue-500 dark:hover:border-blue-500 transition-colors group"
                   >
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
@@ -324,7 +316,7 @@ export default function RecruiterProfilePage({
                       viewBox="0 0 24 24"
                       strokeWidth={2}
                       stroke="currentColor"
-                      className="w-5 h-5 text-blue-600 dark:text-blue-400 flex-shrink-0"
+                      className="w-3.5 h-3.5 text-blue-500"
                     >
                       <path
                         strokeLinecap="round"
@@ -332,7 +324,7 @@ export default function RecruiterProfilePage({
                         d="M12 21a9.004 9.004 0 0 0 8.716-6.747M12 21a9.004 9.004 0 0 1-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 0 1 7.843 4.582M12 3a8.997 8.997 0 0 0-7.843 4.582m15.686 0A11.953 11.953 0 0 1 12 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0 1 21 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0 1 12 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 0 1 3 12c0-1.605.42-3.113 1.157-4.418"
                       />
                     </svg>
-                    <span className="font-bold text-sm text-blue-600 dark:text-blue-400 group-hover:text-blue-700 dark:group-hover:text-blue-300">
+                    <span className="text-xs font-semibold text-blue-600 dark:text-blue-400">
                       Visit Website
                     </span>
                   </a>
@@ -342,19 +334,19 @@ export default function RecruiterProfilePage({
                     href={profile.linkedin_url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-3 p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-blue-500 dark:hover:border-blue-500 transition-colors group"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-blue-500 dark:hover:border-blue-500 transition-colors group"
                   >
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
-                      width="20"
-                      height="20"
+                      width="14"
+                      height="14"
                       viewBox="0 0 24 24"
                       fill="currentColor"
-                      className="text-blue-600 dark:text-blue-400 flex-shrink-0"
+                      className="text-blue-600"
                     >
                       <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z" />
                     </svg>
-                    <span className="font-bold text-sm text-blue-600 dark:text-blue-400 group-hover:text-blue-700 dark:group-hover:text-blue-300">
+                    <span className="text-xs font-semibold text-blue-600 dark:text-blue-400">
                       LinkedIn
                     </span>
                   </a>
@@ -364,25 +356,25 @@ export default function RecruiterProfilePage({
               {/* Individual Recruiter Details */}
               {!isCompany &&
                 (profile.specialization || profile.years_experience) && (
-                  <div className="flex flex-wrap gap-6">
+                  <div className="flex flex-wrap gap-4 mt-2">
                     {profile.specialization && (
-                      <div>
-                        <span className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                          Specialization
+                      <div className="flex items-center gap-2">
+                        <span className="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                          Specialization:
                         </span>
-                        <p className="text-gray-900 dark:text-gray-100 font-bold mt-1">
+                        <span className="text-sm font-medium text-gray-900 dark:text-gray-100">
                           {profile.specialization}
-                        </p>
+                        </span>
                       </div>
                     )}
                     {profile.years_experience && (
-                      <div>
-                        <span className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                          Experience
+                      <div className="flex items-center gap-2">
+                        <span className="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                          Experience:
                         </span>
-                        <p className="text-gray-900 dark:text-gray-100 font-bold mt-1">
+                        <span className="text-sm font-medium text-gray-900 dark:text-gray-100">
                           {profile.years_experience} years
-                        </p>
+                        </span>
                       </div>
                     )}
                   </div>
@@ -396,11 +388,11 @@ export default function RecruiterProfilePage({
       {((Array.isArray(profile.recent_jobs) &&
         profile.recent_jobs.length > 0) ||
         (Array.isArray(profile.events) && profile.events.length > 0)) && (
-        <RecruiterProfileContent
-          jobs={Array.isArray(profile.recent_jobs) ? profile.recent_jobs : []}
-          events={Array.isArray(profile.events) ? profile.events : []}
-        />
-      )}
+          <RecruiterProfileContent
+            jobs={Array.isArray(profile.recent_jobs) ? profile.recent_jobs : []}
+            events={Array.isArray(profile.events) ? profile.events : []}
+          />
+        )}
 
       {/* Footer CTA */}
       <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 border-t border-gray-200 dark:border-gray-700">

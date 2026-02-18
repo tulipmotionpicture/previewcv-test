@@ -753,29 +753,29 @@ export default function CVSearchPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+          <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100">
             Search Candidate
           </h1>
         </div>
 
-        <div className="flex flex-col items-end gap-3">
+        <div className="flex flex-col items-end gap-2">
           {creditsStatus && creditsBalance && (
             <div className="w-full max-w-[320px]">
-              <div className="flex items-baseline gap-2 mb-1.5">
-                <span className="text-lg font-bold text-gray-900 dark:text-white">
+              <div className="flex items-baseline gap-2 mb-1">
+                <span className="text-base font-bold text-gray-900 dark:text-white">
                   {creditsBalance.credits_remaining}/
                   500
                 </span>
-                <span className="text-xs text-gray-900 dark:text-gray-100 font-medium">
+                <span className="text-[10px] text-gray-900 dark:text-gray-100 font-medium">
                   Available Credits
                 </span>
                 <span className="text-[10px] text-gray-500 dark:text-gray-400 ml-1">
                   {creditsStatus.active_unlocks} active unlocks
                 </span>
               </div>
-              <div className="w-full h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden border border-gray-100 dark:border-gray-600">
+              <div className="w-full h-1 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden border border-gray-100 dark:border-gray-600">
                 <div
                   className="h-full bg-blue-500 rounded-full transition-all duration-1000 ease-out"
                   style={{
@@ -792,16 +792,16 @@ export default function CVSearchPage() {
           <div className="flex items-center gap-2 w-full max-w-[320px]">
             <button
               onClick={() => setShowAdvancedFilters(true)}
-              className="flex-1 py-2 bg-white dark:bg-gray-800 border border-gray-400 dark:border-gray-600 text-gray-900 dark:text-white rounded-lg font-medium transition-colors flex items-center justify-center gap-2 text-sm shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700"
+              className="flex-1 py-1.5 bg-white dark:bg-gray-800 border border-gray-400 dark:border-gray-600 text-gray-900 dark:text-white rounded-lg font-medium transition-colors flex items-center justify-center gap-1.5 text-xs shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700"
             >
-              <Filter className="w-4 h-4 fill-current" />
+              <Filter className="w-3.5 h-3.5 fill-current" />
               Advanced Filter
             </button>
             <button
               onClick={fetchSearchHistory}
-              className="flex-1 py-2 bg-[#4B5563] hover:bg-[#374151] text-white rounded-lg font-medium transition-colors flex items-center justify-center gap-2 text-sm shadow-sm"
+              className="flex-1 py-1.5 bg-[#4B5563] hover:bg-[#374151] text-white rounded-lg font-medium transition-colors flex items-center justify-center gap-1.5 text-xs shadow-sm"
             >
-              <History className="w-4 h-4" />
+              <History className="w-3.5 h-3.5" />
               History
             </button>
           </div>
@@ -809,29 +809,29 @@ export default function CVSearchPage() {
       </div>
 
       {/* Search Card */}
-      <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 shadow-sm">
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
+      <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4 shadow-sm">
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-end">
           {/* Keyword Search - Full width on mobile, 4 cols on desktop */}
           <div className="md:col-span-4">
-            <label className="block text-sm font-bold text-gray-900 dark:text-gray-100 mb-1.5">
+            <label className="block text-xs font-bold text-gray-900 dark:text-gray-100 mb-1">
               Keyword Search
             </label>
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-300 pointer-events-none" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-300 pointer-events-none" />
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onKeyPress={(e) => e.key === "Enter" && handleSearch()}
                 placeholder="Search by skills, title, company..."
-                className="w-full pl-10 pr-4 py-3 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg text-sm text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all placeholder-gray-300"
+                className="w-full pl-9 pr-3 py-2 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg text-sm text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all placeholder-gray-300"
               />
             </div>
           </div>
 
           {/* Country - 3 cols */}
           <div className="md:col-span-3">
-            <label className="block text-sm font-bold text-gray-900 dark:text-gray-100 mb-1.5">
+            <label className="block text-xs font-bold text-gray-900 dark:text-gray-100 mb-1">
               Country
             </label>
             <CountrySearch
@@ -845,7 +845,7 @@ export default function CVSearchPage() {
                   onBlur={onBlur}
                   onKeyDown={onKeyDown}
                   placeholder="e.g. India"
-                  className="w-full px-4 py-3 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg text-sm text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all placeholder-gray-300"
+                  className="w-full px-3 py-2 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg text-sm text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all placeholder-gray-300"
                 />
               )}
               onChange={(c) =>
@@ -863,7 +863,7 @@ export default function CVSearchPage() {
 
           {/* State - 3 cols */}
           <div className="md:col-span-3">
-            <label className="block text-sm font-bold text-gray-900 dark:text-gray-100 mb-1.5">
+            <label className="block text-xs font-bold text-gray-900 dark:text-gray-100 mb-1">
               State
             </label>
             <StateSearch
@@ -878,7 +878,7 @@ export default function CVSearchPage() {
                   onBlur={onBlur}
                   onKeyDown={onKeyDown}
                   placeholder="e.g. Maharashtra"
-                  className="w-full px-4 py-3 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg text-sm text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all placeholder-gray-300"
+                  className="w-full px-3 py-2 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg text-sm text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all placeholder-gray-300"
                 />
               )}
               onChange={(s) =>
@@ -897,12 +897,12 @@ export default function CVSearchPage() {
             <button
               onClick={() => handleSearch()}
               disabled={loading}
-              className="w-full h-[46px] bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-bold transition-all disabled:opacity-50 flex items-center justify-center gap-2 shadow-md hover:shadow-lg active:scale-95"
+              className="w-full h-[38px] bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-bold transition-all disabled:opacity-50 flex items-center justify-center gap-1.5 shadow-md hover:shadow-lg active:scale-95 text-sm"
             >
               {loading ? (
-                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
               ) : (
-                <Search className="w-5 h-5" />
+                <Search className="w-4 h-4" />
               )}
               Search CVs
             </button>
@@ -911,10 +911,10 @@ export default function CVSearchPage() {
 
         {/* Collapsible Section */}
         {showMoreFilters && (
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end mt-4 animate-in slide-in-from-top-2 duration-200">
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-end mt-3 animate-in slide-in-from-top-2 duration-200">
             {/* City */}
             <div className="md:col-span-4">
-              <label className="block text-sm font-bold text-gray-900 dark:text-gray-100 mb-1.5">
+              <label className="block text-xs font-bold text-gray-900 dark:text-gray-100 mb-1">
                 City / Location
               </label>
               <CitySearch
@@ -930,7 +930,7 @@ export default function CVSearchPage() {
                     onBlur={onBlur}
                     onKeyDown={onKeyDown}
                     placeholder="e.g. Mumbai"
-                    className="w-full px-4 py-3 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg text-sm text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all placeholder-gray-300"
+                    className="w-full px-3 py-2 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg text-sm text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all placeholder-gray-300"
                   />
                 )}
                 onChange={(c) =>
@@ -941,10 +941,10 @@ export default function CVSearchPage() {
 
             {/* Experience */}
             <div className="md:col-span-4">
-              <label className="block text-sm font-bold text-gray-900 dark:text-gray-100 mb-1.5">
+              <label className="block text-xs font-bold text-gray-900 dark:text-gray-100 mb-1">
                 Experience (years)
               </label>
-              <div className="flex gap-3">
+              <div className="flex gap-2">
                 <div className="flex-1 text-center">
                   <input
                     type="number"
@@ -952,7 +952,7 @@ export default function CVSearchPage() {
                     value={filters.min_experience_years}
                     onChange={(e) => setFilters({ ...filters, min_experience_years: parseInt(e.target.value) || 0 })}
                     placeholder="0"
-                    className="w-full px-4 py-3 text-center bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg text-lg font-medium text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                    className="w-full px-3 py-2 text-center bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg text-sm font-medium text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
                   />
                 </div>
                 <div className="flex-1 text-center">
@@ -962,7 +962,7 @@ export default function CVSearchPage() {
                     value={filters.max_experience_years}
                     onChange={(e) => setFilters({ ...filters, max_experience_years: parseInt(e.target.value) || 50 })}
                     placeholder="2"
-                    className="w-full px-4 py-3 text-center bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg text-lg font-medium text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                    className="w-full px-3 py-2 text-center bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg text-sm font-medium text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
                   />
                 </div>
               </div>
@@ -974,16 +974,16 @@ export default function CVSearchPage() {
                 <button
                   onClick={handleBulkUnlock}
                   disabled={loading || !creditsStatus || creditsStatus.credits_remaining < selectedResumes.size}
-                  className="flex-1 h-[46px] bg-green-600 hover:bg-green-700 text-white rounded-lg font-bold transition-all disabled:opacity-50 flex items-center justify-center gap-2 text-sm shadow-sm"
+                  className="flex-1 h-[38px] bg-green-600 hover:bg-green-700 text-white rounded-lg font-bold transition-all disabled:opacity-50 flex items-center justify-center gap-1.5 text-xs shadow-sm"
                 >
-                  <Unlock className="w-4 h-4" />
+                  <Unlock className="w-3.5 h-3.5" />
                   Unlock {selectedResumes.size}
                 </button>
                 <button
                   onClick={() => setShowBucketModal(true)}
-                  className="flex-1 h-[46px] bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-bold transition-all flex items-center justify-center gap-2 text-sm shadow-sm"
+                  className="flex-1 h-[38px] bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-bold transition-all flex items-center justify-center gap-1.5 text-xs shadow-sm"
                 >
-                  <FolderPlus className="w-4 h-4" />
+                  <FolderPlus className="w-3.5 h-3.5" />
                   Add to Bucket
                 </button>
               </div>
@@ -991,16 +991,16 @@ export default function CVSearchPage() {
           </div>
         )}
 
-        <div className="flex justify-center mt-6">
+        <div className="flex justify-center mt-3">
           <button
             onClick={() => setShowMoreFilters(!showMoreFilters)}
-            className="group flex flex-col items-center gap-1 text-sm font-bold text-gray-900 dark:text-gray-100 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+            className="group flex flex-col items-center gap-0.5 text-xs font-bold text-gray-900 dark:text-gray-100 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
           >
             Show {showMoreFilters ? "less" : "more"}
             {showMoreFilters ? (
-              <ChevronUp className="w-5 h-5 text-gray-900 dark:text-gray-100 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-transform" strokeWidth={3} />
+              <ChevronUp className="w-4 h-4 text-gray-900 dark:text-gray-100 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-transform" strokeWidth={3} />
             ) : (
-              <ChevronDown className="w-5 h-5 text-gray-900 dark:text-gray-100 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-transform" strokeWidth={3} />
+              <ChevronDown className="w-4 h-4 text-gray-900 dark:text-gray-100 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-transform" strokeWidth={3} />
             )}
           </button>
         </div>
@@ -1430,88 +1430,88 @@ export default function CVSearchPage() {
       {
         searchResults && (
           <div className="space-y-4">
-            <div className="grid gap-6 grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
+            <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-4">
               {searchResults.results.map((result) => (
                 <div
                   key={result.resume_id}
-                  className="group relative rounded-2xl border border-gray-200 dark:border-gray-700
+                  className="group relative rounded-xl border border-gray-200 dark:border-gray-700
                  bg-white dark:bg-[#282727]
-                 p-6 shadow-sm
+                 p-4 shadow-sm
                  hover:shadow-xl hover:-translate-y-0.5
                  transition-all duration-200
                  flex flex-col"
                 >
                   {/* Card Header */}
-                  <div className="flex items-start justify-between gap-4 mb-5">
-                    <div className="flex items-center gap-4">
-                      <div>
-                        <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 leading-tight">
+                  <div className="flex items-start justify-between gap-3 mb-3">
+                    <div className="flex items-center gap-3">
+                      <div className="min-w-0">
+                        <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100 leading-tight truncate">
                           {result.full_name}
                         </h3>
-                        <p className="text-sm font-medium text-blue-600 dark:text-blue-400">
+                        <p className="text-xs font-medium text-blue-600 dark:text-blue-400 truncate">
                           {result.professional_title}
                         </p>
                       </div>
                     </div>
 
                     {/* Select */}
-                    <label className="flex items-center gap-2 text-xs text-gray-500 cursor-pointer">
+                    <label className="flex items-center gap-1.5 text-[10px] text-gray-500 cursor-pointer shrink-0">
                       <input
                         type="checkbox"
                         checked={selectedResumes.has(result.resume_id)}
                         onChange={() => toggleSelectResume(result.resume_id)}
-                        className="w-4 h-4 rounded border-gray-300"
+                        className="w-3.5 h-3.5 rounded border-gray-300"
                       />
                       Select
                     </label>
                   </div>
 
                   {/* Meta Info */}
-                  <div className="grid grid-cols-2 gap-y-3 gap-x-4 text-sm text-gray-600 dark:text-gray-400 mb-5">
-                    <div className="flex items-center gap-2">
-                      <MapPin className="w-4 h-4 text-gray-400" />
-                      {result.location}
+                  <div className="grid grid-cols-2 gap-y-2 gap-x-2 text-xs text-gray-600 dark:text-gray-400 mb-3">
+                    <div className="flex items-center gap-1.5 truncate">
+                      <MapPin className="w-3.5 h-3.5 text-gray-400 shrink-0" />
+                      <span className="truncate">{result.location}</span>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <Briefcase className="w-4 h-4 text-gray-400" />
-                      {result.experience_years} yrs
+                    <div className="flex items-center gap-1.5 truncate">
+                      <Briefcase className="w-3.5 h-3.5 text-gray-400 shrink-0" />
+                      <span className="truncate">{result.experience_years} yrs</span>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <GraduationCap className="w-4 h-4 text-gray-400" />
-                      {result.highest_education}
+                    <div className="flex items-center gap-1.5 truncate">
+                      <GraduationCap className="w-3.5 h-3.5 text-gray-400 shrink-0" />
+                      <span className="truncate">{result.highest_education}</span>
                     </div>
                     {result.current_company && (
-                      <div className="flex items-center gap-2 col-span-2">
-                        <Award className="w-4 h-4 text-gray-400" />
-                        {result.current_company}
+                      <div className="flex items-center gap-1.5 col-span-2 truncate">
+                        <Award className="w-3.5 h-3.5 text-gray-400 shrink-0" />
+                        <span className="truncate">{result.current_company}</span>
                       </div>
                     )}
                   </div>
 
                   {/* Skills */}
                   {result.skills?.length > 0 && (
-                    <div className="mb-6">
-                      <p className="text-[11px] font-semibold tracking-wide text-gray-500 dark:text-gray-400 uppercase mb-2">
+                    <div className="mb-4">
+                      <p className="text-[10px] font-semibold tracking-wide text-gray-500 dark:text-gray-400 uppercase mb-1.5">
                         Skills
                       </p>
-                      <div className="flex flex-wrap gap-2">
-                        {result.skills.slice(0, 5).map((skill, idx) => (
+                      <div className="flex flex-wrap gap-1.5">
+                        {result.skills.slice(0, 4).map((skill, idx) => (
                           <span
                             key={idx}
-                            className="px-3 py-1 rounded-full text-xs font-medium
+                            className="px-2 py-0.5 rounded-full text-[10px] font-medium
                            bg-blue-50 text-blue-700
-                           dark:bg-blue-900/30 dark:text-blue-300"
+                           dark:bg-blue-900/30 dark:text-blue-300 border border-blue-100 dark:border-blue-900/50"
                           >
                             {skill}
                           </span>
                         ))}
-                        {result.skills.length > 5 && (
+                        {result.skills.length > 4 && (
                           <span
-                            className="px-3 py-1 rounded-full text-xs font-medium
+                            className="px-2 py-0.5 rounded-full text-[10px] font-medium
                                bg-gray-100 dark:bg-gray-800
-                               text-gray-700 dark:text-gray-300"
+                               text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700"
                           >
-                            +{result.skills.length - 5} more
+                            +{result.skills.length - 4}
                           </span>
                         )}
                       </div>
@@ -1525,17 +1525,17 @@ export default function CVSearchPage() {
                       <button
                         onClick={() => handleDownloadResume(result.resume_id)}
                         disabled={loadingResumeDetail.has(result.resume_id)}
-                        className="w-full px-4 py-2 rounded-xl text-sm font-semibold
+                        className="w-full px-3 py-1.5 rounded-lg text-xs font-semibold
                        bg-emerald-600 hover:bg-emerald-700
-                       text-white shadow-md transition flex items-center justify-center gap-2
+                       text-white shadow-sm transition flex items-center justify-center gap-1.5
                        disabled:opacity-50"
                       >
                         {loadingResumeDetail.has(result.resume_id) ? (
-                          <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                          <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
                         ) : (
-                          <Eye className="w-4 h-4" />
+                          <Eye className="w-3.5 h-3.5" />
                         )}
-                        View / Download CV
+                        View CV
                       </button>
                     ) : (
                       <button
@@ -1545,18 +1545,18 @@ export default function CVSearchPage() {
                           !creditsStatus ||
                           creditsStatus.credits_remaining < 1
                         }
-                        className="w-full px-4 py-2 rounded-xl text-sm font-semibold
+                        className="w-full px-3 py-1.5 rounded-lg text-xs font-semibold
                        bg-gradient-to-r from-blue-600 to-indigo-600
                        hover:from-blue-700 hover:to-indigo-700
-                       text-white shadow-md transition
-                       disabled:opacity-50 flex items-center justify-center gap-2"
+                       text-white shadow-sm transition
+                       disabled:opacity-50 flex items-center justify-center gap-1.5"
                       >
                         {unlockingIds.has(result.resume_id) ? (
-                          <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                          <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
                         ) : (
-                          <Unlock className="w-4 h-4" />
+                          <Unlock className="w-3.5 h-3.5" />
                         )}
-                        View / Unlock (1 credit)
+                        Unlock (1)
                       </button>
                     )}
                   </div>

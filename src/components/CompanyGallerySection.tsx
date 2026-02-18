@@ -260,10 +260,10 @@ function CompanyGallerySection({
         </div>
       </div>
 
-      {/* Main Content Layout: Form Left, Gallery Right */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Left Column: Form */}
-        <div className="lg:col-span-2 space-y-6">
+      {/* Main Content Layout */}
+      <div className="space-y-8">
+        {/* Form Section */}
+        <div className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5 uppercase">
@@ -335,18 +335,18 @@ function CompanyGallerySection({
           </div>
         </div>
 
-        {/* Right Column: Office Gallery */}
-        <div className="lg:col-span-1">
+        {/* Office Gallery Section */}
+        <div>
           <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
             Office Gallery
           </h2>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-2">
             {/* Gallery Images */}
             {gallery.map((img, index) => (
               <div
                 key={index}
-                className="aspect-square relative group rounded-xl overflow-hidden border border-gray-100 dark:border-gray-700"
+                className="aspect-square relative group rounded-lg overflow-hidden border border-gray-100 dark:border-gray-700"
               >
                 <Image
                   src={img}
@@ -357,25 +357,25 @@ function CompanyGallerySection({
                 />
                 <button
                   onClick={() => handleGalleryDelete(img)}
-                  className="absolute top-2 right-2 bg-red-500/80 text-white w-6 h-6 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition backdrop-blur-sm cursor-pointer"
+                  className="absolute top-1 right-1 bg-red-500/80 text-white w-5 h-5 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition backdrop-blur-sm cursor-pointer"
                 >
-                  <X className="w-3.5 h-3.5" />
+                  <X className="w-3 h-3" />
                 </button>
               </div>
             ))}
 
-            {/* Add Photo Button (Always visible as the last item or alone) */}
+            {/* Add Photo Button */}
             <button
               onClick={() => galleryInputRef.current?.click()}
               disabled={uploadingGallery || gallery.length >= 10}
-              className="aspect-square rounded-xl border-2 border-dashed border-blue-200 dark:border-gray-600 bg-blue-50/50 dark:bg-gray-800/50 flex flex-col items-center justify-center text-blue-500 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-gray-800 transition group cursor-pointer"
+              className="aspect-square rounded-lg border-2 border-dashed border-blue-200 dark:border-gray-600 bg-blue-50/50 dark:bg-gray-800/50 flex flex-col items-center justify-center text-blue-500 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-gray-800 transition group cursor-pointer"
             >
               {uploadingGallery ? (
-                <span className="text-xs">Uploading...</span>
+                <span className="text-[10px]">Uploading...</span>
               ) : (
                 <>
-                  <Plus className="w-6 h-6 mb-1 group-hover:scale-110 transition-transform" />
-                  <span className="text-xs font-medium">Add Photo</span>
+                  <Plus className="w-5 h-5 mb-1 group-hover:scale-110 transition-transform" />
+                  <span className="text-[10px] font-medium">Add Photo</span>
                 </>
               )}
             </button>
