@@ -27,11 +27,26 @@ function JobsPageContent() {
   // State for search bar
   const [keyword, setKeyword] = useState(initialKeyword);
   const [country, setCountry] = useState(initialCountry);
+  const [scrolled, setScrolled] = useState(false);
+
   // Pagination state
   const [offset, setOffset] = useState(0);
   const [hasMore, setHasMore] = useState(true);
   const [total, setTotal] = useState(0);
   const limit = 10;
+
+  // Mobile filter visibility state
+  const [showMobileFilters, setShowMobileFilters] = useState(false);
+  const [showSearchModal, setShowSearchModal] = useState(false);
+
+  // Scroll handler
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 20);
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   // On mount, if keyword is present in URL, set it in filters as well
   // Track if filters are initialized from URL
@@ -198,15 +213,28 @@ function JobsPageContent() {
     return () => clearTimeout(timeoutId);
   }, [jobs.length, hasMore, loading, loadingMore, handleLoadMore]);
 
-  const [scrolled, setScrolled] = useState(false);
+  // Trigger search from modal or form
+  const handleSearch = () => {
+    const params = new URLSearchParams(searchParams.toString());
+    if (keyword) params.set("keyword", keyword);
+    else params.delete("keyword");
 
-  useEffect(() => {
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 20);
-    };
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+    if (country) params.set("country", country);
+    else params.delete("country");
+
+    router.push(`/jobs?${params.toString()}`);
+
+    setSelectedFilters((prev) => ({
+      ...prev,
+      skill_search: keyword ? [keyword] : [],
+      country: country ? [country] : [],
+    }));
+
+    // Trigger fetch
+    setOffset(0);
+    fetchJobs(0, false);
+    setShowSearchModal(false);
+  };
 
   return (
     <div className="min-h-screen transition-colors duration-300 bg-gray-50 dark:bg-gray-950">
@@ -220,40 +248,21 @@ function JobsPageContent() {
         showAuthButtons={true}
         hideOnScroll={true}
       />
-      <div className="pt-18 pb-8 px-12 max-w-7xl mx-auto">
+      <div className="pt-18 pb-8 px-4 md:px-12 max-w-7xl mx-auto">
         {/* Search Bar Container */}
-        {/* Search Bar Container */}
-        <div className={`sticky top-4 z-40 transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] ${scrolled ? 'mx-auto w-[95%] md:max-w-4xl bg-white/90 dark:bg-gray-900/90 backdrop-blur-md border border-blue-200/50 dark:border-blue-900/30 rounded-2xl shadow-2xl p-2' : 'w-full bg-white dark:bg-gray-900 border-1 border-[#E1E8F1] dark:border-gray-700 rounded-xl shadow-md p-4'} mb-3`}>
+        <div className={`sticky top-4 z-40 transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] ${scrolled ? 'mx-auto w-full md:w-[95%] md:max-w-4xl bg-white/90 dark:bg-gray-900/90 backdrop-blur-md border border-blue-200/50 dark:border-blue-900/30 rounded-2xl shadow-2xl p-2' : 'w-full bg-white dark:bg-gray-900 border-1 border-[#E1E8F1] dark:border-gray-700 rounded-xl shadow-md p-4'} mb-3`}>
           <div className="">
             <form
               onSubmit={(e) => {
                 e.preventDefault();
-
-                const params = new URLSearchParams(searchParams.toString());
-                if (keyword) params.set("keyword", keyword);
-                else params.delete("keyword");
-
-                if (country) params.set("country", country);
-                else params.delete("country");
-
-                router.push(`/jobs?${params.toString()}`);
-
-                setSelectedFilters((prev) => ({
-                  ...prev,
-                  skill_search: keyword ? [keyword] : [],
-                  country: country ? [country] : [],
-                }));
-
-                // Trigger fetch
-                setOffset(0);
-                fetchJobs(0, false);
+                handleSearch();
               }}
-              className={`flex flex-col lg:flex-row items-stretch transition-all duration-500 ${scrolled ? 'gap-2' : 'gap-3'}`}
+              className={`flex flex-row items-stretch transition-all duration-500 gap-2`}
             >
               {/* Keyword Input */}
-              <div className="flex-[2] bg-white dark:bg-gray-900 rounded-lg border border-blue-200 dark:border-gray-700 flex items-center px-4   hover:border-blue-400 transition-colors">
+              <div className="relative flex-[2] bg-white dark:bg-gray-900 rounded-lg border border-blue-200 dark:border-gray-700 flex items-center px-4 hover:border-blue-400 transition-colors h-11 md:h-12 py-1 md:py-0">
                 <svg
-                  className="w-6 h-6 text-gray-400 mr-3 shrink-0"
+                  className="w-5 h-5 text-gray-400 mr-2 shrink-0"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -265,17 +274,27 @@ function JobsPageContent() {
                     d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
                   />
                 </svg>
+                {/* Desktop Input */}
                 <input
                   type="text"
-                  placeholder="Enter Skills, Destinations, or Company Name"
+                  placeholder="Search jobs"
                   value={keyword}
                   onChange={(e) => setKeyword(e.target.value)}
-                  className="w-full bg-transparent border-none outline-none text-gray-700 dark:text-gray-200 placeholder-gray-400 text-sm font-medium focus:ring-0 p-0"
+                  className="w-full bg-transparent border-none outline-none text-gray-700 dark:text-gray-200 placeholder-gray-400 font-medium focus:ring-0 p-0 text-sm md:text-base hidden md:block"
+                />
+                {/* Mobile Trigger Input */}
+                <input
+                  type="text"
+                  placeholder="Search jobs"
+                  value={keyword}
+                  readOnly
+                  onClick={() => setShowSearchModal(true)}
+                  className="w-full bg-transparent border-none outline-none text-gray-700 dark:text-gray-200 placeholder-gray-400 font-medium focus:ring-0 p-0 text-sm md:hidden cursor-pointer selection:bg-transparent"
                 />
               </div>
 
-              {/* Country Input */}
-              <div className="flex-[1.5]">
+              {/* Country Input - Hidden on Mobile */}
+              <div className="hidden md:block flex-[1.5]">
                 <CountrySearch
                   country={country}
                   onChange={(c) => setCountry(c ? c.name : "")}
@@ -310,8 +329,8 @@ function JobsPageContent() {
                 />
               </div>
 
-              {/* Experience Input */}
-              <div className="flex-[1.5] bg-white dark:bg-gray-900 rounded-lg border border-blue-200 dark:border-gray-700 flex items-center px-4 py-3 hover:border-blue-400 transition-colors">
+              {/* Experience Input - Hidden on Mobile */}
+              <div className="hidden md:flex flex-[1.5] bg-white dark:bg-gray-900 rounded-lg border border-blue-200 dark:border-gray-700 items-center px-4 py-3 hover:border-blue-400 transition-colors h-full">
                 <span className="w-6 h-6 text-gray-400 mr-3 flex items-center justify-center font-bold text-lg shrink-0">
                   ₹
                 </span>
@@ -325,42 +344,63 @@ function JobsPageContent() {
               {/* Search Button */}
               <button
                 type="submit"
-                className={`bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-all duration-500 shadow-sm whitespace-nowrap ${scrolled ? 'px-4 py-2 min-w-[100px] text-sm' : 'px-8 py-3 min-w-[140px]'}`}
+                className={`bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-all duration-500 shadow-sm whitespace-nowrap px-6 py-2 md:px-8 md:py-3 h-11 md:h-auto text-sm md:text-base`}
               >
-                Search Job
+                Search
               </button>
             </form>
           </div>
-
-          {/* Popular Search */}
-          {/* <div className="flex flex-wrap items-center gap-2 mb-2 text-sm">
-            <span className="font-bold text-gray-500 dark:text-gray-400 mr-2">Popular Search:</span>
-            {["UI UX developer", "FrontEnd developer", "Deops Engineer", "Product Manager"].map((tag) => (
-              <button
-                key={tag}
-                onClick={() => {
-                  setKeyword(tag);
-                  setSelectedFilters(prev => ({ ...prev, skill_search: [tag] }));
-                }}
-                className="px-3 py-1 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300 rounded-md text-xs font-medium transition-colors"
-              >
-                {tag}
-              </button>
-            ))}
-          </div>*/}
         </div>
 
         <JobsLayout
           filters={
-            <JobsFilters
-              selectedFilters={selectedFilters}
-              setSelectedFilters={setSelectedFilters}
-            />
+            <div className="hidden md:block">
+              <JobsFilters
+                selectedFilters={selectedFilters}
+                setSelectedFilters={setSelectedFilters}
+              />
+            </div>
           }
           jobs={
             <>
+              {/* Mobile Filter & Sort Row */}
+              <div className="flex items-center justify-between mb-4 md:hidden">
+                <button
+                  className="flex items-center gap-2 px-3 py-2 border border-gray-200 rounded-lg bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 shadow-sm"
+                  onClick={() => setShowMobileFilters(true)}
+                >
+                  All Filter
+                  <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" /></svg>
+                </button>
+
+                <div className="flex items-center gap-2 bg-white rounded-lg border border-gray-200 px-3 py-2 shadow-sm">
+                  <span className="text-gray-500 text-sm whitespace-nowrap">Sort by :</span>
+                  <div className="relative group cursor-pointer flex items-center">
+                    <select className="appearance-none bg-transparent text-sm font-bold text-gray-900 border-none focus:ring-0 cursor-pointer pr-4 py-0 pl-1">
+                      <option>Date</option>
+                      <option>Relevance</option>
+                      <option>Salary</option>
+                    </select>
+                    <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center text-gray-900">
+                      <svg
+                        className="h-4 w-4"
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 20 20"
+                        fill="currentColor"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                          clipRule="evenodd"
+                        />
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
               {/* Header for Job List */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-2">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4">
                 <h2 className="text-slate-500 text-[15px] font-medium">
                   Showing{" "}
                   <span className="font-bold text-slate-900 dark:text-white">
@@ -384,7 +424,7 @@ function JobsPageContent() {
                   )}
                 </h2>
 
-                <div className="gap-2 bg-white dark:bg-gray-900 rounded-lg border border-blue-200 dark:border-gray-700 flex items-center px-1 py-1 hover:border-blue-400 transition-colors">
+                <div className="hidden md:flex gap-2 bg-white dark:bg-gray-900 rounded-lg border border-blue-200 dark:border-gray-700 items-center px-1 py-1 hover:border-blue-400 transition-colors">
                   <span className="text-slate-500 text-sm">Sort by :</span>
                   <div className="relative group cursor-pointer">
                     <select className="appearance-none bg-transparent text-sm font-bold text-slate-900 dark:text-white border-none focus:ring-0 cursor-pointer  py-1 px-1">
@@ -440,6 +480,79 @@ function JobsPageContent() {
           }
           sidebar={<JobsSidebar />}
         />
+
+        {/* Mobile Filters Modal */}
+        {showMobileFilters && (
+          <div className="fixed inset-0 z-[100] bg-black bg-opacity-50 flex justify-end md:hidden">
+            <div className="w-[85%] max-w-sm h-full bg-white dark:bg-gray-900 p-4 overflow-y-auto shadow-xl transition-transform transform translate-x-0">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-lg font-bold text-gray-900 dark:text-white">Filters</h2>
+                <button
+                  onClick={() => setShowMobileFilters(false)}
+                  className="p-2 text-gray-500 hover:text-gray-700 bg-gray-100 rounded-full"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+              </div>
+              <div className="pb-20">
+                <JobsFilters
+                  selectedFilters={selectedFilters}
+                  setSelectedFilters={setSelectedFilters}
+                />
+                <div className="mt-6">
+                  <button
+                    onClick={() => setShowMobileFilters(false)}
+                    className="w-full py-3 bg-blue-600 text-white font-bold rounded-xl shadow-lg hover:bg-blue-700"
+                  >
+                    Show Results
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Mobile Search Modal */}
+        {showSearchModal && (
+          <div className="fixed inset-0 z-[110] bg-white dark:bg-gray-900 p-5 flex flex-col md:hidden animate-in fade-in zoom-in-95 duration-200">
+            <div className="flex justify-end mb-2">
+              <button
+                onClick={() => setShowSearchModal(false)}
+                className="p-1.5 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+              </button>
+            </div>
+
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-5">Search Jobs</h2>
+
+            <div className="flex flex-col gap-5">
+              <input
+                type="text"
+                placeholder="Enter skills, destination, or company name..."
+                value={keyword}
+                onChange={(e) => setKeyword(e.target.value)}
+                autoFocus
+                className="w-full bg-transparent border-b border-gray-300 dark:border-gray-700 py-2.5 text-base font-medium text-gray-900 dark:text-white placeholder-gray-400 focus:border-blue-600 dark:focus:border-blue-500 outline-none transition-colors rounded-none"
+              />
+
+              <input
+                type="text"
+                placeholder="Enter County"
+                value={country} // Assuming we want user to type here, or use same CountrySearch comp if needed. Image shows text input.
+                onChange={(e) => setCountry(e.target.value)}
+                className="w-full bg-transparent border-b border-gray-300 dark:border-gray-700 py-2.5 text-base font-medium text-gray-900 dark:text-white placeholder-gray-400 focus:border-blue-600 dark:focus:border-blue-500 outline-none transition-colors rounded-none"
+              />
+
+              <button
+                onClick={handleSearch}
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold text-base rounded-xl py-3 mt-4 shadow-lg active:scale-[0.98] transition-all"
+              >
+                Search Job
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
 import { api } from "@/lib/api";
 import {
   Job,
@@ -47,7 +46,6 @@ import {
   Search,
   Bell,
   Plus,
-  Briefcase,
 } from "lucide-react";
 import { Button } from "@/components/ui";
 
@@ -418,12 +416,12 @@ export default function RecruiterDashboard() {
         setSelectedApplicationDetail((prev) =>
           prev
             ? {
-                ...prev,
-                application: {
-                  ...prev.application,
-                  status: newStatus as Application["status"],
-                },
-              }
+              ...prev,
+              application: {
+                ...prev.application,
+                status: newStatus as Application["status"],
+              },
+            }
             : null,
         );
       }
@@ -478,33 +476,9 @@ export default function RecruiterDashboard() {
       />
 
       {/* Main Content */}
-      <main className="flex-1 p-5 max-w-7xl  overflow-x-hidden">
+      <main className="flex-1 p-5 w-full overflow-x-hidden">
         {/* Dashboard Header */}
-        <header className="flex items-center justify-end mb-6">
-          <div className="flex items-center gap-4 text-right">
-            <div>
-              <h1 className="text-md font-bold text-gray-900 dark:text-gray-100">
-                {recruiter?.company_name || "Company"}&apos;s Dashboard
-              </h1>
-              <p className="text-sm text-[#60768D] dark:text-gray-400">
-                {recruiter?.email || "user@example.com"}
-              </p>
-            </div>
-            <div className="w-12 h-12 bg-white dark:bg-[#282727] rounded-md flex items-center justify-center border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden">
-              {recruiter?.company_logo_url ? (
-                <Image
-                  src={recruiter.company_logo_url}
-                  alt="Company Logo"
-                  width={48}
-                  height={48}
-                  className="object-cover w-full h-full"
-                />
-              ) : (
-                <Briefcase className="w-6 h-6 text-gray-400" />
-              )}
-            </div>
-          </div>
-        </header>
+
 
         {/* KYC Verification Warning Banner */}
         {kycStatus &&
@@ -569,7 +543,7 @@ export default function RecruiterDashboard() {
                       loadingJobs={loadingJobs}
                       currentPage={1}
                       totalPages={1}
-                      onPageChange={() => {}}
+                      onPageChange={() => { }}
                       onEditJob={handleEditJob}
                       onDeleteJob={(jobId) => setDeleteJobId(jobId)}
                       onViewApplications={handleViewApplications}
@@ -585,51 +559,51 @@ export default function RecruiterDashboard() {
                       <div className="divide-y divide-gray-100 dark:divide-gray-700">
                         {applications.slice(0, 6).length > 0
                           ? applications.slice(0, 6).map((app) => (
-                              <div
-                                key={app.id}
-                                className="flex items-center gap-4 p-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors cursor-pointer group first:rounded-t-2xl last:rounded-b-2xl"
-                                onClick={() => handleViewApplicationDetail(app)}
-                              >
-                                <div className="w-10 h-10 rounded-full bg-[#0B172B] flex items-center justify-center text-white font-bold text-sm shadow-sm flex-shrink-0">
-                                  {app.candidate_name
-                                    ?.substring(0, 2)
-                                    .toUpperCase() || "JD"}
+                            <div
+                              key={app.id}
+                              className="flex items-center gap-4 p-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors cursor-pointer group first:rounded-t-2xl last:rounded-b-2xl"
+                              onClick={() => handleViewApplicationDetail(app)}
+                            >
+                              <div className="w-10 h-10 rounded-full bg-[#0B172B] flex items-center justify-center text-white font-bold text-sm shadow-sm flex-shrink-0">
+                                {app.candidate_name
+                                  ?.substring(0, 2)
+                                  .toUpperCase() || "JD"}
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <div className="font-bold text-gray-900 dark:text-gray-100 truncate text-[15px]">
+                                  {app.candidate_name || "John Deo"}
                                 </div>
-                                <div className="flex-1 min-w-0">
-                                  <div className="font-bold text-gray-900 dark:text-gray-100 truncate text-[15px]">
-                                    {app.candidate_name || "John Deo"}
-                                  </div>
-                                  <div className="text-xs text-[#60768D] dark:text-gray-400 font-medium mt-0.5">
-                                    Application Review
-                                  </div>
-                                </div>
-                                <div className="w-10 h-10 rounded-full border border-gray-200 dark:border-gray-700 flex items-center justify-center bg-white dark:bg-[#282727] group-hover:bg-gray-50 dark:group-hover:bg-gray-700 transition-colors">
-                                  <Clock className="w-5 h-5 text-gray-400 group-hover:text-gray-600 dark:group-hover:text-gray-300 stroke-1" />
+                                <div className="text-xs text-[#60768D] dark:text-gray-400 font-medium mt-0.5">
+                                  Application Review
                                 </div>
                               </div>
-                            ))
+                              <div className="w-10 h-10 rounded-full border border-gray-200 dark:border-gray-700 flex items-center justify-center bg-white dark:bg-[#282727] group-hover:bg-gray-50 dark:group-hover:bg-gray-700 transition-colors">
+                                <Clock className="w-5 h-5 text-gray-400 group-hover:text-gray-600 dark:group-hover:text-gray-300 stroke-1" />
+                              </div>
+                            </div>
+                          ))
                           : // Fallback mock items
-                            [1, 2, 3, 4, 5, 6].map((i) => (
-                              <div
-                                key={i}
-                                className="flex items-center gap-4 p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors cursor-pointer group first:rounded-t-2xl last:rounded-b-2xl"
-                              >
-                                <div className="w-12 h-12 rounded-full bg-[#0B172B] flex items-center justify-center text-white font-bold text-sm shadow-sm flex-shrink-0">
-                                  JD
+                          [1, 2, 3, 4, 5, 6].map((i) => (
+                            <div
+                              key={i}
+                              className="flex items-center gap-4 p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors cursor-pointer group first:rounded-t-2xl last:rounded-b-2xl"
+                            >
+                              <div className="w-12 h-12 rounded-full bg-[#0B172B] flex items-center justify-center text-white font-bold text-sm shadow-sm flex-shrink-0">
+                                JD
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <div className="font-bold text-gray-900 dark:text-gray-100 truncate text-[15px]">
+                                  John Deo
                                 </div>
-                                <div className="flex-1 min-w-0">
-                                  <div className="font-bold text-gray-900 dark:text-gray-100 truncate text-[15px]">
-                                    John Deo
-                                  </div>
-                                  <div className="text-xs text-[#60768D] dark:text-gray-400 font-medium mt-0.5">
-                                    Application Review
-                                  </div>
-                                </div>
-                                <div className="w-10 h-10 rounded-full border border-gray-200 dark:border-gray-700 flex items-center justify-center bg-white dark:bg-[#282727] group-hover:bg-gray-50 dark:group-hover:bg-gray-700 transition-colors">
-                                  <Clock className="w-5 h-5 text-gray-400 group-hover:text-gray-600 dark:group-hover:text-gray-300 stroke-1" />
+                                <div className="text-xs text-[#60768D] dark:text-gray-400 font-medium mt-0.5">
+                                  Application Review
                                 </div>
                               </div>
-                            ))}
+                              <div className="w-10 h-10 rounded-full border border-gray-200 dark:border-gray-700 flex items-center justify-center bg-white dark:bg-[#282727] group-hover:bg-gray-50 dark:group-hover:bg-gray-700 transition-colors">
+                                <Clock className="w-5 h-5 text-gray-400 group-hover:text-gray-600 dark:group-hover:text-gray-300 stroke-1" />
+                              </div>
+                            </div>
+                          ))}
                       </div>
                       <div className="p-4 border-t border-gray-100 dark:border-gray-700"></div>
                     </div>

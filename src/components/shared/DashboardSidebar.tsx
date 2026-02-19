@@ -20,6 +20,8 @@ interface DashboardSidebarProps<T extends string> {
     variant?: "light" | "dark";
     userName?: string | null;
     showChevron?: boolean;
+    userSubtitle?: string;
+    userAvatarUrl?: string;
 }
 
 export default function DashboardSidebar<T extends string>({
@@ -31,6 +33,8 @@ export default function DashboardSidebar<T extends string>({
     variant = "light",
     userName,
     showChevron = false,
+    userSubtitle = "Candidate",
+    userAvatarUrl,
 }: DashboardSidebarProps<T>) {
     const isDark = variant === "dark";
 
@@ -116,15 +120,25 @@ export default function DashboardSidebar<T extends string>({
                 {userName && (
                     <div className="bg-[#1C2534] dark:bg-[#1E293B] rounded-lg p-2.5 flex items-center gap-2.5 mb-2 shadow-sm border border-gray-700/50">
                         {/* User Avatar - Circle Design */}
-                        <div className="w-8 h-8 rounded-full bg-[#111827] flex items-center justify-center flex-shrink-0 text-white font-bold text-xs border border-gray-600">
-                            {userName ? userName.slice(0, 2).toUpperCase() : <User size={14} />}
+                        <div className="w-8 h-8 rounded-full bg-[#111827] flex items-center justify-center flex-shrink-0 text-white font-bold text-xs border border-gray-600 overflow-hidden">
+                            {userAvatarUrl ? (
+                                <Image
+                                    src={userAvatarUrl}
+                                    alt={userName}
+                                    width={32}
+                                    height={32}
+                                    className="object-cover w-full h-full"
+                                />
+                            ) : (
+                                userName ? userName.slice(0, 2).toUpperCase() : <User size={14} />
+                            )}
                         </div>
                         <div className="flex-1 min-w-0">
-                            <p className="text-xs font-bold text-white truncate">
+                            <p className="text-xs font-bold text-white truncate" title={userName}>
                                 {userName}
                             </p>
-                            <p className="text-[10px] text-gray-400">
-                                Candidate
+                            <p className="text-[10px] text-gray-400 truncate" title={userSubtitle}>
+                                {userSubtitle}
                             </p>
                         </div>
                     </div>
