@@ -43,7 +43,9 @@ import {
 import ResumeDetailModal from "./ResumeDetailModal";
 import { CountrySearch, StateSearch, CitySearch } from "@/components/location";
 import { Country, State, City } from "@/types/location";
-
+import { IndustrySearch, SkillSearch, CompanySearch, JobSearch, DegreeSearch } from "@/components/masters";
+import { Company, JobTitle, FieldOfStudy } from "@/types/masters";
+import AdvancedFilters from "./AdvancedFilters";
 export default function CVSearchPage() {
   const { showToast } = useToast();
   const [searchQuery, setSearchQuery] = useState("");
@@ -52,6 +54,7 @@ export default function CVSearchPage() {
     skills_match_all: false,
     min_experience_years: 0,
     max_experience_years: 50,
+    industry: "",
     country: "",
     countryCode: "",
     state: "",
@@ -70,6 +73,19 @@ export default function CVSearchPage() {
     sort_by: "relevance",
     sort_order: "desc",
     excluded_companies: [] as string[],
+    universities: [] as string[],
+    fields_of_study: [] as string[],
+    certifications: [] as string[],
+    under_notice_period: undefined as boolean | undefined,
+    notice_period_values: [] as string[],
+    has_github: undefined as boolean | undefined,
+    has_linkedin: undefined as boolean | undefined,
+    min_projects_count: 0,
+    has_volunteer_experience: undefined as boolean | undefined,
+    last_active_days: 0,
+    bucket_id: 0,
+    not_in_any_bucket: false,
+    exclude_bucket_ids: [] as number[],
   });
 
   // Input states for adding items to arrays
@@ -78,6 +94,10 @@ export default function CVSearchPage() {
   const [companyInput, setCompanyInput] = useState("");
   const [excludedCompanyInput, setExcludedCompanyInput] = useState("");
   const [degreeInput, setDegreeInput] = useState("");
+  const [universityInput, setUniversityInput] = useState("");
+  const [fieldOfStudyInput, setFieldOfStudyInput] = useState("");
+  const [certificationInput, setCertificationInput] = useState("");
+  const [noticePeriodInput, setNoticePeriodInput] = useState("");
   const [languageInput, setLanguageInput] = useState("");
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
   const [showMoreFilters, setShowMoreFilters] = useState(false);
@@ -341,6 +361,7 @@ export default function CVSearchPage() {
             : undefined,
         min_experience_years: activeFilters.min_experience_years,
         max_experience_years: activeFilters.max_experience_years,
+        industry: activeFilters.industry || undefined,
         country: activeFilters.country || undefined,
         state: activeFilters.state || undefined,
         city: activeFilters.city || undefined,
@@ -351,6 +372,19 @@ export default function CVSearchPage() {
             ? activeFilters.languages
             : undefined,
         language_proficiency: activeFilters.language_proficiency || undefined,
+        universities: activeFilters.universities.length > 0 ? activeFilters.universities : undefined,
+        fields_of_study: activeFilters.fields_of_study.length > 0 ? activeFilters.fields_of_study : undefined,
+        certifications: activeFilters.certifications.length > 0 ? activeFilters.certifications : undefined,
+        under_notice_period: activeFilters.under_notice_period,
+        notice_period_values: activeFilters.notice_period_values.length > 0 ? activeFilters.notice_period_values : undefined,
+        has_github: activeFilters.has_github,
+        has_linkedin: activeFilters.has_linkedin,
+        min_projects_count: activeFilters.min_projects_count > 0 ? activeFilters.min_projects_count : undefined,
+        has_volunteer_experience: activeFilters.has_volunteer_experience,
+        last_active_days: activeFilters.last_active_days > 0 ? activeFilters.last_active_days : undefined,
+        bucket_id: activeFilters.bucket_id > 0 ? activeFilters.bucket_id : undefined,
+        not_in_any_bucket: activeFilters.not_in_any_bucket || undefined,
+        exclude_bucket_ids: activeFilters.exclude_bucket_ids.length > 0 ? activeFilters.exclude_bucket_ids : undefined,
         open_to_work_only: activeFilters.open_to_work_only || undefined,
         is_currently_employed: activeFilters.is_currently_employed,
         page: activeFilters.page,
@@ -626,6 +660,137 @@ export default function CVSearchPage() {
       ...filters,
       languages: filters.languages.filter((l) => l !== language),
     });
+  };
+
+  const addUniversity = () => {
+    if (
+      universityInput.trim() &&
+      !filters.universities.includes(universityInput.trim())
+    ) {
+      setFilters({
+        ...filters,
+        universities: [...filters.universities, universityInput.trim()],
+      });
+      setUniversityInput("");
+    }
+  };
+
+  const removeUniversity = (uni: string) => {
+    setFilters({
+      ...filters,
+      universities: filters.universities.filter((u) => u !== uni),
+    });
+  };
+
+  const addFieldOfStudy = () => {
+    if (
+      fieldOfStudyInput.trim() &&
+      !filters.fields_of_study.includes(fieldOfStudyInput.trim())
+    ) {
+      setFilters({
+        ...filters,
+        fields_of_study: [...filters.fields_of_study, fieldOfStudyInput.trim()],
+      });
+      setFieldOfStudyInput("");
+    }
+  };
+
+  const removeFieldOfStudy = (field: string) => {
+    setFilters({
+      ...filters,
+      fields_of_study: filters.fields_of_study.filter((f) => f !== field),
+    });
+  };
+
+  const addCertification = () => {
+    if (
+      certificationInput.trim() &&
+      !filters.certifications.includes(certificationInput.trim())
+    ) {
+      setFilters({
+        ...filters,
+        certifications: [...filters.certifications, certificationInput.trim()],
+      });
+      setCertificationInput("");
+    }
+  };
+
+  const removeCertification = (cert: string) => {
+    setFilters({
+      ...filters,
+      certifications: filters.certifications.filter((c) => c !== cert),
+    });
+  };
+
+  const addNoticePeriod = () => {
+    if (
+      noticePeriodInput.trim() &&
+      !filters.notice_period_values.includes(noticePeriodInput.trim())
+    ) {
+      setFilters({
+        ...filters,
+        notice_period_values: [...filters.notice_period_values, noticePeriodInput.trim()],
+      });
+      setNoticePeriodInput("");
+    }
+  };
+
+  const removeNoticePeriod = (notice: string) => {
+    setFilters({
+      ...filters,
+      notice_period_values: filters.notice_period_values.filter((n) => n !== notice),
+    });
+  };
+
+  const resetFilters = () => {
+    setFilters({
+      skills: [],
+      skills_match_all: false,
+      min_experience_years: 0,
+      max_experience_years: 50,
+      industry: "",
+      country: "",
+      countryCode: "",
+      state: "",
+      stateCode: "",
+      city: "",
+      job_titles: [],
+      companies: [],
+      education_level: "",
+      degrees: [],
+      languages: [],
+      language_proficiency: "",
+      open_to_work_only: false,
+      is_currently_employed: undefined,
+      page: 1,
+      page_size: 20,
+      sort_by: "relevance",
+      sort_order: "desc",
+      excluded_companies: [],
+      universities: [],
+      fields_of_study: [],
+      certifications: [],
+      under_notice_period: undefined,
+      notice_period_values: [],
+      has_github: undefined,
+      has_linkedin: undefined,
+      min_projects_count: 0,
+      has_volunteer_experience: undefined,
+      last_active_days: 0,
+      bucket_id: 0,
+      not_in_any_bucket: false,
+      exclude_bucket_ids: [],
+    });
+    setSkillInput("");
+    setJobTitleInput("");
+    setCompanyInput("");
+    setExcludedCompanyInput("");
+    setDegreeInput("");
+    setUniversityInput("");
+    setFieldOfStudyInput("");
+    setCertificationInput("");
+    setNoticePeriodInput("");
+    setLanguageInput("");
   };
 
   // Bucket functions
@@ -1008,8 +1173,22 @@ export default function CVSearchPage() {
 
       {/* Advanced Filters Modal */}
       {showAdvancedFilters && (
+        <AdvancedFilters
+          filters={filters}
+          setFilters={setFilters}
+          onClose={() => setShowAdvancedFilters(false)}
+          onApply={() => {
+            handleSearch();
+            setShowAdvancedFilters(false);
+          }}
+          onReset={resetFilters}
+          buckets={buckets}
+        />
+      )}
+      {/* Old Modal Code (Hidden) */}
+      {false && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-3xl max-h-[85vh] flex flex-col overflow-hidden animate-in zoom-in-95 duration-200   dark:border-gray-700">
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-7xl max-h-[85vh] flex flex-col overflow-hidden animate-in zoom-in-95 duration-200   dark:border-gray-700">
             <div className="flex items-center justify-between px-6 py-1 border-b  bg-slate-900 rounded-t-xl">
               <h3 className="text-lg font-semibold text-white">
                 Advanced Filters
@@ -1029,16 +1208,48 @@ export default function CVSearchPage() {
                   Skills
                 </label>
                 <div className="flex gap-2 mb-2">
-                  <input
-                    type="text"
-                    value={skillInput}
-                    onChange={(e) => setSkillInput(e.target.value)}
-                    onKeyDown={(e) =>
-                      e.key === "Enter" && (e.preventDefault(), addSkill())
-                    }
-                    placeholder="Add skill (e.g., React, Python)"
-                    className="flex-1 px-3 py-2 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
+                  <div className="flex-1">
+                    <SkillSearch
+                      skill={skillInput}
+                      onChange={(s) => {
+                        if (s) {
+                          if (s.id > 0) {
+                            // Selected from list - add immediately
+                            if (s.skillName && !filters.skills.includes(s.skillName)) {
+                              setFilters(prev => ({
+                                ...prev,
+                                skills: [...prev.skills, s.skillName]
+                              }));
+                              setSkillInput("");
+                            }
+                          } else {
+                            // Typing
+                            setSkillInput(s.skillName);
+                          }
+                        } else {
+                          setSkillInput("");
+                        }
+                      }}
+                      placeholder="Add skill (e.g., React, Python)"
+                      renderInput={({ value, onChange, onFocus, onBlur, onKeyDown }) => (
+                        <input
+                          type="text"
+                          value={value}
+                          onChange={onChange}
+                          onFocus={onFocus}
+                          onBlur={onBlur}
+                          onKeyDown={(e) => {
+                            onKeyDown(e);
+                            if (e.key === "Enter" && !e.defaultPrevented) {
+                              addSkill();
+                            }
+                          }}
+                          placeholder="Add skill (e.g., React, Python)"
+                          className="w-full px-3 py-2 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                      )}
+                    />
+                  </div>
                   <button
                     onClick={addSkill}
                     className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
@@ -1080,22 +1291,61 @@ export default function CVSearchPage() {
                 </label>
               </div>
 
+              {/* Industry */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                  Industry
+                </label>
+                <div className="mb-2">
+                  <IndustrySearch
+                    industry={filters.industry}
+                    onChange={(ind) => setFilters(prev => ({ ...prev, industry: ind ? ind.name : "" }))}
+                    placeholder="Select Industry"
+                    renderInput={({ value, onChange, onFocus, onBlur, onKeyDown }) => (
+                      <input
+                        type="text"
+                        value={value}
+                        onChange={onChange}
+                        onFocus={onFocus}
+                        onBlur={onBlur}
+                        onKeyDown={onKeyDown}
+                        placeholder="Select Industry"
+                        className="w-full px-3 py-2 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                    )}
+                  />
+                </div>
+              </div>
+
               {/* Job Titles */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
                   Job Titles
                 </label>
                 <div className="flex gap-2 mb-2">
-                  <input
-                    type="text"
-                    value={jobTitleInput}
-                    onChange={(e) => setJobTitleInput(e.target.value)}
-                    onKeyDown={(e) =>
-                      e.key === "Enter" && (e.preventDefault(), addJobTitle())
-                    }
-                    placeholder="Add job title (e.g., Software Engineer)"
-                    className="flex-1 px-3 py-2 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
+                  <div className="flex-1">
+                    <JobSearch
+                      title={jobTitleInput}
+                      onChange={(val: JobTitle | null) => {
+                        if (val) {
+                          if (val.id > 0) {
+                            if (!filters.job_titles.includes(val.title)) {
+                              setFilters((prev) => ({
+                                ...prev,
+                                job_titles: [...prev.job_titles, val.title],
+                              }));
+                            }
+                            setJobTitleInput("");
+                          } else {
+                            setJobTitleInput(val.title);
+                          }
+                        } else {
+                          setJobTitleInput("");
+                        }
+                      }}
+                      placeholder="Add job title (e.g., Software Engineer)"
+                    />
+                  </div>
                   <button
                     onClick={addJobTitle}
                     className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
@@ -1127,16 +1377,29 @@ export default function CVSearchPage() {
                   Companies
                 </label>
                 <div className="flex gap-2 mb-2">
-                  <input
-                    type="text"
-                    value={companyInput}
-                    onChange={(e) => setCompanyInput(e.target.value)}
-                    onKeyDown={(e) =>
-                      e.key === "Enter" && (e.preventDefault(), addCompany())
-                    }
-                    placeholder="Add company (e.g., Google, Microsoft)"
-                    className="flex-1 px-3 py-2 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
+                  <div className="flex-1">
+                    <CompanySearch
+                      company={companyInput}
+                      onChange={(val: Company | null) => {
+                        if (val) {
+                          if (val.id > 0) {
+                            if (!filters.companies.includes(val.name)) {
+                              setFilters((prev) => ({
+                                ...prev,
+                                companies: [...prev.companies, val.name],
+                              }));
+                            }
+                            setCompanyInput("");
+                          } else {
+                            setCompanyInput(val.name);
+                          }
+                        } else {
+                          setCompanyInput("");
+                        }
+                      }}
+                      placeholder="Add company (e.g., Google, Microsoft)"
+                    />
+                  </div>
                   <button
                     onClick={addCompany}
                     className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
@@ -1168,17 +1431,29 @@ export default function CVSearchPage() {
                   Exclude Companies
                 </label>
                 <div className="flex gap-2 mb-2">
-                  <input
-                    type="text"
-                    value={excludedCompanyInput}
-                    onChange={(e) => setExcludedCompanyInput(e.target.value)}
-                    onKeyDown={(e) =>
-                      e.key === "Enter" &&
-                      (e.preventDefault(), addExcludedCompany())
-                    }
-                    placeholder="Exclude company (e.g., Competitor Inc)"
-                    className="flex-1 px-3 py-2 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
+                  <div className="flex-1">
+                    <CompanySearch
+                      company={excludedCompanyInput}
+                      onChange={(val: Company | null) => {
+                        if (val) {
+                          if (val.id > 0) {
+                            if (!filters.excluded_companies.includes(val.name)) {
+                              setFilters((prev) => ({
+                                ...prev,
+                                excluded_companies: [...prev.excluded_companies, val.name],
+                              }));
+                            }
+                            setExcludedCompanyInput("");
+                          } else {
+                            setExcludedCompanyInput(val.name);
+                          }
+                        } else {
+                          setExcludedCompanyInput("");
+                        }
+                      }}
+                      placeholder="Exclude company (e.g., Competitor Inc)"
+                    />
+                  </div>
                   <button
                     onClick={addExcludedCompany}
                     className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
@@ -1241,7 +1516,7 @@ export default function CVSearchPage() {
                     onKeyDown={(e) =>
                       e.key === "Enter" && (e.preventDefault(), addDegree())
                     }
-                    placeholder="Add degree (e.g., Computer Science, MBA)"
+                    placeholder="Add degree (e.g., MBA, B.Tech)"
                     className="flex-1 px-3 py-2 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                   <button
@@ -1268,6 +1543,138 @@ export default function CVSearchPage() {
                   ))}
                 </div>
               </div>
+
+              {/* Fields of Study */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                  Fields of Study
+                </label>
+                <div className="flex gap-2 mb-2">
+                  <div className="flex-1">
+                    <DegreeSearch
+                      degree={fieldOfStudyInput}
+                      onChange={(val: FieldOfStudy | null) => {
+                        if (val) {
+                          setFilters((prev) => {
+                            if (!prev.fields_of_study.includes(val.name)) {
+                              return { ...prev, fields_of_study: [...prev.fields_of_study, val.name] };
+                            }
+                            return prev;
+                          });
+                          setFieldOfStudyInput("");
+                        } else {
+                          setFieldOfStudyInput("");
+                        }
+                      }}
+                      placeholder="Add field (e.g., Computer Science)"
+                    />
+                  </div>
+                  <button
+                    onClick={addFieldOfStudy}
+                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                  >
+                    Add
+                  </button>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {filters.fields_of_study.map((field) => (
+                    <span
+                      key={field}
+                      className="inline-flex items-center gap-1 px-3 py-1 bg-indigo-100 dark:bg-indigo-900 text-indigo-800 dark:text-indigo-200 rounded-full text-sm"
+                    >
+                      {field}
+                      <button
+                        onClick={() => removeFieldOfStudy(field)}
+                        className="hover:text-indigo-600"
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              {/* Universities */}
+              {/* <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                  Universities
+                </label>
+                <div className="flex gap-2 mb-2">
+                  <input
+                    type="text"
+                    value={universityInput}
+                    onChange={(e) => setUniversityInput(e.target.value)}
+                    onKeyDown={(e) =>
+                      e.key === "Enter" && (e.preventDefault(), addUniversity())
+                    }
+                    placeholder="Add university"
+                    className="flex-1 px-3 py-2 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                  <button
+                    onClick={addUniversity}
+                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                  >
+                    Add
+                  </button>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {filters.universities.map((uni) => (
+                    <span
+                      key={uni}
+                      className="inline-flex items-center gap-1 px-3 py-1 bg-cyan-100 dark:bg-cyan-900 text-cyan-800 dark:text-cyan-200 rounded-full text-sm"
+                    >
+                      {uni}
+                      <button
+                        onClick={() => removeUniversity(uni)}
+                        className="hover:text-cyan-600"
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    </span>
+                  ))}
+                </div>
+              </div> */}
+
+              {/* Certifications */}
+              {/* <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                  Certifications
+                </label>
+                <div className="flex gap-2 mb-2">
+                  <input
+                    type="text"
+                    value={certificationInput}
+                    onChange={(e) => setCertificationInput(e.target.value)}
+                    onKeyDown={(e) =>
+                      e.key === "Enter" && (e.preventDefault(), addCertification())
+                    }
+                    placeholder="Add certification"
+                    className="flex-1 px-3 py-2 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                  <button
+                    onClick={addCertification}
+                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                  >
+                    Add
+                  </button>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {filters.certifications.map((cert) => (
+                    <span
+                      key={cert}
+                      className="inline-flex items-center gap-1 px-3 py-1 bg-teal-100 dark:bg-teal-900 text-teal-800 dark:text-teal-200 rounded-full text-sm"
+                    >
+                      {cert}
+                      <button
+                        onClick={() => removeCertification(cert)}
+                        className="hover:text-teal-600"
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    </span>
+                  ))}
+                </div>
+              </div> */}
 
               {/* Languages */}
               <div>
@@ -1325,6 +1732,141 @@ export default function CVSearchPage() {
                   <option value="fluent">Fluent</option>
                   <option value="native">Native</option>
                 </select>
+              </div>
+
+              {/* Notice Period */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                  Notice Period
+                </label>
+                <div className="flex items-center gap-2 mb-2">
+                  <input
+                    type="checkbox"
+                    checked={!!filters.under_notice_period}
+                    onChange={(e) => setFilters({ ...filters, under_notice_period: e.target.checked })}
+                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  />
+                  <span className="text-sm text-gray-700 dark:text-gray-300">Currently Serving Notice Period</span>
+                </div>
+                <div className="flex gap-2 mb-2">
+                  <input
+                    type="text"
+                    value={noticePeriodInput}
+                    onChange={(e) => setNoticePeriodInput(e.target.value)}
+                    onKeyDown={(e) =>
+                      e.key === "Enter" && (e.preventDefault(), addNoticePeriod())
+                    }
+                    placeholder="Add notice period value (e.g., 15 Days, Immediate)"
+                    className="flex-1 px-3 py-2 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                  <button
+                    onClick={addNoticePeriod}
+                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                  >
+                    Add
+                  </button>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {filters.notice_period_values.map((val) => (
+                    <span
+                      key={val}
+                      className="inline-flex items-center gap-1 px-3 py-1 bg-orange-100 dark:bg-orange-900 text-orange-800 dark:text-orange-200 rounded-full text-sm"
+                    >
+                      {val}
+                      <button
+                        onClick={() => removeNoticePeriod(val)}
+                        className="hover:text-orange-600"
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              {/* Experience & Activity */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                    Min Projects
+                  </label>
+                  <input
+                    type="number"
+                    min="0"
+                    value={filters.min_projects_count}
+                    onChange={(e) => setFilters({ ...filters, min_projects_count: parseInt(e.target.value) || 0 })}
+                    className="w-full px-3 py-2 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                    Last Active Days
+                  </label>
+                  <input
+                    type="number"
+                    min="0"
+                    value={filters.last_active_days}
+                    onChange={(e) => setFilters({ ...filters, last_active_days: parseInt(e.target.value) || 0 })}
+                    className="w-full px-3 py-2 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+              </div>
+
+              {/* Social & Other */}
+              <div className="space-y-2">
+                <label className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    checked={!!filters.has_github}
+                    onChange={(e) => setFilters({ ...filters, has_github: e.target.checked })}
+                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  />
+                  <span className="text-sm text-gray-700 dark:text-gray-300">Has GitHub</span>
+                </label>
+                <label className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    checked={!!filters.has_linkedin}
+                    onChange={(e) => setFilters({ ...filters, has_linkedin: e.target.checked })}
+                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  />
+                  <span className="text-sm text-gray-700 dark:text-gray-300">Has LinkedIn</span>
+                </label>
+                <label className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    checked={!!filters.has_volunteer_experience}
+                    onChange={(e) => setFilters({ ...filters, has_volunteer_experience: e.target.checked })}
+                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  />
+                  <span className="text-sm text-gray-700 dark:text-gray-300">Volunteer Experience</span>
+                </label>
+              </div>
+
+              {/* Bucket Filters */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                  Filter by Bucket
+                </label>
+                <select
+                  value={filters.bucket_id}
+                  onChange={(e) => setFilters({ ...filters, bucket_id: parseInt(e.target.value) || 0 })}
+                  className="w-full px-3 py-2 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 mb-2"
+                >
+                  <option value={0}>Any (Ignore Bucket)</option>
+                  {buckets.map(b => (
+                    <option key={b.id} value={b.id}>{b.name}</option>
+                  ))}
+                </select>
+                <label className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    checked={filters.not_in_any_bucket}
+                    onChange={(e) => setFilters({ ...filters, not_in_any_bucket: e.target.checked })}
+                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  />
+                  <span className="text-sm text-gray-700 dark:text-gray-300">Not in any bucket</span>
+                </label>
               </div>
 
               {/* Employment Status Filters */}
@@ -1423,8 +1965,9 @@ export default function CVSearchPage() {
               </button>
             </div>
           </div>
-        </div>
+        </div >
       )}
+
 
       {/* Results Section */}
       {

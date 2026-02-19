@@ -61,3 +61,60 @@ export const GET_CITIES_BY_STATE = `
     }
   }
 `;
+
+export const GET_INDUSTRIES = `
+  query GetIndustries($category: String, $activeOnly: Boolean) {
+    industries(category: $category, activeOnly: $activeOnly) {
+      id
+      name
+      category
+      description
+      isActive
+    }
+  }
+`;
+
+export const SEARCH_SKILLS = `
+  query SearchSkills($searchTerm: String!, $categoryId: Int) {
+    searchSkills(searchTerm: $searchTerm, categoryId: $categoryId) {
+      categoryId
+      description
+      id
+      isTechnical
+      skillName
+    }
+  }
+`;
+
+export const GET_SEARCH_COMPANIES = `
+  query GetSearchCompanies($searchTerm: String!) {
+    searchCompanies(searchTerm: $searchTerm) {
+      id
+      name
+      description
+      industry
+    }
+  }
+`;
+
+export const GET_SEARCH_JOB_TITLES = `
+  query GetSearchJobTitles($searchTerm: String!) {
+    searchJobTitles(searchTerm: $searchTerm) {
+      category
+      id
+      isActive
+      title
+    }
+  }
+`;
+
+export const GET_SEARCH_FIELD_OF_STUDY = `
+  query GetSearchFieldOfStudy($searchTerm: String!) {
+    searchFieldsOfStudy(searchTerm: $searchTerm) {
+      category
+      description
+      id
+      name
+    }
+  }
+`;
