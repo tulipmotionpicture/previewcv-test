@@ -69,7 +69,7 @@ export default async function SEOJobsPage({
   }
 
   return (
-    <div className="min-h-screen transition-colors duration-300">
+    <div className="min-h-screen transition-colors duration-300 bg-gray-50 dark:bg-gray-950">
       <FloatingHeader
         links={[{ label: "Candidate Login", href: "/candidate/login" }]}
         cta={{
@@ -78,9 +78,10 @@ export default async function SEOJobsPage({
           variant: "dark",
         }}
         showAuthButtons={true}
+        hideOnScroll={true}
       />
-      <div className="pt-20">
-        <SEOJobsListWithLayout slug={slug} limit={20} />
+      <div className="pt-18 pb-8 px-4 md:px-12 max-w-7xl mx-auto">
+        <SEOJobsListWithLayout slug={slug} limit={10} />
       </div>
     </div>
   );
