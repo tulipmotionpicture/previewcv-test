@@ -957,14 +957,14 @@ export default function CVSearchPage() {
           <div className="flex items-center gap-2 w-full max-w-[320px]">
             <button
               onClick={() => setShowAdvancedFilters(true)}
-              className="flex-1 py-1.5 bg-white dark:bg-gray-800 border border-gray-400 dark:border-gray-600 text-gray-900 dark:text-white rounded-lg font-medium transition-colors flex items-center justify-center gap-1.5 text-xs shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700"
+              className="flex-1 py-3 bg-white dark:bg-gray-800 border border-[#E1E8F1] dark:border-gray-600 text-gray-900 dark:text-white rounded-md font-medium transition-colors flex items-center justify-center gap-1.5 text-xs  hover:bg-gray-50 dark:hover:bg-gray-700"
             >
               <Filter className="w-3.5 h-3.5 fill-current" />
               Advanced Filter
             </button>
             <button
               onClick={fetchSearchHistory}
-              className="flex-1 py-1.5 bg-[#4B5563] hover:bg-[#374151] text-white rounded-lg font-medium transition-colors flex items-center justify-center gap-1.5 text-xs shadow-sm"
+              className="flex-1 py-3 bg-[#4B5563] hover:bg-[#374151] text-white rounded-md font-medium transition-colors flex items-center justify-center gap-1.5 text-xs "
             >
               <History className="w-3.5 h-3.5" />
               History
@@ -974,7 +974,7 @@ export default function CVSearchPage() {
       </div>
 
       {/* Search Card */}
-      <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4 shadow-sm">
+      <div className="bg-white dark:bg-gray-800 rounded-md border border-[#E1E8F1] dark:border-gray-700 p-4 ">
         <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-end">
           {/* Keyword Search - Full width on mobile, 4 cols on desktop */}
           <div className="md:col-span-4">
@@ -989,7 +989,7 @@ export default function CVSearchPage() {
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onKeyPress={(e) => e.key === "Enter" && handleSearch()}
                 placeholder="Search by skills, title, company..."
-                className="w-full h-[42px] pl-9 pr-3 py-2 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                className="w-full h-[42px] pl-9 pr-3 py-2 bg-white dark:bg-gray-900 border border-[#E1E8F1] dark:border-gray-700 rounded-md text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
               />
             </div>
           </div>
@@ -1010,7 +1010,7 @@ export default function CVSearchPage() {
                   onBlur={onBlur}
                   onKeyDown={onKeyDown}
                   placeholder="e.g. India"
-                  className="w-full h-[42px] px-3 py-2 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                  className="w-full h-[42px] px-3 py-2 bg-white dark:bg-gray-900 border border-[#E1E8F1] dark:border-gray-700 rounded-md text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
                 />
               )}
               onChange={(c) =>
@@ -1043,7 +1043,7 @@ export default function CVSearchPage() {
                   onBlur={onBlur}
                   onKeyDown={onKeyDown}
                   placeholder="e.g. Maharashtra"
-                  className="w-full h-[42px] px-3 py-2 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                  className="w-full h-[42px] px-3 py-2 bg-white dark:bg-gray-900 border border-[#E1E8F1] dark:border-gray-700 rounded-md text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
                 />
               )}
               onChange={(s) =>
@@ -1062,7 +1062,7 @@ export default function CVSearchPage() {
             <button
               onClick={() => handleSearch()}
               disabled={loading}
-              className="w-full h-[42px] bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-bold transition-all disabled:opacity-50 flex items-center justify-center gap-1.5 shadow-md hover:shadow-lg active:scale-95 text-sm"
+              className="w-full h-[42px] bg-blue-600 hover:bg-blue-700 text-white rounded-md font-bold transition-all disabled:opacity-50 flex items-center justify-center gap-1.5 shadow-md hover:shadow-lg active:scale-95 text-sm"
             >
               {loading ? (
                 <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -1095,7 +1095,7 @@ export default function CVSearchPage() {
                     onBlur={onBlur}
                     onKeyDown={onKeyDown}
                     placeholder="e.g. Mumbai"
-                    className="w-full h-[42px] px-3 py-2 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                    className="w-full h-[42px] px-3 py-2 bg-white dark:bg-gray-900 border border-[#E1E8F1] dark:border-gray-700 rounded-md text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
                   />
                 )}
                 onChange={(c) =>
@@ -1117,7 +1117,7 @@ export default function CVSearchPage() {
                     value={filters.min_experience_years}
                     onChange={(e) => setFilters({ ...filters, min_experience_years: parseInt(e.target.value) || 0 })}
                     placeholder="0"
-                    className="w-full h-[42px] px-3 py-2 text-center bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                    className="w-full h-[42px] px-3 py-2 text-center bg-white dark:bg-gray-900 border border-[#E1E8F1] dark:border-gray-700 rounded-md text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
                   />
                 </div>
                 <div className="flex-1 text-center">
@@ -1127,7 +1127,7 @@ export default function CVSearchPage() {
                     value={filters.max_experience_years}
                     onChange={(e) => setFilters({ ...filters, max_experience_years: parseInt(e.target.value) || 50 })}
                     placeholder="2"
-                    className="w-full h-[42px] px-3 py-2 text-center bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                    className="w-full h-[42px] px-3 py-2 text-center bg-white dark:bg-gray-900 border border-[#E1E8F1] dark:border-gray-700 rounded-md text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
                   />
                 </div>
               </div>
@@ -1139,14 +1139,14 @@ export default function CVSearchPage() {
                 <button
                   onClick={handleBulkUnlock}
                   disabled={loading || !creditsStatus || creditsStatus.credits_remaining < selectedResumes.size}
-                  className="flex-1 h-[42px] bg-green-600 hover:bg-green-700 text-white rounded-lg font-bold transition-all disabled:opacity-50 flex items-center justify-center gap-1.5 text-xs shadow-sm"
+                  className="flex-1 h-[42px] bg-green-600 hover:bg-green-700 text-white rounded-md font-bold transition-all disabled:opacity-50 flex items-center justify-center gap-1.5 text-xs shadow-sm"
                 >
                   <Unlock className="w-3.5 h-3.5" />
                   Unlock {selectedResumes.size}
                 </button>
                 <button
                   onClick={() => setShowBucketModal(true)}
-                  className="flex-1 h-[42px] bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-bold transition-all flex items-center justify-center gap-1.5 text-xs shadow-sm"
+                  className="flex-1 h-[42px] bg-purple-600 hover:bg-purple-700 text-white rounded-md font-bold transition-all flex items-center justify-center gap-1.5 text-xs shadow-sm"
                 >
                   <FolderPlus className="w-3.5 h-3.5" />
                   Add to Bucket

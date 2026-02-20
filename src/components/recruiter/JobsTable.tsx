@@ -53,7 +53,7 @@ export default function JobsTable({
   if (!mounted) return null;
 
   return (
-    <div className="bg-white dark:bg-[#282727] rounded-xl border border-[#E1E8F1] dark:border-gray-700 overflow-hidden flex flex-col sticky top-5 h-[calc(100vh-140px)]">
+    <div className="bg-white dark:bg-[#282727] rounded-xl border border-[#E1E8F1] dark:border-gray-700 overflow-hidden flex flex-col sticky top-5 h-auto max-h-[calc(110vh-140px)]">
       <div className="overflow-y-auto overflow-x-auto flex-1 custom-scrollbar">
         {loadingJobs ? (
           <div className="text-center py-12 text-gray-500">Loading jobs...</div>
@@ -71,9 +71,8 @@ export default function JobsTable({
                 ].map((heading, index) => (
                   <th
                     key={heading}
-                    className={`px-4 py-3 text-xs bg-[#101828] font-bold text-white dark:text-gray-500 uppercase tracking-wider ${
-                      index === 4 ? "text-right" : "text-left"
-                    }`}
+                    className={`px-4 py-3 text-xs bg-[#101828] font-bold text-white dark:text-gray-500 uppercase tracking-wider ${index === 4 ? "text-right" : "text-left"
+                      }`}
                   >
                     {heading}
                   </th>
@@ -98,11 +97,10 @@ export default function JobsTable({
                   {/* Status */}
                   <td className="px-4 py-3">
                     <span
-                      className={`inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium ${
-                        job.is_active
-                          ? "bg-[#E6F4EA] text-[#1E7F3A] dark:bg-green-900/30 dark:text-green-400"
-                          : "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400"
-                      }`}
+                      className={`inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium ${job.is_active
+                        ? "bg-[#E6F4EA] text-[#1E7F3A] dark:bg-green-900/30 dark:text-green-400"
+                        : "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400"
+                        }`}
                     >
                       {job.is_active ? "Active" : "Inactive"}
                     </span>
@@ -311,11 +309,10 @@ export default function JobsTable({
                 <button
                   key={page}
                   onClick={() => onPageChange(page)}
-                  className={`min-w-[32px] h-8 px-2 flex items-center justify-center rounded-lg text-sm font-medium transition-colors ${
-                    currentPage === page
-                      ? "bg-blue-600 text-white shadow-sm"
-                      : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
-                  }`}
+                  className={`min-w-[32px] h-8 px-2 flex items-center justify-center rounded-lg text-sm font-medium transition-colors ${currentPage === page
+                    ? "bg-blue-600 text-white shadow-sm"
+                    : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
+                    }`}
                 >
                   {page}
                 </button>

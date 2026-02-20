@@ -1082,17 +1082,17 @@ export default function BucketsPage() {
               onChange={(e) => setSearchQuery(e.target.value)}
               onKeyPress={(e) => e.key === "Enter" && handleSearch()}
               placeholder="Search..."
-              className="w-full md:w-56 pl-8 pr-3 py-1.5 text-sm bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md focus:ring-2 focus:ring-blue-500 outline-none transition-all placeholder-gray-400 dark:text-gray-200 "
+              className="w-full md:w-56 pl-8 pr-3 py-2.5 text-sm bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md focus:ring-2 focus:ring-blue-500 outline-none transition-all placeholder-gray-400 dark:text-gray-200 "
             />
           </div>
 
           {/* Archived Toggle */}
-          <label className="flex items-center gap-2 px-3 py-1.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors shadow-sm h-[34px]">
+          <label className="flex items-center gap-2 px-3 py-1.5 bg-white dark:bg-gray-800 border border-[#E1E8F1] dark:border-gray-700 rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors h-[40px]">
             <input
               type="checkbox"
               checked={showArchived}
               onChange={(e) => setShowArchived(e.target.checked)}
-              className="w-3.5 h-3.5 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+              className="w-3.5 h-3.5 rounded border-[#E1E8F1] text-blue-600 focus:ring-blue-500"
             />
             <span className="text-xs font-medium text-gray-700 dark:text-gray-300 whitespace-nowrap">
               Archived
@@ -1102,7 +1102,7 @@ export default function BucketsPage() {
           {/* Create Button */}
           <button
             onClick={() => setShowCreateModal(true)}
-            className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors flex items-center gap-1.5 shadow-sm h-[34px]"
+            className="px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg  border border-[#E1E8F1] transition-colors flex items-center gap-1.5  h-[40px]"
           >
             <Plus className="w-4 h-4" />
             Create
