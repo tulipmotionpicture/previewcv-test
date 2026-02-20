@@ -34,7 +34,7 @@ export default function CreateJobModal({
   return (
     <div className={`fixed inset-0 z-50 flex items-center justify-center ${isFullscreen ? "p-0" : "p-4 sm:p-6"}`}>
       <div
-        className="fixed inset-0 bg-black/40 backdrop-blur-sm transition-opacity"
+        className="fixed inset-0 bg-black/40 transition-opacity"
         onClick={onClose}
       />
 
@@ -44,7 +44,7 @@ export default function CreateJobModal({
           }`}
       >
         {/* Header */}
-        <div className={`flex items-center justify-between px-6 py-4 bg-[#0B172B] border-b border-gray-800 ${isFullscreen ? "" : "rounded-t-xl"
+        <div className={`flex items-center justify-between px-6 py-4 bg-[#2F4269] border-b border-gray-800 ${isFullscreen ? "" : "rounded-t-xl"
           }`}>
           <h2 className="text-lg font-semibold text-white">
             Post New Opportunity
@@ -414,7 +414,7 @@ export default function CreateJobModal({
           <button
             type="submit"
             disabled={isSubmitting}
-            className="px-8 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium shadow-lg shadow-blue-500/30 transition-all transform active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed"
+            className="px-8 py-2.5 bg-[#0077FF] hover:bg-[#006bd6] text-white rounded-lg font-medium shadow-lg shadow-[#0077FF]/30 transition-all transform active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed"
           >
             {isSubmitting ? "Posting..." : "Post Job"}
           </button>

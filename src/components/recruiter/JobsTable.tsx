@@ -71,7 +71,7 @@ export default function JobsTable({
                 ].map((heading, index) => (
                   <th
                     key={heading}
-                    className={`px-4 py-3 text-xs bg-[#101828] font-bold text-white dark:text-gray-500 uppercase tracking-wider ${index === 4 ? "text-right" : "text-left"
+                    className={`px-4 py-3 text-xs bg-[#2F4269] font-bold text-white dark:text-gray-500 uppercase tracking-wider ${index === 4 ? "text-right" : "text-left"
                       }`}
                   >
                     {heading}
@@ -179,7 +179,7 @@ export default function JobsTable({
                                 top: menuPosition.top,
                                 left: menuPosition.left,
                               }}
-                              className="fixed w-48 rounded-xl bg-white dark:bg-[#1E1E1E] shadow-lg ring-1 ring-black ring-opacity-5 z-20 focus:outline-none border border-gray-100 dark:border-gray-700 animate-in fade-in zoom-in-95 duration-200"
+                              className="fixed w-48 rounded-md bg-white dark:bg-[#1E1E1E] shadow-lg border border-gray-300 ring-black ring-opacity-5 z-20 dark:border-gray-700 animate-in fade-in zoom-in-95 duration-200"
                             >
                               <div className="py-1">
                                 <button
@@ -310,7 +310,7 @@ export default function JobsTable({
                   key={page}
                   onClick={() => onPageChange(page)}
                   className={`min-w-[32px] h-8 px-2 flex items-center justify-center rounded-lg text-sm font-medium transition-colors ${currentPage === page
-                    ? "bg-blue-600 text-white shadow-sm"
+                    ? "bg-[#0077FF] text-white shadow-sm"
                     : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
                     }`}
                 >

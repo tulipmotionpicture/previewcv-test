@@ -31,64 +31,80 @@ const EVENT_FORM_INITIAL: EventFormState = {
   is_active: true,
 };
 
-// --- Calendar Component (Mock) ---
-const CustomCalendar = () => {
-  // This is a visual mock to match the screenshot.
-  // In a real app, use a library like react-day-picker or build full logic.
+const CustomCalendar = ({ selectedDate, onSelectDate }: { selectedDate: Date | null, onSelectDate: (d: Date | null) => void }) => {
+  const [currentMonth, setCurrentMonth] = useState(selectedDate || new Date());
+
+  const daysInMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 0).getDate();
+  const firstDayOfMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1).getDay();
+
+  // Adjust so Monday is 0, Sunday is 6
+  const startingDay = firstDayOfMonth === 0 ? 6 : firstDayOfMonth - 1;
+
+  const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+
+  const handlePrevMonth = () => {
+    setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1));
+  };
+
+  const handleNextMonth = () => {
+    setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1));
+  };
+
+  const isSameDay = (d1: Date, d2: Date) => {
+    return d1.getFullYear() === d2.getFullYear() && d1.getMonth() === d2.getMonth() && d1.getDate() === d2.getDate();
+  };
+
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 w-full">
+    <div className="bg-white dark:bg-[#313234] rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-4 w-full">
       <div className="flex items-center justify-between mb-4">
-        <span className="font-semibold text-sm">Januari 2022</span>
+        <span className="font-semibold text-sm dark:text-gray-200">{monthNames[currentMonth.getMonth()]} {currentMonth.getFullYear()}</span>
         <div className="flex gap-2">
-          <ChevronLeft className="w-4 h-4 text-gray-400" />
-          <ChevronRight className="w-4 h-4 text-gray-400" />
+          <button onClick={handlePrevMonth} className="hover:bg-gray-100 dark:hover:bg-gray-700 p-1 rounded-full text-gray-400 dark:text-gray-500 transition-colors"><ChevronLeft className="w-4 h-4" /></button>
+          <button onClick={handleNextMonth} className="hover:bg-gray-100 dark:hover:bg-gray-700 p-1 rounded-full text-gray-400 dark:text-gray-500 transition-colors"><ChevronRight className="w-4 h-4" /></button>
         </div>
       </div>
-      <div className="grid grid-cols-7 text-center text-xs text-gray-400 mb-2">
-        <div>SEN</div>
-        <div>SEL</div>
-        <div>RAB</div>
-        <div>KAM</div>
-        <div>JUM</div>
-        <div>SAB</div>
-        <div>MIN</div>
+      <div className="grid grid-cols-7 text-center text-xs text-gray-400 dark:text-gray-500 mb-2">
+        <div>MON</div><div>TUE</div><div>WED</div><div>THU</div><div>FRI</div><div>SAT</div><div>SUN</div>
       </div>
-      <div className="grid grid-cols-7 text-center text-xs gap-y-3 font-medium text-gray-600">
-        {/* Mock dates */}
-        <div className="bg-[#0B6BCB] text-white rounded-full w-6 h-6 flex items-center justify-center mx-auto">
-          1
-        </div>
-        <div>2</div>
-        <div>3</div>
-        <div>4</div>
-        <div>5</div>
-        <div>6</div>
-        <div>7</div>
-        <div>8</div>
-        <div>9</div>
-        <div>10</div>
-        <div>11</div>
-        <div>12</div>
-        <div>13</div>
-        <div>14</div>
-        <div>15</div>
-        <div>16</div>
-        <div>17</div>
-        <div>18</div>
-        <div>19</div>
-        <div>20</div>
-        <div>21</div>
-        <div>22</div>
-        <div>23</div>
-        <div>24</div>
-        <div>25</div>
-        <div>26</div>
-        <div>27</div>
-        <div>28</div>
-        <div>29</div>
-        <div>30</div>
-        <div>31</div>
+      <div className="grid grid-cols-7 text-center text-xs gap-y-3 font-medium text-gray-600 dark:text-gray-400">
+        {Array.from({ length: startingDay }).map((_, i) => <div key={`empty-${i}`} />)}
+        {Array.from({ length: daysInMonth }).map((_, i) => {
+          const date = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), i + 1);
+          const isSelected = selectedDate && isSameDay(date, selectedDate);
+          return (
+            <button
+              key={i}
+              onClick={() => onSelectDate(isSelected ? null : date)}
+              className={`w-6 h-6 flex items-center justify-center mx-auto rounded-full transition-colors ${isSelected ? "bg-[#0B6BCB] text-white" : "hover:bg-gray-100 dark:hover:bg-gray-700"}`}
+            >
+              {i + 1}
+            </button>
+          );
+        })}
       </div>
+    </div>
+  );
+};
+
+const TimeSelector = ({ selectedTimePeriod, onSelectTimePeriod }: { selectedTimePeriod: string | null, onSelectTimePeriod: (t: string | null) => void }) => {
+  const periods = [
+    { label: "Morning", sublabel: "06:00 - 12:00", value: "morning" },
+    { label: "Afternoon", sublabel: "12:00 - 18:00", value: "afternoon" },
+    { label: "Evening", sublabel: "18:00 - 24:00", value: "evening" }
+  ];
+
+  return (
+    <div className="bg-white dark:bg-[#313234] rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-4 w-full flex flex-col gap-2">
+      {periods.map(p => (
+        <button
+          key={p.value}
+          onClick={() => onSelectTimePeriod(selectedTimePeriod === p.value ? null : p.value)}
+          className={`flex flex-col items-start px-3 py-2 rounded-lg border transition-all ${selectedTimePeriod === p.value ? "border-[#0B6BCB] bg-blue-50 dark:bg-blue-900/20" : "border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500"}`}
+        >
+          <span className={`text-sm font-semibold ${selectedTimePeriod === p.value ? "text-[#0B6BCB]" : "text-gray-700 dark:text-gray-200"}`}>{p.label}</span>
+          <span className="text-xs text-gray-500">{p.sublabel}</span>
+        </button>
+      ))}
     </div>
   );
 };
@@ -113,6 +129,9 @@ export default function RecruiterGalleryEventsSection({
     "Active",
   );
   const [searchQuery, setSearchQuery] = useState("");
+  const [filterTab, setFilterTab] = useState<"dates" | "time">("dates");
+  const [selectedDateFilter, setSelectedDateFilter] = useState<Date | null>(null);
+  const [selectedTimePeriod, setSelectedTimePeriod] = useState<string | null>(null);
 
   const fetchEvents = useCallback(async () => {
     setLoading(true);
@@ -157,7 +176,26 @@ export default function RecruiterGalleryEventsSection({
       matchesTab = !isActive;
     }
 
-    return matchesSearch && matchesTab;
+    let matchesDateFilter = true;
+    if (selectedDateFilter) {
+      matchesDateFilter = eventDate.getFullYear() === selectedDateFilter.getFullYear() &&
+        eventDate.getMonth() === selectedDateFilter.getMonth() &&
+        eventDate.getDate() === selectedDateFilter.getDate();
+    }
+
+    let matchesTimeFilter = true;
+    if (selectedTimePeriod) {
+      const hours = eventDate.getHours();
+      if (selectedTimePeriod === "morning") {
+        matchesTimeFilter = hours >= 6 && hours < 12;
+      } else if (selectedTimePeriod === "afternoon") {
+        matchesTimeFilter = hours >= 12 && hours < 18;
+      } else if (selectedTimePeriod === "evening") {
+        matchesTimeFilter = hours >= 18 || hours < 6;
+      }
+    }
+
+    return matchesSearch && matchesTab && matchesDateFilter && matchesTimeFilter;
   });
 
   const handleFormChange = (
@@ -282,7 +320,7 @@ export default function RecruiterGalleryEventsSection({
     <div className="flex flex-col lg:flex-row gap-6 animate-in fade-in bg-gray-50 dark:bg-[#1C1D1F] min-h-screen p-6">
       {/* LEFT COLUMN: Event List */}
       <div className="flex-1">
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center justify-between mb-2">
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
             Recruiter Gallery Events
           </h1>
@@ -300,7 +338,7 @@ export default function RecruiterGalleryEventsSection({
         {/* Create/Edit Form (Collapsible) */}
         {/* Create/Edit Modal */}
         {showForm && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 overflow-y-auto">
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 overflow-y-auto">
             <div className="bg-white dark:bg-[#313234] w-full max-w-3xl rounded-xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200 my-8">
               {/* Modal Header */}
               <div className="bg-[#0B172B] px-6 py-4 flex justify-between items-center text-white sticky top-0 z-10">
@@ -443,9 +481,9 @@ export default function RecruiterGalleryEventsSection({
         )}
 
         {/* Event List Table */}
-        <div className="bg-white dark:bg-[#313234] rounded-xl border border-gray-100 dark:border-gray-800 shadow-sm overflow-hidden flex flex-col h-[600px]">
+        <div className="bg-white dark:bg-[#313234] rounded-xl border border-gray-100 dark:border-gray-800 shadow-sm overflow-hidden flex flex-col h-[87vh]">
           {/* Table Header */}
-          <div className="grid grid-cols-12 px-6 py-3 bg-[#0B172B] dark:bg-gray-800/50 border-b border-gray-100 dark:border-gray-800 text-xs font-semibold text-gray-500 uppercase sticky top-0 z-10 backdrop-blur-sm">
+          <div className="grid grid-cols-12 px-6 py-3 bg-[#2F4269] dark:bg-gray-800/50 border-b border-gray-100 dark:border-gray-800 text-xs font-semibold text-white uppercase sticky top-0 z-10 backdrop-blur-sm">
             <div className="col-span-6">Event Name</div>
             <div className="col-span-3">Status</div>
             <div className="col-span-3 text-right">Actions</div>
@@ -496,15 +534,15 @@ export default function RecruiterGalleryEventsSection({
                             <Calendar className="w-3 h-3" />
                             {event.event_date
                               ? new Date(event.event_date).toLocaleDateString(
-                                  "en-US",
-                                  {
-                                    month: "short",
-                                    day: "numeric",
-                                    year: "numeric",
-                                    hour: "2-digit",
-                                    minute: "2-digit",
-                                  },
-                                )
+                                "en-US",
+                                {
+                                  month: "short",
+                                  day: "numeric",
+                                  year: "numeric",
+                                  hour: "2-digit",
+                                  minute: "2-digit",
+                                },
+                              )
                               : "No date"}
                           </span>
                           <span>Order: {event.display_order}</span>
@@ -549,8 +587,8 @@ export default function RecruiterGalleryEventsSection({
 
       {/* RIGHT COLUMN: Filters & Calendar */}
       <div className="w-full lg:w-64 space-y-6">
-        <div className="bg-white dark:bg-[#313234] rounded-xl border border-gray-100 dark:border-gray-700 overflow-hidden">
-          <div className="bg-[#0B172B] px-4 py-3">
+        <div className="bg-white dark:bg-[#313234] mt-10.5 rounded-xl border border-gray-100 dark:border-gray-700 overflow-hidden">
+          <div className="bg-[#2F4269] px-4 py-2 ">
             <h2 className="text-sm font-bold text-white uppercase tracking-wider">
               Filters
             </h2>
@@ -601,18 +639,28 @@ export default function RecruiterGalleryEventsSection({
           </div>
         </div>
 
-        {/* Calendar (Visual Only) */}
+        {/* Calendar & Time (Filtering) */}
         <div>
           <div className="flex items-center gap-2 mb-3 px-1">
-            <span className="text-xs font-bold text-gray-500 uppercase">
+            <button
+              onClick={() => setFilterTab("dates")}
+              className={`text-xs font-bold uppercase transition-colors ${filterTab === "dates" ? "text-[#0B6BCB] dark:text-blue-400" : "text-gray-500 dark:text-gray-400 hover:text-gray-700"}`}
+            >
               Dates
-            </span>
-            <span className="text-gray-300">|</span>
-            <span className="text-xs font-bold text-gray-500 uppercase">
+            </button>
+            <span className="text-gray-300 dark:text-gray-600">|</span>
+            <button
+              onClick={() => setFilterTab("time")}
+              className={`text-xs font-bold uppercase transition-colors ${filterTab === "time" ? "text-[#0B6BCB] dark:text-blue-400" : "text-gray-500 dark:text-gray-400 hover:text-gray-700"}`}
+            >
               Time
-            </span>
+            </button>
           </div>
-          <CustomCalendar />
+          {filterTab === "dates" ? (
+            <CustomCalendar selectedDate={selectedDateFilter} onSelectDate={setSelectedDateFilter} />
+          ) : (
+            <TimeSelector selectedTimePeriod={selectedTimePeriod} onSelectTimePeriod={setSelectedTimePeriod} />
+          )}
         </div>
       </div>
     </div>

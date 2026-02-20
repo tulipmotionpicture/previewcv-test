@@ -193,7 +193,7 @@ export default function RecruiterProfileEdit() {
         <div className="rounded-lg overflow-hidden shadow-sm border border-gray-100">
           <button
             onClick={() => setProfileOpen(!profileOpen)}
-            className="w-full bg-[#0B172B] text-white px-6 py-3 flex justify-between items-center"
+            className="w-full bg-[#2F4269] text-white px-6 py-3 flex justify-between items-center"
           >
             <h2 className="text-base font-medium">Profile Information</h2>
             {profileOpen ? (
@@ -348,7 +348,7 @@ export default function RecruiterProfileEdit() {
         <div className="rounded-lg overflow-hidden shadow-sm border border-gray-100">
           <button
             onClick={() => setPasswordOpen(!passwordOpen)}
-            className="w-full bg-[#0B172B] text-white px-6 py-3 flex justify-between items-center"
+            className="w-full bg-[#2F4269] text-white px-6 py-3 flex justify-between items-center"
           >
             <h2 className="text-base font-medium">Change Password</h2>
             {passwordOpen ? (
@@ -428,7 +428,7 @@ export default function RecruiterProfileEdit() {
         </div>
 
         {/* Danger Zone (Collapsible) */}
-        <div className="rounded-lg overflow-hidden shadow-sm border border-red-100">
+        {/* <div className="rounded-lg overflow-hidden shadow-sm border border-red-100">
           <button
             onClick={() => setDangerOpen(!dangerOpen)}
             className="w-full bg-white border-b border-gray-100 px-8 py-5 flex justify-between items-center hover:bg-gray-50 transition-colors"
@@ -458,7 +458,7 @@ export default function RecruiterProfileEdit() {
               </div>
             </div>
           )}
-        </div>
+        </div> */}
 
       </div>
 

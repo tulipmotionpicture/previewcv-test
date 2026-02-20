@@ -118,12 +118,12 @@ export default function AdvancedFilters({
     const redButtonClassName = "h-[42px] w-[42px] p-0 flex items-center justify-center bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors shrink-0";
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
-            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-7xl max-h-[85vh] flex flex-col overflow-hidden animate-in zoom-in-95 duration-200 dark:border-gray-700">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 animate-in fade-in duration-200">
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-4xl max-h-[85vh] flex flex-col overflow-hidden animate-in zoom-in-95 duration-200 dark:border-gray-700">
                 {/* Header */}
-                <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 rounded-t-xl">
-                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Advanced Filters</h3>
-                    <button onClick={onClose} className="p-2 text-gray-400 hover:text-gray-500 dark:hover:text-gray-300 rounded-full transition-colors">
+                <div className="flex items-center justify-between px-6 py-4 bg-[#2F4269] border-b border-gray-800 rounded-t-xl">
+                    <h3 className="text-lg font-semibold text-white">Advanced Filters</h3>
+                    <button onClick={onClose} className="text-white/70 hover:text-white transition-colors">
                         <X className="w-5 h-5" />
                     </button>
                 </div>

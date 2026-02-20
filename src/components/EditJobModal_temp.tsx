@@ -44,7 +44,7 @@ export default function CreateJobModal({
           }`}
       >
         {/* Header */}
-        <div className={`flex items-center justify-between px-6 py-4 bg-[#0B172B] border-b border-gray-800 ${isFullscreen ? "" : "rounded-t-xl"
+        <div className={`flex items-center justify-between px-6 py-4 bg-[#2F4269] border-b border-gray-800 ${isFullscreen ? "" : "rounded-t-xl"
           }`}>
           <h2 className="text-lg font-semibold text-white">
             Post New Opportunity

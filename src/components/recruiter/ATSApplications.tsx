@@ -207,7 +207,7 @@ export default function ATSApplications({
         <div className="lg:col-span-3">
           <div className="bg-white dark:bg-[#282727] rounded-xl border border-[#E1E8F1] dark:border-gray-700 overflow-hidden shadow-sm h-[600px] flex flex-col">
             {/* Table Header */}
-            <div className="bg-[#0B172B] px-4 py-3 grid grid-cols-12 gap-4 items-center sticky top-0 z-10">
+            <div className="bg-[#2F4269] px-4 py-3 grid grid-cols-12 gap-4 items-center sticky top-0 z-10">
               <div className="col-span-4 text-xs font-bold text-white uppercase tracking-wider">
                 Candidate
               </div>
@@ -361,7 +361,7 @@ export default function ATSApplications({
         <div className="lg:col-span-1">
           <div className="bg-white dark:bg-[#282727] rounded-xl border border-[#E1E8F1] dark:border-gray-700 overflow-hidden shadow-sm sticky top-6">
             {/* Filter Header */}
-            <div className="bg-[#0B172B] px-6 py-4">
+            <div className="bg-[#2F4269] px-6 py-4">
               <h2 className="text-[13px] font-bold text-white uppercase tracking-wider">
                 Filter
               </h2>

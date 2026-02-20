@@ -172,7 +172,7 @@ export default function JobManagement({
         <div></div>
         <button
           onClick={() => handleTabChange("create")}
-          className="flex items-center gap-2 px-3.5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-lg font-medium transition-colors shadow-sm"
+          className="flex items-center gap-2 px-3.5 py-2.5 bg-[#0077FF] hover:bg-[#006bd6] text-white text-sm rounded-lg font-medium transition-colors shadow-sm"
         >
           <Plus className="w-4 h-4" />
           Create New Job
@@ -200,7 +200,7 @@ export default function JobManagement({
           <div className="bg-white dark:bg-[#282727]  rounded-xl border border-[#E1E8F1] dark:border-gray-700  space-y-6">
             {/* Search by Role */}
 
-            <h1 className="bg-[#101828]  text-[13px] font-bold text-white dark:text-gray-500 uppercase tracking-wider p-3 rounded-t-xl">
+            <h1 className="bg-[#2F4269]  text-[13px] font-bold text-white dark:text-gray-500 uppercase tracking-wider p-3 rounded-t-xl">
               Filter
             </h1>
             <div className="px-2">

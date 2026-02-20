@@ -118,7 +118,7 @@ export default function DashboardStats({
           return (
             <div
               key={card.label}
-              className="bg-white dark:bg-[#282727] rounded-xl p-4 border border-[#E1E8F1] dark:border-gray-700  transition-shadow"
+              className="bg-white dark:bg-[#282727] rounded-md p-4 border border-[#E1E8F1] dark:border-gray-700  transition-shadow"
             >
               <div className="flex justify-between items-start mb-4">
                 <div>

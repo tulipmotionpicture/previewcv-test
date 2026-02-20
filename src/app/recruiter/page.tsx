@@ -147,7 +147,7 @@ export default function RecruiterLanding() {
             ].map((can, i) => (
               <div
                 key={i}
-                className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 p-8 rounded-[40px] hover:border-indigo-500/30 transition-all group shadow-sm hover:shadow-xl"
+                className="bg-[#E6E6E6] dark:bg-gray-900 border border-gray-200 dark:border-gray-800 p-8 rounded-[40px] hover:border-indigo-500/30 transition-all group shadow-sm hover:shadow-xl"
               >
                 <div className="flex items-center gap-5 mb-8">
                   <div className="w-16 h-16 bg-gray-100 rounded-3xl relative overflow-hidden border border-gray-200">
@@ -210,7 +210,7 @@ export default function RecruiterLanding() {
 
       <section
         id="features"
-        className="py-32 px-8 bg-white dark:bg-gray-950 relative overflow-hidden"
+        className="py-32 px-8 bg-[#E6E6E6] dark:bg-gray-950 relative overflow-hidden"
       >
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-32">
@@ -244,7 +244,7 @@ export default function RecruiterLanding() {
               </ul>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
-              <div className="p-10 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-[40px] shadow-sm hover:shadow-xl transition-all">
+              <div className="p-10 bg-[#E6E6E6] dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-[40px] shadow-sm hover:shadow-xl transition-all">
                 <div className="w-14 h-14 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center mb-8 shadow-inner">
                   <MagnifyingGlassIcon />
                 </div>
@@ -255,7 +255,7 @@ export default function RecruiterLanding() {
                   Access 100k+ active job seeker profiles instantly.
                 </p>
               </div>
-              <div className="p-10 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-[40px] shadow-sm hover:shadow-xl transition-all mt-8">
+              <div className="p-10 bg-[#E6E6E6] dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-[40px] shadow-sm hover:shadow-xl transition-all mt-8">
                 <div className="w-14 h-14 bg-blue-50 text-indigo-600 rounded-2xl flex items-center justify-center mb-8 shadow-inner">
                   <ChartBarIcon />
                 </div>

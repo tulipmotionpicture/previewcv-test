@@ -27,6 +27,8 @@ interface HeaderProps {
 }
 
 const NAV_ITEMS = [
+  { label: "Jobs", href: "/jobs" },
+  { label: "Blogs", href: "/blog" },
   {
     label: "Services",
     href: "#", // Dropdown trigger
@@ -35,8 +37,6 @@ const NAV_ITEMS = [
       { label: "Create CV", href: "/cover-letter/create" },
     ],
   },
-  { label: "Blogs", href: "/blog" },
-  { label: "Jobs", href: "/jobs" },
 ];
 
 export default function Header({

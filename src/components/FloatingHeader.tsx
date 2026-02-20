@@ -27,12 +27,23 @@ interface FloatingHeaderProps {
     hideOnScroll?: boolean;
 }
 
-const NAV_ITEMS = [
-    { label: "Top Hiring Partner", href: "/hiring-partners" },
-    { label: "Create Resume", href: "/resume/build" },
-    { label: "Create CV", href: "/cover-letter/create" },
+interface NavItem {
+    label: string;
+    href: string;
+    dropdown?: { label: string; href: string }[];
+}
+
+const NAV_ITEMS: NavItem[] = [
     { label: "Jobs", href: "/jobs" },
     { label: "Blogs", href: "/blog" },
+    {
+        label: "Services",
+        href: "#",
+        dropdown: [
+            { label: "Create Resume", href: "/resume/build" },
+            { label: "Create CV", href: "/cover-letter/create" },
+        ]
+    }
 ];
 
 export default function FloatingHeader({
@@ -46,6 +57,7 @@ export default function FloatingHeader({
     const pathname = usePathname();
     const router = useRouter();
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+    const [isServicesOpen, setIsServicesOpen] = useState(false);
     const [isProfileOpen, setIsProfileOpen] = useState(false);
     const [scrolled, setScrolled] = useState(false);
     const profileRef = useRef<HTMLDivElement>(null);
@@ -146,17 +158,39 @@ export default function FloatingHeader({
                         />
                     </Link>
 
-                    {/* Desktop Navigation */}
                     <div className="hidden md:flex items-center gap-6 lg:gap-8">
-                        {NAV_ITEMS.map((item) => (
-                            <Link
-                                key={item.href}
-                                href={item.href}
-                                className="text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors whitespace-nowrap"
-                            >
-                                {item.label}
-                            </Link>
-                        ))}
+                        {NAV_ITEMS.map((item) => {
+                            if (item.dropdown) {
+                                return (
+                                    <div key={item.label} className="relative group">
+                                        <button className="flex items-center gap-1 text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors py-2">
+                                            {item.label}
+                                            <ChevronDown size={14} />
+                                        </button>
+                                        <div className="absolute top-full left-0 w-48 bg-white shadow-lg rounded-xl border border-gray-100 py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 transform translate-y-2 group-hover:translate-y-0">
+                                            {item.dropdown.map((subItem) => (
+                                                <Link
+                                                    key={subItem.href}
+                                                    href={subItem.href}
+                                                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-blue-600"
+                                                >
+                                                    {subItem.label}
+                                                </Link>
+                                            ))}
+                                        </div>
+                                    </div>
+                                );
+                            }
+                            return (
+                                <Link
+                                    key={item.href}
+                                    href={item.href}
+                                    className="text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors whitespace-nowrap"
+                                >
+                                    {item.label}
+                                </Link>
+                            );
+                        })}
                     </div>
 
                     {/* Right Actions */}
@@ -287,16 +321,45 @@ export default function FloatingHeader({
                         </div>
 
                         <div className="flex flex-col gap-2">
-                            {NAV_ITEMS.map((item) => (
-                                <Link
-                                    key={item.href}
-                                    href={item.href}
-                                    onClick={() => setIsMobileMenuOpen(false)}
-                                    className="px-4 py-3 text-base font-medium text-gray-700 hover:bg-gray-50 hover:text-blue-600 rounded-xl transition-colors"
-                                >
-                                    {item.label}
-                                </Link>
-                            ))}
+                            {NAV_ITEMS.map((item) => {
+                                if (item.dropdown) {
+                                    return (
+                                        <div key={item.label}>
+                                            <button
+                                                onClick={() => setIsServicesOpen(!isServicesOpen)}
+                                                className="flex w-full items-center justify-between px-4 py-3 text-base font-medium text-gray-700 hover:bg-gray-50 hover:text-blue-600 rounded-xl transition-colors"
+                                            >
+                                                {item.label}
+                                                <ChevronDown size={16} className={`transition-transform ${isServicesOpen ? 'rotate-180' : ''}`} />
+                                            </button>
+                                            {isServicesOpen && (
+                                                <div className="pl-8 border-l-2 border-gray-100 my-2 flex flex-col gap-2">
+                                                    {item.dropdown.map((subItem) => (
+                                                        <Link
+                                                            key={subItem.href}
+                                                            href={subItem.href}
+                                                            onClick={() => setIsMobileMenuOpen(false)}
+                                                            className="block py-2 text-sm text-gray-600 hover:text-blue-600"
+                                                        >
+                                                            {subItem.label}
+                                                        </Link>
+                                                    ))}
+                                                </div>
+                                            )}
+                                        </div>
+                                    );
+                                }
+                                return (
+                                    <Link
+                                        key={item.href}
+                                        href={item.href}
+                                        onClick={() => setIsMobileMenuOpen(false)}
+                                        className="px-4 py-3 text-base font-medium text-gray-700 hover:bg-gray-50 hover:text-blue-600 rounded-xl transition-colors"
+                                    >
+                                        {item.label}
+                                    </Link>
+                                );
+                            })}
                             {/* Add auth links to mobile menu if not authenticated */}
                             {!isAuthenticated && links.map(link => (
                                 <Link

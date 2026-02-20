@@ -81,14 +81,14 @@ export default function ResumeDetailModal({
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-2xl animate-in zoom-in-95 duration-200">
-          <div className="px-6 py-4 border-b bg-slate-900 rounded-t-xl flex justify-between items-center">
+          <div className="flex items-center justify-between px-6 py-4 bg-[#2F4269] border-b border-gray-800 rounded-t-xl">
             <h3 className="text-lg font-semibold text-white flex items-center gap-2">
               <Lock className="w-5 h-5" />
               Resume Locked
             </h3>
             <button
               onClick={onClose}
-              className="p-2 text-white/70 hover:text-white hover:bg-white/10 rounded-full transition-colors"
+              className="text-white/70 hover:text-white transition-colors"
             >
               <X className="w-5 h-5" />
             </button>
@@ -203,15 +203,15 @@ export default function ResumeDetailModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-7xl max-h-[90vh] flex flex-col animate-in zoom-in-95 duration-200">
-        <div className="px-6 py-4 border-b bg-slate-900 rounded-t-xl flex justify-between items-center">
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-4xl max-h-[90vh] flex flex-col animate-in zoom-in-95 duration-200">
+        <div className="flex items-center justify-between px-6 py-4 bg-[#2F4269] border-b border-gray-800 rounded-t-xl">
           <h3 className="text-lg font-semibold text-white flex items-center gap-2">
             <Download className="w-5 h-5" />
             Resume Details - {resumeData.resume_name}
           </h3>
           <button
             onClick={onClose}
-            className="p-2 text-white/70 hover:text-white hover:bg-white/10 rounded-full transition-colors"
+            className="text-white/70 hover:text-white transition-colors"
           >
             <X className="w-5 h-5" />
           </button>

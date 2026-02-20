@@ -1102,7 +1102,7 @@ export default function BucketsPage() {
           {/* Create Button */}
           <button
             onClick={() => setShowCreateModal(true)}
-            className="px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg  border border-[#E1E8F1] transition-colors flex items-center gap-1.5  h-[40px]"
+            className="px-4 py-2.5 bg-[#2563EB] hover:bg-blue-700 text-white text-sm font-medium rounded-lg  border border-[#E1E8F1] transition-colors flex items-center gap-1.5  h-[40px]"
           >
             <Plus className="w-4 h-4" />
             Create

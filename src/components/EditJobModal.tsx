@@ -151,7 +151,7 @@ export default function EditJobModal({
   if (loadingJobDetails || !job) {
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
-        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm transition-opacity" onClick={onClose} />
+        <div className="fixed inset-0 bg-black/40 transition-opacity" onClick={onClose} />
         <div className="relative w-full max-w-4xl bg-white dark:bg-[#1E1E1E] rounded-xl shadow-2xl p-8">
           <p className="text-center text-gray-500 dark:text-gray-400 font-medium">Loading job details...</p>
         </div>
@@ -162,7 +162,7 @@ export default function EditJobModal({
   return (
     <div className={`fixed inset-0 z-50 flex items-center justify-center ${isFullscreen ? "p-0" : "p-4 sm:p-6"}`}>
       <div
-        className="fixed inset-0 bg-black/40 backdrop-blur-sm transition-opacity"
+        className="fixed inset-0 bg-black/40 transition-opacity"
         onClick={onClose}
       />
 
@@ -172,7 +172,7 @@ export default function EditJobModal({
           }`}
       >
         {/* Header */}
-        <div className={`flex items-center justify-between px-6 py-4 bg-[#0B172B] border-b border-gray-800 ${isFullscreen ? "" : "rounded-t-xl"
+        <div className={`flex items-center justify-between px-6 py-4 bg-[#2F4269] border-b border-gray-800 ${isFullscreen ? "" : "rounded-t-xl"
           }`}>
           <h2 className="text-lg font-semibold text-white">
             Edit Job Posting

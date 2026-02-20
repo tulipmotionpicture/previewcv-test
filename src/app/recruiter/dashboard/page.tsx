@@ -531,7 +531,7 @@ export default function RecruiterDashboard() {
                           setActiveTab("jobs");
                           setJobManagementView("create");
                         }}
-                        className="flex items-center gap-2 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors shadow-sm text-sm"
+                        className="flex items-center gap-2 px-4 py-2.5 bg-[#0077FF] hover:bg-blue-700 text-white rounded-lg font-medium transition-colors shadow-sm text-sm"
                       >
                         <Plus className="w-4 h-4" />
                         Create New Job
@@ -564,7 +564,7 @@ export default function RecruiterDashboard() {
                               className="flex items-center gap-4 p-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors cursor-pointer group first:rounded-t-2xl last:rounded-b-2xl"
                               onClick={() => handleViewApplicationDetail(app)}
                             >
-                              <div className="w-10 h-10 rounded-full bg-[#0B172B] flex items-center justify-center text-white font-bold text-sm shadow-sm flex-shrink-0">
+                              <div className="w-10 h-10 rounded-full bg-[#2F4269] flex items-center justify-center text-white font-bold text-sm shadow-sm flex-shrink-0">
                                 {app.candidate_name
                                   ?.substring(0, 2)
                                   .toUpperCase() || "JD"}
@@ -588,7 +588,7 @@ export default function RecruiterDashboard() {
                               key={i}
                               className="flex items-center gap-4 p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors cursor-pointer group first:rounded-t-2xl last:rounded-b-2xl"
                             >
-                              <div className="w-12 h-12 rounded-full bg-[#0B172B] flex items-center justify-center text-white font-bold text-sm shadow-sm flex-shrink-0">
+                              <div className="w-12 h-12 rounded-full bg-[#2F4269] flex items-center justify-center text-white font-bold text-sm shadow-sm flex-shrink-0">
                                 JD
                               </div>
                               <div className="flex-1 min-w-0">

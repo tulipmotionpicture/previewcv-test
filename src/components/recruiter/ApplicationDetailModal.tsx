@@ -133,23 +133,23 @@ export default function ApplicationDetailModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
       <div className="bg-white dark:bg-gray-900 w-full max-w-2xl rounded-xl shadow-2xl animate-in zoom-in-95 duration-200 overflow-hidden flex flex-col max-h-[90vh]">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 bg-[#0B172B] shrink-0">
+        <div className="flex items-center justify-between px-6 py-4 bg-[#2F4269] border-b border-gray-800 rounded-t-xl shrink-0">
           <h2 className="text-lg font-medium text-white">
             Application Details
           </h2>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-white transition-colors"
+            className="text-white/70 hover:text-white transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Content */}
-        <div className="p-8 space-y-8 overflow-y-auto custom-scrollbar flex-1">
+        <div className="p-6 space-y-6 overflow-y-auto custom-scrollbar flex-1">
           {loading ? (
             <div className="flex items-center justify-center py-20">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
@@ -159,7 +159,7 @@ export default function ApplicationDetailModal({
               {/* Profile Header */}
               <div className="flex items-start justify-between">
                 <div className="flex items-center gap-4">
-                  <div className="w-16 h-16 rounded-full overflow-hidden bg-gray-200 shrink-0">
+                  <div className="w-12 h-12 rounded-full overflow-hidden bg-gray-200 shrink-0">
                     <img
                       src={
                         applicationDetail?.candidate?.profile_image_url ||
@@ -170,7 +170,7 @@ export default function ApplicationDetailModal({
                     />
                   </div>
                   <div>
-                    <h3 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+                    <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100">
                       {applicationDetail.candidate.full_name}
                     </h3>
                     <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400 mt-1">
@@ -430,7 +430,7 @@ export default function ApplicationDetailModal({
                   <button
                     onClick={handleDownloadResume}
                     disabled={downloadLoading}
-                    className="flex items-center gap-2 px-6 py-2.5 bg-[#0B172B] text-white rounded-lg font-medium hover:bg-[#0B172B]/90 transition-colors disabled:opacity-50"
+                    className="flex items-center gap-2 px-6 py-2.5 bg-[#2F4269] text-white rounded-lg font-medium hover:bg-[#2F4269]/90 transition-colors disabled:opacity-50"
                   >
                     {downloadLoading ? (
                       <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
