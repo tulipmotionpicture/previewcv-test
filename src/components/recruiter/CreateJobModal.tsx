@@ -1,10 +1,11 @@
 import React, { useState } from "react";
-import { X, ChevronDown, Plus, Minimize2, Maximize2 } from "lucide-react";
+import { ChevronDown, Plus } from "lucide-react";
 import { JobFormState } from "./JobManagement";
 import RichTextEditor from "../ui/RichTextEditor";
 import CountrySearch from "../location/CountrySearch";
 import StateSearch from "../location/StateSearch";
 import CitySearch from "../location/CitySearch";
+import MaximizableModal from "@/components/common/MaximizableModal";
 
 interface CreateJobModalProps {
   isOpen: boolean;
@@ -27,53 +28,36 @@ export default function CreateJobModal({
   onSubmit,
   isSubmitting = false,
 }: CreateJobModalProps) {
-  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [isMaximized, setIsMaximized] = useState(false);
 
   if (!isOpen) return null;
 
   return (
-    <div className={`fixed inset-0 z-50 flex items-center justify-center ${isFullscreen ? "p-0" : "p-4 sm:p-6"}`}>
-      <div
-        className="fixed inset-0 bg-black/40 transition-opacity"
-        onClick={onClose}
-      />
-
+    <MaximizableModal
+      isOpen={isOpen}
+      onClose={onClose}
+      isMaximized={isMaximized}
+      setIsMaximized={setIsMaximized}
+      title="Post New Opportunity"
+      maxWidthClass="max-w-4xl"
+      footer={
+        <div className="flex justify-end w-full">
+          <button
+            type="submit"
+            onClick={onSubmit}
+            disabled={isSubmitting}
+            className="px-8 py-2.5 bg-primary-blue hover:bg-primary-blue-hover text-white rounded-lg font-medium shadow-lg shadow-primary-blue/30 transition-all transform active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed"
+          >
+            {isSubmitting ? "Posting..." : "Post Job"}
+          </button>
+        </div>
+      }
+    >
       <form
         onSubmit={onSubmit}
-        className={`relative w-full bg-white dark:bg-[#1E1E1E] shadow-2xl flex flex-col transition-all duration-300 ${isFullscreen ? "h-full max-w-none rounded-none" : "max-w-4xl max-h-[90vh] rounded-xl"
-          }`}
+        className="w-full flex flex-col transition-all duration-300"
       >
-        {/* Header */}
-        <div className={`flex items-center justify-between px-6 py-4 bg-[#2F4269] border-b border-gray-800 ${isFullscreen ? "" : "rounded-t-xl"
-          }`}>
-          <h2 className="text-lg font-semibold text-white">
-            Post New Opportunity
-          </h2>
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => setIsFullscreen(!isFullscreen)}
-              className="p-1 rounded-full hover:bg-white/10 text-gray-400 hover:text-white transition-colors"
-              title={isFullscreen ? "Exit Fullscreen" : "Fullscreen"}
-            >
-              {isFullscreen ? (
-                <Minimize2 className="w-5 h-5" />
-              ) : (
-                <Maximize2 className="w-5 h-5" />
-              )}
-            </button>
-            <button
-              type="button"
-              onClick={onClose}
-              className="p-1 rounded-full hover:bg-white/10 text-gray-400 hover:text-white transition-colors"
-            >
-              <X className="w-5 h-5" />
-            </button>
-          </div>
-        </div>
-
-        {/* Scrollable Content */}
-        <div className="flex-1 overflow-y-auto p-6 space-y-6 custom-scrollbar">
+        <div className="space-y-6">
           {/* Row 1: Title */}
           <div className="space-y-2">
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -408,18 +392,7 @@ export default function CreateJobModal({
             </div>
           </div>
         </div>
-
-        {/* Footer */}
-        <div className="px-6 py-4 border-t border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-[#1E1E1E]/50 rounded-b-xl flex justify-end">
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className="px-8 py-2.5 bg-primary-blue hover:bg-primary-blue-hover text-white rounded-lg font-medium shadow-lg shadow-primary-blue/30 transition-all transform active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed"
-          >
-            {isSubmitting ? "Posting..." : "Post Job"}
-          </button>
-        </div>
       </form>
-    </div>
+    </MaximizableModal>
   );
 }

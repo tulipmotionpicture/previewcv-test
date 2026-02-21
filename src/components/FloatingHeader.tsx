@@ -138,9 +138,9 @@ export default function FloatingHeader({
                     }`}
             >
                 <div
-                    className={`bg-white/95 backdrop-blur-xl px-4 md:px-6 py-3 border-gray-100 flex items-center justify-between transition-all duration-300 ${scrolled
-                        ? "rounded-full shadow-lg border"
-                        : "rounded-none shadow-sm border-b"
+                    className={`bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl px-4 md:px-6 py-3 border-gray-100 dark:border-gray-800 flex items-center justify-between transition-all duration-300 ${scrolled
+                        ? "rounded-full shadow-lg border dark:border-gray-700"
+                        : "rounded-none shadow-sm border-b dark:border-b-gray-800"
                         }`}
                 >
                     {/* Logo */}
@@ -163,16 +163,16 @@ export default function FloatingHeader({
                             if (item.dropdown) {
                                 return (
                                     <div key={item.label} className="relative group">
-                                        <button className="flex items-center gap-1 text-sm font-medium text-gray-700 hover:text-primary-blue transition-colors py-2">
+                                        <button className="flex items-center gap-1 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-primary-blue dark:hover:text-blue-400 transition-colors py-2">
                                             {item.label}
                                             <ChevronDown size={14} />
                                         </button>
-                                        <div className="absolute top-full left-0 w-48 bg-white shadow-lg rounded-xl border border-gray-100 py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 transform translate-y-2 group-hover:translate-y-0">
+                                        <div className="absolute top-full left-0 w-48 bg-white dark:bg-gray-800 shadow-lg rounded-xl border border-gray-100 dark:border-gray-700 py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 transform translate-y-2 group-hover:translate-y-0">
                                             {item.dropdown.map((subItem) => (
                                                 <Link
                                                     key={subItem.href}
                                                     href={subItem.href}
-                                                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-primary-blue"
+                                                    className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50 hover:text-primary-blue dark:hover:text-blue-400"
                                                 >
                                                     {subItem.label}
                                                 </Link>
@@ -185,7 +185,7 @@ export default function FloatingHeader({
                                 <Link
                                     key={item.href}
                                     href={item.href}
-                                    className="text-sm font-medium text-gray-700 hover:text-primary-blue transition-colors whitespace-nowrap"
+                                    className="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-primary-blue dark:hover:text-blue-400 transition-colors whitespace-nowrap"
                                 >
                                     {item.label}
                                 </Link>
@@ -201,12 +201,12 @@ export default function FloatingHeader({
                                     <div className="relative" ref={profileRef}>
                                         <button
                                             onClick={() => setIsProfileOpen(!isProfileOpen)}
-                                            className="flex items-center gap-2 pl-2 pr-1 py-1 rounded-full hover:bg-gray-100 transition-colors focus:outline-none"
+                                            className="flex items-center gap-2 pl-2 pr-1 py-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors focus:outline-none"
                                         >
-                                            <span className="text-sm font-semibold text-gray-700 max-w-[100px] truncate">
+                                            <span className="text-sm font-semibold text-gray-700 dark:text-gray-300 max-w-[100px] truncate">
                                                 {userDisplayName?.split(' ')[0]}
                                             </span>
-                                            <div className="h-8 w-8 rounded-full bg-gray-200 overflow-hidden ring-2 ring-white shadow-sm flex items-center justify-center">
+                                            <div className="h-8 w-8 rounded-full bg-gray-200 dark:bg-gray-700 overflow-hidden ring-2 ring-white dark:ring-gray-800 shadow-sm flex items-center justify-center">
                                                 {userProfileImage ? (
                                                     <Image
                                                         src={userProfileImage}
@@ -222,29 +222,29 @@ export default function FloatingHeader({
                                         </button>
 
                                         {isProfileOpen && (
-                                            <div className="absolute right-0 mt-3 w-56 bg-white rounded-xl shadow-xl border border-gray-100 py-2 animate-in fade-in zoom-in-95 duration-200 origin-top-right">
-                                                <div className="px-4 py-3 border-b border-gray-50">
-                                                    <p className="text-sm font-bold text-gray-900 truncate">
+                                            <div className="absolute right-0 mt-3 w-56 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-100 dark:border-gray-700 py-2 animate-in fade-in zoom-in-95 duration-200 origin-top-right">
+                                                <div className="px-4 py-3 border-b border-gray-50 dark:border-gray-700">
+                                                    <p className="text-sm font-bold text-gray-900 dark:text-white truncate">
                                                         {userDisplayName || "User"}
                                                     </p>
-                                                    <p className="text-xs text-gray-500 truncate mt-0.5">
+                                                    <p className="text-xs text-gray-500 dark:text-gray-400 truncate mt-0.5">
                                                         {isRecruiterAuth ? recruiterUser?.email : candidateUser?.email}
                                                     </p>
                                                 </div>
                                                 <div className="py-1">
                                                     <Link
                                                         href={dashboardLink}
-                                                        className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-black"
+                                                        className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-black dark:hover:text-white"
                                                         onClick={() => setIsProfileOpen(false)}
                                                     >
                                                         <LayoutDashboard size={16} />
                                                         Dashboard
                                                     </Link>
                                                 </div>
-                                                <div className="py-1 border-t border-gray-50">
+                                                <div className="py-1 border-t border-gray-50 dark:border-gray-700">
                                                     <button
                                                         onClick={handleLogout}
-                                                        className="flex w-full items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50"
+                                                        className="flex w-full items-center gap-2 px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"
                                                     >
                                                         <LogOut size={16} />
                                                         Logout
@@ -259,7 +259,7 @@ export default function FloatingHeader({
                                             <Link
                                                 key={link.href}
                                                 href={link.href}
-                                                className="text-sm font-medium text-gray-600 hover:text-black transition-colors"
+                                                className="text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-black dark:hover:text-white transition-colors"
                                             >
                                                 {link.label.replace(' Login', '')}
                                             </Link>
@@ -284,7 +284,7 @@ export default function FloatingHeader({
                         {/* We can show minimal auth on mobile if needed, but keeping it simple */}
                         <button
                             onClick={() => setIsMobileMenuOpen(true)}
-                            className="p-2 text-gray-800 hover:bg-gray-100 rounded-full transition-colors"
+                            className="p-2 text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors"
                             aria-label="Open menu"
                         >
                             <Menu size={24} />
@@ -303,7 +303,7 @@ export default function FloatingHeader({
                     />
 
                     {/* Sidebar */}
-                    <div className="fixed top-0 right-0 h-full w-[280px] bg-white z-[9999] shadow-2xl p-5 flex flex-col gap-6 animate-in slide-in-from-right duration-300 md:hidden overflow-y-auto">
+                    <div className="fixed top-0 right-0 h-full w-[280px] bg-white dark:bg-gray-900 z-[9999] shadow-2xl p-5 flex flex-col gap-6 animate-in slide-in-from-right duration-300 md:hidden overflow-y-auto">
                         <div className="flex justify-between items-center px-1">
                             <Image
                                 src={logoSrc || config.app.logoUrl}
@@ -314,7 +314,7 @@ export default function FloatingHeader({
                             />
                             <button
                                 onClick={() => setIsMobileMenuOpen(false)}
-                                className="p-2 text-gray-500 hover:text-black hover:bg-gray-100 rounded-full transition-colors"
+                                className="p-2 text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors"
                             >
                                 <X size={24} />
                             </button>
@@ -327,19 +327,19 @@ export default function FloatingHeader({
                                         <div key={item.label}>
                                             <button
                                                 onClick={() => setIsServicesOpen(!isServicesOpen)}
-                                                className="flex w-full items-center justify-between px-4 py-3 text-base font-medium text-gray-700 hover:bg-gray-50 hover:text-primary-blue rounded-xl transition-colors"
+                                                className="flex w-full items-center justify-between px-4 py-3 text-base font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-primary-blue dark:hover:text-blue-400 rounded-xl transition-colors"
                                             >
                                                 {item.label}
                                                 <ChevronDown size={16} className={`transition-transform ${isServicesOpen ? 'rotate-180' : ''}`} />
                                             </button>
                                             {isServicesOpen && (
-                                                <div className="pl-8 border-l-2 border-gray-100 my-2 flex flex-col gap-2">
+                                                <div className="pl-8 border-l-2 border-gray-100 dark:border-gray-800 my-2 flex flex-col gap-2">
                                                     {item.dropdown.map((subItem) => (
                                                         <Link
                                                             key={subItem.href}
                                                             href={subItem.href}
                                                             onClick={() => setIsMobileMenuOpen(false)}
-                                                            className="block py-2 text-sm text-gray-600 hover:text-primary-blue"
+                                                            className="block py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-primary-blue dark:hover:text-blue-400"
                                                         >
                                                             {subItem.label}
                                                         </Link>
@@ -354,7 +354,7 @@ export default function FloatingHeader({
                                         key={item.href}
                                         href={item.href}
                                         onClick={() => setIsMobileMenuOpen(false)}
-                                        className="px-4 py-3 text-base font-medium text-gray-700 hover:bg-gray-50 hover:text-primary-blue rounded-xl transition-colors"
+                                        className="px-4 py-3 text-base font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-primary-blue dark:hover:text-blue-400 rounded-xl transition-colors"
                                     >
                                         {item.label}
                                     </Link>
@@ -366,21 +366,21 @@ export default function FloatingHeader({
                                     key={link.href}
                                     href={link.href}
                                     onClick={() => setIsMobileMenuOpen(false)}
-                                    className="px-4 py-3 text-base font-medium text-gray-700 hover:bg-gray-50 hover:text-primary-blue rounded-xl transition-colors"
+                                    className="px-4 py-3 text-base font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-primary-blue dark:hover:text-blue-400 rounded-xl transition-colors"
                                 >
                                     {link.label}
                                 </Link>
                             ))}
                         </div>
 
-                        <div className="h-px bg-gray-100" />
+                        <div className="h-px bg-gray-100 dark:bg-gray-800" />
 
                         {isAuthenticated ? (
                             <div className="flex flex-col gap-2">
                                 <Link
                                     href={dashboardLink}
                                     onClick={() => setIsMobileMenuOpen(false)}
-                                    className="flex items-center gap-3 px-4 py-3 text-base font-medium text-gray-700 hover:bg-gray-50 rounded-xl"
+                                    className="flex items-center gap-3 px-4 py-3 text-base font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-xl"
                                 >
                                     <LayoutDashboard size={20} /> Dashboard
                                 </Link>
@@ -389,7 +389,7 @@ export default function FloatingHeader({
                                         handleLogout();
                                         setIsMobileMenuOpen(false);
                                     }}
-                                    className="flex items-center gap-3 px-4 py-3 text-base font-medium text-red-600 hover:bg-red-50 rounded-xl w-full text-left"
+                                    className="flex items-center gap-3 px-4 py-3 text-base font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-xl w-full text-left"
                                 >
                                     <LogOut size={20} /> Logout
                                 </button>

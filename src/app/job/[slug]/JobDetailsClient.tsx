@@ -662,12 +662,12 @@ export default function JobDetailsClient({ job, slug }: JobDetailsClientProps) {
                 <span className="hidden sm:inline-block text-gray-300 dark:text-gray-600">
                   |
                 </span>
-                <Link
+                {/* <Link
                   href={`/jobs?limit=10&category=${job.categories?.[0]}`}
                   className="hidden sm:inline-block text-primary-blue hover:underline font-medium"
                 >
                   Send me jobs like this
-                </Link>
+                </Link> */}
               </div>
             </div>
           </div>
