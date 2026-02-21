@@ -137,7 +137,38 @@ export default function ApplicationDetailModal({
       isMaximized={isMaximized}
       setIsMaximized={setIsMaximized}
       title="Application Details"
-      maxWidthClass="max-w-2xl"
+      footer={
+        <div className="flex items-center gap-4 justify-end">
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            Resume : {applicationDetail?.resume?.name || "N/A"}
+          </p>
+          <button
+            onClick={handleViewResume}
+            disabled={viewLoading}
+            className="flex items-center gap-2 px-6 py-2.5 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-700 dark:text-gray-200 font-medium hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors disabled:opacity-50"
+          >
+            {viewLoading ? (
+              <div className="w-5 h-5 border-2 border-gray-600 border-t-transparent rounded-full animate-spin" />
+            ) : (
+              <Eye className="w-5 h-5" />
+            )}
+            View
+          </button>
+
+          <button
+            onClick={handleDownloadResume}
+            disabled={downloadLoading}
+            className="flex items-center gap-2 px-6 py-2.5 bg-[#2F4269] text-white rounded-lg font-medium hover:bg-[#2F4269]/90 transition-colors disabled:opacity-50"
+          >
+            {downloadLoading ? (
+              <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+            ) : (
+              <Download className="w-5 h-5" />
+            )}
+            Download
+          </button>
+        </div>
+      }
     >
       <div className="space-y-6">
         {loading ? (
@@ -399,38 +430,6 @@ export default function ApplicationDetailModal({
             </div>
 
             {/* Resume Section */}
-            <div>
-              <h4 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">
-                Resume
-              </h4>
-              <div className="flex items-center gap-4">
-                <button
-                  onClick={handleViewResume}
-                  disabled={viewLoading}
-                  className="flex items-center gap-2 px-6 py-2.5 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-700 dark:text-gray-200 font-medium hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors disabled:opacity-50"
-                >
-                  {viewLoading ? (
-                    <div className="w-5 h-5 border-2 border-gray-600 border-t-transparent rounded-full animate-spin" />
-                  ) : (
-                    <Eye className="w-5 h-5" />
-                  )}
-                  View
-                </button>
-
-                <button
-                  onClick={handleDownloadResume}
-                  disabled={downloadLoading}
-                  className="flex items-center gap-2 px-6 py-2.5 bg-[#2F4269] text-white rounded-lg font-medium hover:bg-[#2F4269]/90 transition-colors disabled:opacity-50"
-                >
-                  {downloadLoading ? (
-                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  ) : (
-                    <Download className="w-5 h-5" />
-                  )}
-                  Download
-                </button>
-              </div>
-            </div>
           </>
         ) : (
           <div className="text-center py-10 text-gray-500">

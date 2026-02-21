@@ -13,7 +13,7 @@ import {
 } from "@/types/api";
 import { useRecruiterAuth } from "@/context/RecruiterAuthContext";
 import { useToast } from "@/context/ToastContext";
-import EditJobModal from "@/components/EditJobModal";
+import JobModal from "@/components/recruiter/JobModal";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
 import CompanyGallerySection from "@/components/CompanyGallerySection";
 import RecruiterGalleryEventsSection from "@/components/RecruiterGalleryEventsSection";
@@ -39,14 +39,7 @@ import type {
   JobFormState,
   JobManagementTab,
 } from "@/components/recruiter";
-import {
-  ArrowRight,
-  Clock,
-  Shield,
-  Search,
-  Bell,
-  Plus,
-} from "lucide-react";
+import { ArrowRight, Clock, Shield, Search, Bell, Plus } from "lucide-react";
 import { Button } from "@/components/ui";
 
 interface JobFilters {
@@ -102,7 +95,7 @@ export default function RecruiterDashboard() {
   }));
 
   // Edit Job State
-  const [editJobModalOpen, setEditJobModalOpen] = useState(false);
+  const [jobModalOpen, setJobModalOpen] = useState(false);
   const [editingJob, setEditingJob] = useState<Job | null>(null);
   const [loadingJobDetails, setLoadingJobDetails] = useState(false);
 
@@ -352,7 +345,7 @@ export default function RecruiterDashboard() {
 
   const handleEditJob = async (job: Job) => {
     setLoadingJobDetails(true);
-    setEditJobModalOpen(true);
+    setJobModalOpen(true);
     try {
       const response = await api.getJobPostingDetails(job.id);
       if (response.success && response.job) {
@@ -371,13 +364,42 @@ export default function RecruiterDashboard() {
     }
   };
 
-  const handleSaveJob = async (jobId: number, data: Partial<Job>) => {
+  const handleSaveJob = async (jobId: number | null, data: Partial<Job>) => {
     try {
-      await api.updateJob(jobId, data);
+      if (jobId) {
+        await api.updateJob(jobId, data);
+        toast.success("Job updated successfully!");
+      } else {
+        const e = { preventDefault: () => { } } as React.FormEvent;
+
+        const payload = {
+          title: data.title || "",
+          country: data.country || "",
+          state: data.state || "",
+          city: data.city || "",
+          company_name:
+            recruiter?.company_name || recruiter?.display_name || "My Company",
+          job_type: data.job_type || "full_time",
+          experience_level: data.experience_level || "mid",
+          description: data.description || "",
+          requirements: data.requirements || "Requirements not provided.",
+          responsibilities:
+            data.responsibilities || "Responsibilities not provided.",
+          salary_min: data.salary_min || 0,
+          salary_max: data.salary_max || 0,
+          salary_currency: data.salary_currency || "USD",
+          is_remote: data.is_remote || false,
+          required_skills: data.required_skills || [],
+          preferred_skills: data.preferred_skills || [],
+          categories: data.categories || [],
+        };
+
+        await api.createJob(payload as any);
+        toast.success("Job posted successfully!");
+      }
       await fetchJobs();
-      toast.success("Job updated successfully!");
     } catch (error) {
-      toast.error("Failed to update job");
+      toast.error(jobId ? "Failed to update job" : "Failed to create job");
       throw error;
     }
   };
@@ -478,7 +500,6 @@ export default function RecruiterDashboard() {
       {/* Main Content */}
       <main className="flex-1 p-5 w-full overflow-x-hidden">
         {/* Dashboard Header */}
-
 
         {/* KYC Verification Warning Banner */}
         {kycStatus &&
@@ -714,10 +735,10 @@ export default function RecruiterDashboard() {
       />
 
       {/* Edit Job Modal */}
-      <EditJobModal
-        isOpen={editJobModalOpen}
+      <JobModal
+        isOpen={jobModalOpen}
         onClose={() => {
-          setEditJobModalOpen(false);
+          setJobModalOpen(false);
           setEditingJob(null);
         }}
         onSave={handleSaveJob}

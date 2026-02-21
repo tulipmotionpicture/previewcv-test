@@ -8,6 +8,7 @@ interface MaximizableModalProps {
     children: ReactNode;
     footer?: ReactNode;
     headerIcon?: ReactNode;
+    headerActions?: ReactNode;
     maxWidthClass?: string;
     isMaximized: boolean;
     setIsMaximized: (maximized: boolean) => void;
@@ -20,6 +21,7 @@ export default function MaximizableModal({
     children,
     footer,
     headerIcon,
+    headerActions,
     maxWidthClass = "max-w-4xl",
     isMaximized,
     setIsMaximized,
@@ -30,8 +32,8 @@ export default function MaximizableModal({
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
             <div
                 className={`bg-white dark:bg-gray-800 shadow-xl flex flex-col animate-in zoom-in-95 duration-200 transition-all ${isMaximized
-                        ? "fixed inset-0 w-full h-full rounded-none"
-                        : `rounded-xl w-full ${maxWidthClass} max-h-[90vh]`
+                    ? "fixed inset-0 w-full h-full rounded-none"
+                    : `rounded-xl w-full ${maxWidthClass} max-h-[90vh]`
                     }`}
             >
                 <div
@@ -42,7 +44,13 @@ export default function MaximizableModal({
                         {headerIcon}
                         {title}
                     </div>
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center justify-end gap-3">
+                        {headerActions && (
+                            <div className="flex items-center gap-3">
+                                {headerActions}
+                                <div className="h-4 w-px bg-white/20 ml-1" />
+                            </div>
+                        )}
                         <button
                             onClick={() => setIsMaximized(!isMaximized)}
                             className="text-white/70 hover:text-white transition-colors focus:outline-none"

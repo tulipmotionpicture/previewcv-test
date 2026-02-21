@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { Job } from "@/types/api";
 import { Search, Plus } from "lucide-react";
-import CreateJobModal from "./CreateJobModal";
+import JobModal from "./JobModal";
 import JobsTable from "./JobsTable";
 
 export type JobManagementTab = "create" | "manage";
@@ -16,21 +16,21 @@ export type JobFormState = {
   stateCode?: string;
   city: string;
   job_type:
-  | "full_time"
-  | "part_time"
-  | "contract"
-  | "internship"
-  | "temporary"
-  | "freelance"
-  | "other";
+    | "full_time"
+    | "part_time"
+    | "contract"
+    | "internship"
+    | "temporary"
+    | "freelance"
+    | "other";
   experience_level:
-  | "entry"
-  | "junior"
-  | "mid"
-  | "senior"
-  | "lead"
-  | "director"
-  | "executive";
+    | "entry"
+    | "junior"
+    | "mid"
+    | "senior"
+    | "lead"
+    | "director"
+    | "executive";
   description: string;
   requirements: string;
   responsibilities: string;
@@ -158,13 +158,37 @@ export default function JobManagement({
 
   return (
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <CreateJobModal
+      <JobModal
         isOpen={activeTab === "create"}
         onClose={() => handleTabChange("manage")}
-        jobForm={jobForm}
-        onChange={onJobFormChange}
-        onSubmit={onCreateJob}
-        isSubmitting={creatingJob}
+        job={null}
+        onSave={async (_, data) => {
+          const e = {
+            preventDefault: () => {},
+            target: {},
+          } as any;
+
+          Object.keys(data).forEach((key) => {
+            const event = {
+              target: {
+                name: key,
+                value: (data as any)[key],
+                type:
+                  typeof (data as any)[key] === "boolean" ? "checkbox" : "text",
+                checked:
+                  typeof (data as any)[key] === "boolean"
+                    ? (data as any)[key]
+                    : undefined,
+              },
+            };
+            onJobFormChange(event as any);
+          });
+          setTimeout(() => {
+            onCreateJob(e);
+            handleTabChange("manage");
+          }, 100);
+        }}
+        loadingJobDetails={creatingJob}
       />
 
       {/* Header */}
