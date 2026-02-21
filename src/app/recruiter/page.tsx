@@ -8,37 +8,18 @@ import { useRecruiterAuth } from "@/context/RecruiterAuthContext";
 import FloatingHeader from "@/components/FloatingHeader";
 import HeroSection from "@/components/HeroSection";
 
-const MagnifyingGlassIcon = () => (
+const ShareNodeIcon = () => (
   <svg
-    xmlns="http://www.w3.org/2000/svg"
-    fill="none"
-    viewBox="0 0 24 24"
-    strokeWidth={2}
-    stroke="currentColor"
-    className="w-6 h-6"
+    width="24" height="24" viewBox="0 0 24 24"
+    fill="none" stroke="currentColor" strokeWidth="2.5"
+    strokeLinecap="round" strokeLinejoin="round"
+    className="text-gray-500 dark:text-gray-400"
   >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"
-    />
-  </svg>
-);
-
-const ChartBarIcon = () => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    fill="none"
-    viewBox="0 0 24 24"
-    strokeWidth={2}
-    stroke="currentColor"
-    className="w-6 h-6"
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z"
-    />
+    <circle cx="18" cy="5" r="3"></circle>
+    <circle cx="6" cy="12" r="3"></circle>
+    <circle cx="18" cy="19" r="3"></circle>
+    <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+    <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
   </svg>
 );
 
@@ -77,192 +58,208 @@ export default function RecruiterLanding() {
         showAuthButtons={true}
       />
 
-      <HeroSection
-        subtitle="For Recruiters"
-        title="Hire Smarter, Not Harder."
-        description="Find and engage with top-tier talent effortlessly. Preview live candidate resumes from LetsMakeCV and manage your hiring pipeline in one place."
-        showImage={true}
-        imageSrc="/sable-flow-o-6GhmpELnw-unsplash 1.png"
-        imageAlt="Professional hiring meeting"
-        imageStyle="contain"
-        showJobSearch={false}
-        ctaButtons={{
-          primary: { label: "Start Hiring Now", href: "/recruiter/signup" },
-          secondary: { label: "Watch Demo", href: "#demo" },
-        }}
-        stats={[
-          { value: "500+", label: "Companies" },
-          { value: "10k+", label: "Hires Made" },
-        ]}
-        backgroundColor="bg-mint dark:bg-gray-900"
-      />
-
-      {/* NEW: Talent Preview Teaser */}
-      <section className="py-32 px-8 bg-gray-50/50 dark:bg-gray-900/50 border-y border-gray-100 dark:border-gray-800 relative overflow-hidden">
-        <div className="max-w-7xl mx-auto">
-          <div className="flex flex-col md:flex-row md:items-end justify-between mb-20 gap-8">
-            <div>
-              <div className="inline-block px-4 py-2 bg-indigo-100 text-indigo-700 text-[10px] font-black uppercase tracking-[0.2em] rounded-full mb-6 border border-indigo-200">
-                Active Network
-              </div>
-              <h2 className="text-4xl lg:text-6xl font-black text-gray-900 dark:text-gray-100 tracking-tighter mb-4 italic uppercase leading-none">
-                Direct Market Pulse
-              </h2>
-              <p className="text-gray-500 dark:text-gray-400 font-medium max-w-xl text-lg leading-relaxed">
-                Browsing live performance data instead of static resumes. Source
-                10x faster with verified skill matrices.
-              </p>
+      {/* Custom Hero */}
+      <div className="relative bg-[#E5F1EF] dark:bg-[#0a0a0a] overflow-hidden lg:h-[480px] mt-10 flex items-center">
+        <div className="max-w-7xl mx-auto w-full flex flex-col lg:flex-row items-center relative z-10">
+          <div className="w-full lg:w-1/2 px-4 sm:px-6 lg:px-8 py-16 lg:py-0">
+            <h1 className="text-[36px] lg:text-[48px] font-medium text-gray-900 dark:text-gray-100 leading-[1.15] mb-5 tracking-tight">
+              Hire Smarter,<br />Not Harder.
+            </h1>
+            <p className="text-gray-600 dark:text-[#a1a1a1] font-medium text-[14px] lg:text-[15px] max-w-[420px] mb-8 leading-relaxed">
+              Find and engage with top-tier talent effortlessly. Preview live candidate resumes from LetsMakeCV and manage your hiring pipeline in one place.
+            </p>
+            <div className="flex flex-wrap gap-3 mb-10">
+              <Link
+                href="/recruiter/signup"
+                className="px-6 py-3 bg-[#1F4E4F] hover:bg-[#163c3d] text-white font-medium rounded-full transition-all text-[13px]"
+              >
+                Start Hiring Now
+              </Link>
+              <Link
+                href="#demo"
+                className="px-6 py-3 bg-transparent border border-[#1F4E4F] text-[#1F4E4F] dark:border-white dark:text-white hover:bg-[#1F4E4F]/5 dark:hover:bg-white/5 rounded-full transition-all text-[13px] font-medium"
+              >
+                Watch Demo
+              </Link>
             </div>
-            <Link
-              href="/recruiter/signup"
-              className="px-10 py-5 bg-indigo-600 text-white font-black rounded-2xl hover:bg-indigo-700 transition-all shadow-2xl shadow-indigo-200"
-            >
-              Get Started Free
+            <div className="flex gap-12">
+              <div>
+                <p className="text-[24px] font-semibold text-gray-900 dark:text-white mb-0.5 leading-none">500+</p>
+                <p className="text-[12px] text-gray-700 dark:text-[#a1a1a1] font-medium">Companies</p>
+              </div>
+              <div>
+                <p className="text-[24px] font-semibold text-gray-900 dark:text-white mb-0.5 leading-none">10k+</p>
+                <p className="text-[12px] text-gray-700 dark:text-[#a1a1a1] font-medium">Hires Made</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Right side image constrained to medium height */}
+        <div className="lg:absolute lg:top-1/2 lg:-translate-y-1/2 lg:right-0 lg:w-1/2 h-[350px] lg:h-[480px] w-full z-0 px-4 sm:px-6 lg:px-0 pb-8 lg:pb-0">
+          <div className="w-full h-full relative lg:rounded-l-[40px] overflow-hidden rounded-[20px] lg:rounded-tr-none lg:rounded-br-none shadow-lg">
+            <Image
+              src="/sable-flow-o-6GhmpELnw-unsplash 1.png"
+              alt="Professional hiring meeting"
+              fill
+              className="object-cover object-center lg:object-[center_30%]"
+              priority
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Talent Preview Teaser */}
+      <section className="py-16 lg:py-20 bg-[#F4F9F8] dark:bg-gray-950 border-y border-gray-100 dark:border-[#262626]">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="mb-4">
+            <h2 className="text-[28px] font-medium text-gray-900 dark:text-gray-100 mb-2 tracking-tight">
+              Direct Market Pulse
+            </h2>
+            <p className="text-gray-500 dark:text-[#a1a1a1] text-[15px] max-w-2xl leading-relaxed">
+              Browsing live performance data instead of static resumes. Source 10x faster with verified skill matrices.
+            </p>
+          </div>
+
+          <div className="flex justify-end mb-6">
+            <Link href="/jobs" className="text-[13px] font-semibold text-gray-900 dark:text-gray-100 hover:text-[#1F4E4F] transition-colors">
+              Explore All Jobs
             </Link>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {[
               {
-                role: "Fullstack Engineer",
+                name: "Vihaan Aarav",
+                role: "Senior React Developer",
                 exp: "5+ Years",
                 skills: ["React", "Go", "Kubernetes"],
-                badges: ["Verified", "Top 1%"],
                 img: "/images/profile1.png",
               },
               {
+                name: "Vihaan Aarav",
                 role: "Product Designer",
-                exp: "7+ Years",
-                skills: ["UX", "Figma", "Design Systems"],
-                badges: ["Expert"],
+                exp: "",
+                skills: ["UX", "Go", "Kubernetes"],
                 img: "/images/profile2.png",
               },
               {
-                role: "Data Scientist",
-                exp: "4+ Years",
-                skills: ["Python", "PyTorch", "AWS"],
-                badges: ["Available"],
+                name: "Vihaan Aarav",
+                role: "Senior React Developer",
+                exp: "5+ Years",
+                skills: ["React", "Go", "Kubernetes"],
                 img: "/images/profile3.png",
               },
             ].map((can, i) => (
               <div
                 key={i}
-                className="bg-[#E6E6E6] dark:bg-gray-900 border border-gray-200 dark:border-gray-800 p-8 rounded-[40px] hover:border-indigo-500/30 transition-all group shadow-sm hover:shadow-xl"
+                className="bg-white dark:bg-[#0a0a0a] p-6 rounded-[16px] shadow-[0_2px_12px_-4px_rgba(0,0,0,0.05)] border border-gray-100 dark:border-[#262626] flex flex-col justify-between hover:shadow-[0_8px_24px_-4px_rgba(0,0,0,0.08)] transition-all"
               >
-                <div className="flex items-center gap-5 mb-8">
-                  <div className="w-16 h-16 bg-gray-100 rounded-3xl relative overflow-hidden border border-gray-200">
-                    <Image
-                      src={can.img}
-                      alt={can.role}
-                      fill
-                      className="object-cover"
-                    />
+                <div>
+                  <div className="flex items-center gap-4 mb-4">
+                    <div className="w-[46px] h-[46px] bg-gray-100 dark:bg-gray-800 rounded-full relative overflow-hidden shrink-0 border border-gray-100 dark:border-gray-800">
+                      <Image
+                        src={can.img}
+                        alt={can.name}
+                        fill
+                        className="object-cover"
+                      />
+                    </div>
+                    <div>
+                      <h5 className="text-[11px] text-gray-500 dark:text-[#a1a1a1] font-medium mb-0.5">{can.name}</h5>
+                      <h4 className="font-semibold text-gray-900 dark:text-gray-100 text-[17px] tracking-tight">
+                        {can.role}
+                      </h4>
+                    </div>
                   </div>
-                  <div>
-                    <div className="h-4 w-24 bg-gray-100 rounded-full mb-2 blur-[3px]" />
-                    <h4 className="font-black text-gray-900 dark:text-gray-100 text-lg tracking-tight uppercase leading-none">
-                      {can.role}
-                    </h4>
-                  </div>
-                </div>
 
-                <div className="space-y-6">
-                  <div className="flex flex-wrap gap-2">
+                  <div className="flex flex-wrap gap-2 mb-6">
                     {can.skills.map((s) => (
                       <span
                         key={s}
-                        className="px-3 py-1.5 bg-gray-50 text-gray-500 text-[10px] font-black rounded-lg border border-gray-100 tracking-tight uppercase"
+                        className="px-2.5 py-1 bg-[#F4F4F5] dark:bg-gray-800 text-gray-600 dark:text-gray-300 text-[10px] font-medium rounded-md"
                       >
                         {s}
                       </span>
                     ))}
                   </div>
-
-                  <div className="flex items-center justify-between pt-6 border-t border-gray-100">
-                    <div className="flex gap-2">
-                      {can.badges.map((b) => (
-                        <span
-                          key={b}
-                          className="text-[10px] font-black text-indigo-600 uppercase tracking-tighter italic"
-                        >
-                          ● {b}
-                        </span>
-                      ))}
-                    </div>
-                    <span className="text-xs font-black text-gray-900 uppercase italic">
-                      {can.exp}
-                    </span>
-                  </div>
                 </div>
 
-                <Link
-                  href="/recruiter/login"
-                  className="mt-8 w-full py-4 bg-gray-100 text-gray-500 font-black rounded-2xl hover:bg-indigo-600 hover:text-white transition-all text-center text-sm uppercase tracking-tighter"
-                >
-                  View Full Profile & Resume
-                </Link>
+                <div className="flex items-end justify-between border-t border-gray-100 dark:border-[#262626] pt-4 mt-auto">
+                  <Link
+                    href="/recruiter/login"
+                    className="py-2.5 px-4 bg-black dark:bg-white text-white dark:text-black font-medium rounded-lg hover:bg-gray-800 dark:hover:bg-gray-200 transition-all text-[12px]"
+                  >
+                    View Full Profile & Resume
+                  </Link>
+                  {can.exp && (
+                    <span className="text-[11px] text-gray-400 font-medium mb-1">
+                      {can.exp}
+                    </span>
+                  )}
+                </div>
               </div>
             ))}
           </div>
         </div>
-        <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-indigo-50 rounded-full blur-[150px] -z-10" />
       </section>
 
       <section
         id="features"
-        className="py-32 px-8 bg-[#E6E6E6] dark:bg-gray-950 relative overflow-hidden"
+        className="pt-16 pb-32 px-4 sm:px-6 lg:px-8 bg-white dark:bg-[#0a0a0a] relative overflow-hidden"
       >
-        <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-32">
-            <div>
-              <h2 className="text-4xl lg:text-5xl font-black mb-10 tracking-tighter italic text-indigo-600 uppercase">
-                Search Beyond the Post.
-              </h2>
-              <p className="text-xl text-gray-500 font-medium mb-12 leading-relaxed">
-                Why wait for applications? Our Global Talent Search allows you
-                to browse active resumes even if you haven&apos;t posted a job.
-              </p>
+        <div className="max-w-6xl mx-auto">
+          <div className="max-w-[550px] mb-16 lg:mb-24">
+            <h2 className="text-[32px] sm:text-[36px] font-medium mb-3 text-gray-900 dark:text-gray-100 tracking-tight leading-tight">
+              Search Beyond the Post.
+            </h2>
+            <p className="text-[14px] sm:text-[15px] text-gray-500 font-medium leading-relaxed">
+              Why wait for applications? Our Global Talent Search allows you
+              to browse active resumes even if you haven&apos;t posted a job.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] gap-12 md:gap-16 items-start relative max-w-5xl">
+            <div className="flex flex-col justify-center py-4">
               <ul className="space-y-6">
-                <li className="flex items-center gap-4 text-gray-600 font-bold uppercase text-sm">
-                  <span className="w-8 h-8 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center">
-                    →
-                  </span>{" "}
-                  Advanced filter by skills & experience
+                <li className="flex gap-3 text-gray-900 dark:text-gray-100 font-medium text-[13px] sm:text-[14px]">
+                  <span className="font-bold">•</span>
+                  <span>Advanced filter by skills & experience</span>
                 </li>
-                <li className="flex items-center gap-4 text-gray-600 font-bold uppercase text-sm">
-                  <span className="w-8 h-8 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center">
-                    →
-                  </span>{" "}
-                  Real-time resume preview (No downloads)
+                <li className="flex gap-3 text-gray-900 dark:text-gray-100 font-medium text-[13px] sm:text-[14px]">
+                  <span className="font-bold">•</span>
+                  <span>→Real-time resume preview (No downloads)</span>
                 </li>
-                <li className="flex items-center gap-4 text-gray-600 font-bold uppercase text-sm">
-                  <span className="w-8 h-8 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center">
-                    →
-                  </span>{" "}
-                  Direct reach-out via secure messaging
+                <li className="flex gap-3 text-gray-900 dark:text-gray-100 font-medium text-[13px] sm:text-[14px]">
+                  <span className="font-bold">•</span>
+                  <span>→Direct reach-out via secure messaging</span>
                 </li>
               </ul>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
-              <div className="p-10 bg-[#E6E6E6] dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-[40px] shadow-sm hover:shadow-xl transition-all">
-                <div className="w-14 h-14 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center mb-8 shadow-inner">
-                  <MagnifyingGlassIcon />
+
+            <div className="hidden md:block w-px bg-gray-200 dark:bg-[#262626] self-stretch mx-auto min-h-[200px]"></div>
+
+            <div className="flex flex-col gap-6">
+              <div className="p-6 bg-[#F4F4F5] dark:bg-gray-900/50 rounded-[12px] max-w-sm">
+                <div className="mb-4">
+                  <ShareNodeIcon />
                 </div>
-                <h4 className="font-black mb-4 uppercase tracking-tighter leading-none">
+                <h4 className="text-[18px] sm:text-[20px] font-medium text-gray-900 dark:text-gray-100 mb-2 leading-none tracking-tight">
                   Global Search
                 </h4>
-                <p className="text-sm text-gray-400 font-medium leading-relaxed uppercase tracking-tight">
+                <p className="text-[12px] text-gray-500 dark:text-[#a1a1a1] leading-relaxed">
                   Access 100k+ active job seeker profiles instantly.
                 </p>
               </div>
-              <div className="p-10 bg-[#E6E6E6] dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-[40px] shadow-sm hover:shadow-xl transition-all mt-8">
-                <div className="w-14 h-14 bg-blue-50 text-indigo-600 rounded-2xl flex items-center justify-center mb-8 shadow-inner">
-                  <ChartBarIcon />
+
+              <div className="p-6 bg-[#F4F4F5] dark:bg-gray-900/50 rounded-[12px] max-w-sm">
+                <div className="mb-4">
+                  <ShareNodeIcon />
                 </div>
-                <h4 className="font-black mb-4 uppercase tracking-tighter leading-none">
+                <h4 className="text-[18px] sm:text-[20px] font-medium text-gray-900 dark:text-gray-100 mb-2 leading-none tracking-tight">
                   Application Manager
                 </h4>
-                <p className="text-sm text-gray-400 font-medium leading-relaxed uppercase tracking-tight">
+                <p className="text-[12px] text-gray-500 dark:text-[#a1a1a1] leading-relaxed">
                   Review and organize candidate applications efficiently.
                 </p>
               </div>
