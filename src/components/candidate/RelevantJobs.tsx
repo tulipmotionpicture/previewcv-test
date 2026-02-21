@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { Sparkles, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { RelevantJobsResponse } from "@/types/jobs";
 import RelevantJobItem from "./RelevantJobItem";
 
@@ -88,7 +88,6 @@ export default function RelevantJobs({
   if (jobs.length === 0) {
     return (
       <div className="text-center py-8">
-        <Sparkles className="w-8 h-8 text-gray-300 dark:text-gray-600 mx-auto mb-2" />
         <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">
           No relevant jobs found at the moment.
         </p>
@@ -105,7 +104,6 @@ export default function RelevantJobs({
       {relevantJobsData?.profile_completeness && (
         <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-lg p-3 border border-blue-200 dark:border-blue-800">
           <div className="flex items-center gap-2 mb-2">
-            <Sparkles className="w-4 h-4 text-primary-blue dark:text-blue-400" />
             <span className="text-sm font-semibold text-blue-900 dark:text-blue-100">
               Profile Completeness:{" "}
               {relevantJobsData.profile_completeness.score}%

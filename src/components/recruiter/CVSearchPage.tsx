@@ -39,6 +39,8 @@ import {
   RotateCw,
   Clock,
   Eye,
+  Star,
+  Edit2,
 } from "lucide-react";
 import ResumeDetailModal from "./ResumeDetailModal";
 import { CountrySearch, StateSearch, CitySearch } from "@/components/location";
@@ -133,6 +135,13 @@ export default function CVSearchPage() {
   const [showHistoryModal, setShowHistoryModal] = useState(false);
   const [searchHistory, setSearchHistory] = useState<SearchHistoryItem[]>([]);
   const [historyLoading, setHistoryLoading] = useState(false);
+  const [historyPage, setHistoryPage] = useState(1);
+  const [historyPageSize, setHistoryPageSize] = useState(50);
+  const [historySortBy, setHistorySortBy] = useState("last_used");
+  const [historyFavoritesOnly, setHistoryFavoritesOnly] = useState(false);
+  const [historyTotalCount, setHistoryTotalCount] = useState(0);
+  const [editingSearchId, setEditingSearchId] = useState<number | null>(null);
+  const [editingSearchName, setEditingSearchName] = useState("");
   const [showTrendModal, setShowTrendModal] = useState(false);
   const [trendData, setTrendData] =
     useState<SearchResultCountTrendResponse | null>(null);
@@ -190,22 +199,54 @@ export default function CVSearchPage() {
   // --- History & Trend Handlers ---
   const [historyError, setHistoryError] = useState<string | null>(null);
 
-  const fetchSearchHistory = async () => {
+  const fetchSearchHistory = async (
+    page = historyPage,
+    pageSize = historyPageSize,
+    sortBy = historySortBy,
+    favoritesOnly = historyFavoritesOnly
+  ) => {
     setHistoryLoading(true);
     setHistoryError(null);
     try {
-      const res: any = await api.getSearchHistory({ limit: 10 });
+      const res: any = await api.getSearchHistory({
+        page,
+        page_size: pageSize,
+        sort_by: sortBy,
+        favorites_only: favoritesOnly,
+      });
 
       // api.getSearchHistory is now normalized, but accept a few legacy shapes here as well
       let items: any[] = [];
-      if (Array.isArray(res)) items = res;
-      else if (res?.history && Array.isArray(res.history)) items = res.history;
-      else if (res?.searches && Array.isArray(res.searches))
+      let total = 0;
+      if (Array.isArray(res)) {
+        items = res;
+        total = res.length;
+      }
+      else if (res?.history && Array.isArray(res.history)) {
+        items = res.history;
+        total = res.total ?? res.history.length;
+      }
+      else if (res?.searches && Array.isArray(res.searches)) {
         items = res.searches;
-      else if (res?.results && Array.isArray(res.results)) items = res.results;
-      else if (res?.data && Array.isArray(res.data)) items = res.data;
+        total = res.total ?? res.searches.length;
+      }
+      else if (res?.results && Array.isArray(res.results)) {
+        items = res.results;
+        total = res.total ?? res.results.length;
+      }
+      else if (res?.data && Array.isArray(res.data)) {
+        items = res.data;
+        total = res.total ?? res.data.length;
+      }
 
       setSearchHistory(items);
+      setHistoryTotalCount(total);
+
+      setHistoryPage(page);
+      setHistoryPageSize(pageSize);
+      setHistorySortBy(sortBy);
+      setHistoryFavoritesOnly(favoritesOnly);
+
       setShowHistoryModal(true);
     } catch (error) {
       console.error("Failed to fetch search history", error);
@@ -317,6 +358,46 @@ export default function CVSearchPage() {
       console.error("Failed to fetch trend", error);
     } finally {
       setTrendLoading(false);
+    }
+  };
+
+  const handleToggleFavorite = async (item: SearchHistoryItem) => {
+    try {
+      const newFavoriteStatus = !item.is_favorite;
+      await api.updateSavedSearch(item.id, { is_favorite: newFavoriteStatus });
+      setSearchHistory((prev) =>
+        prev.map((h) =>
+          h.id === item.id ? { ...h, is_favorite: newFavoriteStatus } : h
+        )
+      );
+      showToast(newFavoriteStatus ? "Saved to favorites" : "Removed from favorites", "success");
+      // if we are currently filtering by favorites_only, optionally re-fetch or optimistically remove
+      if (historyFavoritesOnly && !newFavoriteStatus) {
+        setSearchHistory((prev) => prev.filter((h) => h.id !== item.id));
+      }
+    } catch (error) {
+      console.error("Failed to update favorite status", error);
+      showToast("Failed to update favorite status", "error");
+    }
+  };
+
+  const handleRenameSearch = async (historyId: number, customName: string) => {
+    try {
+      await api.updateSavedSearch(historyId, { custom_name: customName });
+      setSearchHistory((prev) =>
+        prev.map((h) =>
+          h.id === historyId ? { ...h, custom_name: customName, search_name: customName || h.search_name } : h
+        )
+      );
+      setEditingSearchId(null);
+      showToast("Search renamed successfully", "success");
+      // optionally re-fetch to get correct auto-generated name if custom_name is empty
+      if (!customName) {
+        fetchSearchHistory(historyPage, historyPageSize, historySortBy, historyFavoritesOnly);
+      }
+    } catch (error) {
+      console.error("Failed to rename search", error);
+      showToast("Failed to rename search", "error");
     }
   };
 
@@ -963,7 +1044,7 @@ export default function CVSearchPage() {
               Advanced Filter
             </button>
             <button
-              onClick={fetchSearchHistory}
+              onClick={() => fetchSearchHistory()}
               className="flex-1 py-3 bg-[#4B5563] hover:bg-[#374151] text-white rounded-md font-medium transition-colors flex items-center justify-center gap-1.5 text-xs "
             >
               <History className="w-3.5 h-3.5" />
@@ -2281,18 +2362,39 @@ export default function CVSearchPage() {
       {
         showHistoryModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-2xl max-h-[80vh] flex flex-col animate-in zoom-in-95 duration-200">
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-6xl max-h-[90vh] flex flex-col animate-in zoom-in-95 duration-200">
               <div className="flex items-center justify-between px-6 py-4 bg-[#2F4269] border-b border-gray-800 rounded-t-xl">
                 <h3 className="text-lg font-semibold text-white flex items-center gap-2">
                   <History className="w-5 h-5" />
                   Search History
                 </h3>
-                <button
-                  onClick={() => setShowHistoryModal(false)}
-                  className="text-white/70 hover:text-white transition-colors"
-                >
-                  <X className="w-5 h-5" />
-                </button>
+                <div className="flex items-center gap-4">
+                  <label className="flex items-center gap-2 text-white text-sm cursor-pointer whitespace-nowrap">
+                    <input
+                      type="checkbox"
+                      checked={historyFavoritesOnly}
+                      onChange={(e) => fetchSearchHistory(1, historyPageSize, historySortBy, e.target.checked)}
+                      className="rounded border-gray-600 bg-gray-700 text-blue-500 focus:ring-blue-500 w-4 h-4"
+                    />
+                    Favorites Only
+                  </label>
+                  <select
+                    value={historySortBy}
+                    onChange={(e) => fetchSearchHistory(1, historyPageSize, e.target.value, historyFavoritesOnly)}
+                    className="bg-gray-800 border border-gray-700 text-white text-sm rounded-lg focus:ring-blue-500 block p-2"
+                  >
+                    <option value="last_used">Last Used</option>
+                    <option value="created">Created</option>
+                    <option value="use_count">Most Used</option>
+                    <option value="name">Name A-Z</option>
+                  </select>
+                  <button
+                    onClick={() => setShowHistoryModal(false)}
+                    className="text-white/70 hover:text-white transition-colors ml-2"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
               </div>
               <div className="flex-1 overflow-y-auto p-4">
                 {historyLoading ? (
@@ -2308,7 +2410,7 @@ export default function CVSearchPage() {
                     No search history found.
                   </div>
                 ) : (
-                  <div className="space-y-4">
+                  <div className="space-y-4 grid grid-cols-2 gap-4">
                     {searchHistory.map((item) => (
                       <div
                         key={item.id}
@@ -2318,9 +2420,47 @@ export default function CVSearchPage() {
                         <div className="flex justify-between items-start gap-4">
                           <div className="flex-1">
                             {/* Search Name/Title */}
-                            <h4 className="font-semibold text-gray-900 dark:text-gray-100 mb-2">
-                              {item.search_name || "Untitled Search"}
-                            </h4>
+                            <div className="flex items-center gap-2 mb-2">
+                              {editingSearchId === item.id ? (
+                                <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+                                  <input
+                                    type="text"
+                                    value={editingSearchName}
+                                    onChange={(e) => setEditingSearchName(e.target.value)}
+                                    className="px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                                    placeholder="Enter custom name (or leave empty)"
+                                    autoFocus
+                                    onKeyDown={(e) => {
+                                      if (e.key === "Enter") handleRenameSearch(item.id, editingSearchName);
+                                      if (e.key === "Escape") setEditingSearchId(null);
+                                    }}
+                                  />
+                                  <button onClick={() => handleRenameSearch(item.id, editingSearchName)} className="p-1 rounded bg-blue-100 text-blue-600 hover:bg-blue-200">
+                                    <Check className="w-4 h-4" />
+                                  </button>
+                                  <button onClick={() => setEditingSearchId(null)} className="p-1 rounded bg-gray-200 text-gray-600 hover:bg-gray-300">
+                                    <X className="w-4 h-4" />
+                                  </button>
+                                </div>
+                              ) : (
+                                <>
+                                  <h4 className="font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
+                                    {item.custom_name || item.search_name || "Untitled Search"}
+                                  </h4>
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setEditingSearchId(item.id);
+                                      setEditingSearchName(item.custom_name || "");
+                                    }}
+                                    className="p-1 text-gray-400 hover:text-blue-500 transition-colors"
+                                    title="Rename search"
+                                  >
+                                    <Edit2 className="w-3 h-3" />
+                                  </button>
+                                </>
+                              )}
+                            </div>
 
                             {/* Filter badges */}
                             <div className="flex flex-wrap gap-2 mb-3">
@@ -2393,6 +2533,16 @@ export default function CVSearchPage() {
                             <button
                               onClick={(e) => {
                                 e.stopPropagation();
+                                handleToggleFavorite(item);
+                              }}
+                              className={`p-2 rounded-lg transition-colors ${item.is_favorite ? "text-yellow-500 hover:bg-yellow-50 dark:hover:bg-yellow-900/20" : "text-gray-400 hover:text-yellow-500 hover:bg-yellow-50 dark:hover:bg-yellow-900/20"}`}
+                              title={item.is_favorite ? "Remove from favorites" : "Add to favorites"}
+                            >
+                              <Star className={`w-4 h-4 ${item.is_favorite ? "fill-current" : ""}`} />
+                            </button>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
                                 handleShowTrend(item.id);
                               }}
                               className="p-2 text-purple-600 hover:bg-purple-50 dark:hover:bg-purple-900/20 rounded-lg transition-colors"
@@ -2417,6 +2567,41 @@ export default function CVSearchPage() {
                   </div>
                 )}
               </div>
+
+              {/* Pagination */}
+              {searchHistory.length > 0 && (
+                <div className="px-6 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50 flex flex-wrap items-center justify-between rounded-b-xl gap-4">
+                  <span className="text-sm text-gray-600 dark:text-gray-400">
+                    Showing {(historyPage - 1) * historyPageSize + 1} to {Math.min(historyPage * historyPageSize, historyTotalCount)} of {historyTotalCount}
+                  </span>
+                  <div className="flex items-center gap-3">
+                    <button
+                      disabled={historyPage === 1}
+                      onClick={() => fetchSearchHistory(historyPage - 1, historyPageSize, historySortBy, historyFavoritesOnly)}
+                      className="p-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50 transition-colors"
+                    >
+                      <ChevronLeft className="w-4 h-4 text-gray-700 dark:text-gray-300" />
+                    </button>
+                    <select
+                      value={historyPageSize}
+                      onChange={(e) => fetchSearchHistory(1, Number(e.target.value), historySortBy, historyFavoritesOnly)}
+                      className="p-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-sm text-gray-700 dark:text-gray-300 focus:ring-blue-500"
+                    >
+                      <option value="10">10 / page</option>
+                      <option value="20">20 / page</option>
+                      <option value="50">50 / page</option>
+                      <option value="100">100 / page</option>
+                    </select>
+                    <button
+                      disabled={historyPage * historyPageSize >= historyTotalCount}
+                      onClick={() => fetchSearchHistory(historyPage + 1, historyPageSize, historySortBy, historyFavoritesOnly)}
+                      className="p-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50 transition-colors"
+                    >
+                      <ChevronRight className="w-4 h-4 text-gray-700 dark:text-gray-300" />
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         )

@@ -697,6 +697,8 @@ export interface SearchHistoryItem {
   id: number;
   name?: string;
   search_name?: string;
+  custom_name?: string;
+  is_favorite?: boolean;
   filters: Record<string, any>;
   search_filters?: Record<string, any>;
   result_count: number;

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Sparkles, MapPin, Clock, ChevronDown, ChevronUp } from "lucide-react";
+import { MapPin, Clock, ChevronDown, ChevronUp } from "lucide-react";
 import { Job } from "../../types/jobs";
 import Link from "next/link";
 
@@ -38,9 +38,7 @@ const RelevantJobItem: React.FC<RelevantJobItemProps> = ({ job }) => {
                   );
                 }}
               />
-              <div className="w-full h-full bg-slate-100 flex items-center justify-center text-slate-400 ">
-                <Sparkles size={16} />
-              </div>
+
             </div>
             <div>
               <h4 className="font-bold text-slate-900 leading-tight">
@@ -51,7 +49,6 @@ const RelevantJobItem: React.FC<RelevantJobItemProps> = ({ job }) => {
               </p>
             </div>
           </div>
-          <Sparkles size={16} className="text-amber-400" />
         </div>
 
         <div className="space-y-2 mt-3">

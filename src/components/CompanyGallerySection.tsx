@@ -338,7 +338,7 @@ function CompanyGallerySection({
         {/* Office Gallery Section */}
         <div>
           <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-            Office Gallery
+            Gallery
           </h2>
 
           <div className="grid grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-2">

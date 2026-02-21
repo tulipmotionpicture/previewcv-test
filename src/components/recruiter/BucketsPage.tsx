@@ -1501,12 +1501,12 @@ export default function BucketsPage() {
             className={
               isFullscreen
                 ? "bg-white dark:bg-[#282727] shadow-xl flex flex-col transition-all duration-300 w-full h-full"
-                : "bg-white dark:bg-[#282727] rounded-xl shadow-xl flex flex-col transition-all duration-300 w-full max-w-7xl max-h-[90vh]"
+                : "bg-white dark:bg-[#282727] shadow-xl flex flex-col transition-all duration-300 w-full max-w-7xl max-h-[90vh]"
             }
           >
             {/* Modal Header */}
             <div
-              className="px-6 py-4 border-b rounded-t-xl flex items-center justify-between"
+              className="px-6 py-4 border-b  flex items-center justify-between"
               style={{ backgroundColor: selectedBucket.color || "#3B82F6" }}
             >
               <div className="flex items-center gap-3">

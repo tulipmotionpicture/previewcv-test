@@ -597,7 +597,6 @@ function CandidateDashboardContent() {
                 <div className="bg-white dark:bg-gray-900 border border-slate-200 dark:border-gray-800 rounded-xl overflow-hidden">
                   <div className="p-2 bg-slate-900 dark:bg-slate-900 border-b border-slate-900 dark:border-gray-800">
                     <h2 className="text-md font-bold text-white flex items-center gap-2">
-                      <Sparkles className="w-5 h-5 text-white" />
                       Relative Jobs
                     </h2>
                   </div>
@@ -827,7 +826,6 @@ function CandidateDashboardContent() {
               >
                 <div className="p-2 border-b border-gray-200 dark:border-gray-800 bg-slate-900 dark:bg-gray-800 flex items-center justify-between">
                   <h3 className="font-bold text-white dark:text-gray-100 flex items-center gap-2">
-                    <Sparkles className="w-5 h-5  text-[#0EA5E9]" />
                     LetsMakeCV Resumes ({builderResumes.length})
                   </h3>
                   <button

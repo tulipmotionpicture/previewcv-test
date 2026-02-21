@@ -94,7 +94,7 @@ export default function DashboardStats({
     },
     {
       label: "Pending Approvals",
-      value: stats.pending_approvals.total,
+      value: stats.pending_approvals.jobs_pending_approval,
       icon: Clock,
       trend: null, // Pending approvals don't have trend data
       trendDirection: "stable",

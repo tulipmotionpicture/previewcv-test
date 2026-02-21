@@ -1249,11 +1249,23 @@ export class ApiClient {
   }
 
   /** Upload Gallery Image */
-  async uploadGalleryImage(file: File): Promise<any> {
+  async uploadGalleryImage(
+    file: File,
+    eventId: number,
+    options?: { caption?: string; alt_text?: string; is_cover?: boolean; display_order?: number }
+  ): Promise<any> {
     const formData = new FormData();
     formData.append("file", file);
+    
+    const queryParams = new URLSearchParams();
+    queryParams.append("event_id", eventId.toString());
+    if (options?.caption) queryParams.append("caption", options.caption);
+    if (options?.alt_text) queryParams.append("alt_text", options.alt_text);
+    if (options?.is_cover !== undefined) queryParams.append("is_cover", options.is_cover.toString());
+    if (options?.display_order !== undefined) queryParams.append("display_order", options.display_order.toString());
+
     return this.request<any>(
-      "/api/v1/recruiters/gallery/images/upload",
+      `/api/v1/recruiters/gallery/images/upload?${queryParams.toString()}`,
       {
         method: "POST",
         body: formData,
@@ -1817,11 +1829,17 @@ export class ApiClient {
 
   async getSearchHistory(params?: {
     page?: number;
-    limit?: number;
+    page_size?: number;
+    limit?: number; // keeping for backward compatibility if any
+    favorites_only?: boolean;
+    sort_by?: string;
   }): Promise<SearchHistoryResponse> {
     const queryParams = new URLSearchParams();
     if (params?.page) queryParams.append("page", params.page.toString());
-    if (params?.limit) queryParams.append("limit", params.limit.toString());
+    if (params?.page_size) queryParams.append("page_size", params.page_size.toString());
+    else if (params?.limit) queryParams.append("page_size", params.limit.toString());
+    if (params?.favorites_only !== undefined) queryParams.append("favorites_only", params.favorites_only.toString());
+    if (params?.sort_by) queryParams.append("sort_by", params.sort_by);
 
     // fetch raw response then normalize different backend shapes (some responses use `searches`)
     const raw: any = await this.request<any>(
@@ -1855,6 +1873,21 @@ export class ApiClient {
 
     // final fallback: empty
     return { history: [], total: 0 };
+  }
+
+  async updateSavedSearch(
+    searchId: number,
+    data: { custom_name?: string; is_favorite?: boolean }
+  ): Promise<any> {
+    return this.request<any>(
+      `/api/v1/recruiter/cv-search/search-history/${searchId}`,
+      {
+        method: "PUT",
+        body: JSON.stringify(data),
+      },
+      true,
+      true,
+    );
   }
 
   async unlockCVProfile(

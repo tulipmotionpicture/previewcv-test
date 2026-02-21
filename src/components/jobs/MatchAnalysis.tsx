@@ -1,19 +1,16 @@
 import React, { useState } from "react";
 import {
   CheckCircle2,
-  XCircle,
   ChevronRight,
   ChevronDown,
   ChevronUp,
   Zap,
-  Target,
   Award,
   MapPin,
   Briefcase,
-  User,
-  Sparkles,
   AlertCircle,
   DollarSign,
+  Calendar,
 } from "lucide-react";
 import { Job } from "../../types/jobs";
 
@@ -145,9 +142,9 @@ const MatchAnalysis: React.FC<MatchAnalysisProps> = ({ job, onClose }) => {
         onClick={() => setIsExpanded(!isExpanded)}
       >
         <div className="flex items-center gap-2">
-          <div className="bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 p-1.5 rounded-lg">
+          {/* <div className="bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 p-1.5 rounded-lg">
             <Sparkles size={16} />
-          </div>
+          </div> */}
           <div>
             <h3 className="text-sm font-bold text-slate-800 dark:text-white">AI Match Analysis</h3>
             <p className="text-[10px] text-slate-500 dark:text-gray-400">Based on your profile & resume</p>
@@ -192,7 +189,7 @@ const MatchAnalysis: React.FC<MatchAnalysisProps> = ({ job, onClose }) => {
               <MetricItem
                 label="Salary"
                 value={reasoning?.salaryMatch || 0}
-                icon={DollarSign}
+                icon={Calendar}
                 color="amber"
               />
             </div>

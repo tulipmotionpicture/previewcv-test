@@ -9,6 +9,11 @@ import {
   Edit2,
   Trash2,
   X,
+  Image as ImageIcon,
+  ChevronDown,
+  ChevronUp,
+  Upload,
+  Star,
 } from "lucide-react";
 import RichTextEditor from "./ui/RichTextEditor";
 // Removed 'sonner' import since it is not installed. Relying on toast prop.
@@ -123,6 +128,18 @@ export default function RecruiterGalleryEventsSection({
   const [showForm, setShowForm] = useState(false);
   const [editingEventId, setEditingEventId] = useState<number | null>(null);
   const [updating, setUpdating] = useState(false);
+  const [expandedEventId, setExpandedEventId] = useState<number | null>(null);
+  const [imageModalMode, setImageModalMode] = useState<"upload" | "edit" | null>(null);
+  const [imageForm, setImageForm] = useState({
+    file: null as File | null,
+    eventId: null as number | null,
+    imageId: null as number | null,
+    caption: "",
+    alt_text: "",
+    is_cover: false,
+    display_order: 0,
+  });
+  const [savingImage, setSavingImage] = useState(false);
 
   // Filter state
   const [activeTab, setActiveTab] = useState<"Active" | "Draft" | "Closed">(
@@ -156,42 +173,45 @@ export default function RecruiterGalleryEventsSection({
       ?.toLowerCase()
       .includes(searchQuery.toLowerCase());
 
-    // Status Logic
-    const eventDate = new Date(event.event_date);
+    const hasDate = !!event.event_date;
+    const eventDate = hasDate ? new Date(event.event_date!) : null;
     const now = new Date();
-    const isPast = eventDate < now;
-    const isActive = event.is_active !== false; // Default to true if undefined
+    const isPast = eventDate ? eventDate < now : false;
+    const isActive = event.is_active !== false;
 
     let matchesTab = false;
     if (activeTab === "Active") {
-      // Show active future events (or all active if you prefer)
-      // For "Active" tab, let's show active future events
       matchesTab = isActive && !isPast;
     } else if (activeTab === "Closed") {
-      // Show past events regardless of active status, or maybe just active past ones?
-      // Usually "Closed" means past.
-      matchesTab = isPast;
+      matchesTab = isActive && isPast;
     } else if (activeTab === "Draft") {
-      // Show inactive events
       matchesTab = !isActive;
     }
 
     let matchesDateFilter = true;
     if (selectedDateFilter) {
-      matchesDateFilter = eventDate.getFullYear() === selectedDateFilter.getFullYear() &&
-        eventDate.getMonth() === selectedDateFilter.getMonth() &&
-        eventDate.getDate() === selectedDateFilter.getDate();
+      if (eventDate) {
+        matchesDateFilter = eventDate.getFullYear() === selectedDateFilter.getFullYear() &&
+          eventDate.getMonth() === selectedDateFilter.getMonth() &&
+          eventDate.getDate() === selectedDateFilter.getDate();
+      } else {
+        matchesDateFilter = false;
+      }
     }
 
     let matchesTimeFilter = true;
     if (selectedTimePeriod) {
-      const hours = eventDate.getHours();
-      if (selectedTimePeriod === "morning") {
-        matchesTimeFilter = hours >= 6 && hours < 12;
-      } else if (selectedTimePeriod === "afternoon") {
-        matchesTimeFilter = hours >= 12 && hours < 18;
-      } else if (selectedTimePeriod === "evening") {
-        matchesTimeFilter = hours >= 18 || hours < 6;
+      if (eventDate) {
+        const hours = eventDate.getHours();
+        if (selectedTimePeriod === "morning") {
+          matchesTimeFilter = hours >= 6 && hours < 12;
+        } else if (selectedTimePeriod === "afternoon") {
+          matchesTimeFilter = hours >= 12 && hours < 18;
+        } else if (selectedTimePeriod === "evening") {
+          matchesTimeFilter = hours >= 18 || hours < 6;
+        }
+      } else {
+        matchesTimeFilter = false;
       }
     }
 
@@ -226,8 +246,8 @@ export default function RecruiterGalleryEventsSection({
     setCreating(true);
     try {
       const eventDate = eventForm.event_date
-        ? eventForm.event_date.replace("T", " ") + ":00"
-        : new Date().toISOString().slice(0, 19).replace("T", " ");
+        ? eventForm.event_date.length === 16 ? eventForm.event_date + ":00" : eventForm.event_date
+        : new Date().toISOString().slice(0, 19);
 
       const payload = {
         title: eventForm.title,
@@ -252,9 +272,100 @@ export default function RecruiterGalleryEventsSection({
     try {
       await api.deleteGalleryEvent(eventId);
       toast?.success("Event deleted");
+      if (expandedEventId === eventId) setExpandedEventId(null);
       fetchEvents();
     } catch {
       toast?.error("Failed to delete event");
+    }
+  };
+
+  const handleToggleFeatured = async (event: any) => {
+    try {
+      const payload = {
+        title: event.title,
+        description: event.description,
+        event_date: event.event_date ? event.event_date.slice(0, 19) : new Date().toISOString().slice(0, 19),
+        is_featured: !event.is_featured,
+        display_order: event.display_order || 0,
+        is_active: event.is_active !== undefined ? event.is_active : true,
+      };
+      await api.updateGalleryEvent(event.id, payload);
+      toast?.success(`Event ${!event.is_featured ? "marked as featured" : "unfeatured"}`);
+      fetchEvents();
+    } catch {
+      toast?.error("Failed to update feature status");
+    }
+  };
+
+  const handleSelectUploadImage = (e: React.ChangeEvent<HTMLInputElement>, eventId: number) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setImageForm({
+      file,
+      eventId,
+      imageId: null,
+      caption: "",
+      alt_text: "",
+      is_cover: false,
+      display_order: 0,
+    });
+    setImageModalMode("upload");
+    if (e.target) e.target.value = "";
+  };
+
+  const handleEditImageModal = (img: any, eventId: number) => {
+    setImageForm({
+      file: null,
+      eventId,
+      imageId: img.id,
+      caption: img.caption || "",
+      alt_text: img.alt_text || "",
+      is_cover: img.is_cover || false,
+      display_order: img.display_order || 0,
+    });
+    setImageModalMode("edit");
+  };
+
+  const handleSubmitImageForm = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSavingImage(true);
+    try {
+      if (imageModalMode === "upload") {
+        if (!imageForm.file || !imageForm.eventId) return;
+        await api.uploadGalleryImage(imageForm.file, imageForm.eventId, {
+          caption: imageForm.caption,
+          alt_text: imageForm.alt_text,
+          is_cover: imageForm.is_cover,
+          display_order: imageForm.display_order,
+        });
+        toast?.success("Image uploaded successfully");
+      } else if (imageModalMode === "edit") {
+        if (!imageForm.imageId) return;
+        await api.updateGalleryImage(imageForm.imageId, {
+          caption: imageForm.caption,
+          alt_text: imageForm.alt_text,
+          is_cover: imageForm.is_cover,
+          display_order: imageForm.display_order,
+        });
+        toast?.success("Image updated successfully");
+      }
+      setImageModalMode(null);
+      fetchEvents();
+    } catch {
+      toast?.error(`Failed to ${imageModalMode} image`);
+    } finally {
+      setSavingImage(false);
+    }
+  };
+
+  const handleDeleteImage = async (imageId: number) => {
+    try {
+      await api.deleteGalleryImage(imageId);
+      toast?.success("Image deleted");
+      fetchEvents();
+    } catch {
+      toast?.error("Failed to delete image");
     }
   };
 
@@ -286,8 +397,8 @@ export default function RecruiterGalleryEventsSection({
     setUpdating(true);
     try {
       const eventDate = eventForm.event_date
-        ? eventForm.event_date.replace("T", " ") + ":00"
-        : new Date().toISOString().slice(0, 19).replace("T", " ");
+        ? eventForm.event_date.length === 16 ? eventForm.event_date + ":00" : eventForm.event_date
+        : new Date().toISOString().slice(0, 19);
 
       const payload = {
         title: eventForm.title,
@@ -339,7 +450,7 @@ export default function RecruiterGalleryEventsSection({
         {/* Create/Edit Modal */}
         {showForm && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 overflow-y-auto">
-            <div className="bg-white dark:bg-[#313234] w-full max-w-3xl rounded-xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200 my-8">
+            <div className="bg-white dark:bg-[#313234] w-full max-w-6xl rounded-xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200 my-8">
               {/* Modal Header */}
               <div className="bg-[#0B172B] px-6 py-4 flex justify-between items-center text-white sticky top-0 z-10">
                 <h3 className="text-lg font-medium">
@@ -409,21 +520,47 @@ export default function RecruiterGalleryEventsSection({
                     />
                   </div>
 
-                  {/* Bottom Row: Order + Buttons */}
+                  {/* Bottom Row: Order, Checkboxes + Buttons */}
                   <div className="flex flex-col md:flex-row items-end justify-between gap-6 pt-2">
-                    {/* Order Input */}
-                    <div className="w-full md:w-1/3 space-y-2">
-                      <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                        Order
-                      </label>
-                      <input
-                        type="number"
-                        name="display_order"
-                        value={eventForm.display_order}
-                        onChange={handleFormChange}
-                        placeholder="Display Order"
-                        className="w-full px-4 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-sm outline-none focus:border-blue-500 transition-colors"
-                      />
+                    {/* Order Input and Checkboxes */}
+                    <div className="flex flex-col md:flex-row items-center gap-6 w-full md:w-auto">
+                      <div className="w-full md:w-32 space-y-2">
+                        <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                          Order
+                        </label>
+                        <input
+                          type="number"
+                          name="display_order"
+                          value={eventForm.display_order}
+                          onChange={handleFormChange}
+                          placeholder="Display Order"
+                          className="w-full px-4 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-sm outline-none focus:border-blue-500 transition-colors"
+                        />
+                      </div>
+                      <div className="flex items-center gap-6 pb-2">
+                        <label className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            name="is_featured"
+                            checked={eventForm.is_featured}
+                            onChange={(e) => setEventForm({ ...eventForm, is_featured: e.target.checked })}
+                            className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                          />
+                          Featured Event
+                        </label>
+                        {editingEventId && (
+                          <label className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer">
+                            <input
+                              type="checkbox"
+                              name="is_active"
+                              checked={eventForm.is_active}
+                              onChange={(e) => setEventForm({ ...eventForm, is_active: e.target.checked })}
+                              className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                            />
+                            Active
+                          </label>
+                        )}
+                      </div>
                     </div>
 
                     {/* Action Buttons */}
@@ -449,30 +586,6 @@ export default function RecruiterGalleryEventsSection({
                             : "Create Event"}
                       </button>
                     </div>
-                  </div>
-
-                  {/* Hidden/Extra Fields if functional but not in screenshot design focus */}
-                  <div className="hidden">
-                    <label className="flex items-center gap-2">
-                      <input
-                        type="checkbox"
-                        name="is_featured"
-                        checked={eventForm.is_featured}
-                        onChange={handleFormChange}
-                      />
-                      Featured
-                    </label>
-                    {editingEventId && (
-                      <label className="flex items-center gap-2">
-                        <input
-                          type="checkbox"
-                          name="is_active"
-                          checked={eventForm.is_active}
-                          onChange={handleFormChange}
-                        />
-                        Active
-                      </label>
-                    )}
                   </div>
                 </form>
               </div>
@@ -521,61 +634,138 @@ export default function RecruiterGalleryEventsSection({
                   }
 
                   return (
-                    <div
-                      key={event.id}
-                      className="grid grid-cols-12 px-6 py-4 items-center hover:bg-gray-50 dark:hover:bg-gray-800/30 transition-colors"
-                    >
-                      <div className="col-span-6">
-                        <h4 className="text-sm font-bold text-gray-900 dark:text-gray-100 line-clamp-1">
-                          {event.title || `Event #${event.id}`}
-                        </h4>
-                        <div className="flex items-center gap-3 mt-1 text-xs text-gray-500">
-                          <span className="flex items-center gap-1">
-                            <Calendar className="w-3 h-3" />
-                            {event.event_date
-                              ? new Date(event.event_date).toLocaleDateString(
-                                "en-US",
-                                {
+                    <div key={event.id} className="flex flex-col">
+                      <div className="grid grid-cols-12 px-6 py-4 items-center hover:bg-gray-50 dark:hover:bg-gray-800/30 transition-colors">
+                        <div className="col-span-6">
+                          <h4 className="text-sm font-bold text-gray-900 dark:text-gray-100 line-clamp-1">
+                            {event.title || `Event #${event.id}`}
+                          </h4>
+                          <div className="flex items-center gap-3 mt-1 text-xs text-gray-500">
+                            <span className="flex items-center gap-1">
+                              <Calendar className="w-3 h-3" />
+                              {event.event_date
+                                ? new Date(event.event_date).toLocaleDateString("en-US", {
                                   month: "short",
                                   day: "numeric",
                                   year: "numeric",
                                   hour: "2-digit",
                                   minute: "2-digit",
-                                },
-                              )
-                              : "No date"}
-                          </span>
-                          <span>Order: {event.display_order}</span>
-                          {event.is_featured && (
-                            <span className="text-primary-blue font-medium">
-                              Featured
+                                })
+                                : "No date"}
                             </span>
-                          )}
+                            <span>Order: {event.display_order}</span>
+                            {event.is_featured && (
+                              <span className="text-primary-blue font-medium">Featured</span>
+                            )}
+                          </div>
+                        </div>
+                        <div className="col-span-3">
+                          <span className={`inline-flex px-2.5 py-1 rounded text-xs font-medium ${statusClass}`}>
+                            {statusLabel}
+                          </span>
+                        </div>
+                        <div className="col-span-3 flex justify-end gap-2">
+                          <button
+                            onClick={() => handleToggleFeatured(event)}
+                            className={`p-2 rounded-full transition-colors ${event.is_featured ? "bg-yellow-100 text-yellow-600 dark:bg-yellow-900/40 dark:text-yellow-400" : "hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-400 hover:text-yellow-500"}`}
+                            title={event.is_featured ? "Remove featured" : "Mark as featured"}
+                          >
+                            <Star className={`w-4 h-4 ${event.is_featured ? "fill-current" : ""}`} />
+                          </button>
+                          <button
+                            onClick={() => setExpandedEventId(expandedEventId === event.id ? null : event.id)}
+                            className={`p-2 rounded-full transition-colors ${expandedEventId === event.id ? "bg-blue-100 text-blue-600 dark:bg-blue-900/40 dark:text-blue-400" : "hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-400 hover:text-blue-500"}`}
+                            title="View Images"
+                          >
+                            <ImageIcon className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() => handleEditEvent(event)}
+                            className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-400 hover:text-primary-blue transition-colors"
+                            title="Edit"
+                          >
+                            <Edit2 className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() => handleDeleteEvent(event.id)}
+                            className="p-2 rounded-full hover:bg-red-50 dark:hover:bg-red-900/20 text-gray-400 hover:text-red-600 transition-colors"
+                            title="Delete"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
                         </div>
                       </div>
-                      <div className="col-span-3">
-                        <span
-                          className={`inline-flex px-2.5 py-1 rounded text-xs font-medium ${statusClass}`}
-                        >
-                          {statusLabel}
-                        </span>
-                      </div>
-                      <div className="col-span-3 flex justify-end gap-2">
-                        <button
-                          onClick={() => handleEditEvent(event)}
-                          className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-400 hover:text-primary-blue transition-colors"
-                          title="Edit"
-                        >
-                          <Edit2 className="w-4 h-4" />
-                        </button>
-                        <button
-                          onClick={() => handleDeleteEvent(event.id)}
-                          className="p-2 rounded-full hover:bg-red-50 dark:hover:bg-red-900/20 text-gray-400 hover:text-red-600 transition-colors"
-                          title="Delete"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </div>
+
+                      {/* Event Images Expanded View */}
+                      {expandedEventId === event.id && (
+                        <div className="bg-gray-50 dark:bg-gray-800/50 p-6 border-t border-gray-100 dark:border-gray-800">
+                          <div className="flex justify-between items-center mb-4">
+                            <h5 className="font-semibold text-gray-800 dark:text-gray-200 text-sm">
+                              Event Images ({event.images?.length || 0})
+                            </h5>
+                            <div>
+                              <input
+                                type="file"
+                                accept="image/*"
+                                id={`upload-image-${event.id}`}
+                                className="hidden"
+                                onChange={(e) => handleSelectUploadImage(e, event.id)}
+                              />
+                              <label
+                                htmlFor={`upload-image-${event.id}`}
+                                className={`cursor-pointer bg-blue-50 hover:bg-blue-100 text-blue-600 dark:bg-blue-900/20 dark:hover:bg-blue-900/40 dark:text-blue-400 px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1.5 transition-colors`}
+                              >
+                                <>
+                                  <Upload className="w-3.5 h-3.5" />
+                                  Upload Image
+                                </>
+                              </label>
+                            </div>
+                          </div>
+
+                          {!event.images || event.images.length === 0 ? (
+                            <div className="text-center py-6 text-sm text-gray-500 bg-white dark:bg-[#313234] rounded-lg border border-dashed border-gray-200 dark:border-gray-700">
+                              No images uploaded for this event.
+                            </div>
+                          ) : (
+                            <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-4">
+                              {event.images.map((img: any) => (
+                                <div
+                                  key={img.id}
+                                  className="relative group aspect-square rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700 bg-white dark:bg-[#313234]"
+                                >
+                                  <img
+                                    src={img.image_url}
+                                    alt={img.caption || "Event image"}
+                                    className="w-full h-full object-cover"
+                                  />
+                                  <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                                    <button
+                                      onClick={() => handleEditImageModal(img, event.id)}
+                                      className="p-1.5 bg-blue-500 text-white rounded-full hover:bg-blue-600 transition-colors shadow-sm"
+                                      title="Edit Image"
+                                    >
+                                      <Edit2 className="w-4 h-4" />
+                                    </button>
+                                    <button
+                                      onClick={() => handleDeleteImage(img.id)}
+                                      className="p-1.5 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors shadow-sm"
+                                      title="Delete Image"
+                                    >
+                                      <Trash2 className="w-4 h-4" />
+                                    </button>
+                                  </div>
+                                  {img.is_cover && (
+                                    <div className="absolute top-2 left-2 px-1.5 py-0.5 bg-yellow-400 text-yellow-900 text-[10px] font-bold rounded shadow-sm uppercase">
+                                      Cover
+                                    </div>
+                                  )}
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      )}
                     </div>
                   );
                 })}
@@ -663,6 +853,86 @@ export default function RecruiterGalleryEventsSection({
           )}
         </div>
       </div>
+
+
+      {/* Image Upload/Edit Modal */}
+      {imageModalMode && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 p-4">
+          <div className="bg-white dark:bg-[#313234] w-full max-w-md rounded-xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
+            <div className="bg-[#0B172B] px-6 py-4 flex justify-between items-center text-white sticky top-0 z-10">
+              <h3 className="text-lg font-medium">
+                {imageModalMode === "upload" ? "Upload Image Details" : "Edit Image Details"}
+              </h3>
+              <button
+                onClick={() => setImageModalMode(null)}
+                className="text-white/70 hover:text-white transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="p-6">
+              <form onSubmit={handleSubmitImageForm} className="space-y-4">
+                <div className="space-y-1.5">
+                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Caption</label>
+                  <input
+                    type="text"
+                    value={imageForm.caption}
+                    onChange={(e) => setImageForm({ ...imageForm, caption: e.target.value })}
+                    placeholder="Enter image caption"
+                    className="w-full px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-sm outline-none focus:border-blue-500 transition-colors"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Alt Text</label>
+                  <input
+                    type="text"
+                    value={imageForm.alt_text}
+                    onChange={(e) => setImageForm({ ...imageForm, alt_text: e.target.value })}
+                    placeholder="Enter image alt text"
+                    className="w-full px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-sm outline-none focus:border-blue-500 transition-colors"
+                  />
+                </div>
+                <div className="flex items-center gap-4">
+                  <label className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={imageForm.is_cover}
+                      onChange={(e) => setImageForm({ ...imageForm, is_cover: e.target.checked })}
+                      className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 w-4 h-4"
+                    />
+                    Set as Cover Image
+                  </label>
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Display Order</label>
+                  <input
+                    type="number"
+                    value={imageForm.display_order}
+                    onChange={(e) => setImageForm({ ...imageForm, display_order: parseInt(e.target.value) || 0 })}
+                    className="w-full px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-sm outline-none focus:border-blue-500 transition-colors"
+                  />
+                </div>
+                <div className="flex justify-end gap-3 pt-4 border-t border-gray-100 dark:border-gray-800">
+                  <button
+                    type="button"
+                    onClick={() => setImageModalMode(null)}
+                    className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={savingImage}
+                    className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 flex items-center gap-2"
+                  >
+                    {savingImage ? "Saving..." : "Save Image"}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

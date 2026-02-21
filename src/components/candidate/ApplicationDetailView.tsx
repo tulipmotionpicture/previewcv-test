@@ -79,7 +79,7 @@ const ApplicationDetailView: React.FC<ApplicationDetailViewProps> = ({
     return (
         <div className="flex-1 h-full overflow-y-auto p-5 bg-white dark:bg-gray-900 scroll-smooth">
             {/* Header Section */}
-            <div className="flex justify-between items-start mb-5 pb-5 border-b border-gray-100 dark:border-gray-800">
+            <div className="flex justify-between items-start mb-2 pb-5 border-b border-gray-100 dark:border-gray-800">
                 <div className="flex-1 pr-6">
                     <div className="flex items-center gap-3 mb-3">
                         <span className="px-2.5 py-1 rounded-md bg-blue-50 dark:bg-blue-900/20 text-primary-blue dark:text-blue-400 text-[11px] font-bold uppercase tracking-wider">
@@ -124,9 +124,8 @@ const ApplicationDetailView: React.FC<ApplicationDetailViewProps> = ({
             </div>
 
             {/* Application Status Timeline */}
-            {/* Application Status Timeline */}
             <div className="mb-6 bg-slate-50 dark:bg-gray-800/50 rounded-xl p-4 border border-slate-100 dark:border-gray-700">
-                <h3 className="text-xs font-bold text-gray-900 dark:text-gray-100 mb-6">Application Status</h3>
+                <h3 className="text-xs font-bold text-gray-900 dark:text-gray-100 mb-4">Application Status</h3>
                 <div className="relative flex items-center justify-between w-full px-2 md:px-6">
                     {/* Horizontal Line Background */}
                     <div className="absolute top-[10px] left-2 right-2 md:left-6 md:right-6 h-0.5 bg-gray-200 dark:bg-gray-700 z-0" />
