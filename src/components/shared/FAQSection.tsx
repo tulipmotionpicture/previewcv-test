@@ -62,7 +62,7 @@ export default function FAQSection({
     <section
       className={`w-full max-w-7xl mx-auto px-4 lg:px-6 mb-12 lg:mb-16 ${className}`}
     >
-      <div className="bg-[#FAF9FF] dark:bg-gray-800 rounded-[32px] p-6 lg:p-10 relative overflow-hidden border border-purple-50 dark:border-gray-700">
+      <div className=" dark:bg-gray-800 rounded-[32px] p-6 lg:p-10 relative overflow-hidden  dark:border-gray-700">
         {/* Background Noise & Gradients */}
         <div className="absolute inset-0 -z-10">
           <div className="absolute inset-0 opacity-[0.03] bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]"></div>
@@ -88,10 +88,9 @@ export default function FAQSection({
                 onClick={() => setOpenIndex(openIndex === index ? null : index)}
                 className={`
                   group cursor-pointer transition-all duration-300 ease-in-out border border-zinc-200 dark:border-white/5
-                  ${
-                    openIndex === index
-                      ? "bg-white dark:bg-zinc-900 p-5 lg:p-6 rounded-2xl shadow-lg shadow-black/5 dark:shadow-black/20"
-                      : "bg-white/50 dark:bg-zinc-900/30 py-3 lg:py-4 px-5 lg:px-6 hover:bg-white dark:hover:bg-zinc-800 rounded-xl hover:shadow-sm"
+                  ${openIndex === index
+                    ? "bg-white dark:bg-zinc-900 p-5 lg:p-6 rounded-2xl shadow-lg shadow-black/5 dark:shadow-black/20"
+                    : "bg-white/50 dark:bg-zinc-900/30 py-3 lg:py-4 px-5 lg:px-6 hover:bg-white dark:hover:bg-zinc-800 rounded-xl hover:shadow-sm"
                   }
                 `}
               >

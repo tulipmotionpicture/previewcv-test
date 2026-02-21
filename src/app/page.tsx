@@ -404,7 +404,7 @@ export default function Home() {
 
       {/* Create CV Section */}
       <section className="w-full max-w-7xl mx-auto px-4 lg:px-6 mb-6 lg:mb-8 mt-2">
-        <div className="bg-[#FAF9FF] dark:bg-gray-800 rounded-[32px] p-6 lg:p-10 flex flex-col lg:flex-row items-center justify-between gap-8 lg:gap-16 overflow-hidden relative border border-purple-50 dark:border-gray-700">
+        <div className=" dark:bg-gray-800 rounded-[32px] p-6 lg:p-10 flex flex-col lg:flex-row items-center justify-between gap-8 lg:gap-16 overflow-hidden relative  dark:border-gray-700">
           {/* Left Content */}
           <div className="w-full lg:max-w-[40%] z-10">
             <h2 className="text-xl lg:text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
@@ -500,7 +500,7 @@ export default function Home() {
 
       {/* Cover Letter Section - Redesigned to Match */}
       <section className="w-full max-w-7xl mx-auto px-4 lg:px-6 mb-6 lg:mb-8">
-        <div className="bg-[#F2F5FF] dark:bg-gray-800 rounded-[32px] p-6 lg:p-10 flex flex-col lg:flex-row items-center justify-between gap-8 lg:gap-16 overflow-hidden relative border border-blue-50 dark:border-gray-700">
+        <div className=" dark:bg-gray-800 rounded-[32px] p-6 lg:p-10 flex flex-col lg:flex-row items-center justify-between gap-8 lg:gap-16 overflow-hidden relative  dark:border-gray-700">
           {/* Left Content */}
           <div className="w-full lg:max-w-[40%] z-10">
             <h2 className="text-xl lg:text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
@@ -597,7 +597,7 @@ export default function Home() {
 
       {/* How It Works Section */}
       <section className="w-full max-w-7xl mx-auto px-4 lg:px-6 mb-6 lg:mb-8">
-        <div className="bg-[#FAF9FF] dark:bg-gray-800 rounded-[32px] p-6 lg:p-10 relative overflow-hidden border border-purple-50 dark:border-gray-700">
+        <div className=" dark:bg-gray-800 rounded-[32px] p-6 lg:p-10 relative overflow-hidden  dark:border-gray-700">
           <div className="mb-8 lg:mb-12 text-left w-full">
             <h1 className="text-xl lg:text-3xl font-bold text-zinc-900 dark:text-gray-100 tracking-tight text-left mb-2 lg:mb-4">
               How It Works
@@ -669,7 +669,7 @@ export default function Home() {
       {/* Why PreviewCV Section */}
       {/* Why PreviewCV Section */}
       <section className="w-full max-w-7xl mx-auto px-4 lg:px-6 mb-6 lg:mb-8">
-        <div className="bg-[#FAF9FF] dark:bg-gray-800 rounded-[32px] p-6 lg:p-10 relative overflow-hidden border border-purple-50 dark:border-gray-700">
+        <div className=" dark:bg-gray-800 rounded-[32px] p-6 lg:p-10 relative overflow-hidden  dark:border-gray-700">
           {/* Decorative Background Elements */}
           <div className="absolute top-0 left-0 -z-10 w-full h-full overflow-hidden pointer-events-none">
             <div className="absolute top-[10%] left-[-5%] w-[600px] h-[600px] rounded-[100px] border-[40px] border-zinc-200 dark:border-zinc-800 opacity-40 -rotate-12 blur-3xl"></div>
@@ -777,7 +777,7 @@ export default function Home() {
       {/* Direct Market Pulse Section */}
       {/* Direct Market Pulse Section */}
       <section className="w-full max-w-7xl mx-auto px-4 lg:px-6 mb-6 lg:mb-8">
-        <div className="bg-[#FAF9FF] dark:bg-gray-800 rounded-[32px] p-6 lg:p-10 relative overflow-hidden border border-purple-50 dark:border-gray-700 animate-in fade-in duration-700">
+        <div className=" dark:bg-gray-800 rounded-[32px] p-6 lg:p-10 relative overflow-hidden  dark:border-gray-700 animate-in fade-in duration-700">
           {/* Page Header */}
           <div className="mb-8 lg:mb-12">
             <h1 className="text-xl lg:text-3xl font-bold text-zinc-900 dark:text-gray-100 tracking-tight text-left mb-2 lg:mb-4">
