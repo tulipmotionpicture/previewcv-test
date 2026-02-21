@@ -170,7 +170,7 @@ export default function FloatingHeader({
                                         <div className="absolute top-full left-0 w-48 bg-white dark:bg-gray-800 shadow-lg rounded-xl border border-gray-100 dark:border-gray-700 py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 transform translate-y-2 group-hover:translate-y-0">
                                             {item.dropdown.map((subItem) => (
                                                 <Link
-                                                    key={subItem.href}
+                                                    key={subItem.label}
                                                     href={subItem.href}
                                                     className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50 hover:text-primary-blue dark:hover:text-blue-400"
                                                 >
@@ -336,7 +336,7 @@ export default function FloatingHeader({
                                                 <div className="pl-8 border-l-2 border-gray-100 dark:border-gray-800 my-2 flex flex-col gap-2">
                                                     {item.dropdown.map((subItem) => (
                                                         <Link
-                                                            key={subItem.href}
+                                                            key={subItem.label}
                                                             href={subItem.href}
                                                             onClick={() => setIsMobileMenuOpen(false)}
                                                             className="block py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-primary-blue dark:hover:text-blue-400"
