@@ -102,7 +102,7 @@ function JobsFilters({
 
   return (
     <div className="flex flex-col h-full bg-white dark:bg-gray-900 rounded-xl overflow-hidden border border-gray-200 dark:border-gray-800 ">
-      <div className="bg-blue-600 px-6 py-2 flex items-center justify-between">
+      <div className="bg-primary-blue px-6 py-2 flex items-center justify-between">
         <h2 className="text-md font-bold text-white">
           All Filter
         </h2>
@@ -214,7 +214,7 @@ function JobsFilters({
                           .replace(/\b\w/g, (l) => l.toUpperCase())}
                       </h3>
                       {selectedCount > 0 && (
-                        <span className="bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 text-xs font-bold px-2 py-0.5 rounded-full">
+                        <span className="bg-blue-100 dark:bg-blue-900/30 text-primary-blue dark:text-blue-400 text-xs font-bold px-2 py-0.5 rounded-full">
                           {selectedCount}
                         </span>
                       )}
@@ -243,7 +243,7 @@ function JobsFilters({
                         >
                           <input
                             type="checkbox"
-                            className="form-checkbox rounded text-blue-600 focus:ring-blue-500 h-4 w-4"
+                            className="form-checkbox rounded text-primary-blue focus:ring-blue-500 h-4 w-4"
                             checked={
                               Array.isArray(selectedFilters[filterKey]) &&
                               selectedFilters[filterKey].includes(opt.value)
@@ -280,7 +280,7 @@ function JobsFilters({
                       {hasMore && (
                         <button
                           onClick={() => handleShowMore(filterKey)}
-                          className="text-xs text-left px-2 py-2 text-blue-600 dark:text-blue-400 font-bold hover:underline mt-1"
+                          className="text-xs text-left px-2 py-2 text-primary-blue dark:text-blue-400 font-bold hover:underline mt-1"
                         >
                           + View More ({filteredOptions.length - visibleCount})
                         </button>

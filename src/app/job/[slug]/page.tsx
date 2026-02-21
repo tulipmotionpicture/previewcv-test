@@ -175,19 +175,19 @@ export default async function JobDetailsPage({
                         <span className="text-gray-500">₹</span>
                         {job.salary_min
                           ? formatCurrency(
-                              job.salary_min,
-                              job.salary_currency || "USD",
-                            )
-                              .replace("US$", "")
-                              .replace("$", "")
+                            job.salary_min,
+                            job.salary_currency || "USD",
+                          )
+                            .replace("US$", "")
+                            .replace("$", "")
                           : ""}
                         {job.salary_max
                           ? ` - ${formatCurrency(
-                              job.salary_max,
-                              job.salary_currency || "USD",
-                            )
-                              .replace("US$", "")
-                              .replace("$", "")}`
+                            job.salary_max,
+                            job.salary_currency || "USD",
+                          )
+                            .replace("US$", "")
+                            .replace("$", "")}`
                           : ""}
                       </div>
                     )}
@@ -276,17 +276,17 @@ export default async function JobDetailsPage({
                   {job.required_skills?.map((skill, index) => (
                     <span
                       key={index}
-                      className="inline-flex items-center px-4 py-1.5 bg-white dark:bg-gray-800 text-blue-600 dark:text-blue-400 text-sm font-medium rounded-full border border-blue-200 dark:border-blue-900"
+                      className="inline-flex items-center px-4 py-1.5 bg-white dark:bg-gray-800 text-primary-blue dark:text-blue-400 text-sm font-medium rounded-full border border-blue-200 dark:border-blue-900"
                     >
                       {skill}
                     </span>
                   ))}
                   {(!job.required_skills ||
                     job.required_skills.length === 0) && (
-                    <span className="text-sm text-gray-500">
-                      No specific skills listed
-                    </span>
-                  )}
+                      <span className="text-sm text-gray-500">
+                        No specific skills listed
+                      </span>
+                    )}
                 </div>
               </div>
             </div>
@@ -331,7 +331,7 @@ export default async function JobDetailsPage({
                           <Link
                             href={companyData.company_website}
                             target="_blank"
-                            className="flex items-center gap-1 hover:text-blue-600"
+                            className="flex items-center gap-1 hover:text-primary-blue"
                           >
                             <ExternalLink className="w-4 h-4" />
                             visit website
@@ -341,7 +341,7 @@ export default async function JobDetailsPage({
                           <Link
                             href={companyData.linkedin_url}
                             target="_blank"
-                            className="text-blue-600 hover:text-blue-700"
+                            className="text-primary-blue hover:text-blue-700"
                           >
                             <div className="w-5 h-5 bg-[#0077b5] text-white rounded flex items-center justify-center text-[10px] font-bold">
                               in

@@ -279,7 +279,7 @@ export default function JobDetailsClient({ job, slug }: JobDetailsClientProps) {
                   }
                 }
               }}
-              className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+              className="p-2 text-gray-400 hover:text-primary-blue hover:bg-blue-50 rounded-lg transition-colors"
               title="Share Job"
             >
               <Share2 className="w-5 h-5" />
@@ -337,7 +337,7 @@ export default function JobDetailsClient({ job, slug }: JobDetailsClientProps) {
 
               {loadingResumes ? (
                 <div className="flex items-center justify-center py-3 bg-gray-50 rounded-lg border border-dashed border-gray-200">
-                  <div className="animate-spin w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full"></div>
+                  <div className="animate-spin w-4 h-4 border-2 border-primary-blue border-t-transparent rounded-full"></div>
                 </div>
               ) : (
                 <div className="space-y-2">
@@ -468,7 +468,7 @@ export default function JobDetailsClient({ job, slug }: JobDetailsClientProps) {
                 </div>
 
                 <div className="mb-2 pr-8">
-                  <h4 className="font-bold text-gray-900 dark:text-gray-100 group-hover:text-blue-600 transition-colors text-base line-clamp-1">
+                  <h4 className="font-bold text-gray-900 dark:text-gray-100 group-hover:text-primary-blue transition-colors text-base line-clamp-1">
                     <Link href={`/job/${similarJob.slug}`}>
                       {similarJob.title}
                     </Link>
@@ -524,7 +524,7 @@ export default function JobDetailsClient({ job, slug }: JobDetailsClientProps) {
                   {similarJob.required_skills?.slice(0, 3).map((skill, idx) => (
                     <span
                       key={idx}
-                      className="px-2 py-0.5 text-[10px] border border-blue-200 text-blue-600 rounded-full font-medium"
+                      className="px-2 py-0.5 text-[10px] border border-blue-200 text-primary-blue rounded-full font-medium"
                     >
                       {skill}
                     </span>
@@ -664,7 +664,7 @@ export default function JobDetailsClient({ job, slug }: JobDetailsClientProps) {
                 </span>
                 <Link
                   href={`/jobs?limit=10&category=${job.categories?.[0]}`}
-                  className="hidden sm:inline-block text-blue-600 hover:underline font-medium"
+                  className="hidden sm:inline-block text-primary-blue hover:underline font-medium"
                 >
                   Send me jobs like this
                 </Link>
@@ -675,7 +675,7 @@ export default function JobDetailsClient({ job, slug }: JobDetailsClientProps) {
           <div className="flex items-center gap-3">
             <Link
               href={`/jobs?limit=10&category=${job.categories?.[0]}`}
-              className="sm:hidden text-blue-600 text-xs font-medium hover:underline whitespace-nowrap"
+              className="sm:hidden text-primary-blue text-xs font-medium hover:underline whitespace-nowrap"
             >
               Similar Jobs
             </Link>
@@ -685,7 +685,7 @@ export default function JobDetailsClient({ job, slug }: JobDetailsClientProps) {
                   .getElementById("application-card")
                   ?.scrollIntoView({ behavior: "smooth" });
               }}
-              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-lg transition-colors shadow-sm whitespace-nowrap"
+              className="px-4 py-2 bg-primary-blue hover:bg-blue-700 text-white text-xs font-bold rounded-lg transition-colors shadow-sm whitespace-nowrap"
             >
               Apply Now
             </button>

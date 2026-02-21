@@ -67,7 +67,7 @@ export default function ResponsiveLayout({
                 <button
                   type="button"
                   onClick={handleLogoClick}
-                  className="flex items-center text-xl sm:text-2xl font-bold text-blue-600 hover:text-blue-700 transition-colors"
+                  className="flex items-center text-xl sm:text-2xl font-bold text-primary-blue hover:text-blue-700 transition-colors"
                 >
                   {config.app.logoUrl ? (
                     <Image

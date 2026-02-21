@@ -18,9 +18,9 @@ export default function Button({
     ...props
 }: ButtonProps) {
     const baseStyles = 'font-bold rounded-2xl transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed';
-    
+
     const variants = {
-        primary: 'bg-blue-600 text-white hover:bg-blue-700 shadow-lg shadow-blue-200 hover:shadow-xl',
+        primary: 'bg-primary-blue text-white hover:bg-blue-700 shadow-lg shadow-blue-200 hover:shadow-xl',
         secondary: 'bg-gray-100 text-gray-900 hover:bg-gray-200',
         danger: 'bg-red-600 text-white hover:bg-red-700 shadow-lg shadow-red-200',
         ghost: 'bg-transparent text-gray-600 hover:bg-gray-100',

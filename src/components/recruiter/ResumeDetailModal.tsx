@@ -140,7 +140,7 @@ export default function ResumeDetailModal({
                 onClick={onUnlock}
                 disabled={unlocking}
                 className="px-6 py-3 rounded-lg text-sm font-semibold
-                  bg-gradient-to-r from-blue-600 to-indigo-600
+                  bg-gradient-to-r from-primary-blue to-indigo-600
                   hover:from-blue-700 hover:to-indigo-700
                   text-white shadow-md transition
                   disabled:opacity-50 flex items-center justify-center gap-2 mx-auto"
@@ -382,7 +382,7 @@ export default function ResumeDetailModal({
                                 href={project.projectUrl}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="text-blue-600 dark:text-blue-400 hover:underline"
+                                className="text-primary-blue dark:text-blue-400 hover:underline"
                               >
                                 {project.projectUrl}
                               </a>
@@ -392,7 +392,7 @@ export default function ResumeDetailModal({
                                 href={project.githubUrl}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="text-blue-600 dark:text-blue-400 hover:underline"
+                                className="text-primary-blue dark:text-blue-400 hover:underline"
                               >
                                 {project.githubUrl}
                               </a>
@@ -445,7 +445,7 @@ export default function ResumeDetailModal({
                             href={cert.certificationUrl}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-blue-600 dark:text-blue-400 hover:underline text-sm"
+                            className="text-primary-blue dark:text-blue-400 hover:underline text-sm"
                           >
                             {cert.certificationUrl}
                           </a>
@@ -643,7 +643,7 @@ export default function ResumeDetailModal({
                             href={pub.publicationUrl}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-blue-600 dark:text-blue-400 hover:underline text-sm"
+                            className="text-primary-blue dark:text-blue-400 hover:underline text-sm"
                           >
                             {pub.publicationUrl}
                           </a>
@@ -710,7 +710,7 @@ export default function ResumeDetailModal({
                         href={social.socialLink}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="px-4 py-2 bg-gray-50 dark:bg-gray-900 rounded-lg text-sm text-blue-600 dark:text-blue-400 hover:underline"
+                        className="px-4 py-2 bg-gray-50 dark:bg-gray-900 rounded-lg text-sm text-primary-blue dark:text-blue-400 hover:underline"
                       >
                         {social.socialMediaName} :- {social.socialLink}
                       </a>
@@ -1100,7 +1100,7 @@ export default function ResumeDetailModal({
               </button>
               <button
                 onClick={onDownloadPDF}
-                className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg shadow-sm hover:shadow transition-all flex items-center gap-2"
+                className="px-6 py-2 bg-primary-blue hover:bg-blue-700 text-white text-sm font-medium rounded-lg shadow-sm hover:shadow transition-all flex items-center gap-2"
               >
                 <Download className="w-4 h-4" />
                 Download PDF

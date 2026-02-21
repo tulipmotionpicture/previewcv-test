@@ -68,7 +68,7 @@ const RelevantJobItem: React.FC<RelevantJobItemProps> = ({ job }) => {
 
           <div className="flex items-center justify-between">
             <div className="flex gap-1">
-              <span className="px-2 py-0.5 bg-blue-50 text-blue-600 rounded text-[10px] font-bold">
+              <span className="px-2 py-0.5 bg-blue-50 text-primary-blue rounded text-[10px] font-bold">
                 {job.job_type.replace("_", " ").toUpperCase()}
               </span>
             </div>
@@ -131,7 +131,7 @@ const RelevantJobItem: React.FC<RelevantJobItemProps> = ({ job }) => {
 
           <Link
             href={`/job/${job.slug}`}
-            className="block w-full py-2 bg-blue-600 text-white rounded-lg text-xs font-bold hover:bg-blue-700 transition-colors text-center"
+            className="block w-full py-2 bg-primary-blue text-white rounded-lg text-xs font-bold hover:bg-blue-700 transition-colors text-center"
           >
             View Details
           </Link>

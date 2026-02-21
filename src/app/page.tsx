@@ -326,7 +326,7 @@ export default function Home() {
             </h2>
             <Link
               href="/blogs"
-              className="text-blue-500 hover:text-blue-600 text-sm font-medium"
+              className="text-blue-500 hover:text-primary-blue text-sm font-medium"
             >
               View All
             </Link>
@@ -505,19 +505,19 @@ export default function Home() {
           <div className="w-full lg:max-w-[40%] z-10">
             <h2 className="text-xl lg:text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
               Create a Professional{" "}
-              <span className="text-blue-600">Cover Letter</span>
+              <span className="text-primary-blue">Cover Letter</span>
             </h2>
 
             <p className="text-xs lg:text-sm text-gray-600 dark:text-gray-400 mb-6">
               Stand out with a{" "}
-              <span className="text-blue-600 font-semibold">customized</span>{" "}
+              <span className="text-primary-blue font-semibold">customized</span>{" "}
               cover letter.
             </p>
 
             <ul className="space-y-3 mb-6">
               <li className="flex items-center gap-3">
                 <div className="flex-shrink-0 w-5 h-5 rounded-full border border-blue-400 flex items-center justify-center">
-                  <CheckCircle2 className="text-blue-600 w-3 h-3" />
+                  <CheckCircle2 className="text-primary-blue w-3 h-3" />
                 </div>
                 <span className="text-gray-700 dark:text-gray-300 text-xs lg:text-sm font-medium">
                   Automated Cover Letter Maker
@@ -526,7 +526,7 @@ export default function Home() {
 
               <li className="flex items-center gap-3">
                 <div className="flex-shrink-0 w-5 h-5 rounded-full border border-blue-400 flex items-center justify-center">
-                  <CheckCircle2 className="text-blue-600 w-3 h-3" />
+                  <CheckCircle2 className="text-primary-blue w-3 h-3" />
                 </div>
                 <span className="text-gray-700 dark:text-gray-300 text-xs lg:text-sm font-medium">
                   Integrated with your resume
@@ -535,7 +535,7 @@ export default function Home() {
 
               <li className="flex items-center gap-3">
                 <div className="flex-shrink-0 w-5 h-5 rounded-full border border-blue-400 flex items-center justify-center">
-                  <CheckCircle2 className="text-blue-600 w-3 h-3" />
+                  <CheckCircle2 className="text-primary-blue w-3 h-3" />
                 </div>
                 <span className="text-gray-700 dark:text-gray-300 text-xs lg:text-sm font-medium">
                   Hiring manager approved templates
@@ -545,7 +545,7 @@ export default function Home() {
 
             <Link
               href="/candidate/signup"
-              className="inline-flex items-center gap-2 px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-full transition-all shadow-lg hover:shadow-xl text-xs lg:text-sm"
+              className="inline-flex items-center gap-2 px-6 py-2.5 bg-primary-blue hover:bg-blue-700 text-white font-semibold rounded-full transition-all shadow-lg hover:shadow-xl text-xs lg:text-sm"
             >
               Create Cover Letter
               <Image
@@ -706,7 +706,7 @@ export default function Home() {
                 title: "Always Up-to-Date",
                 description:
                   "Edit your resume once on LetsMakeCV - your PreviewCV link updates automatically.",
-                color: "text-blue-600 dark:text-blue-400",
+                color: "text-primary-blue dark:text-blue-400",
               },
               {
                 icon: (

@@ -602,7 +602,7 @@ export default function EditJobModal({
           <button
             type="submit"
             disabled={loading}
-            className="px-8 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium shadow-lg shadow-blue-500/30 transition-all transform active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed"
+            className="px-8 py-2.5 bg-primary-blue hover:bg-blue-700 text-white rounded-lg font-medium shadow-lg shadow-blue-500/30 transition-all transform active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed"
           >
             {loading ? "Saving..." : "Save Changes"}
           </button>

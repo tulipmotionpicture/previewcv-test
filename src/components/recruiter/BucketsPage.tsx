@@ -778,7 +778,7 @@ export default function BucketsPage() {
       case "bucket_updated":
         return {
           Icon: Edit2,
-          color: "text-blue-600 dark:text-blue-400",
+          color: "text-primary-blue dark:text-blue-400",
           bg: "bg-blue-50 dark:bg-blue-900/20",
         };
       case "resumes_bulk_added":
@@ -907,7 +907,7 @@ export default function BucketsPage() {
     // Handle count
     if (key === "count") {
       return (
-        <span className="font-semibold text-blue-600 dark:text-blue-400">
+        <span className="font-semibold text-primary-blue dark:text-blue-400">
           {value}
         </span>
       );
@@ -1092,7 +1092,7 @@ export default function BucketsPage() {
               type="checkbox"
               checked={showArchived}
               onChange={(e) => setShowArchived(e.target.checked)}
-              className="w-3.5 h-3.5 rounded border-[#E1E8F1] text-blue-600 focus:ring-blue-500"
+              className="w-3.5 h-3.5 rounded border-[#E1E8F1] text-primary-blue focus:ring-blue-500"
             />
             <span className="text-xs font-medium text-gray-700 dark:text-gray-300 whitespace-nowrap">
               Archived
@@ -1102,7 +1102,7 @@ export default function BucketsPage() {
           {/* Create Button */}
           <button
             onClick={() => setShowCreateModal(true)}
-            className="px-4 py-2.5 bg-[#2563EB] hover:bg-blue-700 text-white text-sm font-medium rounded-lg  border border-[#E1E8F1] transition-colors flex items-center gap-1.5  h-[40px]"
+            className="px-4 py-2.5 bg-primary-blue hover:bg-primary-blue-hover text-white text-sm font-medium rounded-lg  border border-[#E1E8F1] transition-colors flex items-center gap-1.5  h-[40px]"
           >
             <Plus className="w-4 h-4" />
             Create
@@ -1113,7 +1113,7 @@ export default function BucketsPage() {
       {/* Buckets Grid */}
       {loading ? (
         <div className="text-center py-12">
-          <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto" />
+          <div className="w-8 h-8 border-4 border-primary-blue border-t-transparent rounded-full animate-spin mx-auto" />
           <p className="text-gray-500 mt-4">Loading buckets...</p>
         </div>
       ) : filteredBuckets.length === 0 ? (
@@ -1127,7 +1127,7 @@ export default function BucketsPage() {
           </p>
           <button
             onClick={() => setShowCreateModal(true)}
-            className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors inline-flex items-center gap-2"
+            className="px-6 py-3 bg-primary-blue hover:bg-primary-blue-hover text-white rounded-lg font-medium transition-colors inline-flex items-center gap-2"
           >
             <Plus className="w-5 h-5" />
             Create Bucket
@@ -1346,7 +1346,7 @@ export default function BucketsPage() {
               </button>
               <button
                 onClick={handleCreateBucket}
-                className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                className="flex-1 px-4 py-2 bg-primary-blue text-white rounded-lg hover:bg-blue-700"
               >
                 Create Bucket
               </button>
@@ -1436,7 +1436,7 @@ export default function BucketsPage() {
               </button>
               <button
                 onClick={handleUpdateBucket}
-                className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                className="flex-1 px-4 py-2 bg-primary-blue text-white rounded-lg hover:bg-blue-700"
               >
                 Update Bucket
               </button>
@@ -1882,7 +1882,7 @@ export default function BucketsPage() {
                                 creditsStatus.credits_remaining < 1
                               }
                               className="w-full px-4 py-2 rounded-lg text-sm font-semibold
-                               bg-gradient-to-r from-blue-600 to-indigo-600
+                               bg-gradient-to-r from-primary-blue to-indigo-600
                                hover:from-blue-700 hover:to-indigo-700
                                text-white shadow-md transition
                                disabled:opacity-50 flex items-center justify-center gap-2"
@@ -2042,7 +2042,7 @@ export default function BucketsPage() {
               <button
                 onClick={handleMoveResumes}
                 disabled={!targetBucketId || movingItems}
-                className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 flex items-center justify-center gap-2"
+                className="flex-1 px-4 py-2 bg-primary-blue text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 flex items-center justify-center gap-2"
               >
                 {movingItems ? (
                   <>
@@ -2077,7 +2077,7 @@ export default function BucketsPage() {
             <div className="p-6">
               {loadingPreview ? (
                 <div className="flex items-center justify-center py-8">
-                  <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
+                  <div className="w-8 h-8 border-4 border-primary-blue border-t-transparent rounded-full animate-spin" />
                 </div>
               ) : downloadPreview ? (
                 <div className="space-y-6">
@@ -2143,7 +2143,7 @@ export default function BucketsPage() {
                         disabled={
                           downloadPreview.unlocked_only.file_count === 0
                         }
-                        className="w-full mt-3 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="w-full mt-3 px-4 py-2 bg-primary-blue hover:bg-blue-700 text-white rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                         style={{
                           backgroundColor: selectedBucket.color || "#3B82F6",
                         }}
@@ -2274,7 +2274,7 @@ export default function BucketsPage() {
               {loadingActivity ? (
                 <div className="flex items-center justify-center py-12">
                   <div className="flex flex-col items-center gap-3">
-                    <div className="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
+                    <div className="w-10 h-10 border-4 border-primary-blue border-t-transparent rounded-full animate-spin" />
                     <p className="text-gray-600 dark:text-gray-400">
                       Loading activity logs...
                     </p>
@@ -2545,7 +2545,7 @@ export default function BucketsPage() {
               <button
                 onClick={handleSaveItemMetadata}
                 disabled={savingItem}
-                className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg shadow-sm hover:shadow transition-all flex items-center gap-2 disabled:opacity-50"
+                className="px-6 py-2 bg-primary-blue hover:bg-blue-700 text-white text-sm font-medium rounded-lg shadow-sm hover:shadow transition-all flex items-center gap-2 disabled:opacity-50"
               >
                 {savingItem ? (
                   <>

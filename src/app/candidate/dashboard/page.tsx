@@ -1075,7 +1075,7 @@ function CandidateDashboardContent() {
 
               {/* Modal Header */}
               <div className="text-center mb-6">
-                <div className="inline-flex items-center justify-center w-12 h-12 rounded-lg bg-blue-600 text-white text-xl mb-3">
+                <div className="inline-flex items-center justify-center w-12 h-12 rounded-lg bg-primary-blue text-white text-xl mb-3">
                   <Share2 className="w-6 h-6" />
                 </div>
                 <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-1">
@@ -1120,7 +1120,7 @@ function CandidateDashboardContent() {
                       );
                       toast.success("Link copied to clipboard!");
                     }}
-                    className="px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold rounded-lg transition-colors duration-150 flex items-center gap-2 cursor-pointer"
+                    className="px-4 py-3 bg-primary-blue hover:bg-blue-700 text-white text-sm font-bold rounded-lg transition-colors duration-150 flex items-center gap-2 cursor-pointer"
                   >
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
@@ -1169,7 +1169,7 @@ export default function CandidateDashboard() {
     <Suspense
       fallback={
         <div className="min-h-screen bg-[#F9FAFC] dark:bg-[#121111] flex items-center justify-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-2 border-blue-600 border-t-transparent"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-2 border-primary-blue border-t-transparent"></div>
         </div>
       }
     >

@@ -53,7 +53,7 @@ const MenuButton = ({
         disabled={disabled}
         title={title}
         className={`p-2 rounded-lg transition-all ${isActive
-            ? "bg-blue-100 text-blue-600 dark:bg-blue-900/40 dark:text-blue-400"
+            ? "bg-blue-100 text-primary-blue dark:bg-blue-900/40 dark:text-blue-400"
             : "text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800"
             } ${disabled ? "opacity-50 cursor-not-allowed" : ""}`}
     >

@@ -118,7 +118,7 @@ export default function JobList({ jobs, loading, error }: JobListProps) {
                       {job.title}
                     </h3>
                     <p className="text-[11px] font-medium text-gray-500 dark:text-gray-400 truncate">
-                      <span className="text-gray-900 dark:text-gray-300 font-semibold hover:text-blue-600 transition-colors">
+                      <span className="text-gray-900 dark:text-gray-300 font-semibold hover:text-primary-blue transition-colors">
                         <Link href={job.recruiter_profile_url || ""}>
                           {job.company_name}
                         </Link>
@@ -145,7 +145,7 @@ export default function JobList({ jobs, loading, error }: JobListProps) {
                   />
                   <button
                     onClick={() => handleShare(job)}
-                    className="p-1 text-gray-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-md transition-colors"
+                    className="p-1 text-gray-400 hover:text-primary-blue hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-md transition-colors"
                     title="Share Job"
                   >
                     <svg
@@ -194,7 +194,7 @@ export default function JobList({ jobs, loading, error }: JobListProps) {
               {/* Salary & Badges */}
               <div className="flex flex-wrap items-center gap-2 mb-2">
                 <div className="flex items-baseline">
-                  <span className="text-lg font-bold text-blue-600 dark:text-blue-400">
+                  <span className="text-lg font-bold text-primary-blue dark:text-blue-400">
                     {formatSalary(job).split(" ")[0] === "USD"
                       ? "$"
                       : formatSalary(job).split(" ")[0]}
@@ -272,7 +272,7 @@ export default function JobList({ jobs, loading, error }: JobListProps) {
 
                 <Link
                   href={`/job/${job.slug}`}
-                  className="px-4 py-2 bg-blue-600 text-white text-xs font-bold rounded-lg hover:bg-blue-700 transition shadow-sm hover:shadow text-center min-w-[100px]"
+                  className="px-4 py-2 bg-primary-blue text-white text-xs font-bold rounded-lg hover:bg-blue-700 transition shadow-sm hover:shadow text-center min-w-[100px]"
                 >
                   Apply
                 </Link>

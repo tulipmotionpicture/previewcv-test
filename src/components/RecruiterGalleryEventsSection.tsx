@@ -438,7 +438,7 @@ export default function RecruiterGalleryEventsSection({
                       <button
                         type="submit"
                         disabled={creating || updating}
-                        className="flex-1 md:flex-none px-6 py-3 bg-[#007BFF] hover:bg-blue-600 text-white rounded-lg font-medium shadow-sm transition-colors disabled:opacity-70 whitespace-nowrap"
+                        className="flex-1 md:flex-none px-6 py-3 bg-[#007BFF] hover:bg-primary-blue text-white rounded-lg font-medium shadow-sm transition-colors disabled:opacity-70 whitespace-nowrap"
                       >
                         {editingEventId
                           ? updating
@@ -547,7 +547,7 @@ export default function RecruiterGalleryEventsSection({
                           </span>
                           <span>Order: {event.display_order}</span>
                           {event.is_featured && (
-                            <span className="text-blue-600 font-medium">
+                            <span className="text-primary-blue font-medium">
                               Featured
                             </span>
                           )}
@@ -563,7 +563,7 @@ export default function RecruiterGalleryEventsSection({
                       <div className="col-span-3 flex justify-end gap-2">
                         <button
                           onClick={() => handleEditEvent(event)}
-                          className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-400 hover:text-blue-600 transition-colors"
+                          className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-400 hover:text-primary-blue transition-colors"
                           title="Edit"
                         >
                           <Edit2 className="w-4 h-4" />

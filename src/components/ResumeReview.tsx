@@ -313,7 +313,7 @@ export default function ResumeReview({ resumeId, onSaveComplete, portfolioId, pe
               e.stopPropagation();
               fetchLinkedEntities();
             }}
-            className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-black px-8 py-4 rounded-2xl shadow-xl hover:shadow-2xl transition-all transform hover:scale-105"
+            className="flex items-center gap-2 bg-gradient-to-r from-primary-blue to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-black px-8 py-4 rounded-2xl shadow-xl hover:shadow-2xl transition-all transform hover:scale-105"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -445,7 +445,7 @@ export default function ResumeReview({ resumeId, onSaveComplete, portfolioId, pe
         <div className="flex items-center justify-between mb-6 px-4">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center">
-              <Briefcase className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+              <Briefcase className="w-5 h-5 text-primary-blue dark:text-blue-400" />
             </div>
             <h2 className="text-xl font-black text-gray-900 dark:text-gray-100 uppercase tracking-tight">Work Experience</h2>
           </div>
@@ -454,7 +454,7 @@ export default function ResumeReview({ resumeId, onSaveComplete, portfolioId, pe
               e.stopPropagation();
               addItem('work_experiences');
             }}
-            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl text-sm font-black transition-all shadow-lg active:scale-95"
+            className="flex items-center gap-2 bg-primary-blue hover:bg-blue-700 text-white px-4 py-2 rounded-xl text-sm font-black transition-all shadow-lg active:scale-95"
           >
             <Plus className="w-4 h-4" /> Add Experience
           </button>
@@ -479,7 +479,7 @@ export default function ResumeReview({ resumeId, onSaveComplete, portfolioId, pe
                         e.stopPropagation();
                         toggleSelection('work_experiences', exp._preview);
                       }}
-                      className={`w-8 h-8 rounded-full flex items-center justify-center transition-all flex-shrink-0 ${isSelected ? 'bg-blue-600 text-white' : 'bg-gray-100 dark:bg-gray-800 text-gray-400'
+                      className={`w-8 h-8 rounded-full flex items-center justify-center transition-all flex-shrink-0 ${isSelected ? 'bg-primary-blue text-white' : 'bg-gray-100 dark:bg-gray-800 text-gray-400'
                         }`}
                     >
                       <Check className={`w-5 h-5 transition-transform ${isSelected ? 'scale-100' : 'scale-0'}`} />
@@ -501,7 +501,7 @@ export default function ResumeReview({ resumeId, onSaveComplete, portfolioId, pe
                             <input
                               value={exp.company}
                               onChange={(e) => updateItem('work_experiences', idx, 'company', e.target.value)}
-                              className="w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 rounded-xl border border-transparent focus:border-blue-500 outline-none font-bold text-blue-600"
+                              className="w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 rounded-xl border border-transparent focus:border-blue-500 outline-none font-bold text-primary-blue"
                             />
                           </div>
                           <div className="flex gap-2">
@@ -524,7 +524,7 @@ export default function ResumeReview({ resumeId, onSaveComplete, portfolioId, pe
                               type="checkbox"
                               checked={exp.is_current}
                               onChange={(e) => updateItem('work_experiences', idx, 'is_current', e.target.checked)}
-                              className="w-4 h-4 text-blue-600"
+                              className="w-4 h-4 text-primary-blue"
                             />
                             <span className="text-xs font-bold text-gray-500">I currently work here</span>
                           </div>
@@ -532,7 +532,7 @@ export default function ResumeReview({ resumeId, onSaveComplete, portfolioId, pe
                       ) : (
                         <div>
                           <h3 className="text-xl font-black text-gray-900 dark:text-gray-100">{exp.position}</h3>
-                          <p className="text-blue-600 font-bold mb-2">{exp.company}</p>
+                          <p className="text-primary-blue font-bold mb-2">{exp.company}</p>
                           <div className="flex items-center gap-4 text-xs text-gray-500 font-bold uppercase">
                             <span className="flex items-center gap-1.5"><Calendar className="w-3 h-3" /> {exp.start_date} — {exp.is_current ? 'Present' : exp.end_date}</span>
                           </div>
@@ -546,7 +546,7 @@ export default function ResumeReview({ resumeId, onSaveComplete, portfolioId, pe
                           e.stopPropagation();
                           setEditingId(isEditing ? null : exp._preview);
                         }}
-                        className={`p-2 rounded-xl ${isEditing ? 'bg-blue-600 text-white' : 'text-gray-400 hover:bg-gray-100'}`}
+                        className={`p-2 rounded-xl ${isEditing ? 'bg-primary-blue text-white' : 'text-gray-400 hover:bg-gray-100'}`}
                       >
                         {isEditing ? <Check className="w-5 h-5" /> : <Pencil className="w-5 h-5" />}
                       </button>
@@ -892,7 +892,7 @@ export default function ResumeReview({ resumeId, onSaveComplete, portfolioId, pe
         <div className="bg-white/90 dark:bg-gray-900/90 backdrop-blur-xl border border-gray-200/50 dark:border-gray-800/50 p-4 rounded-[2.5rem] shadow-2xl flex items-center justify-between max-w-2xl mx-auto pointer-events-auto">
           <div className="pl-6 flex flex-col">
             <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 line-clamp-1">Items for Profile</p>
-            <p className="text-2xl font-black text-blue-600 leading-tight">0{totalSelectedCount}</p>
+            <p className="text-2xl font-black text-primary-blue leading-tight">0{totalSelectedCount}</p>
           </div>
 
           <button
@@ -901,7 +901,7 @@ export default function ResumeReview({ resumeId, onSaveComplete, portfolioId, pe
               handleSave();
             }}
             disabled={totalSelectedCount === 0 || saving}
-            className="flex items-center gap-3 bg-gradient-to-br from-blue-600 to-indigo-600 text-white font-black py-4 px-10 rounded-3xl shadow-xl shadow-blue-600/20 hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-50 disabled:grayscale group"
+            className="flex items-center gap-3 bg-gradient-to-br from-primary-blue to-indigo-600 text-white font-black py-4 px-10 rounded-3xl shadow-xl shadow-primary-blue/20 hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-50 disabled:grayscale group"
           >
             {saving ? (
               <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white" />

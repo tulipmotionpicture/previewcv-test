@@ -11,9 +11,9 @@ export default function JobNotFound() {
                 <p className="text-gray-500 dark:text-gray-400 mb-8">
                     The job you are looking for could not be found or may have been removed.
                 </p>
-                <Link 
-                    href="/jobs" 
-                    className="inline-block px-8 py-4 bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-600 text-white font-black rounded-2xl transition-all shadow-lg"
+                <Link
+                    href="/jobs"
+                    className="inline-block px-8 py-4 bg-primary-blue hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-primary-blue text-white font-black rounded-2xl transition-all shadow-lg"
                 >
                     Browse All Jobs
                 </Link>

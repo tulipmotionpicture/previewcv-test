@@ -114,7 +114,7 @@ export default function AdvancedFilters({
 
     // Consistent Styles
     const inputClassName = "w-full h-[42px] px-3 py-2 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm";
-    const buttonClassName = "h-[42px] w-[42px] p-0 flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors shrink-0";
+    const buttonClassName = "h-[42px] w-[42px] p-0 flex items-center justify-center bg-primary-blue hover:bg-blue-700 text-white rounded-lg transition-colors shrink-0";
     const redButtonClassName = "h-[42px] w-[42px] p-0 flex items-center justify-center bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors shrink-0";
 
     return (
@@ -209,7 +209,7 @@ export default function AdvancedFilters({
                                 <div className="flex flex-wrap gap-2 mb-2">
                                     {filters.skills.map((s: string) => (
                                         <span key={s} className="inline-flex items-center gap-1 px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded-full text-sm">
-                                            {s}<button onClick={() => removeSkill(s)} className="hover:text-blue-600"><X className="h-3 w-3" /></button>
+                                            {s}<button onClick={() => removeSkill(s)} className="hover:text-primary-blue"><X className="h-3 w-3" /></button>
                                         </span>
                                     ))}
                                 </div>
@@ -360,7 +360,7 @@ export default function AdvancedFilters({
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Notice Period</label>
                                 <div className="flex items-center gap-2 mb-2">
-                                    <input type="checkbox" checked={!!filters.under_notice_period} onChange={(e) => setFilters((prev: any) => ({ ...prev, under_notice_period: e.target.checked }))} className="rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
+                                    <input type="checkbox" checked={!!filters.under_notice_period} onChange={(e) => setFilters((prev: any) => ({ ...prev, under_notice_period: e.target.checked }))} className="rounded border-gray-300 text-primary-blue focus:ring-blue-500" />
                                     <span className="text-sm text-gray-700 dark:text-gray-300">Currently Serving Notice Period</span>
                                 </div>
                                 <div className="flex gap-2 mb-2 items-center">
@@ -377,13 +377,13 @@ export default function AdvancedFilters({
                             </div>
                             <div className="space-y-2">
                                 <label className="flex items-center gap-2">
-                                    <input type="checkbox" checked={filters.open_to_work_only} onChange={(e) => setFilters((prev: any) => ({ ...prev, open_to_work_only: e.target.checked }))} className="rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
+                                    <input type="checkbox" checked={filters.open_to_work_only} onChange={(e) => setFilters((prev: any) => ({ ...prev, open_to_work_only: e.target.checked }))} className="rounded border-gray-300 text-primary-blue focus:ring-blue-500" />
                                     <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Open to Work Only</span>
                                 </label>
                                 <div className="flex gap-4">
-                                    <label className="flex items-center gap-2"><input type="radio" name="employment_status" checked={filters.is_currently_employed === undefined} onChange={() => setFilters((prev: any) => ({ ...prev, is_currently_employed: undefined }))} className="text-blue-600 focus:ring-blue-500" /><span className="text-sm text-gray-700 dark:text-gray-300">Any</span></label>
-                                    <label className="flex items-center gap-2"><input type="radio" name="employment_status" checked={filters.is_currently_employed === true} onChange={() => setFilters((prev: any) => ({ ...prev, is_currently_employed: true }))} className="text-blue-600 focus:ring-blue-500" /><span className="text-sm text-gray-700 dark:text-gray-300">Employed</span></label>
-                                    <label className="flex items-center gap-2"><input type="radio" name="employment_status" checked={filters.is_currently_employed === false} onChange={() => setFilters((prev: any) => ({ ...prev, is_currently_employed: false }))} className="text-blue-600 focus:ring-blue-500" /><span className="text-sm text-gray-700 dark:text-gray-300">Unemployed</span></label>
+                                    <label className="flex items-center gap-2"><input type="radio" name="employment_status" checked={filters.is_currently_employed === undefined} onChange={() => setFilters((prev: any) => ({ ...prev, is_currently_employed: undefined }))} className="text-primary-blue focus:ring-blue-500" /><span className="text-sm text-gray-700 dark:text-gray-300">Any</span></label>
+                                    <label className="flex items-center gap-2"><input type="radio" name="employment_status" checked={filters.is_currently_employed === true} onChange={() => setFilters((prev: any) => ({ ...prev, is_currently_employed: true }))} className="text-primary-blue focus:ring-blue-500" /><span className="text-sm text-gray-700 dark:text-gray-300">Employed</span></label>
+                                    <label className="flex items-center gap-2"><input type="radio" name="employment_status" checked={filters.is_currently_employed === false} onChange={() => setFilters((prev: any) => ({ ...prev, is_currently_employed: false }))} className="text-primary-blue focus:ring-blue-500" /><span className="text-sm text-gray-700 dark:text-gray-300">Unemployed</span></label>
                                 </div>
                             </div>
                         </div>
@@ -423,9 +423,9 @@ export default function AdvancedFilters({
                             </div>
                             <div className="space-y-6">
                                 <div className="space-y-2">
-                                    <label className="flex items-center gap-2"><input type="checkbox" checked={!!filters.has_github} onChange={(e) => setFilters((prev: any) => ({ ...prev, has_github: e.target.checked }))} className="rounded border-gray-300 text-blue-600 focus:ring-blue-500" /><span className="text-sm text-gray-700 dark:text-gray-300">Has GitHub</span></label>
-                                    <label className="flex items-center gap-2"><input type="checkbox" checked={!!filters.has_linkedin} onChange={(e) => setFilters((prev: any) => ({ ...prev, has_linkedin: e.target.checked }))} className="rounded border-gray-300 text-blue-600 focus:ring-blue-500" /><span className="text-sm text-gray-700 dark:text-gray-300">Has LinkedIn</span></label>
-                                    <label className="flex items-center gap-2"><input type="checkbox" checked={!!filters.has_volunteer_experience} onChange={(e) => setFilters((prev: any) => ({ ...prev, has_volunteer_experience: e.target.checked }))} className="rounded border-gray-300 text-blue-600 focus:ring-blue-500" /><span className="text-sm text-gray-700 dark:text-gray-300">Volunteer Experience</span></label>
+                                    <label className="flex items-center gap-2"><input type="checkbox" checked={!!filters.has_github} onChange={(e) => setFilters((prev: any) => ({ ...prev, has_github: e.target.checked }))} className="rounded border-gray-300 text-primary-blue focus:ring-blue-500" /><span className="text-sm text-gray-700 dark:text-gray-300">Has GitHub</span></label>
+                                    <label className="flex items-center gap-2"><input type="checkbox" checked={!!filters.has_linkedin} onChange={(e) => setFilters((prev: any) => ({ ...prev, has_linkedin: e.target.checked }))} className="rounded border-gray-300 text-primary-blue focus:ring-blue-500" /><span className="text-sm text-gray-700 dark:text-gray-300">Has LinkedIn</span></label>
+                                    <label className="flex items-center gap-2"><input type="checkbox" checked={!!filters.has_volunteer_experience} onChange={(e) => setFilters((prev: any) => ({ ...prev, has_volunteer_experience: e.target.checked }))} className="rounded border-gray-300 text-primary-blue focus:ring-blue-500" /><span className="text-sm text-gray-700 dark:text-gray-300">Volunteer Experience</span></label>
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Filter by Bucket</label>
@@ -433,7 +433,7 @@ export default function AdvancedFilters({
                                         <option value={0}>Any (Ignore Bucket)</option>
                                         {buckets.map((b) => (<option key={b.id} value={b.id}>{b.name}</option>))}
                                     </select>
-                                    <label className="flex items-center gap-2"><input type="checkbox" checked={filters.not_in_any_bucket} onChange={(e) => setFilters((prev: any) => ({ ...prev, not_in_any_bucket: e.target.checked }))} className="rounded border-gray-300 text-blue-600 focus:ring-blue-500" /><span className="text-sm text-gray-700 dark:text-gray-300">Not in any bucket</span></label>
+                                    <label className="flex items-center gap-2"><input type="checkbox" checked={filters.not_in_any_bucket} onChange={(e) => setFilters((prev: any) => ({ ...prev, not_in_any_bucket: e.target.checked }))} className="rounded border-gray-300 text-primary-blue focus:ring-blue-500" /><span className="text-sm text-gray-700 dark:text-gray-300">Not in any bucket</span></label>
                                 </div>
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>
@@ -459,7 +459,7 @@ export default function AdvancedFilters({
                     <button onClick={handleReset} className="px-4 py-2 text-sm font-medium text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors">Reset Filters</button>
                     <div className="flex gap-3">
                         <button onClick={onClose} className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">Cancel</button>
-                        <button onClick={onApply} className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg shadow-sm hover:shadow transition-all">Apply Filters</button>
+                        <button onClick={onApply} className="px-6 py-2 bg-primary-blue hover:bg-blue-700 text-white text-sm font-medium rounded-lg shadow-sm hover:shadow transition-all">Apply Filters</button>
                     </div>
                 </div>
             </div>

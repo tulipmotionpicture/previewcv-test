@@ -104,7 +104,7 @@ const JobCard: React.FC<JobCardProps> = ({ application }) => {
 
               <a
                 href={`/jobs/${application.job_slug || application.job?.slug}`}
-                className="flex items-center gap-1 text-blue-600 dark:text-blue-400 text-[10px] font-bold hover:underline whitespace-nowrap"
+                className="flex items-center gap-1 text-primary-blue dark:text-blue-400 text-[10px] font-bold hover:underline whitespace-nowrap"
               >
                 View Job <ExternalLink size={10} />
               </a>

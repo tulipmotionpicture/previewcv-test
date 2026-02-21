@@ -358,7 +358,7 @@ export default function ApplicationDetailModal({
                   {!showMessageBox && (
                     <button
                       onClick={() => setShowMessageBox(true)}
-                      className="flex items-center gap-2 px-4 py-2 text-sm bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors"
+                      className="flex items-center gap-2 px-4 py-2 text-sm bg-primary-blue hover:bg-blue-700 text-white rounded-lg font-medium transition-colors"
                     >
                       <MessageSquare className="w-4 h-4" />
                       Send Message
@@ -379,7 +379,7 @@ export default function ApplicationDetailModal({
                       <button
                         onClick={handleSendMessage}
                         disabled={sendingMessage || !message.trim()}
-                        className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="flex items-center gap-2 px-4 py-2 bg-primary-blue hover:bg-blue-700 text-white rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         {sendingMessage ? (
                           <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />

@@ -34,7 +34,7 @@ const ApplicationSidebarCard: React.FC<ApplicationSidebarCardProps> = ({
         switch (application.status) {
             case "applied":
                 return (
-                    <div className={`${baseClasses} bg-blue-50 text-blue-600 border-blue-100 dark:bg-blue-900/20 dark:border-blue-800 dark:text-blue-300`}>
+                    <div className={`${baseClasses} bg-blue-50 text-primary-blue border-blue-100 dark:bg-blue-900/20 dark:border-blue-800 dark:text-blue-300`}>
                         <Clock size={10} /> Applied
                     </div>
                 );

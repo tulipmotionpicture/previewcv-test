@@ -29,7 +29,7 @@ if (typeof window !== 'undefined') {
       try {
         // Primary: Use local worker file
         pdfjs.pdfjs.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.js';
-        
+
         // Test if worker loads, if not, try CDN fallbacks
         const testWorker = new Worker('/pdf.worker.min.js');
         testWorker.terminate();
@@ -41,7 +41,7 @@ if (typeof window !== 'undefined') {
           `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.pdfjs.version}/pdf.worker.min.js`,
           `https://cdn.jsdelivr.net/npm/pdfjs-dist@${pdfjs.pdfjs.version}/build/pdf.worker.min.mjs`
         ];
-        
+
         let workerIndex = 0;
         const tryNextWorker = () => {
           if (workerIndex < workerSources.length) {
@@ -49,11 +49,11 @@ if (typeof window !== 'undefined') {
             workerIndex++;
           }
         };
-        
+
         tryNextWorker();
       }
     };
-    
+
     setupWorker();
   }).catch((error) => {
     console.warn('Failed to load react-pdf:', error);
@@ -116,14 +116,14 @@ export default function PDFViewer({
           setShowExpirationWarning(false);
           return 0;
         }
-        
+
         const newTime = prev - 1;
-        
+
         // Show warning when 1 minutes (60 seconds) or less remaining
         if (newTime <= 60 && !showExpirationWarning) {
           setShowExpirationWarning(true);
         }
-        
+
         return newTime;
       });
     }, 1000);
@@ -140,7 +140,7 @@ export default function PDFViewer({
   const onDocumentLoadError = (error: Error) => {
     setLoading(false);
     console.error('PDF load error:', error);
-    
+
     // Check if it's a worker-related error
     if (error.message.includes('worker') || error.message.includes('fetch')) {
       setError('PDF worker failed to load. Please refresh the page or try opening the PDF directly.');
@@ -178,7 +178,7 @@ export default function PDFViewer({
       onReloadRequired?.();
       return;
     }
-    
+
     const link = document.createElement('a');
     link.href = pdfUrl;
     link.download = `${resumeName}.pdf`;
@@ -190,11 +190,11 @@ export default function PDFViewer({
 
   const formatTimeRemaining = (seconds: number): string => {
     if (seconds <= 0) return 'Expired';
-    
+
     const hours = Math.floor(seconds / 3600);
     const minutes = Math.floor((seconds % 3600) / 60);
     const secs = seconds % 60;
-    
+
     if (hours > 0) {
       return `${hours}h ${minutes}m`;
     } else if (minutes > 0) {
@@ -257,7 +257,7 @@ export default function PDFViewer({
             </div>
           </div>
         </div>
-        
+
         <div className="flex items-center space-x-2">
           {/* PDF Controls */}
           {numPages && (
@@ -285,11 +285,11 @@ export default function PDFViewer({
                   >
                     ▶
                   </button>
-                  
+
                   <div className="mx-2 h-4 w-px bg-gray-300"></div>
                 </>
               )}
-              
+
               <button
                 type="button"
                 onClick={toggleViewMode}
@@ -298,9 +298,9 @@ export default function PDFViewer({
               >
                 {showAllPages ? '📄' : '📋'}
               </button>
-              
+
               <div className="mx-2 h-4 w-px bg-gray-300"></div>
-              
+
               <button
                 type="button"
                 onClick={zoomOut}
@@ -330,36 +330,34 @@ export default function PDFViewer({
               </button>
             </div>
           )}
-          
+
           {/* Expiration Timer and Download Button */}
           <div className="flex items-center space-x-2">
             {timeUntilExpiry !== null && (
-              <div className={`flex items-center space-x-1 text-xs px-2 py-1 rounded-md ${
-                isExpired 
-                  ? 'bg-red-50 text-red-600 border border-red-200' 
-                  : timeUntilExpiry <= 300 
-                    ? 'bg-amber-50 text-amber-600 border border-amber-200' 
+              <div className={`flex items-center space-x-1 text-xs px-2 py-1 rounded-md ${isExpired
+                  ? 'bg-red-50 text-red-600 border border-red-200'
+                  : timeUntilExpiry <= 300
+                    ? 'bg-amber-50 text-amber-600 border border-amber-200'
                     : 'bg-gray-50 text-gray-500 border border-gray-200'
-              }`}>
+                }`}>
                 <span>{isExpired ? '🔒' : '⏰'}</span>
                 <span className="font-medium">
-                  {isExpired 
-                    ? 'Expired' 
+                  {isExpired
+                    ? 'Expired'
                     : formatTimeRemaining(timeUntilExpiry)
                   }
                 </span>
               </div>
             )}
-            
+
             <button
               type="button"
               onClick={handleDownloadClick}
               title={isExpired ? "Reload page to download" : "Download PDF"}
-              className={`p-2 rounded-lg transition-colors ${
-                isExpired 
-                  ? 'text-red-500 hover:text-red-700 hover:bg-red-50 border border-red-200' 
+              className={`p-2 rounded-lg transition-colors ${isExpired
+                  ? 'text-red-500 hover:text-red-700 hover:bg-red-50 border border-red-200'
                   : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'
-              }`}
+                }`}
             >
               {isExpired ? '↻' : '⤓'}
             </button>
@@ -387,11 +385,11 @@ export default function PDFViewer({
                 <div className="w-20 h-20 mx-auto mb-6 bg-red-500 rounded-2xl flex items-center justify-center shadow-lg">
                   <span className="text-2xl text-white">🔒</span>
                 </div>
-                
+
                 <h3 className="text-xl font-semibold text-gray-900 mb-4">
                   PDF Link Expired
                 </h3>
-                
+
                 <p className="text-gray-600 mb-6 text-sm leading-relaxed">
                   The PDF link has expired for security reasons. Please reload the page to generate a new link.
                 </p>
@@ -399,7 +397,7 @@ export default function PDFViewer({
                 <button
                   type="button"
                   onClick={handleReloadClick}
-                  className="w-full bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-colors flex items-center justify-center space-x-2"
+                  className="w-full bg-primary-blue hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-colors flex items-center justify-center space-x-2"
                 >
                   <span>↻</span>
                   <span>Reload Page</span>
@@ -424,7 +422,7 @@ export default function PDFViewer({
                         <button
                           type="button"
                           onClick={handleViewDirectly}
-                          className="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg"
+                          className="w-full bg-primary-blue hover:bg-blue-700 text-white px-4 py-2 rounded-lg"
                         >
                           Open PDF Directly
                         </button>
@@ -484,7 +482,7 @@ export default function PDFViewer({
                 PDF Link Expiring Soon
               </h4>
               <p className="text-amber-700 text-sm mt-1">
-                This PDF link will expire in {formatTimeRemaining(timeUntilExpiry!)}. 
+                This PDF link will expire in {formatTimeRemaining(timeUntilExpiry!)}.
                 Download now or reload the page to get a fresh link.
               </p>
               <div className="mt-3 flex space-x-2">

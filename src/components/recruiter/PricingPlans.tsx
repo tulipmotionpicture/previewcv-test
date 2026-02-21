@@ -123,7 +123,7 @@ export default function PricingPlans() {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-2 border-gray-200 dark:border-gray-700 border-t-blue-600 mx-auto mb-4"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-2 border-gray-200 dark:border-gray-700 border-t-primary-blue mx-auto mb-4"></div>
           <p className="text-sm text-gray-500 dark:text-gray-400">
             Loading pricing plans...
           </p>
@@ -138,8 +138,8 @@ export default function PricingPlans() {
       <div className="flex items-center justify-center gap-3">
         <span
           className={`text-sm font-medium ${currency === "usd"
-              ? "text-gray-900 dark:text-white"
-              : "text-gray-500 dark:text-gray-400"
+            ? "text-gray-900 dark:text-white"
+            : "text-gray-500 dark:text-gray-400"
             }`}
         >
           USD
@@ -149,14 +149,14 @@ export default function PricingPlans() {
           className="relative w-14 h-7 bg-gray-200 dark:bg-gray-700 rounded-full transition-colors"
         >
           <div
-            className={`absolute top-0.5 left-0.5 w-6 h-6 bg-blue-600 rounded-full transition-transform ${currency === "inr" ? "translate-x-7" : ""
+            className={`absolute top-0.5 left-0.5 w-6 h-6 bg-primary-blue rounded-full transition-transform ${currency === "inr" ? "translate-x-7" : ""
               }`}
           />
         </button>
         <span
           className={`text-sm font-medium ${currency === "inr"
-              ? "text-gray-900 dark:text-white"
-              : "text-gray-500 dark:text-gray-400"
+            ? "text-gray-900 dark:text-white"
+            : "text-gray-500 dark:text-gray-400"
             }`}
         >
           INR
@@ -182,10 +182,10 @@ export default function PricingPlans() {
               <div
                 key={plan.id}
                 className={`relative bg-white dark:bg-gray-800 rounded-xl border-2 p-6 ${isCurrentPlan
-                    ? "border-green-500 shadow-lg"
-                    : index === 1
-                      ? "border-blue-600 shadow-lg"
-                      : "border-gray-200 dark:border-gray-700"
+                  ? "border-green-500 shadow-lg"
+                  : index === 1
+                    ? "border-primary-blue shadow-lg"
+                    : "border-gray-200 dark:border-gray-700"
                   }`}
               >
                 {isCurrentPlan && (
@@ -198,7 +198,7 @@ export default function PricingPlans() {
                 )}
                 {!isCurrentPlan && index === 1 && (
                   <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                    <span className="inline-flex items-center gap-1 px-3 py-1 bg-blue-600 text-white text-xs font-semibold rounded-full">
+                    <span className="inline-flex items-center gap-1 px-3 py-1 bg-primary-blue text-white text-xs font-semibold rounded-full">
                       <Crown className="w-3 h-3" />
                       Most Popular
                     </span>
@@ -238,10 +238,10 @@ export default function PricingPlans() {
                   onClick={() => handleJobPlanSubscribe(plan.id)}
                   disabled={subscribing || isCurrentPlan}
                   className={`w-full py-2.5 rounded-lg font-semibold transition-colors ${subscribing || isCurrentPlan
-                      ? "bg-gray-300 dark:bg-gray-600 text-gray-500 cursor-not-allowed"
-                      : index === 1
-                        ? "bg-blue-600 hover:bg-blue-700 text-white"
-                        : "bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-900 dark:text-white"
+                    ? "bg-gray-300 dark:bg-gray-600 text-gray-500 cursor-not-allowed"
+                    : index === 1
+                      ? "bg-primary-blue hover:bg-blue-700 text-white"
+                      : "bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-900 dark:text-white"
                     }`}
                 >
                   {subscribing
@@ -275,10 +275,10 @@ export default function PricingPlans() {
               <div
                 key={plan.id}
                 className={`relative bg-white dark:bg-gray-800 rounded-xl border-2 p-6 ${isCurrentPlan
-                    ? "border-green-500 shadow-lg"
-                    : index === 1
-                      ? "border-purple-600 shadow-lg"
-                      : "border-gray-200 dark:border-gray-700"
+                  ? "border-green-500 shadow-lg"
+                  : index === 1
+                    ? "border-purple-600 shadow-lg"
+                    : "border-gray-200 dark:border-gray-700"
                   }`}
               >
                 {isCurrentPlan && (
@@ -336,10 +336,10 @@ export default function PricingPlans() {
                   onClick={() => handleCvPlanPurchase(plan.id)}
                   disabled={subscribing || isCurrentPlan}
                   className={`w-full py-2.5 rounded-lg font-semibold transition-colors ${subscribing || isCurrentPlan
-                      ? "bg-gray-300 dark:bg-gray-600 text-gray-500 cursor-not-allowed"
-                      : index === 1
-                        ? "bg-purple-600 hover:bg-purple-700 text-white"
-                        : "bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-900 dark:text-white"
+                    ? "bg-gray-300 dark:bg-gray-600 text-gray-500 cursor-not-allowed"
+                    : index === 1
+                      ? "bg-purple-600 hover:bg-purple-700 text-white"
+                      : "bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-900 dark:text-white"
                     }`}
                 >
                   {subscribing

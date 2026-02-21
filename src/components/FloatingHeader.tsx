@@ -163,7 +163,7 @@ export default function FloatingHeader({
                             if (item.dropdown) {
                                 return (
                                     <div key={item.label} className="relative group">
-                                        <button className="flex items-center gap-1 text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors py-2">
+                                        <button className="flex items-center gap-1 text-sm font-medium text-gray-700 hover:text-primary-blue transition-colors py-2">
                                             {item.label}
                                             <ChevronDown size={14} />
                                         </button>
@@ -172,7 +172,7 @@ export default function FloatingHeader({
                                                 <Link
                                                     key={subItem.href}
                                                     href={subItem.href}
-                                                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-blue-600"
+                                                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-primary-blue"
                                                 >
                                                     {subItem.label}
                                                 </Link>
@@ -185,7 +185,7 @@ export default function FloatingHeader({
                                 <Link
                                     key={item.href}
                                     href={item.href}
-                                    className="text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors whitespace-nowrap"
+                                    className="text-sm font-medium text-gray-700 hover:text-primary-blue transition-colors whitespace-nowrap"
                                 >
                                     {item.label}
                                 </Link>
@@ -268,7 +268,7 @@ export default function FloatingHeader({
                                         {cta && (
                                             <Link
                                                 href={cta.href}
-                                                className="px-5 py-2 bg-blue-600 text-white text-sm font-bold rounded-lg transition-all hover:bg-blue-700 shadow-md shadow-blue-600/20 hover:shadow-blue-600/30 whitespace-nowrap"
+                                                className="px-5 py-2 bg-primary-blue text-white text-sm font-bold rounded-lg transition-all hover:bg-blue-700 shadow-md shadow-primary-blue/20 hover:shadow-primary-blue/30 whitespace-nowrap"
                                             >
                                                 {cta.label}
                                             </Link>
@@ -327,7 +327,7 @@ export default function FloatingHeader({
                                         <div key={item.label}>
                                             <button
                                                 onClick={() => setIsServicesOpen(!isServicesOpen)}
-                                                className="flex w-full items-center justify-between px-4 py-3 text-base font-medium text-gray-700 hover:bg-gray-50 hover:text-blue-600 rounded-xl transition-colors"
+                                                className="flex w-full items-center justify-between px-4 py-3 text-base font-medium text-gray-700 hover:bg-gray-50 hover:text-primary-blue rounded-xl transition-colors"
                                             >
                                                 {item.label}
                                                 <ChevronDown size={16} className={`transition-transform ${isServicesOpen ? 'rotate-180' : ''}`} />
@@ -339,7 +339,7 @@ export default function FloatingHeader({
                                                             key={subItem.href}
                                                             href={subItem.href}
                                                             onClick={() => setIsMobileMenuOpen(false)}
-                                                            className="block py-2 text-sm text-gray-600 hover:text-blue-600"
+                                                            className="block py-2 text-sm text-gray-600 hover:text-primary-blue"
                                                         >
                                                             {subItem.label}
                                                         </Link>
@@ -354,7 +354,7 @@ export default function FloatingHeader({
                                         key={item.href}
                                         href={item.href}
                                         onClick={() => setIsMobileMenuOpen(false)}
-                                        className="px-4 py-3 text-base font-medium text-gray-700 hover:bg-gray-50 hover:text-blue-600 rounded-xl transition-colors"
+                                        className="px-4 py-3 text-base font-medium text-gray-700 hover:bg-gray-50 hover:text-primary-blue rounded-xl transition-colors"
                                     >
                                         {item.label}
                                     </Link>
@@ -366,7 +366,7 @@ export default function FloatingHeader({
                                     key={link.href}
                                     href={link.href}
                                     onClick={() => setIsMobileMenuOpen(false)}
-                                    className="px-4 py-3 text-base font-medium text-gray-700 hover:bg-gray-50 hover:text-blue-600 rounded-xl transition-colors"
+                                    className="px-4 py-3 text-base font-medium text-gray-700 hover:bg-gray-50 hover:text-primary-blue rounded-xl transition-colors"
                                 >
                                     {link.label}
                                 </Link>
@@ -400,7 +400,7 @@ export default function FloatingHeader({
                                     <Link
                                         href={cta.href}
                                         onClick={() => setIsMobileMenuOpen(false)}
-                                        className="w-full text-center py-3 bg-blue-600 text-white text-sm font-bold rounded-xl shadow-lg shadow-blue-600/20"
+                                        className="w-full text-center py-3 bg-primary-blue text-white text-sm font-bold rounded-xl shadow-lg shadow-primary-blue/20"
                                     >
                                         {cta.label}
                                     </Link>

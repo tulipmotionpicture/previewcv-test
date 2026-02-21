@@ -15,9 +15,8 @@ export default function Input({ label, error, helperText, className = '', ...pro
                 </label>
             )}
             <input
-                className={`w-full px-6 py-4 bg-gray-50 border ${
-                    error ? 'border-red-300 focus:ring-red-600' : 'border-gray-100 focus:ring-blue-600'
-                } rounded-2xl focus:ring-2 outline-none hover:bg-gray-100 transition-all font-medium text-gray-900 placeholder-gray-300 ${className}`}
+                className={`w-full px-6 py-4 bg-gray-50 border ${error ? 'border-red-300 focus:ring-red-600' : 'border-gray-100 focus:ring-primary-blue'
+                    } rounded-2xl focus:ring-2 outline-none hover:bg-gray-100 transition-all font-medium text-gray-900 placeholder-gray-300 ${className}`}
                 {...props}
             />
             {error && (

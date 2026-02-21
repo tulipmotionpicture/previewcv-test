@@ -8,9 +8,9 @@ interface LoadingSpinnerProps {
   className?: string;
 }
 
-export default function LoadingSpinner({ 
-  size = 'medium', 
-  className = '' 
+export default function LoadingSpinner({
+  size = 'medium',
+  className = ''
 }: LoadingSpinnerProps) {
   const sizeClasses = {
     small: 'w-4 h-4',
@@ -21,7 +21,7 @@ export default function LoadingSpinner({
   return (
     <div className={`flex items-center justify-center ${className}`}>
       <div
-        className={`${sizeClasses[size]} border-4 border-gray-200 border-t-blue-600 rounded-full animate-spin`}
+        className={`${sizeClasses[size]} border-4 border-gray-200 border-t-primary-blue rounded-full animate-spin`}
         role="status"
         aria-label="Loading"
       >

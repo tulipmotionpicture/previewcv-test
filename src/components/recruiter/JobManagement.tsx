@@ -172,7 +172,7 @@ export default function JobManagement({
         <div></div>
         <button
           onClick={() => handleTabChange("create")}
-          className="flex items-center gap-2 px-3.5 py-2.5 bg-[#0077FF] hover:bg-[#006bd6] text-white text-sm rounded-lg font-medium transition-colors shadow-sm"
+          className="flex items-center gap-2 px-3.5 py-2.5 bg-primary-blue hover:bg-primary-blue-hover text-white text-sm rounded-lg font-medium transition-colors shadow-sm"
         >
           <Plus className="w-4 h-4" />
           Create New Job

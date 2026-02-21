@@ -334,7 +334,7 @@ export default function RecruiterProfileEdit() {
                   <Button
                     type="submit"
                     loading={isSaving}
-                    className="bg-[#007BFF] hover:bg-blue-600 text-white px-6 py-2 rounded-lg text-sm font-medium shadow-sm transition-colors"
+                    className="bg-[#007BFF] hover:bg-primary-blue text-white px-6 py-2 rounded-lg text-sm font-medium shadow-sm transition-colors"
                   >
                     Save Changes
                   </Button>
@@ -417,7 +417,7 @@ export default function RecruiterProfileEdit() {
                   <Button
                     type="submit"
                     loading={passwordLoading}
-                    className="bg-[#007BFF] hover:bg-blue-600 text-white px-6 py-2 rounded-lg text-sm font-medium shadow-sm transition-colors"
+                    className="bg-[#007BFF] hover:bg-primary-blue text-white px-6 py-2 rounded-lg text-sm font-medium shadow-sm transition-colors"
                   >
                     Save Changes
                   </Button>
