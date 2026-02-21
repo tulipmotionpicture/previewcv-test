@@ -531,7 +531,7 @@ export default function RecruiterDashboard() {
                           setActiveTab("jobs");
                           setJobManagementView("create");
                         }}
-                        className="flex items-center gap-2 px-4 py-2.5 bg-[#0077FF] hover:bg-blue-700 text-white rounded-lg font-medium transition-colors shadow-sm text-sm"
+                        className="flex items-center gap-2 px-4 py-2.5 bg-primary-blue hover:bg-primary-blue-hover text-white rounded-lg font-medium transition-colors shadow-sm text-sm"
                       >
                         <Plus className="w-4 h-4" />
                         Create New Job
@@ -622,7 +622,7 @@ export default function RecruiterDashboard() {
                 </p>
                 <button
                   onClick={() => setActiveTab("kyc")}
-                  className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition"
+                  className="px-6 py-2 bg-primary-blue hover:bg-blue-700 text-white rounded-lg font-medium transition"
                 >
                   Go to KYC Verification
                 </button>

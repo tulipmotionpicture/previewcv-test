@@ -112,7 +112,7 @@ const MatchAnalysis: React.FC<MatchAnalysisProps> = ({ job, onClose }) => {
       amber: "bg-amber-500",
     };
     const textStyles = {
-      blue: "text-blue-600 dark:text-blue-400",
+      blue: "text-primary-blue dark:text-blue-400",
       emerald: "text-emerald-600 dark:text-emerald-400",
       purple: "text-purple-600 dark:text-purple-400",
       amber: "text-amber-600 dark:text-amber-400",
@@ -264,7 +264,7 @@ const MatchAnalysis: React.FC<MatchAnalysisProps> = ({ job, onClose }) => {
           {onClose && (
             <button
               onClick={onClose}
-              className="w-full py-2.5 bg-slate-900 dark:bg-blue-600 text-white rounded-lg font-bold text-xs hover:bg-slate-800 dark:hover:bg-blue-500 transition-all flex items-center justify-center gap-2 group"
+              className="w-full py-2.5 bg-slate-900 dark:bg-primary-blue text-white rounded-lg font-bold text-xs hover:bg-slate-800 dark:hover:bg-blue-500 transition-all flex items-center justify-center gap-2 group"
             >
               Apply Now{" "}
               <ChevronRight
@@ -285,7 +285,7 @@ const MatchAnalysis: React.FC<MatchAnalysisProps> = ({ job, onClose }) => {
       {/* Toggle Button */}
       <button
         onClick={() => setIsExpanded(!isExpanded)}
-        className="w-full py-2 flex items-center justify-center gap-1 text-[11px] font-bold text-blue-600 hover:text-blue-700 dark:text-blue-400 hover:bg-slate-50 dark:hover:bg-gray-800 transition-colors border-t border-slate-100 dark:border-gray-800"
+        className="w-full py-2 flex items-center justify-center gap-1 text-[11px] font-bold text-primary-blue hover:text-blue-700 dark:text-blue-400 hover:bg-slate-50 dark:hover:bg-gray-800 transition-colors border-t border-slate-100 dark:border-gray-800"
       >
         {isExpanded ? (
           <>Show Less <ChevronUp size={12} /></>

@@ -149,7 +149,7 @@ export default function Header({
                         <Link
                           key={subItem.href}
                           href={subItem.href}
-                          className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50 hover:text-blue-600 dark:hover:text-blue-400"
+                          className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50 hover:text-primary-blue dark:hover:text-blue-400"
                         >
                           {subItem.label}
                         </Link>
@@ -163,7 +163,7 @@ export default function Header({
                   key={item.href}
                   href={item.href}
                   className={`text-sm font-semibold transition-colors ${pathname === item.href
-                    ? "text-blue-600 dark:text-blue-400"
+                    ? "text-primary-blue dark:text-blue-400"
                     : "text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
                     }`}
                 >
@@ -218,7 +218,7 @@ export default function Header({
                       <div className="py-1">
                         <Link
                           href={dashboardLink}
-                          className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50 hover:text-blue-600 dark:hover:text-blue-400"
+                          className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50 hover:text-primary-blue dark:hover:text-blue-400"
                           onClick={() => setIsProfileOpen(false)}
                         >
                           <LayoutDashboard size={16} />
@@ -331,7 +331,7 @@ export default function Header({
                 key={item.href}
                 href={item.href}
                 onClick={() => setIsMobileMenuOpen(false)}
-                className="text-base font-semibold text-gray-700 dark:text-gray-300 hover:text-blue-600 py-2"
+                className="text-base font-semibold text-gray-700 dark:text-gray-300 hover:text-primary-blue py-2"
               >
                 {item.label}
               </Link>
@@ -388,7 +388,7 @@ export default function Header({
                     <Link
                       href={cta.href}
                       onClick={() => setIsMobileMenuOpen(false)}
-                      className="w-full text-center px-6 py-3 bg-blue-600 text-white font-bold rounded-full"
+                      className="w-full text-center px-6 py-3 bg-primary-blue text-white font-bold rounded-full"
                     >
                       {cta.label}
                     </Link>

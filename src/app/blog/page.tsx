@@ -155,7 +155,7 @@ function BlogListingContent() {
             </div>
             <button
               type="submit"
-              className="px-6 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors"
+              className="px-6 py-3 bg-primary-blue text-white rounded-lg font-medium hover:bg-blue-700 transition-colors"
             >
               Search
             </button>
@@ -170,7 +170,7 @@ function BlogListingContent() {
             <button
               onClick={() => handleCategoryChange(null)}
               className={`px-4 py-2 rounded-lg font-medium whitespace-nowrap transition-colors ${!selectedCategory
-                ? "bg-blue-600 text-white"
+                ? "bg-primary-blue text-white"
                 : "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700"
                 }`}
             >
@@ -183,7 +183,7 @@ function BlogListingContent() {
                   key={category.id}
                   onClick={() => handleCategoryChange(category.slug)}
                   className={`px-4 py-2 rounded-lg font-medium whitespace-nowrap transition-colors ${selectedCategory === category.slug
-                    ? "bg-blue-600 text-white"
+                    ? "bg-primary-blue text-white"
                     : "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700"
                     }`}
                 >
@@ -199,7 +199,7 @@ function BlogListingContent() {
         <div className="max-w-7xl mx-auto px-4">
           {loading || isSearching ? (
             <div className="flex items-center justify-center py-20">
-              <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+              <Loader2 className="w-8 h-8 animate-spin text-primary-blue" />
             </div>
           ) : posts.length === 0 ? (
             <div className="text-center py-20">
@@ -236,7 +236,7 @@ function BlogListingContent() {
                       )}
                       {/* Category Badge */}
                       <div className="absolute top-3 left-3">
-                        <span className="px-3 py-1 text-xs font-semibold text-white bg-blue-600 rounded-full">
+                        <span className="px-3 py-1 text-xs font-semibold text-white bg-primary-blue rounded-full">
                           {post.category.name}
                         </span>
                       </div>
@@ -244,7 +244,7 @@ function BlogListingContent() {
 
                     {/* Content */}
                     <div className="p-6">
-                      <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-3 line-clamp-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                      <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-3 line-clamp-2 group-hover:text-primary-blue dark:group-hover:text-blue-400 transition-colors">
                         {post.title}
                       </h3>
                       <p className="text-sm text-gray-600 dark:text-gray-400 mb-4 line-clamp-3">
@@ -300,7 +300,7 @@ function BlogListingContent() {
                             key={page}
                             onClick={() => handlePageChange(page)}
                             className={`px-4 py-2 rounded-lg font-medium transition-colors ${currentPage === page
-                              ? "bg-blue-600 text-white"
+                              ? "bg-primary-blue text-white"
                               : "border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800"
                               }`}
                           >
@@ -348,7 +348,7 @@ export default function BlogListingPage() {
         <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
           <FloatingHeader />
           <div className="flex items-center justify-center min-h-[60vh]">
-            <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+            <Loader2 className="w-8 h-8 animate-spin text-primary-blue" />
           </div>
         </div>
       }

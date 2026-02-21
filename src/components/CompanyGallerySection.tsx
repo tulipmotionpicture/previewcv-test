@@ -224,7 +224,7 @@ function CompanyGallerySection({
       {/* Public Profile Link Card */}
       <div className="bg-[#F8F9FC] dark:bg-[#282727] rounded-xl p-4 mb-8 flex flex-col md:flex-row items-center justify-between gap-4 border border-blue-50 dark:border-gray-700">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400">
+          <div className="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-primary-blue dark:text-blue-400">
             <Globe className="w-5 h-5" />
           </div>
           <div>
@@ -254,7 +254,7 @@ function CompanyGallerySection({
               <Copy className="w-3.5 h-3.5" />
             </button>
           </div>
-          <button className="text-blue-600 hover:text-blue-700">
+          <button className="text-primary-blue hover:text-blue-700">
             <Share2 className="w-5 h-5" />
           </button>
         </div>

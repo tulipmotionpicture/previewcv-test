@@ -82,7 +82,7 @@ const ApplicationDetailView: React.FC<ApplicationDetailViewProps> = ({
             <div className="flex justify-between items-start mb-5 pb-5 border-b border-gray-100 dark:border-gray-800">
                 <div className="flex-1 pr-6">
                     <div className="flex items-center gap-3 mb-3">
-                        <span className="px-2.5 py-1 rounded-md bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 text-[11px] font-bold uppercase tracking-wider">
+                        <span className="px-2.5 py-1 rounded-md bg-blue-50 dark:bg-blue-900/20 text-primary-blue dark:text-blue-400 text-[11px] font-bold uppercase tracking-wider">
                             {(application.job_type || application.job?.job_type || "Full Time").replace(/_/g, " ")}
                         </span>
                         {application.location && (
@@ -102,7 +102,7 @@ const ApplicationDetailView: React.FC<ApplicationDetailViewProps> = ({
                             {application.company_name || application.job?.company_name}
                         </span>
                         {application.job_id && (
-                            <Link href={`/jobs/${application.job_slug || application.job?.slug}`} className="text-xs font-bold text-blue-600 hover:text-blue-700 flex items-center gap-1 ml-2">
+                            <Link href={`/jobs/${application.job_slug || application.job?.slug}`} className="text-xs font-bold text-primary-blue hover:text-blue-700 flex items-center gap-1 ml-2">
                                 View Job <ExternalLink size={10} />
                             </Link>
                         )}
@@ -182,7 +182,7 @@ const ApplicationDetailView: React.FC<ApplicationDetailViewProps> = ({
                 {/* Activity Stats - Clean Card */}
                 <div className="p-4 border border-gray-100 dark:border-gray-800 rounded-xl bg-white dark:bg-gray-900 hover:shadow-sm transition-shadow">
                     <div className="flex items-center gap-3 mb-6">
-                        <div className="h-8 w-8 rounded-full bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center text-blue-600">
+                        <div className="h-8 w-8 rounded-full bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center text-primary-blue">
                             <Users size={16} />
                         </div>
                         <h3 className="text-sm font-bold text-gray-900 dark:text-white">Activity Stats</h3>
@@ -300,7 +300,7 @@ const ApplicationDetailView: React.FC<ApplicationDetailViewProps> = ({
                         <p className="text-xs text-gray-500 dark:text-gray-400">Other roles matching your profile</p>
                     </div>
                     {similarJobs.length > 0 && (
-                        <Link href="/jobs" className="text-xs font-bold text-blue-600 hover:text-blue-700 dark:hover:text-blue-400 flex items-center gap-1 transition-colors px-3 py-1.5 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                        <Link href="/jobs" className="text-xs font-bold text-primary-blue hover:text-blue-700 dark:hover:text-blue-400 flex items-center gap-1 transition-colors px-3 py-1.5 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
                             All Jobs <ChevronRight size={14} />
                         </Link>
                     )}
@@ -315,7 +315,7 @@ const ApplicationDetailView: React.FC<ApplicationDetailViewProps> = ({
                         <div className="col-span-2 py-8 bg-gray-50 dark:bg-gray-800/30 border border-dashed border-gray-200 dark:border-gray-800 rounded-xl flex flex-col items-center justify-center text-center">
                             <Briefcase className="w-8 h-8 text-gray-300 dark:text-gray-600 mb-2" />
                             <p className="text-sm font-medium text-gray-900 dark:text-gray-100">No similar jobs found</p>
-                            <Link href="/jobs" className="mt-3 text-xs font-bold text-blue-600 hover:underline">
+                            <Link href="/jobs" className="mt-3 text-xs font-bold text-primary-blue hover:underline">
                                 Browse all jobs
                             </Link>
                         </div>

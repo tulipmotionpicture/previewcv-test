@@ -127,7 +127,7 @@ export default function SEOJobsList({
               // Implement pagination logic
               window.scrollTo({ top: 0, behavior: "smooth" });
             }}
-            className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl transition-colors"
+            className="px-6 py-3 bg-primary-blue hover:bg-blue-700 text-white font-semibold rounded-xl transition-colors"
           >
             Load More Jobs
           </button>

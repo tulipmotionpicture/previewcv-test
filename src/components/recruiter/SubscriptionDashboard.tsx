@@ -38,8 +38,8 @@ interface EmptyStateProps {
 const colorMap = {
   blue: {
     bg: "bg-blue-100 dark:bg-blue-900/30",
-    text: "text-blue-600 dark:text-blue-400",
-    button: "bg-blue-600 hover:bg-blue-700",
+    text: "text-primary-blue dark:text-blue-400",
+    button: "bg-primary-blue hover:bg-blue-700",
   },
   purple: {
     bg: "bg-purple-100 dark:bg-purple-900/30",
@@ -206,7 +206,7 @@ export default function SubscriptionDashboard({
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-2 border-gray-200 dark:border-gray-700 border-t-blue-600 mx-auto mb-4"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-2 border-gray-200 dark:border-gray-700 border-t-primary-blue mx-auto mb-4"></div>
           <p className="text-sm text-gray-500 dark:text-gray-400">
             Loading subscriptions...
           </p>
@@ -231,21 +231,19 @@ export default function SubscriptionDashboard({
       <div className="flex gap-2 border-b border-gray-200 dark:border-gray-700">
         <button
           onClick={() => setActiveTab("overview")}
-          className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
-            activeTab === "overview"
-              ? "border-blue-600 text-blue-600"
+          className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${activeTab === "overview"
+              ? "border-primary-blue text-primary-blue"
               : "border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
-          }`}
+            }`}
         >
           Overview
         </button>
         <button
           onClick={() => setActiveTab("history")}
-          className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
-            activeTab === "history"
-              ? "border-blue-600 text-blue-600"
+          className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${activeTab === "history"
+              ? "border-primary-blue text-primary-blue"
               : "border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
-          }`}
+            }`}
         >
           History
         </button>
@@ -258,7 +256,7 @@ export default function SubscriptionDashboard({
             <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4">
               <div className="flex items-center gap-3 mb-2">
                 <div className="p-2 bg-blue-50 dark:bg-blue-900/30 rounded-lg">
-                  <Zap className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                  <Zap className="w-5 h-5 text-primary-blue dark:text-blue-400" />
                 </div>
                 <div>
                   <p className="text-2xl font-bold text-gray-900 dark:text-white">
@@ -306,15 +304,14 @@ export default function SubscriptionDashboard({
             <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4">
               <div className="flex items-center gap-3 mb-2">
                 <div
-                  className={`p-2 rounded-lg ${
-                    dashboard?.has_active_job_subscription ||
-                    dashboard?.has_active_cv_subscription
+                  className={`p-2 rounded-lg ${dashboard?.has_active_job_subscription ||
+                      dashboard?.has_active_cv_subscription
                       ? "bg-green-50 dark:bg-green-900/30"
                       : "bg-red-50 dark:bg-red-900/30"
-                  }`}
+                    }`}
                 >
                   {dashboard?.has_active_job_subscription ||
-                  dashboard?.has_active_cv_subscription ? (
+                    dashboard?.has_active_cv_subscription ? (
                     <CheckCircle className="w-5 h-5 text-green-600 dark:text-green-400" />
                   ) : (
                     <AlertCircle className="w-5 h-5 text-red-600 dark:text-red-400" />
@@ -323,7 +320,7 @@ export default function SubscriptionDashboard({
                 <div>
                   <p className="text-lg font-semibold text-gray-900 dark:text-white capitalize">
                     {dashboard?.has_active_job_subscription ||
-                    dashboard?.has_active_cv_subscription
+                      dashboard?.has_active_cv_subscription
                       ? "Active"
                       : "Inactive"}
                   </p>
@@ -341,7 +338,7 @@ export default function SubscriptionDashboard({
             <div className="p-5 flex items-start justify-between">
               <div className="flex items-center gap-3">
                 <div className="p-2 rounded-lg bg-blue-100 dark:bg-blue-900/30">
-                  <CreditCard className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                  <CreditCard className="w-5 h-5 text-primary-blue dark:text-blue-400" />
                 </div>
                 <div>
                   <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
@@ -374,18 +371,18 @@ export default function SubscriptionDashboard({
 
                     <div className="w-full h-2 bg-gray-100 dark:bg-gray-700 rounded-full">
                       <div
-                        className="h-2 bg-blue-600 rounded-full"
+                        className="h-2 bg-primary-blue rounded-full"
                         style={{
                           width: dashboard.job_subscription.plan_config
                             ?.job_post_limit
                             ? `${Math.min(
-                                (dashboard.job_subscription
-                                  .jobs_posted_this_period /
-                                  dashboard.job_subscription.plan_config
-                                    .job_post_limit) *
-                                  100,
-                                100,
-                              )}%`
+                              (dashboard.job_subscription
+                                .jobs_posted_this_period /
+                                dashboard.job_subscription.plan_config
+                                  .job_post_limit) *
+                              100,
+                              100,
+                            )}%`
                             : "100%",
                         }}
                       />
@@ -416,7 +413,7 @@ export default function SubscriptionDashboard({
                   <div className="flex justify-between items-center pt-2">
                     <button
                       onClick={() => router.push("/recruiter/upgrade")}
-                      className="text-sm font-medium text-blue-600 hover:text-blue-700"
+                      className="text-sm font-medium text-primary-blue hover:text-blue-700"
                     >
                       Change Plan
                     </button>
@@ -509,7 +506,7 @@ export default function SubscriptionDashboard({
                               .credits_used_this_period /
                               dashboard.cv_subscription.plan_config
                                 ?.credits_per_period) *
-                              100,
+                            100,
                             100,
                           )}%`,
                         }}
@@ -523,8 +520,8 @@ export default function SubscriptionDashboard({
                     <span className="font-medium text-gray-900 dark:text-white">
                       {dashboard.cv_subscription.current_period_end
                         ? new Date(
-                            dashboard.cv_subscription.current_period_end,
-                          ).toLocaleDateString()
+                          dashboard.cv_subscription.current_period_end,
+                        ).toLocaleDateString()
                         : "Never"}
                     </span>
                   </p>

@@ -414,7 +414,7 @@ export default function CreateJobModal({
           <button
             type="submit"
             disabled={isSubmitting}
-            className="px-8 py-2.5 bg-[#0077FF] hover:bg-[#006bd6] text-white rounded-lg font-medium shadow-lg shadow-[#0077FF]/30 transition-all transform active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed"
+            className="px-8 py-2.5 bg-primary-blue hover:bg-primary-blue-hover text-white rounded-lg font-medium shadow-lg shadow-primary-blue/30 transition-all transform active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed"
           >
             {isSubmitting ? "Posting..." : "Post Job"}
           </button>

@@ -127,7 +127,7 @@ export default function CandidateProfilePage() {
             <div className="flex items-center gap-4">
               <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
                 <svg
-                  className="w-6 h-6 text-blue-600 dark:text-blue-400"
+                  className="w-6 h-6 text-primary-blue dark:text-blue-400"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -216,8 +216,8 @@ export default function CandidateProfilePage() {
               <button
                 onClick={() => setActiveTab("applications")}
                 className={`flex-1 px-6 py-4 text-sm font-medium transition-colors ${activeTab === "applications"
-                    ? "text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400 bg-blue-50 dark:bg-blue-900/20"
-                    : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100"
+                  ? "text-primary-blue dark:text-blue-400 border-b-2 border-primary-blue dark:border-blue-400 bg-blue-50 dark:bg-blue-900/20"
+                  : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100"
                   }`}
               >
                 My Applications ({applications.length})
@@ -225,8 +225,8 @@ export default function CandidateProfilePage() {
               <button
                 onClick={() => setActiveTab("resumes")}
                 className={`flex-1 px-6 py-4 text-sm font-medium transition-colors ${activeTab === "resumes"
-                    ? "text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400 bg-blue-50 dark:bg-blue-900/20"
-                    : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100"
+                  ? "text-primary-blue dark:text-blue-400 border-b-2 border-primary-blue dark:border-blue-400 bg-blue-50 dark:bg-blue-900/20"
+                  : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100"
                   }`}
               >
                 My Resumes ({totalResumes})
@@ -262,7 +262,7 @@ export default function CandidateProfilePage() {
                     </p>
                     <Link
                       href="/jobs"
-                      className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors"
+                      className="inline-flex items-center gap-2 px-6 py-3 bg-primary-blue hover:bg-blue-700 text-white rounded-lg font-medium transition-colors"
                     >
                       Browse Jobs
                       <svg
@@ -410,7 +410,7 @@ export default function CandidateProfilePage() {
                               <div className="flex items-start gap-3">
                                 <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center flex-shrink-0">
                                   <svg
-                                    className="w-5 h-5 text-blue-600 dark:text-blue-400"
+                                    className="w-5 h-5 text-primary-blue dark:text-blue-400"
                                     fill="currentColor"
                                     viewBox="0 0 20 20"
                                   >

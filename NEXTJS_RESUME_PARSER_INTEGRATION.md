@@ -600,7 +600,7 @@ export default function ResumeUpload() {
       <button
         onClick={handleUpload}
         disabled={!file || !resumeName || uploading}
-        className="w-full py-3 px-6 bg-blue-600 text-white rounded-lg
+        className="w-full py-3 px-6 bg-primary-blue text-white rounded-lg
           hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed
           font-medium transition-colors"
       >
@@ -720,7 +720,7 @@ export default function ResumeParsingProgress({ resumeId }: Props) {
       {/* Loading State */}
       {parsing && (
         <div className="mt-6 p-4 bg-blue-50 rounded-lg flex items-center gap-3">
-          <Loader className="w-5 h-5 text-blue-600 animate-spin" />
+          <Loader className="w-5 h-5 text-primary-blue animate-spin" />
           <span className="text-blue-700">Parsing in progress...</span>
         </div>
       )}
@@ -1074,7 +1074,7 @@ export default function ResumeReview({ resumeId, portfolioId }: Props) {
           <button
             onClick={handleSave}
             disabled={totalSelected === 0 || saving || updating}
-            className="px-6 py-3 bg-blue-600 text-white rounded-lg
+            className="px-6 py-3 bg-primary-blue text-white rounded-lg
               hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed
               font-medium transition-colors"
           >

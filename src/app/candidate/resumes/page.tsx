@@ -219,7 +219,7 @@ function ResumeCard({
       {/* Resume Icon/Preview */}
       <div className="w-full h-48 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl flex items-center justify-center mb-4">
         <svg
-          className="w-20 h-20 text-blue-600"
+          className="w-20 h-20 text-primary-blue"
           fill="none"
           viewBox="0 0 24 24"
           stroke="currentColor"
@@ -245,12 +245,12 @@ function ResumeCard({
       {shareLink && (
         <div className="mb-4 p-4 bg-blue-50 rounded-2xl">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-bold text-blue-600 uppercase">
+            <span className="text-xs font-bold text-primary-blue uppercase">
               Share Link
             </span>
             <button
               onClick={() => setShowQR(!showQR)}
-              className="text-xs text-blue-600 hover:underline"
+              className="text-xs text-primary-blue hover:underline"
             >
               {showQR ? "Hide QR" : "Show QR"}
             </button>
@@ -275,7 +275,7 @@ function ResumeCard({
             />
             <button
               onClick={() => onCopyLink(shareLink.link)}
-              className="px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all"
+              className="px-3 py-2 bg-primary-blue text-white rounded-lg hover:bg-blue-700 transition-all"
             >
               <svg
                 className="w-4 h-4"

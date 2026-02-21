@@ -83,7 +83,7 @@ function EventCard({
                     setCurrentImageIndex(idx);
                   }}
                   className={`w-2 h-2 rounded-full transition-all shadow-sm ${idx === currentImageIndex
-                    ? "bg-blue-600 w-4"
+                    ? "bg-primary-blue w-4"
                     : "bg-white/80 hover:bg-white"
                     }`}
                   aria-label={`Go to slide ${idx + 1}`}
@@ -100,7 +100,7 @@ function EventCard({
 
       {/* Content */}
       <div className="space-y-2">
-        <h3 className="text-sm font-bold text-gray-900 dark:text-gray-100 leading-tight group-hover:text-blue-600 transition-colors line-clamp-1">
+        <h3 className="text-sm font-bold text-gray-900 dark:text-gray-100 leading-tight group-hover:text-primary-blue transition-colors line-clamp-1">
           {event.title}
         </h3>
 

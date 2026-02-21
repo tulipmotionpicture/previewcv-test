@@ -13,6 +13,8 @@
   --font-sans: var(--font-inter);
   --color-mint: #E5F1EF;
   --color-teal-dark: #09474F;
+  --color-primary-blue: #0077FF;
+  --color-primary-blue-hover: #006bd6;
 }
 
 /* Dark mode overrides */

@@ -310,7 +310,7 @@ export default function JobsTable({
                   key={page}
                   onClick={() => onPageChange(page)}
                   className={`min-w-[32px] h-8 px-2 flex items-center justify-center rounded-lg text-sm font-medium transition-colors ${currentPage === page
-                    ? "bg-[#0077FF] text-white shadow-sm"
+                    ? "bg-primary-blue text-white shadow-sm"
                     : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
                     }`}
                 >

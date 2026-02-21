@@ -653,7 +653,7 @@ export default function JobListingPage({
       ) : (
         <div className="text-center py-12">
           <p className="text-gray-500 text-lg">No jobs found matching your criteria.</p>
-          <Link href="/jobs" className="text-blue-600 hover:underline mt-4 inline-block">
+          <Link href="/jobs" className="text-primary-blue hover:underline mt-4 inline-block">
             Browse all jobs
           </Link>
         </div>
@@ -880,7 +880,7 @@ export default function CityCards({ cards, title = 'Jobs by City' }: Props) {
             {card.country && (
               <p className="text-sm text-gray-500">{card.country}</p>
             )}
-            <p className="text-sm text-blue-600 mt-1">{card.count} jobs</p>
+            <p className="text-sm text-primary-blue mt-1">{card.count} jobs</p>
           </Link>
         ))}
       </div>
@@ -1086,19 +1086,19 @@ export default async function HomePage() {
         <section className="py-8 text-center">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             <div className="p-6 bg-white rounded-lg border">
-              <p className="text-3xl font-bold text-blue-600">
+              <p className="text-3xl font-bold text-primary-blue">
                 {summary.stats.total_countries}
               </p>
               <p className="text-gray-600">Countries</p>
             </div>
             <div className="p-6 bg-white rounded-lg border">
-              <p className="text-3xl font-bold text-blue-600">
+              <p className="text-3xl font-bold text-primary-blue">
                 {summary.stats.total_cities}
               </p>
               <p className="text-gray-600">Cities</p>
             </div>
             <div className="p-6 bg-white rounded-lg border">
-              <p className="text-3xl font-bold text-blue-600">
+              <p className="text-3xl font-bold text-primary-blue">
                 {summary.stats.total_industries}
               </p>
               <p className="text-gray-600">Industries</p>
@@ -1381,7 +1381,7 @@ export default async function BrowseLocationsPage() {
             >
               <p className="font-medium">{city.city}</p>
               <p className="text-sm text-gray-500">{city.country}</p>
-              <p className="text-sm text-blue-600">{city.count} jobs</p>
+              <p className="text-sm text-primary-blue">{city.count} jobs</p>
             </Link>
           ))}
         </div>
@@ -1534,7 +1534,7 @@ export default function FilterChips() {
               flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium
               flex-shrink-0 transition-colors
               ${isActive
-                ? 'bg-blue-600 text-white'
+                ? 'bg-primary-blue text-white'
                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               }
             `}
@@ -1585,7 +1585,7 @@ export default function Error({
         <div className="flex gap-4 justify-center">
           <button
             onClick={reset}
-            className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+            className="px-6 py-3 bg-primary-blue text-white rounded-lg hover:bg-blue-700 transition"
           >
             Try again
           </button>
@@ -1622,7 +1622,7 @@ export default function NotFound() {
         <div className="flex gap-4 justify-center">
           <Link
             href="/jobs"
-            className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+            className="px-6 py-3 bg-primary-blue text-white rounded-lg hover:bg-blue-700 transition"
           >
             Browse all jobs
           </Link>

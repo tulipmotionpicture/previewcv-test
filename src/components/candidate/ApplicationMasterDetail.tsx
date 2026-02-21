@@ -96,7 +96,7 @@ const ApplicationMasterDetail: React.FC<ApplicationMasterDetailProps> = ({
                                 key={f}
                                 onClick={() => setFilter(f)}
                                 className={`px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors border ${filter === f
-                                    ? "bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 border-blue-200 dark:border-blue-800"
+                                    ? "bg-blue-50 dark:bg-blue-900/20 text-primary-blue dark:text-blue-400 border-blue-200 dark:border-blue-800"
                                     : "bg-white dark:bg-gray-800 text-slate-600 dark:text-gray-400 border-slate-200 dark:border-gray-700 hover:bg-slate-50"
                                     }`}
                             >

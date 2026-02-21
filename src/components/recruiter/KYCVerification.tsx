@@ -255,7 +255,7 @@ export default function KYCVerification() {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-2 border-gray-200 dark:border-gray-700 border-t-blue-600 mx-auto mb-4"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-2 border-gray-200 dark:border-gray-700 border-t-primary-blue mx-auto mb-4"></div>
           <p className="text-sm text-gray-500 dark:text-gray-400">Loading...</p>
         </div>
       </div>
@@ -268,7 +268,7 @@ export default function KYCVerification() {
       <div>
         <div className="flex items-start justify-between mb-2">
           <div className="flex items-center gap-3">
-            <Shield className="w-7 h-7 text-blue-600 dark:text-blue-400" />
+            <Shield className="w-7 h-7 text-primary-blue dark:text-blue-400" />
             <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">
               KYC Verification
             </h1>
@@ -292,26 +292,24 @@ export default function KYCVerification() {
             <div className="flex items-start justify-between mb-6">
               <div className="flex items-center gap-3">
                 <div
-                  className={`p-2.5 rounded-lg ${
-                    kycStatus.kyc_status === "approved"
+                  className={`p-2.5 rounded-lg ${kycStatus.kyc_status === "approved"
                       ? "bg-green-100 dark:bg-green-900/30"
                       : kycStatus.kyc_status === "pending_review"
                         ? "bg-yellow-100 dark:bg-yellow-900/30"
                         : kycStatus.kyc_status === "rejected"
                           ? "bg-red-100 dark:bg-red-900/30"
                           : "bg-gray-100 dark:bg-gray-700"
-                  }`}
+                    }`}
                 >
                   <Shield
-                    className={`w-5 h-5 ${
-                      kycStatus.kyc_status === "approved"
+                    className={`w-5 h-5 ${kycStatus.kyc_status === "approved"
                         ? "text-green-600 dark:text-green-400"
                         : kycStatus.kyc_status === "pending_review"
                           ? "text-yellow-600 dark:text-yellow-400"
                           : kycStatus.kyc_status === "rejected"
                             ? "text-red-600 dark:text-red-400"
                             : "text-gray-500 dark:text-gray-400"
-                    }`}
+                      }`}
                   />
                 </div>
                 <div>
@@ -334,7 +332,7 @@ export default function KYCVerification() {
                 documents.length > 0 && (
                   <button
                     onClick={handleSubmitForReview}
-                    className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-md transition-colors"
+                    className="px-4 py-2 bg-primary-blue hover:bg-blue-700 text-white text-sm font-medium rounded-md transition-colors"
                   >
                     Submit for Review
                   </button>
@@ -579,7 +577,7 @@ export default function KYCVerification() {
                   !issuingCountry ||
                   uploading
                 }
-                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-300 dark:disabled:bg-gray-700 disabled:cursor-not-allowed transition-colors text-sm font-medium"
+                className="px-4 py-2 bg-primary-blue text-white rounded-md hover:bg-blue-700 disabled:bg-gray-300 dark:disabled:bg-gray-700 disabled:cursor-not-allowed transition-colors text-sm font-medium"
               >
                 {uploading
                   ? editingDocId
@@ -609,7 +607,7 @@ export default function KYCVerification() {
 
           <button
             onClick={() => setIsUploadModalOpen(true)}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors text-sm font-medium"
+            className="flex items-center gap-2 px-4 py-2 bg-primary-blue hover:bg-blue-700 text-white rounded-md transition-colors text-sm font-medium"
           >
             <Upload className="w-4 h-4" />
             Upload
@@ -629,7 +627,7 @@ export default function KYCVerification() {
             </p>
             <button
               onClick={() => setIsUploadModalOpen(true)}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors text-sm font-medium"
+              className="inline-flex items-center gap-2 px-4 py-2 bg-primary-blue hover:bg-blue-700 text-white rounded-md transition-colors text-sm font-medium"
             >
               <Upload className="w-4 h-4" />
               Upload Document
@@ -811,7 +809,7 @@ export default function KYCVerification() {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white dark:bg-[#282727] rounded-xl shadow-xl max-w-md w-full">
             <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-              <h2 className="text-xl font-semibold text-blue-600 dark:text-blue-400">
+              <h2 className="text-xl font-semibold text-primary-blue dark:text-blue-400">
                 Submit for Review
               </h2>
             </div>
@@ -831,7 +829,7 @@ export default function KYCVerification() {
               </button>
               <button
                 onClick={confirmSubmitForReview}
-                className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                className="flex-1 px-4 py-2 bg-primary-blue text-white rounded-lg hover:bg-blue-700"
               >
                 Submit
               </button>

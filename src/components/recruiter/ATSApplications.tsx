@@ -70,7 +70,7 @@ export default function ATSApplications({
       case "hired":
       case "offered":
       case "accepted":
-        return "bg-blue-50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400";
+        return "bg-blue-50 text-primary-blue dark:bg-blue-900/20 dark:text-blue-400";
       default:
         return "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400";
     }
@@ -183,7 +183,7 @@ export default function ATSApplications({
           <button
             onClick={handleBulkDownload}
             disabled={downloadingBulk}
-            className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors disabled:opacity-50 flex items-center gap-2"
+            className="px-6 py-3 bg-primary-blue hover:bg-blue-700 text-white rounded-lg font-medium transition-colors disabled:opacity-50 flex items-center gap-2"
           >
             {downloadingBulk ? (
               <>
@@ -276,7 +276,7 @@ export default function ATSApplications({
                           href={app.resume.pdf_url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="flex items-center gap-1.5 text-xs text-blue-600 dark:text-blue-400 font-medium hover:underline"
+                          className="flex items-center gap-1.5 text-xs text-primary-blue dark:text-blue-400 font-medium hover:underline"
                         >
                           <FileText className="w-3.5 h-3.5" />
                           View Resume
@@ -303,7 +303,7 @@ export default function ATSApplications({
                             onChange={(e) =>
                               handleStatusUpdate(app.id, e.target.value)
                             }
-                            className="appearance-none pl-4 pr-9 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium rounded-lg cursor-pointer transition-colors focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 w-[110px]"
+                            className="appearance-none pl-4 pr-9 py-2 bg-primary-blue hover:bg-blue-700 text-white text-xs font-medium rounded-lg cursor-pointer transition-colors focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 w-[110px]"
                           >
                             <option
                               value="applied"

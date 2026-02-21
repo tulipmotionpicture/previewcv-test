@@ -29,7 +29,7 @@ export default function JobsSidebar() {
     <div className="flex flex-col gap-3">
       {/* Top Hiring Partners Card */}
       <div className="bg-white dark:bg-gray-900 rounded-xl overflow-hidden border border-gray-200 dark:border-gray-800 ">
-        <div className="bg-blue-600 px-6 py-2 flex items-center justify-between">
+        <div className="bg-primary-blue px-6 py-2 flex items-center justify-between">
           <h2 className="text-md font-bold text-white">
             Top Hiring Partners
           </h2>
@@ -68,11 +68,11 @@ export default function JobsSidebar() {
                       />
                     </div>
                   ) : (
-                    <div className="h-8 w-8 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center mb-2 text-blue-600 dark:text-blue-400 font-bold text-sm">
+                    <div className="h-8 w-8 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center mb-2 text-primary-blue dark:text-blue-400 font-bold text-sm">
                       {partner.company_name?.charAt(0) || "?"}
                     </div>
                   )}
-                  <span className="text-[10px] font-medium text-gray-700 dark:text-gray-300 text-center line-clamp-1 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition">
+                  <span className="text-[10px] font-medium text-gray-700 dark:text-gray-300 text-center line-clamp-1 group-hover:text-primary-blue dark:group-hover:text-blue-400 transition">
                     {partner.company_name || "Unknown"}
                   </span>
                 </Link>
@@ -94,7 +94,7 @@ export default function JobsSidebar() {
             <h3 className="text-base font-bold text-blue-700 dark:text-blue-400 mb-0.5">Create Resume</h3>
             <p className="text-xs font-medium text-slate-500 dark:text-slate-400">Build a new cv profile</p>
           </div>
-          <div className="h-12 w-12 bg-blue-600 rounded-lg flex items-center justify-center text-white shadow-md shadow-blue-200 dark:shadow-none group-hover:scale-105 transition-transform">
+          <div className="h-12 w-12 bg-primary-blue rounded-lg flex items-center justify-center text-white shadow-md shadow-blue-200 dark:shadow-none group-hover:scale-105 transition-transform">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
               <polyline points="14 2 14 8 20 8" />

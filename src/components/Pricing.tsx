@@ -104,14 +104,14 @@ const PricingPage: React.FC<PricingPageProps> = ({ onNavigate }) => {
       <div className="max-w-7xl mx-auto px-4 py-20">
         <div className="text-center mb-16">
           <div className="inline-block px-4 py-2 bg-blue-50 dark:bg-blue-900/20 rounded-full mb-4">
-            <span className="text-sm font-semibold text-blue-600 dark:text-blue-400">
+            <span className="text-sm font-semibold text-primary-blue dark:text-blue-400">
               Simple, transparent pricing
             </span>
           </div>
           <h1 className="text-5xl md:text-6xl font-extrabold text-gray-900 dark:text-white mb-6 tracking-tight">
             Choose the perfect plan
             <br />
-            <span className="text-blue-600">for your hiring needs</span>
+            <span className="text-primary-blue">for your hiring needs</span>
           </h1>
           <p className="text-xl text-gray-600 dark:text-gray-400 max-w-3xl mx-auto mb-8">
             Whether you&apos;re looking for a job or looking for talent,
@@ -148,7 +148,7 @@ const PricingPage: React.FC<PricingPageProps> = ({ onNavigate }) => {
             className="relative w-14 h-7 bg-gray-200 dark:bg-gray-700 rounded-full transition-colors"
           >
             <div
-              className={`absolute top-0.5 left-0.5 w-6 h-6 bg-blue-600 rounded-full transition-transform ${currency === "inr" ? "translate-x-7" : ""
+              className={`absolute top-0.5 left-0.5 w-6 h-6 bg-primary-blue rounded-full transition-transform ${currency === "inr" ? "translate-x-7" : ""
                 }`}
             />
           </button>
@@ -191,7 +191,7 @@ const PricingPage: React.FC<PricingPageProps> = ({ onNavigate }) => {
                     return "bg-purple-600 hover:bg-purple-700 text-white";
                   if (plan.slug === "premium")
                     return "bg-green-600 hover:bg-green-700 text-white";
-                  return "bg-blue-600 hover:bg-blue-700 text-white";
+                  return "bg-primary-blue hover:bg-blue-700 text-white";
                 };
 
                 const getButtonText = () => {
@@ -319,7 +319,7 @@ const PricingPage: React.FC<PricingPageProps> = ({ onNavigate }) => {
                     return "bg-purple-600 hover:bg-purple-700 text-white";
                   if (plan.slug === "platinum")
                     return "bg-purple-700 hover:bg-purple-800 text-white";
-                  return "bg-blue-600 hover:bg-blue-700 text-white";
+                  return "bg-primary-blue hover:bg-blue-700 text-white";
                 };
 
                 const getButtonText = () => {
@@ -576,7 +576,7 @@ const PricingPage: React.FC<PricingPageProps> = ({ onNavigate }) => {
             </p>
             <div className="flex flex-wrap items-center justify-center gap-8 text-sm text-gray-600 dark:text-gray-400">
               <div className="text-center">
-                <div className="text-3xl font-bold text-blue-600 dark:text-blue-400">
+                <div className="text-3xl font-bold text-primary-blue dark:text-blue-400">
                   50K+
                 </div>
                 <div className="text-xs mt-1">Jobs Posted</div>
@@ -599,7 +599,7 @@ const PricingPage: React.FC<PricingPageProps> = ({ onNavigate }) => {
 
         {/* Final CTA */}
         <div className="my-20 text-center">
-          <div className="bg-blue-600 rounded-2xl p-12 text-white">
+          <div className="bg-primary-blue rounded-2xl p-12 text-white">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">
               Ready to find your next hire?
             </h2>
@@ -610,7 +610,7 @@ const PricingPage: React.FC<PricingPageProps> = ({ onNavigate }) => {
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <button
                 onClick={() => onNavigate("recruiter/signup")}
-                className="px-8 py-4 bg-white text-blue-600 rounded-lg font-bold hover:bg-gray-100 transition-colors"
+                className="px-8 py-4 bg-white text-primary-blue rounded-lg font-bold hover:bg-gray-100 transition-colors"
               >
                 Start Free Trial
               </button>

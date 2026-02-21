@@ -658,7 +658,7 @@ export function ResumeUploader({
           <button
             onClick={handleUpload}
             disabled={!file || !resumeName || !token}
-            className="w-full py-3 px-6 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-lg hover:from-blue-700 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+            className="w-full py-3 px-6 bg-gradient-to-r from-primary-blue to-purple-600 text-white font-semibold rounded-lg hover:from-blue-700 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
           >
             Upload & Parse Resume
           </button>
@@ -778,7 +778,7 @@ export function UploadProgress({ events, status }: UploadProgressProps) {
       {/* Progress Spinner */}
       {status === 'processing' && (
         <div className="flex justify-center mb-6">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-blue"></div>
         </div>
       )}
 

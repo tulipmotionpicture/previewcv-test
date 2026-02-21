@@ -321,7 +321,7 @@ export default function SEOJobsListWithLayout({
 
             <button
               type="submit"
-              className={`bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-all duration-500 shadow-sm whitespace-nowrap px-6 py-2 md:px-8 md:py-3 h-11 md:h-auto text-sm md:text-base`}
+              className={`bg-primary-blue hover:bg-blue-700 text-white font-semibold rounded-lg transition-all duration-500 shadow-sm whitespace-nowrap px-6 py-2 md:px-8 md:py-3 h-11 md:h-auto text-sm md:text-base`}
             >
               Search
             </button>
@@ -433,7 +433,7 @@ export default function SEOJobsListWithLayout({
                 className="py-8 flex justify-center min-h-[100px]"
               >
                 {loadingMore ? (
-                  <div className="flex items-center gap-2 text-blue-600">
+                  <div className="flex items-center gap-2 text-primary-blue">
                     <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-blue-500"></div>
                     <span className="text-sm font-medium">
                       Loading more jobs...
@@ -481,7 +481,7 @@ export default function SEOJobsListWithLayout({
               <div className="mt-6">
                 <button
                   onClick={() => setShowMobileFilters(false)}
-                  className="w-full py-3 bg-blue-600 text-white font-bold rounded-xl shadow-lg hover:bg-blue-700"
+                  className="w-full py-3 bg-primary-blue text-white font-bold rounded-xl shadow-lg hover:bg-blue-700"
                 >
                   Show Results
                 </button>
@@ -511,7 +511,7 @@ export default function SEOJobsListWithLayout({
               value={keyword}
               onChange={(e) => setKeyword(e.target.value)}
               autoFocus
-              className="w-full bg-transparent border-b border-gray-300 dark:border-gray-700 py-2.5 text-base font-medium text-gray-900 dark:text-white placeholder-gray-400 focus:border-blue-600 dark:focus:border-blue-500 outline-none transition-colors rounded-none"
+              className="w-full bg-transparent border-b border-gray-300 dark:border-gray-700 py-2.5 text-base font-medium text-gray-900 dark:text-white placeholder-gray-400 focus:border-primary-blue dark:focus:border-blue-500 outline-none transition-colors rounded-none"
             />
 
             <input
@@ -519,12 +519,12 @@ export default function SEOJobsListWithLayout({
               placeholder="Enter Country"
               value={country}
               onChange={(e) => setCountry(e.target.value)}
-              className="w-full bg-transparent border-b border-gray-300 dark:border-gray-700 py-2.5 text-base font-medium text-gray-900 dark:text-white placeholder-gray-400 focus:border-blue-600 dark:focus:border-blue-500 outline-none transition-colors rounded-none"
+              className="w-full bg-transparent border-b border-gray-300 dark:border-gray-700 py-2.5 text-base font-medium text-gray-900 dark:text-white placeholder-gray-400 focus:border-primary-blue dark:focus:border-blue-500 outline-none transition-colors rounded-none"
             />
 
             <button
               onClick={handleSearch}
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold text-base rounded-xl py-3 mt-4 shadow-lg active:scale-[0.98] transition-all"
+              className="w-full bg-primary-blue hover:bg-blue-700 text-white font-bold text-base rounded-xl py-3 mt-4 shadow-lg active:scale-[0.98] transition-all"
             >
               Search Job
             </button>

@@ -47,15 +47,15 @@ export default function DashboardSidebar<T extends string>({
                     onClick={() => onTabChange(item.key)}
                     className={`w-full text-left px-4 py-3 rounded-md transition-all duration-150 text-xs flex items-center ${showChevron ? "justify-between" : "gap-3"
                         } group cursor-pointer ${isActive
-                            ? "bg-[#0077FF] text-white"
-                            : "text-black dark:text-gray-400 hover:bg-[#0077FF]/10 dark:hover:bg-[#0369A1]/20 hover:text-[#0077FF] dark:hover:text-white"
+                            ? "bg-primary-blue text-white"
+                            : "text-black dark:text-gray-400 hover:bg-primary-blue-hover/10 dark:hover:bg-[#0369A1]/20 hover:text-primary-blue dark:hover:text-white"
                         }`}
                 >
                     <div className="flex items-center gap-3">
                         <span
                             className={`transition-colors duration-150 ${isActive
                                 ? "text-white"
-                                : "text-black dark:text-gray-500 group-hover:text-[#0077FF] dark:group-hover:text-white"
+                                : "text-black dark:text-gray-500 group-hover:text-primary-blue dark:group-hover:text-white"
                                 }`}
                         >
                             {item.icon}

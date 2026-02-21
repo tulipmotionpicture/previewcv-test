@@ -113,7 +113,7 @@ export default function BlogDetailPage() {
           }}
         />
         <div className="flex items-center justify-center min-h-[60vh]">
-          <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+          <Loader2 className="w-8 h-8 animate-spin text-primary-blue" />
         </div>
         <Footer />
       </div>
@@ -141,7 +141,7 @@ export default function BlogDetailPage() {
           </h1>
           <Link
             href="/blog"
-            className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-700"
+            className="inline-flex items-center gap-2 text-primary-blue hover:text-blue-700"
           >
             <ArrowLeft className="w-4 h-4" />
             Back to Blog
@@ -172,7 +172,7 @@ export default function BlogDetailPage() {
         {/* Back Button */}
         <Link
           href="/blog"
-          className="inline-flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 mb-8"
+          className="inline-flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-primary-blue dark:hover:text-blue-400 mb-8"
         >
           <ArrowLeft className="w-4 h-4" />
           Back to Blog
@@ -182,7 +182,7 @@ export default function BlogDetailPage() {
         <div className="mb-4">
           <Link
             href={`/blog/category/${post.category.slug}`}
-            className="inline-block px-3 py-1 text-xs font-semibold text-blue-600 bg-blue-50 dark:bg-blue-900/20 rounded-full hover:bg-blue-100 dark:hover:bg-blue-900/30"
+            className="inline-block px-3 py-1 text-xs font-semibold text-primary-blue bg-blue-50 dark:bg-blue-900/20 rounded-full hover:bg-blue-100 dark:hover:bg-blue-900/30"
           >
             {post.category.name}
           </Link>
@@ -219,7 +219,7 @@ export default function BlogDetailPage() {
           </div>
           <button
             onClick={handleShare}
-            className="ml-auto flex items-center gap-2 text-blue-600 hover:text-blue-700"
+            className="ml-auto flex items-center gap-2 text-primary-blue hover:text-blue-700"
           >
             <Share2 className="w-4 h-4" />
             Share
@@ -274,7 +274,7 @@ export default function BlogDetailPage() {
               />
             ) : (
               <div className="w-20 h-20 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center">
-                <User className="w-10 h-10 text-blue-600" />
+                <User className="w-10 h-10 text-primary-blue" />
               </div>
             )}
             <div>

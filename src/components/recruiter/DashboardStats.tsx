@@ -72,7 +72,7 @@ export default function DashboardStats({
       trend: stats.active_jobs.change_percentage,
       trendDirection: stats.active_jobs.trend,
       iconBg: "bg-blue-100/50 dark:bg-blue-900/30",
-      iconColor: "text-blue-600 dark:text-blue-400",
+      iconColor: "text-primary-blue dark:text-blue-400",
     },
     {
       label: "Total Application",
@@ -90,7 +90,7 @@ export default function DashboardStats({
       trend: stats.interviews.change_percentage,
       trendDirection: stats.interviews.trend,
       iconBg: "bg-blue-100/50 dark:bg-blue-900/30",
-      iconColor: "text-blue-600 dark:text-blue-400",
+      iconColor: "text-primary-blue dark:text-blue-400",
     },
     {
       label: "Pending Approvals",
@@ -99,7 +99,7 @@ export default function DashboardStats({
       trend: null, // Pending approvals don't have trend data
       trendDirection: "stable",
       iconBg: "bg-blue-100/50 dark:bg-blue-900/30",
-      iconColor: "text-blue-600 dark:text-blue-400",
+      iconColor: "text-primary-blue dark:text-blue-400",
     },
   ];
 
