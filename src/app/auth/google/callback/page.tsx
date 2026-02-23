@@ -2,17 +2,21 @@
 
 import { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { api } from '@/lib/api';
 
 function GoogleCallbackContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const [error, setError] = useState<string | null>(null);
+    const [isProcessing, setIsProcessing] = useState(false);
 
     useEffect(() => {
         const handleCallback = async () => {
-            // Get tokens from URL parameters
-            const accessToken = searchParams.get('access_token');
-            const refreshToken = searchParams.get('refresh_token');
+            if (isProcessing) return;
+            setIsProcessing(true);
+
+            const code = searchParams.get('code');
+            const state = searchParams.get('state');
             const errorParam = searchParams.get('error');
 
             if (errorParam) {
@@ -21,20 +25,32 @@ function GoogleCallbackContent() {
                 return;
             }
 
-            if (!accessToken) {
-                setError('No access token received');
+            if (!code) {
+                setError('No authorization code received');
                 setTimeout(() => router.push('/candidate/login'), 3000);
                 return;
             }
 
-            // Store tokens
-            localStorage.setItem('access_token', accessToken);
-            if (refreshToken) {
-                localStorage.setItem('refresh_token', refreshToken);
-            }
+            try {
+                // Exchange code for tokens
+                const response = await api.exchangeSocialAuthCode('google', code, state || '');
 
-            // Redirect to dashboard
-            router.push('/candidate/dashboard');
+                // Clear any existing recruiter tokens to prevent role confusion
+                localStorage.removeItem('recruiter_access_token');
+                localStorage.removeItem('recruiter_refresh_token');
+
+                // Store tokens
+                localStorage.setItem('access_token', response.access_token);
+                if (response.refresh_token) {
+                    localStorage.setItem('refresh_token', response.refresh_token);
+                }
+
+                // Redirect to dashboard
+                window.location.href = '/candidate/dashboard';
+            } catch (err: any) {
+                setError(err.message || 'Failed to authenticate with Google');
+                setTimeout(() => router.push('/candidate/login'), 3000);
+            }
         };
 
         handleCallback();

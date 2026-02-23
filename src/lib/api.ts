@@ -292,10 +292,33 @@ export class ApiClient {
   }
 
   async candidateSocialLogin(provider: "google" | "linkedin"): Promise<void> {
-    // Redirect to backend endpoint which handles the OAuth flow
+    try {
+      const endpoint =
+        provider === "google"
+          ? "/api/v1/auth/oauth/google/url"
+          : "/api/v1/auth/oauth/linkedin/url";
+          
+      const response = await this.request<{ auth_url: string; state: string }>(endpoint);
+      if (response && response.auth_url) {
+        window.location.href = response.auth_url;
+      }
+    } catch (error) {
+      console.error(`Failed to initiate ${provider} login:`, error);
+      throw error;
+    }
+  }
+
+  async exchangeSocialAuthCode(
+    provider: "google" | "linkedin",
+    code: string,
+    state: string
+  ): Promise<AuthResponse> {
     const endpoint =
-      provider === "google" ? "/api/v1/auth/google" : "/api/v1/auth/linkedin";
-    window.location.href = `${this.baseUrl}${endpoint}`;
+      provider === "google"
+        ? `/api/v1/auth/oauth/google/callback?code=${encodeURIComponent(code)}&state=${encodeURIComponent(state)}`
+        : `/api/v1/auth/oauth/linkedin/callback?code=${encodeURIComponent(code)}&state=${encodeURIComponent(state)}`;
+        
+    return this.request<AuthResponse>(endpoint);
   }
 
   // --- Recruiter Auth ---
