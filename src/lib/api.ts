@@ -295,8 +295,8 @@ export class ApiClient {
     try {
       const endpoint =
         provider === "google"
-          ? "/api/v1/auth/oauth/google/url"
-          : "/api/v1/auth/oauth/linkedin/url";
+          ? "/api/v1/auth/previewcv/oauth/google/url"
+          : "/api/v1/auth/previewcv/oauth/linkedin/url";
           
       const response = await this.request<{ auth_url: string; state: string }>(endpoint);
       if (response && response.auth_url) {
@@ -315,8 +315,8 @@ export class ApiClient {
   ): Promise<AuthResponse> {
     const endpoint =
       provider === "google"
-        ? `/api/v1/auth/oauth/google/callback?code=${encodeURIComponent(code)}&state=${encodeURIComponent(state)}`
-        : `/api/v1/auth/oauth/linkedin/callback?code=${encodeURIComponent(code)}&state=${encodeURIComponent(state)}`;
+        ? `/api/v1/auth/previewcv/oauth/google/callback?code=${encodeURIComponent(code)}&state=${encodeURIComponent(state)}`
+        : `/api/v1/auth/previewcv/oauth/linkedin/callback?code=${encodeURIComponent(code)}&state=${encodeURIComponent(state)}`;
         
     return this.request<AuthResponse>(endpoint);
   }
