@@ -4,7 +4,7 @@ import { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { api } from '@/lib/api';
 
-function GoogleCallbackContent() {
+function AuthCallbackContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const [error, setError] = useState<string | null>(null);
@@ -32,8 +32,18 @@ function GoogleCallbackContent() {
             }
 
             try {
+                // Determine provider based on search params
+                // Google usually sends 'iss' or 'scope' with googleapis
+                const iss = searchParams.get('iss');
+                const scope = searchParams.get('scope');
+
+                let provider: "google" | "linkedin" = "linkedin";
+                if ((iss && iss.includes('google')) || (scope && scope.includes('google'))) {
+                    provider = "google";
+                }
+
                 // Exchange code for tokens
-                const response = await api.exchangeSocialAuthCode('google', code, state || '');
+                const response = await api.exchangeSocialAuthCode(provider, code, state || '');
 
                 // Clear any existing recruiter tokens to prevent role confusion
                 localStorage.removeItem('recruiter_access_token');
@@ -48,7 +58,29 @@ function GoogleCallbackContent() {
                 // Redirect to dashboard
                 window.location.href = '/candidate/dashboard';
             } catch (err: any) {
-                setError(err.message || 'Failed to authenticate with Google');
+                // If the first attempt failed and we guessed linkedin, let's try google just in case
+                try {
+                    const iss = searchParams.get('iss');
+                    const scope = searchParams.get('scope');
+                    const isDefinitelyGoogle = (iss && iss.includes('google')) || (scope && scope.includes('google'));
+
+                    if (!isDefinitelyGoogle) {
+                        const alternativeProvider = "google";
+                        const response = await api.exchangeSocialAuthCode(alternativeProvider, code, state || '');
+                        localStorage.removeItem('recruiter_access_token');
+                        localStorage.removeItem('recruiter_refresh_token');
+                        localStorage.setItem('access_token', response.access_token);
+                        if (response.refresh_token) {
+                            localStorage.setItem('refresh_token', response.refresh_token);
+                        }
+                        window.location.href = '/candidate/dashboard';
+                        return;
+                    }
+                } catch (e: any) {
+                    // Ignore and show original error
+                }
+
+                setError(err.message || 'Failed to authenticate');
                 setTimeout(() => router.push('/candidate/login'), 3000);
             }
         };
@@ -93,7 +125,7 @@ function GoogleCallbackContent() {
     );
 }
 
-export default function GoogleCallbackPage() {
+export default function AuthCallbackPage() {
     return (
         <Suspense fallback={
             <div className="min-h-screen flex items-center justify-center bg-gray-50">
@@ -110,7 +142,7 @@ export default function GoogleCallbackPage() {
                 </div>
             </div>
         }>
-            <GoogleCallbackContent />
+            <AuthCallbackContent />
         </Suspense>
     );
 }
