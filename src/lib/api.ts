@@ -297,8 +297,10 @@ export class ApiClient {
         provider === "google"
           ? "/api/v1/auth/previewcv/oauth/google/url"
           : "/api/v1/auth/previewcv/oauth/linkedin/url";
-          
-      const response = await this.request<{ auth_url: string; state: string }>(endpoint);
+
+      const response = await this.request<{ auth_url: string; state: string }>(
+        endpoint,
+      );
       if (response && response.auth_url) {
         window.location.href = response.auth_url;
       }
@@ -311,13 +313,13 @@ export class ApiClient {
   async exchangeSocialAuthCode(
     provider: "google" | "linkedin",
     code: string,
-    state: string
+    state: string,
   ): Promise<AuthResponse> {
     const endpoint =
       provider === "google"
         ? `/api/v1/auth/previewcv/oauth/google/callback?code=${encodeURIComponent(code)}&state=${encodeURIComponent(state)}`
         : `/api/v1/auth/previewcv/oauth/linkedin/callback?code=${encodeURIComponent(code)}&state=${encodeURIComponent(state)}`;
-        
+
     return this.request<AuthResponse>(endpoint);
   }
 
@@ -336,8 +338,8 @@ export class ApiClient {
     });
   }
 
-  async getRecruiterProfile(): Promise<RecruiterProfileResponse> {
-    return this.request<RecruiterProfileResponse>(
+  async getRecruiterProfile(): Promise<Recruiter> {
+    return this.request<Recruiter>(
       "/api/v1/recruiters/profile/me",
       {},
       true,
@@ -345,10 +347,8 @@ export class ApiClient {
     );
   }
 
-  async updateRecruiterProfile(
-    data: Partial<Recruiter>,
-  ): Promise<RecruiterProfileResponse> {
-    return this.request<RecruiterProfileResponse>(
+  async updateRecruiterProfile(data: Partial<Recruiter>): Promise<Recruiter> {
+    return this.request<Recruiter>(
       "/api/v1/recruiters/profile/me",
       {
         method: "PUT",
@@ -1275,17 +1275,24 @@ export class ApiClient {
   async uploadGalleryImage(
     file: File,
     eventId: number,
-    options?: { caption?: string; alt_text?: string; is_cover?: boolean; display_order?: number }
+    options?: {
+      caption?: string;
+      alt_text?: string;
+      is_cover?: boolean;
+      display_order?: number;
+    },
   ): Promise<any> {
     const formData = new FormData();
     formData.append("file", file);
-    
+
     const queryParams = new URLSearchParams();
     queryParams.append("event_id", eventId.toString());
     if (options?.caption) queryParams.append("caption", options.caption);
     if (options?.alt_text) queryParams.append("alt_text", options.alt_text);
-    if (options?.is_cover !== undefined) queryParams.append("is_cover", options.is_cover.toString());
-    if (options?.display_order !== undefined) queryParams.append("display_order", options.display_order.toString());
+    if (options?.is_cover !== undefined)
+      queryParams.append("is_cover", options.is_cover.toString());
+    if (options?.display_order !== undefined)
+      queryParams.append("display_order", options.display_order.toString());
 
     return this.request<any>(
       `/api/v1/recruiters/gallery/images/upload?${queryParams.toString()}`,
@@ -1859,9 +1866,12 @@ export class ApiClient {
   }): Promise<SearchHistoryResponse> {
     const queryParams = new URLSearchParams();
     if (params?.page) queryParams.append("page", params.page.toString());
-    if (params?.page_size) queryParams.append("page_size", params.page_size.toString());
-    else if (params?.limit) queryParams.append("page_size", params.limit.toString());
-    if (params?.favorites_only !== undefined) queryParams.append("favorites_only", params.favorites_only.toString());
+    if (params?.page_size)
+      queryParams.append("page_size", params.page_size.toString());
+    else if (params?.limit)
+      queryParams.append("page_size", params.limit.toString());
+    if (params?.favorites_only !== undefined)
+      queryParams.append("favorites_only", params.favorites_only.toString());
     if (params?.sort_by) queryParams.append("sort_by", params.sort_by);
 
     // fetch raw response then normalize different backend shapes (some responses use `searches`)
@@ -1900,7 +1910,7 @@ export class ApiClient {
 
   async updateSavedSearch(
     searchId: number,
-    data: { custom_name?: string; is_favorite?: boolean }
+    data: { custom_name?: string; is_favorite?: boolean },
   ): Promise<any> {
     return this.request<any>(
       `/api/v1/recruiter/cv-search/search-history/${searchId}`,
