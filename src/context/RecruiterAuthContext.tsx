@@ -66,7 +66,7 @@ export function RecruiterAuthProvider({ children }: { children: ReactNode }) {
         // Response is the recruiter object directly
         console.log(
           "RecruiterAuthContext: Setting recruiter (direct):",
-          responseData
+          responseData,
         );
         setRecruiter(responseData);
       } else if (
@@ -77,12 +77,12 @@ export function RecruiterAuthProvider({ children }: { children: ReactNode }) {
         // Response is wrapped with success and recruiter properties
         console.log(
           "RecruiterAuthContext: Setting recruiter (wrapped):",
-          responseData.recruiter
+          responseData.recruiter,
         );
         setRecruiter(responseData.recruiter);
       } else {
         console.log(
-          "RecruiterAuthContext: Response not valid recruiter format"
+          "RecruiterAuthContext: Response not valid recruiter format",
         );
       }
     } catch (error: unknown) {
@@ -109,7 +109,7 @@ export function RecruiterAuthProvider({ children }: { children: ReactNode }) {
       }
     } finally {
       console.log(
-        "RecruiterAuthContext: checkAuth complete, setting loading false"
+        "RecruiterAuthContext: checkAuth complete, setting loading false",
       );
       setLoading(false);
     }
@@ -177,8 +177,8 @@ export function RecruiterAuthProvider({ children }: { children: ReactNode }) {
 
   const updateProfile = async (data: Partial<Recruiter>) => {
     const response = await api.updateRecruiterProfile(data);
-    if (response.success && response.recruiter) {
-      setRecruiter(response.recruiter);
+    if (response && response.id) {
+      setRecruiter(response);
     }
   };
 
@@ -203,7 +203,7 @@ export function useRecruiterAuth() {
   const context = useContext(RecruiterAuthContext);
   if (context === undefined) {
     throw new Error(
-      "useRecruiterAuth must be used within a RecruiterAuthProvider"
+      "useRecruiterAuth must be used within a RecruiterAuthProvider",
     );
   }
   return context;

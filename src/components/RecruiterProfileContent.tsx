@@ -161,7 +161,12 @@ const profileDataToRecruiter = (
 
 type TabType = "company_profile" | "security";
 
-export default function App() {
+interface RecruiterProfileContentProps {
+  jobs?: any[];
+  events?: any[];
+}
+
+export default function App({ jobs, events }: RecruiterProfileContentProps) {
   const [activeTab, setActiveTab] = useState<TabType>("company_profile");
   const [isSaving, setIsSaving] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
