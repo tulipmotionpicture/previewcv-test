@@ -321,9 +321,9 @@ export default function ResumePreviewPage() {
         {/* Header */}
         <Header showAuthButtons={true} />
 
-        <main className="max-w-7xl mx-auto px-4 py-8 mt-16 grid grid-cols-1 lg:grid-cols-12 gap-4">
+        <main className="max-w-7xl mx-auto px-4 py-2 mt-16 grid grid-cols-1 lg:grid-cols-12 gap-4">
           {/* Left Column: Resume */}
-          <div className="lg:col-span-8 space-y-6">
+          <div className="lg:col-span-8 space-y-2">
             {/* Resume Header Card */}
             <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 relative overflow-hidden">
               <div className="flex flex-col md:flex-row gap-6 items-start justify-between">
@@ -450,27 +450,6 @@ export default function ResumePreviewPage() {
                   color: "text-blue-600",
                   bg: "bg-blue-50",
                 },
-                {
-                  label: "Avg. View Time",
-                  value: "2m 45s",
-                  icon: Clock,
-                  color: "text-purple-600",
-                  bg: "bg-purple-50",
-                },
-                {
-                  label: "Recruiters Viewed",
-                  value: "12",
-                  icon: Users,
-                  color: "text-emerald-600",
-                  bg: "bg-emerald-50",
-                },
-                {
-                  label: "PDF Downloads",
-                  value: "3",
-                  icon: Download,
-                  color: "text-amber-600",
-                  bg: "bg-amber-50",
-                },
               ].map((stat, i) => (
                 <div
                   key={i}
@@ -504,12 +483,12 @@ export default function ResumePreviewPage() {
                       "Resume"}
                     .pdf
                   </span>
-                  {resumeData.source_type && (
+                  {/* {resumeData.source_type && (
                     <Badge className="bg-blue-500/20 text-blue-300 border border-blue-500/30 text-xs">
                       {resumeData.source_type.charAt(0).toUpperCase() +
                         resumeData.source_type.slice(1)}
                     </Badge>
-                  )}
+                  )} */}
                 </div>
 
                 <div className="flex items-center gap-2">
@@ -535,7 +514,7 @@ export default function ResumePreviewPage() {
               </div>
 
               {/* PDF Content Area */}
-              <div className="flex-1 bg-slate-700 overflow-auto p-8 flex justify-center">
+              <div className="flex-1 bg-slate-700 overflow-auto flex justify-center">
                 <div className="w-full max-w-[800px]">
                   <PDFViewer
                     pdfUrl={resumeData.pdf_signed_url!}
@@ -676,47 +655,6 @@ export default function ResumePreviewPage() {
                         >
                           {resumeData.candidate.contact.github}
                         </a>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Action Buttons */}
-                  <div className="space-y-2.5 pt-3 border-t border-slate-200">
-                    {isAuthenticated ? (
-                      <>
-                        <button
-                          onClick={handleCopyEmail}
-                          className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-700 hover:to-indigo-700 shadow-md shadow-blue-200 px-3 py-1.5 text-sm rounded-lg transition-all duration-200 active:scale-[0.98] inline-flex items-center justify-center gap-2"
-                        >
-                          <Mail size={16} />
-                          Copy Email
-                        </button>
-                        <ResumeViewerButton
-                          variant="outline"
-                          className="w-full"
-                          size="sm"
-                          icon={Calendar}
-                        >
-                          Invite to Interview
-                        </ResumeViewerButton>
-                      </>
-                    ) : (
-                      <div className="space-y-3">
-                        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                          <p className="text-sm font-semibold text-slate-900 mb-2">
-                            Want to reach out to this candidate?
-                          </p>
-                          <p className="text-xs text-slate-600 mb-3">
-                            Sign in as a recruiter to send interview invitations
-                            and manage candidates.
-                          </p>
-                        </div>
-                        <button
-                          onClick={() => router.push("/recruiter/login")}
-                          className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-700 hover:to-indigo-700 shadow-md shadow-blue-200 px-4 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 active:scale-[0.98] flex items-center justify-center gap-2"
-                        >
-                          Sign In as Recruiter
-                        </button>
                       </div>
                     )}
                   </div>
