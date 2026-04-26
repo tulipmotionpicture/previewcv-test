@@ -31,6 +31,38 @@ export interface ErrorResponse {
   details?: Record<string, unknown>;
 }
 
+export interface CandidateContact {
+  email?: string;
+  phone?: string;
+  address?: string;
+  website?: string | null;
+  linkedin?: string | null;
+  github?: string | null;
+}
+
+export interface CandidateInfo {
+  full_name?: string;
+  headline?: string;
+  summary?: string;
+  email?: string;
+  phone?: string;
+  location?: {
+    city?: string;
+    state?: string;
+    country?: string;
+  };
+  profile_image?: string;
+  profile_image_truncated?: boolean;
+  contact?: CandidateContact;
+}
+
+export interface JobPreferences {
+  job_title?: string;
+  notice_period?: string;
+  employment_type?: string | string[];
+  salary_expectation?: string;
+}
+
 export interface ResumeApiResponse extends ApiResponse<ResumeData> {
   resume_id?: number;
   resume_name?: string;
@@ -40,8 +72,18 @@ export interface ResumeApiResponse extends ApiResponse<ResumeData> {
   access_count?: number;
   last_accessed_at?: string;
   created_at?: string;
+  updated_at?: string;
   expires_in?: number; // Expiration time in seconds
   view_count?: number; // Number of views
+  source_type?: string; // 'builder', 'upload', etc.
+  language?: string;
+  parse_status?: string | null;
+  parse_error?: string | null;
+  candidate?: CandidateInfo;
+  job_preferences?: JobPreferences;
+  sections?: Record<string, any>;
+  files?: Record<string, any>;
+  share?: Record<string, any>;
 }
 
 export interface RateLimitInfo {

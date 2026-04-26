@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import config from "@/config";
-import RecruiterProfileContent from "@/components/RecruiterProfileContent";
+import RecruiterProfilePublic from "@/components/RecruiterProfilePublic";
 import ImageGalleryModal from "@/components/ImageGalleryModal";
 import { Job } from "@/types/api";
 
@@ -120,7 +120,10 @@ export default function RecruiterProfilePage({
       {/* Navigation */}
       <nav className="fixed top-0 w-full z-50 bg-white/90 dark:bg-gray-900/90 backdrop-blur-md border-b border-gray-200 dark:border-gray-800 shadow-sm transition-colors duration-300">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-3">
+          <Link
+            href="/"
+            className="flex items-center gap-3 hover:opacity-90 transition-opacity"
+          >
             <Image
               src={config.app.logoUrl}
               alt={config.app.name}
@@ -132,7 +135,7 @@ export default function RecruiterProfilePage({
           <div className="flex items-center gap-4">
             <Link
               href="/jobs"
-              className="text-sm font-bold text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition-colors"
+              className="text-sm font-bold text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition-colors hidden sm:inline"
             >
               Browse Jobs
             </Link>
@@ -150,7 +153,7 @@ export default function RecruiterProfilePage({
       {galleryImages.length > 0 && (
         <button
           onClick={() => openGallery(0)}
-          className="relative w-full h-64 overflow-hidden group cursor-pointer"
+          className="relative w-full h-64 sm:h-80 overflow-hidden group cursor-pointer"
         >
           <Image
             src={galleryImages[0]}
@@ -160,8 +163,8 @@ export default function RecruiterProfilePage({
             className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-300"
             priority
           />
-          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300 flex items-center justify-center">
-            <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-white/90 dark:bg-gray-900/90 px-3 py-1.5 rounded-full flex items-center gap-2 text-xs font-semibold">
+          <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent group-hover:from-black/40 transition-colors duration-300 flex items-center justify-center">
+            <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm px-4 py-2 rounded-full flex items-center gap-2 text-xs font-semibold text-gray-900 dark:text-white">
               <svg
                 className="w-4 h-4"
                 fill="none"
@@ -190,24 +193,24 @@ export default function RecruiterProfilePage({
         initialIndex={galleryStartIndex}
       />
 
-      {/* Hero Section */}
-      <section className="relative pb-8 mt-4">
+      {/* Hero Section with improved spacing */}
+      <section className="relative py-12 sm:py-16 border-b border-gray-100 dark:border-gray-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
+          <div className="flex flex-col lg:flex-row items-start gap-8 lg:gap-12">
             {/* Logo/Avatar */}
-            <div className="relative flex-shrink-0">
-              <div className="w-24 h-24 md:w-32 md:h-32 bg-white dark:bg-gray-800 rounded-xl border-4 border-white dark:border-gray-700 shadow-lg overflow-hidden flex items-center justify-center p-2 -mt-12 md:-mt-16">
+            <div className="relative flex-shrink-0 w-full sm:w-auto">
+              <div className="w-32 h-32 sm:w-40 sm:h-40 bg-white dark:bg-gray-800 rounded-2xl border-4 border-white dark:border-gray-700 shadow-lg overflow-hidden flex items-center justify-center p-4 mx-auto sm:mx-0">
                 {profile.company_logo_url ? (
                   <Image
                     src={profile.company_logo_url}
                     alt={displayName || "Company logo"}
-                    width={128}
-                    height={128}
+                    width={160}
+                    height={160}
                     className="object-contain w-full h-full"
                   />
                 ) : (
                   <div
-                    className="text-4xl"
+                    className="text-5xl sm:text-6xl"
                     aria-label={isCompany ? "Company" : "Recruiter"}
                   >
                     {isCompany ? "🏢" : "👤"}
@@ -215,12 +218,15 @@ export default function RecruiterProfilePage({
                 )}
               </div>
               {profile.is_verified && (
-                <div className="absolute -bottom-1.5 -right-1.5 w-8 h-8 bg-green-500 rounded-full flex items-center justify-center border-2 border-white dark:border-gray-900 shadow-md">
+                <div
+                  className="absolute -bottom-2 right-2 w-10 h-10 bg-green-500 rounded-full flex items-center justify-center border-4 border-white dark:border-gray-900 shadow-md"
+                  title="Verified Profile"
+                >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     viewBox="0 0 24 24"
                     fill="currentColor"
-                    className="w-4 h-4 text-white"
+                    className="w-5 h-5 text-white"
                   >
                     <path
                       fillRule="evenodd"
@@ -233,59 +239,67 @@ export default function RecruiterProfilePage({
             </div>
 
             {/* Info */}
-            <div className="flex-1 w-full text-center md:text-left">
-              <div className="mt-1 mb-3">
-                <div className="flex flex-col md:flex-row md:items-baseline gap-2 md:gap-3 justify-center md:justify-start">
-                  <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-gray-100 leading-tight">
+            <div className="flex-1 w-full text-center sm:text-left">
+              <div className="mb-6">
+                <div className="flex flex-col sm:flex-row sm:items-baseline gap-3 sm:gap-4 justify-center sm:justify-start mb-3">
+                  <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-gray-100 leading-tight">
                     {displayName}
                   </h1>
                   {profile.is_verified && (
-                    <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 text-[10px] font-bold rounded-full border border-green-200 dark:border-green-800 self-center">
+                    <span className="inline-flex items-center justify-center sm:justify-start gap-1.5 px-3 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 text-xs font-bold rounded-full border border-green-200 dark:border-green-800">
                       <svg
-                        className="w-3 h-3"
+                        className="w-3.5 h-3.5"
                         fill="currentColor"
                         viewBox="0 0 24 24"
                       >
                         <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                       </svg>
-                      Verified
+                      Verified Company
                     </span>
                   )}
                 </div>
 
                 {/* Company Details - Industry & Size */}
                 {isCompany && (profile.company_size || profile.industry) && (
-                  <div className="flex flex-wrap items-center justify-center md:justify-start gap-2 mt-1.5 text-xs text-gray-500 dark:text-gray-400 font-medium">
+                  <div className="flex flex-wrap items-center justify-center sm:justify-start gap-3 mb-4 text-sm text-gray-600 dark:text-gray-400 font-medium">
                     {profile.industry && (
-                      <span className="uppercase tracking-wide">{profile.industry}</span>
-                    )}
-                    {profile.industry && profile.company_size && (
-                      <span className="w-1 h-1 rounded-full bg-gray-300 dark:bg-gray-600" />
+                      <span className="inline-block px-3 py-1 bg-gray-100 dark:bg-gray-800 rounded-lg text-xs font-semibold uppercase tracking-wide">
+                        {profile.industry}
+                      </span>
                     )}
                     {profile.company_size && (
-                      <span>{profile.company_size}+ employees</span>
+                      <span className="inline-block px-3 py-1 bg-gray-100 dark:bg-gray-800 rounded-lg text-xs font-semibold">
+                        {profile.company_size} employees
+                      </span>
                     )}
                   </div>
                 )}
               </div>
 
               {profile.bio && (
-                <p className="text-gray-600 dark:text-gray-300 text-sm leading-relaxed mb-4 whitespace-pre-line max-w-3xl mx-auto md:mx-0">
-                  {profile.bio}
-                </p>
+                <div
+                  className="prose dark:prose-invert prose-sm sm:prose-base max-w-3xl mx-auto md:mx-0 mb-6
+                             prose-p:text-gray-700 dark:prose-p:text-gray-300 prose-p:leading-relaxed
+                             prose-headings:text-gray-900 dark:prose-headings:text-gray-100 prose-headings:font-bold
+                             prose-ul:my-3 prose-ol:my-3 prose-li:my-1 prose-li:text-gray-700 dark:prose-li:text-gray-300
+                             prose-a:text-primary-blue dark:prose-a:text-blue-400 prose-a:font-semibold
+                             prose-strong:text-gray-900 dark:prose-strong:text-gray-100 prose-strong:font-bold
+                             prose-hr:border-gray-200 dark:prose-hr:border-gray-700"
+                  dangerouslySetInnerHTML={{ __html: profile.bio }}
+                />
               )}
 
               {/* Contact Info Grid */}
-              <div className="flex flex-wrap items-center justify-center md:justify-start gap-2 mb-4">
+              <div className="flex flex-wrap items-center justify-center sm:justify-start gap-3 mb-6">
                 {profile.location && (
-                  <div className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-100 dark:border-gray-700">
+                  <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-br from-blue-50 to-blue-100 dark:from-gray-800 dark:to-gray-700 rounded-lg border border-blue-200 dark:border-gray-600 shadow-sm">
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
                       fill="none"
                       viewBox="0 0 24 24"
                       strokeWidth={2}
                       stroke="currentColor"
-                      className="w-3.5 h-3.5 text-gray-400"
+                      className="w-4 h-4 text-blue-600 dark:text-blue-400"
                     >
                       <path
                         strokeLinecap="round"
@@ -298,7 +312,7 @@ export default function RecruiterProfilePage({
                         d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z"
                       />
                     </svg>
-                    <span className="text-xs font-medium text-gray-600 dark:text-gray-300">
+                    <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">
                       {profile.location}
                     </span>
                   </div>
@@ -308,7 +322,7 @@ export default function RecruiterProfilePage({
                     href={profile.company_website}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-blue-500 dark:hover:border-blue-500 transition-colors group"
+                    className="inline-flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-800 rounded-lg border border-gray-300 dark:border-gray-600 hover:border-primary-blue hover:shadow-md dark:hover:border-blue-500 transition-all group"
                   >
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
@@ -316,7 +330,7 @@ export default function RecruiterProfilePage({
                       viewBox="0 0 24 24"
                       strokeWidth={2}
                       stroke="currentColor"
-                      className="w-3.5 h-3.5 text-blue-500"
+                      className="w-4 h-4 text-primary-blue dark:text-blue-400"
                     >
                       <path
                         strokeLinecap="round"
@@ -324,8 +338,8 @@ export default function RecruiterProfilePage({
                         d="M12 21a9.004 9.004 0 0 0 8.716-6.747M12 21a9.004 9.004 0 0 1-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 0 1 7.843 4.582M12 3a8.997 8.997 0 0 0-7.843 4.582m15.686 0A11.953 11.953 0 0 1 12 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0 1 21 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0 1 12 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 0 1 3 12c0-1.605.42-3.113 1.157-4.418"
                       />
                     </svg>
-                    <span className="text-xs font-semibold text-primary-blue dark:text-blue-400">
-                      Visit Website
+                    <span className="text-sm font-semibold text-primary-blue dark:text-blue-400 group-hover:text-blue-700">
+                      Website
                     </span>
                   </a>
                 )}
@@ -334,19 +348,19 @@ export default function RecruiterProfilePage({
                     href={profile.linkedin_url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-blue-500 dark:hover:border-blue-500 transition-colors group"
+                    className="inline-flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-800 rounded-lg border border-gray-300 dark:border-gray-600 hover:border-primary-blue hover:shadow-md dark:hover:border-blue-500 transition-all"
                   >
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
-                      width="14"
-                      height="14"
+                      width="16"
+                      height="16"
                       viewBox="0 0 24 24"
                       fill="currentColor"
-                      className="text-primary-blue"
+                      className="text-primary-blue dark:text-blue-400"
                     >
                       <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z" />
                     </svg>
-                    <span className="text-xs font-semibold text-primary-blue dark:text-blue-400">
+                    <span className="text-sm font-semibold text-primary-blue dark:text-blue-400">
                       LinkedIn
                     </span>
                   </a>
@@ -384,31 +398,27 @@ export default function RecruiterProfilePage({
         </div>
       </section>
 
-      {/* Jobs and Events Section with Tab Switcher */}
-      {((Array.isArray(profile.recent_jobs) &&
-        profile.recent_jobs.length > 0) ||
-        (Array.isArray(profile.events) && profile.events.length > 0)) && (
-          <RecruiterProfileContent
-            jobs={Array.isArray(profile.recent_jobs) ? profile.recent_jobs : []}
-            events={Array.isArray(profile.events) ? profile.events : []}
-          />
-        )}
+      {/* Jobs and Events Section */}
+      <RecruiterProfilePublic
+        jobs={Array.isArray(profile.recent_jobs) ? profile.recent_jobs : []}
+        events={Array.isArray(profile.events) ? profile.events : []}
+      />
 
-      {/* Footer CTA */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 border-t border-gray-200 dark:border-gray-700">
-        <div className="max-w-3xl mx-auto text-center">
-          <h2 className="text-3xl md:text-4xl font-black text-gray-900 dark:text-gray-100 mb-4">
-            Interested in Working Together?
+      {/* Footer CTA - Improved */}
+      <section className="py-16 sm:py-24 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 border-t border-blue-500/20 dark:border-gray-700">
+        <div className="max-w-4xl mx-auto text-center">
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-white mb-4 leading-tight">
+            Ready to Join Our Team?
           </h2>
-          <p className="text-lg text-gray-600 dark:text-gray-400 mb-8 max-w-xl mx-auto">
-            Browse our open positions or get in touch to discuss opportunities.
+          <p className="text-lg sm:text-xl text-blue-100 dark:text-gray-300 mb-10 max-w-2xl mx-auto leading-relaxed">
+            Explore exciting career opportunities and be part of our growing
+            community of talented professionals.
           </p>
-          <div className="flex flex-wrap justify-center gap-4">
+          <div className="flex flex-col sm:flex-row justify-center items-center gap-4 sm:gap-6">
             <Link
               href="/jobs"
-              className="inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-primary-blue to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold text-base rounded-xl transition-all hover:scale-105 shadow-xl shadow-blue-500/25 dark:shadow-blue-500/10"
+              className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white hover:bg-blue-50 text-blue-700 font-bold text-base rounded-xl transition-all hover:shadow-xl hover:scale-105 shadow-lg w-full sm:w-auto"
             >
-              Browse All Jobs
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
@@ -423,14 +433,22 @@ export default function RecruiterProfilePage({
                   d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3"
                 />
               </svg>
+              Explore Open Positions
             </Link>
             <Link
               href="/candidate/login"
-              className="inline-flex items-center gap-3 px-8 py-4 bg-white dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 font-bold text-base rounded-xl hover:border-primary-blue dark:hover:border-blue-500 transition-all hover:scale-105 shadow-lg"
+              className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white/10 hover:bg-white/20 border-2 border-white text-white font-bold text-base rounded-xl transition-all w-full sm:w-auto"
             >
-              Candidate Login
+              Apply Now
             </Link>
           </div>
+          <p className="text-sm text-blue-100/70 dark:text-gray-400 mt-8">
+            Not ready yet?{" "}
+            <Link href="/blog" className="underline hover:text-blue-100">
+              Read our career blog
+            </Link>{" "}
+            for insights and tips.
+          </p>
         </div>
       </section>
     </div>
