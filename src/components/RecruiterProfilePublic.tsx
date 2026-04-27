@@ -64,109 +64,121 @@ export default function RecruiterProfilePublic({
 
   return (
     <div className="min-h-screen mt-12">
-      <div className="max-w-7xl mx-auto px-4 py-8">
-        {/* Header Card */}
-        <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden mb-8">
-          <div className="h-32 bg-gradient-to-r from-blue-600 to-indigo-700 relative">
+      <div className="overflow-hidden">
+        {profile.company_images && profile.company_images.length > 0 ? (
+          profile.company_images.map((img, index) => (
+            <div key={index} className="h-52 w-full relative">
+              <img
+                src={img}
+                alt={`company-${index}`}
+                className="w-full h-full object-cover"
+              />
+            </div>
+          ))
+        ) : (
+          <div className="h-52 bg-gradient-to-r from-blue-600 to-indigo-700 relative">
             <div className="absolute inset-0 opacity-20 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:20px_20px]" />
           </div>
-          <div className="px-8 pb-8">
-            <div className="relative flex flex-col md:flex-row md:items-end gap-6 -mt-12 mb-8">
-              {profile.company_logo_url && (
-                <div className="w-32 h-32 bg-white p-2 rounded-2xl shadow-lg border border-slate-100">
-                  <img
-                    src={profile.company_logo_url}
-                    className="w-full h-full object-contain rounded-xl"
-                    alt="Company Logo"
-                    referrerPolicy="no-referrer"
-                  />
-                </div>
-              )}
-              <div className="flex-1 pt-4 md:pt-0">
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                  <div>
-                    <h1 className="text-3xl font-extrabold tracking-tight text-slate-900 mb-1">
-                      {profile.company_name ||
-                        profile.display_name ||
-                        profile.full_name ||
-                        "Recruiter Profile"}
-                    </h1>
-                    <p className="text-slate-500 font-medium">
-                      {profile.specialization ||
-                        `${profile.years_experience || 0}+ years experience`}
-                    </p>
-                  </div>
+        )}
+        <div className="max-w-7xl mx-auto px-4 py-2">
+          <div className="relative flex flex-col md:flex-row md:items-end gap-6 -mt-12 mb-8">
+            {profile.company_logo_url && (
+              <div className="w-32 h-32 bg-white p-2 rounded-2xl shadow-lg border border-slate-100">
+                <img
+                  src={profile.company_logo_url}
+                  className="w-full h-full object-contain rounded-xl"
+                  alt="Company Logo"
+                  referrerPolicy="no-referrer"
+                />
+              </div>
+            )}
+            <div className="flex-1 pt-4 md:pt-0">
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                  <h1 className="text-3xl font-extrabold tracking-tight text-slate-900 mb-1">
+                    {profile.company_name ||
+                      profile.display_name ||
+                      profile.full_name ||
+                      "Recruiter Profile"}
+                  </h1>
+                  <p className="text-slate-500 font-medium">
+                    {profile.specialization ||
+                      `${profile.years_experience || 0}+ years experience`}
+                  </p>
                 </div>
               </div>
             </div>
+          </div>
 
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 py-6 border-t border-slate-100">
-              <div className="flex items-center gap-3 text-slate-600">
-                <div className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center">
-                  <Briefcase className="w-5 h-5 text-slate-400" />
-                </div>
-                <div>
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                    Industry
-                  </p>
-                  <p className="text-sm font-bold">
-                    {profile.industry || "Not specified"}
-                  </p>
-                </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 py-6 border-t border-slate-100">
+            <div className="flex items-center gap-3 text-slate-600">
+              <div className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center">
+                <Briefcase className="w-5 h-5 text-slate-400" />
               </div>
-              <div className="flex items-center gap-3 text-slate-600">
-                <div className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center">
-                  <Users className="w-5 h-5 text-slate-400" />
-                </div>
-                <div>
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                    Company Size
-                  </p>
-                  <p className="text-sm font-bold">
-                    {profile.company_size || "Not specified"}
-                  </p>
-                </div>
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                  Industry
+                </p>
+                <p className="text-sm font-bold">
+                  {profile.industry || "Not specified"}
+                </p>
               </div>
-              <div className="flex items-center gap-3 text-slate-600">
-                <div className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center">
-                  <MapPin className="w-5 h-5 text-slate-400" />
-                </div>
-                <div>
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                    Location
-                  </p>
-                  <p className="text-sm font-bold">
-                    {profile.location || "Not specified"}
-                  </p>
-                </div>
+            </div>
+            <div className="flex items-center gap-3 text-slate-600">
+              <div className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center">
+                <Users className="w-5 h-5 text-slate-400" />
               </div>
-              <div className="flex items-center gap-3 text-slate-600">
-                <div className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center">
-                  <ExternalLink className="w-5 h-5 text-slate-400" />
-                </div>
-                <div>
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                    Website
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                  Company Size
+                </p>
+                <p className="text-sm font-bold">
+                  {profile.company_size || "Not specified"}
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3 text-slate-600">
+              <div className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center">
+                <MapPin className="w-5 h-5 text-slate-400" />
+              </div>
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                  Location
+                </p>
+                <p className="text-sm font-bold">
+                  {profile.location || "Not specified"}
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3 text-slate-600">
+              <div className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center">
+                <ExternalLink className="w-5 h-5 text-slate-400" />
+              </div>
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                  Website
+                </p>
+                {profile.company_website ? (
+                  <a
+                    href={profile.company_website}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-sm font-bold text-blue-600 hover:underline"
+                  >
+                    Visit Site
+                  </a>
+                ) : (
+                  <p className="text-sm font-bold text-slate-400">
+                    Not available
                   </p>
-                  {profile.company_website ? (
-                    <a
-                      href={profile.company_website}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="text-sm font-bold text-blue-600 hover:underline"
-                    >
-                      Visit Site
-                    </a>
-                  ) : (
-                    <p className="text-sm font-bold text-slate-400">
-                      Not available
-                    </p>
-                  )}
-                </div>
+                )}
               </div>
             </div>
           </div>
         </div>
+      </div>
+      <div className="max-w-7xl mx-auto px-4 py-2">
+        {/* Header Card */}
 
         {/* Navigation Tabs */}
         <div className="flex border-b border-slate-200 mb-8 overflow-x-auto scrollbar-hide">
