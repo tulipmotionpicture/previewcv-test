@@ -2,6 +2,8 @@
  * TypeScript types and interfaces for PreviewCV application
  */
 
+import type { Job } from "./api";
+
 export interface ResumeData {
   success: boolean;
   resume_id: number;
@@ -101,8 +103,65 @@ export interface AccessLog {
   userAgent?: string;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface RecruiterProfile {}
+export interface EventImage {
+  id: number;
+  image_url: string;
+  caption?: string;
+  display_order?: number;
+}
+
+export interface CompanyEvent {
+  id: string | number;
+  title: string;
+  event_date?: string;
+  date?: string;
+  location?: string;
+  description: string;
+  type?: "Webinar" | "Hiring Drive" | "Workshop" | "Conference";
+  is_featured?: boolean;
+  images?: EventImage[];
+}
+
+export interface RecruiterProfile {
+  // Identity
+  id: number;
+  username: string;
+  display_name?: string;
+  full_name?: string;
+  company_name?: string;
+
+  // Company Info
+  company_website?: string;
+  company_logo_url?: string;
+  industry?: string;
+  company_size?: string;
+  location?: string;
+
+  // Social & Contact
+  linkedin_url?: string;
+  company_email?: string;
+  company_phone?: string;
+
+  // About
+  bio?: string;
+  specialization?: string;
+  years_experience?: number;
+
+  // Meta
+  recruiter_type?: string; // "company" | "recruiter" from API, kept flexible for type safety
+  is_verified?: boolean;
+  created_at?: string;
+  profile_url?: string;
+
+  // Relations
+  gallery?: {
+    images?: string[];
+    total_images?: number;
+  };
+  company_images?: string[];
+  recent_jobs?: Job[];
+  events?: CompanyEvent[];
+}
 
 export interface ReviewedResumeMetadata {
   personal_details: {
