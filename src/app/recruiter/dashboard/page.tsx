@@ -21,6 +21,7 @@ import RecruiterProfileEdit from "./profile/page";
 import KYCVerification from "@/components/recruiter/KYCVerification";
 import PricingPlans from "@/components/recruiter/PricingPlans";
 import SubscriptionDashboard from "@/components/recruiter/SubscriptionDashboard";
+import JobCreationPage from "@/components/recruiter/CreateJob";
 
 // Import separated components
 import {
@@ -370,7 +371,7 @@ export default function RecruiterDashboard() {
         await api.updateJob(jobId, data);
         toast.success("Job updated successfully!");
       } else {
-        const e = { preventDefault: () => { } } as React.FormEvent;
+        const e = { preventDefault: () => {} } as React.FormEvent;
 
         const payload = {
           title: data.title || "",
@@ -438,12 +439,12 @@ export default function RecruiterDashboard() {
         setSelectedApplicationDetail((prev) =>
           prev
             ? {
-              ...prev,
-              application: {
-                ...prev.application,
-                status: newStatus as Application["status"],
-              },
-            }
+                ...prev,
+                application: {
+                  ...prev.application,
+                  status: newStatus as Application["status"],
+                },
+              }
             : null,
         );
       }
@@ -548,10 +549,7 @@ export default function RecruiterDashboard() {
                         </h2>
                       </div>
                       <button
-                        onClick={() => {
-                          setActiveTab("jobs");
-                          setJobManagementView("create");
-                        }}
+                        onClick={() => setActiveTab("createJob")}
                         className="flex items-center gap-2 px-4 py-2.5 bg-primary-blue hover:bg-primary-blue-hover text-white rounded-lg font-medium transition-colors shadow-sm text-sm"
                       >
                         <Plus className="w-4 h-4" />
@@ -564,7 +562,7 @@ export default function RecruiterDashboard() {
                       loadingJobs={loadingJobs}
                       currentPage={1}
                       totalPages={1}
-                      onPageChange={() => { }}
+                      onPageChange={() => {}}
                       onEditJob={handleEditJob}
                       onDeleteJob={(jobId) => setDeleteJobId(jobId)}
                       onViewApplications={handleViewApplications}
@@ -580,51 +578,51 @@ export default function RecruiterDashboard() {
                       <div className="divide-y divide-gray-100 dark:divide-gray-700">
                         {applications.slice(0, 6).length > 0
                           ? applications.slice(0, 6).map((app) => (
-                            <div
-                              key={app.id}
-                              className="flex items-center gap-4 p-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors cursor-pointer group first:rounded-t-2xl last:rounded-b-2xl"
-                              onClick={() => handleViewApplicationDetail(app)}
-                            >
-                              <div className="w-10 h-10 rounded-full bg-[#2F4269] flex items-center justify-center text-white font-bold text-sm shadow-sm flex-shrink-0">
-                                {app.candidate_name
-                                  ?.substring(0, 2)
-                                  .toUpperCase() || "JD"}
-                              </div>
-                              <div className="flex-1 min-w-0">
-                                <div className="font-bold text-gray-900 dark:text-gray-100 truncate text-[15px]">
-                                  {app.candidate_name || "John Deo"}
+                              <div
+                                key={app.id}
+                                className="flex items-center gap-4 p-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors cursor-pointer group first:rounded-t-2xl last:rounded-b-2xl"
+                                onClick={() => handleViewApplicationDetail(app)}
+                              >
+                                <div className="w-10 h-10 rounded-full bg-[#2F4269] flex items-center justify-center text-white font-bold text-sm shadow-sm flex-shrink-0">
+                                  {app.candidate_name
+                                    ?.substring(0, 2)
+                                    .toUpperCase() || "JD"}
                                 </div>
-                                <div className="text-xs text-[#60768D] dark:text-gray-400 font-medium mt-0.5">
-                                  Application Review
+                                <div className="flex-1 min-w-0">
+                                  <div className="font-bold text-gray-900 dark:text-gray-100 truncate text-[15px]">
+                                    {app.candidate_name || "John Deo"}
+                                  </div>
+                                  <div className="text-xs text-[#60768D] dark:text-gray-400 font-medium mt-0.5">
+                                    Application Review
+                                  </div>
+                                </div>
+                                <div className="w-10 h-10 rounded-full border border-gray-200 dark:border-gray-700 flex items-center justify-center bg-white dark:bg-[#282727] group-hover:bg-gray-50 dark:group-hover:bg-gray-700 transition-colors">
+                                  <Clock className="w-5 h-5 text-gray-400 group-hover:text-gray-600 dark:group-hover:text-gray-300 stroke-1" />
                                 </div>
                               </div>
-                              <div className="w-10 h-10 rounded-full border border-gray-200 dark:border-gray-700 flex items-center justify-center bg-white dark:bg-[#282727] group-hover:bg-gray-50 dark:group-hover:bg-gray-700 transition-colors">
-                                <Clock className="w-5 h-5 text-gray-400 group-hover:text-gray-600 dark:group-hover:text-gray-300 stroke-1" />
-                              </div>
-                            </div>
-                          ))
+                            ))
                           : // Fallback mock items
-                          [1, 2, 3, 4, 5, 6].map((i) => (
-                            <div
-                              key={i}
-                              className="flex items-center gap-4 p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors cursor-pointer group first:rounded-t-2xl last:rounded-b-2xl"
-                            >
-                              <div className="w-12 h-12 rounded-full bg-[#2F4269] flex items-center justify-center text-white font-bold text-sm shadow-sm flex-shrink-0">
-                                JD
-                              </div>
-                              <div className="flex-1 min-w-0">
-                                <div className="font-bold text-gray-900 dark:text-gray-100 truncate text-[15px]">
-                                  John Deo
+                            [1, 2, 3, 4, 5, 6].map((i) => (
+                              <div
+                                key={i}
+                                className="flex items-center gap-4 p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors cursor-pointer group first:rounded-t-2xl last:rounded-b-2xl"
+                              >
+                                <div className="w-12 h-12 rounded-full bg-[#2F4269] flex items-center justify-center text-white font-bold text-sm shadow-sm flex-shrink-0">
+                                  JD
                                 </div>
-                                <div className="text-xs text-[#60768D] dark:text-gray-400 font-medium mt-0.5">
-                                  Application Review
+                                <div className="flex-1 min-w-0">
+                                  <div className="font-bold text-gray-900 dark:text-gray-100 truncate text-[15px]">
+                                    John Deo
+                                  </div>
+                                  <div className="text-xs text-[#60768D] dark:text-gray-400 font-medium mt-0.5">
+                                    Application Review
+                                  </div>
+                                </div>
+                                <div className="w-10 h-10 rounded-full border border-gray-200 dark:border-gray-700 flex items-center justify-center bg-white dark:bg-[#282727] group-hover:bg-gray-50 dark:group-hover:bg-gray-700 transition-colors">
+                                  <Clock className="w-5 h-5 text-gray-400 group-hover:text-gray-600 dark:group-hover:text-gray-300 stroke-1" />
                                 </div>
                               </div>
-                              <div className="w-10 h-10 rounded-full border border-gray-200 dark:border-gray-700 flex items-center justify-center bg-white dark:bg-[#282727] group-hover:bg-gray-50 dark:group-hover:bg-gray-700 transition-colors">
-                                <Clock className="w-5 h-5 text-gray-400 group-hover:text-gray-600 dark:group-hover:text-gray-300 stroke-1" />
-                              </div>
-                            </div>
-                          ))}
+                            ))}
                       </div>
                       <div className="p-4 border-t border-gray-100 dark:border-gray-700"></div>
                     </div>
@@ -671,6 +669,7 @@ export default function RecruiterDashboard() {
             onEditJob={handleEditJob}
             onDeleteJob={(jobId) => setDeleteJobId(jobId)}
             onViewApplications={handleViewApplications}
+            onCreateNewJob={() => setActiveTab("createJob")}
           />
         )}
 
@@ -720,6 +719,11 @@ export default function RecruiterDashboard() {
           />
         )}
 
+        {activeTab === "createJob" && (
+          <JobCreationPage
+            onNavigateToPricing={() => setActiveTab("createJob")}
+          />
+        )}
         {activeTab === "pricing" && <PricingPlans />}
       </main>
 

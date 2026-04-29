@@ -10,6 +10,7 @@ export type JobManagementTab = "create" | "manage";
 
 export type JobFormState = {
   title: string;
+  company_name: string;
   country: string;
   countryCode?: string;
   state: string;
@@ -38,6 +39,7 @@ export type JobFormState = {
   salary_max: string;
   salary_currency: string;
   is_remote: boolean;
+  is_active: boolean;
   required_skills: string;
   preferred_skills: string;
   categories: string;
@@ -45,6 +47,7 @@ export type JobFormState = {
 
 export const JOB_FORM_INITIAL: JobFormState = {
   title: "",
+  company_name: "",
   country: "",
   countryCode: "",
   state: "",
@@ -59,6 +62,7 @@ export const JOB_FORM_INITIAL: JobFormState = {
   salary_max: "",
   salary_currency: "USD",
   is_remote: false,
+  is_active: true,
   required_skills: "",
   preferred_skills: "",
   categories: "",
@@ -95,6 +99,7 @@ interface JobManagementProps {
   onEditJob: (job: Job) => void;
   onDeleteJob: (jobId: number) => void;
   onViewApplications: (jobId: number) => void;
+  onCreateNewJob?: () => void;
 }
 
 export default function JobManagement({
@@ -115,6 +120,7 @@ export default function JobManagement({
   onViewApplications,
   activeView,
   onViewChange,
+  onCreateNewJob,
 }: JobManagementProps) {
   const [internalActiveTab, setInternalActiveTab] =
     useState<JobManagementTab>("manage");
@@ -195,7 +201,7 @@ export default function JobManagement({
       <div className="flex items-end justify-between mb-2">
         <div></div>
         <button
-          onClick={() => handleTabChange("create")}
+          onClick={() => onCreateNewJob ? onCreateNewJob() : handleTabChange("create")}
           className="flex items-center gap-2 px-3.5 py-2.5 bg-primary-blue hover:bg-primary-blue-hover text-white text-sm rounded-lg font-medium transition-colors shadow-sm"
         >
           <Plus className="w-4 h-4" />
