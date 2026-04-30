@@ -161,6 +161,22 @@ export default function JobCreationPage({
   const back = () => setStep((s) => Math.max(s - 1, 0));
 
   const submit = async () => {
+    if (
+      !form.title ||
+      !form.company_name ||
+      !form.country ||
+      !form.city ||
+      !form.job_type ||
+      !form.experience_level ||
+      !form.description ||
+      !form.requirements ||
+      !form.salary_min ||
+      !form.salary_max
+    ) {
+      showToast("Please fill all the required fields before submitting.", "error");
+      return;
+    }
+
     try {
       setLoading(true);
 
@@ -227,7 +243,11 @@ export default function JobCreationPage({
   };
 
   return (
-    <div className="mx-auto">
+    <form className="mx-auto" onSubmit={(e) => {
+      e.preventDefault();
+      if (step === 3) submit();
+      else next();
+    }}>
       {/* PROGRESS BAR */}
       <div className="mb-12">
         <div className="flex justify-between items-start mb-2">
@@ -382,7 +402,9 @@ export default function JobCreationPage({
                       name="job_type"
                       value={form.job_type}
                       onChange={handleChange}
+                      required
                       options={[
+                        { value: "", label: "Select Job Type" },
                         { value: "full_time", label: "Full Time" },
                         { value: "part_time", label: "Part Time" },
                         { value: "contract", label: "Contract" },
@@ -401,7 +423,9 @@ export default function JobCreationPage({
                       name="experience_level"
                       value={form.experience_level}
                       onChange={handleChange}
+                      required
                       options={[
+                        { value: "", label: "Select Experience Level" },
                         { value: "entry", label: "Entry Level" },
                         { value: "junior", label: "Junior" },
                         { value: "mid", label: "Mid Level" },
@@ -1212,6 +1236,7 @@ export default function JobCreationPage({
       {/* FOOTER */}
       <div className="flex justify-between items-center mt-12 pt-6 border-t border-gray-200 dark:border-gray-700">
         <button
+          type="button"
           onClick={back}
           disabled={step === 0}
           className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition"
@@ -1220,7 +1245,7 @@ export default function JobCreationPage({
         </button>
 
         <button
-          onClick={step === 3 ? submit : next}
+          type="submit"
           disabled={loading}
           className="flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-lg text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed transition shadow-lg"
         >
@@ -1237,6 +1262,6 @@ export default function JobCreationPage({
           )}
         </button>
       </div>
-    </div>
+    </form>
   );
 }
