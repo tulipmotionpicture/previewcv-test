@@ -403,7 +403,7 @@ export default function App({ jobs, events }: RecruiterProfileContentProps) {
             {[
               {
                 id: "company_profile",
-                label: "Company Profile",
+                label: `${profile.recruiterType === "company" ? "Company Profile" : "Profile"}`,
                 icon: Building2,
               },
               {
@@ -415,11 +415,10 @@ export default function App({ jobs, events }: RecruiterProfileContentProps) {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as TabType)}
-                className={`flex items-center gap-2 py-4 text-sm font-bold transition-all relative whitespace-nowrap ${
-                  activeTab === tab.id
-                    ? "text-blue-600 dark:text-blue-400"
-                    : "text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-400"
-                }`}
+                className={`flex items-center gap-2 py-4 text-sm font-bold transition-all relative whitespace-nowrap ${activeTab === tab.id
+                  ? "text-blue-600 dark:text-blue-400"
+                  : "text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-400"
+                  }`}
               >
                 <tab.icon className="w-4 h-4" />
                 {tab.label}
