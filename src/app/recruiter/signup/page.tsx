@@ -6,6 +6,9 @@ import config from "@/config";
 import Image from "next/image";
 import Link from "next/link";
 import { useRecruiterAuth } from "@/context/RecruiterAuthContext";
+import { api } from "@/lib/api";
+import CountrySearch from "@/components/location/CountrySearch";
+import CitySearch from "@/components/location/CitySearch";
 import {
   Users,
   TrendingUp,
@@ -41,16 +44,64 @@ export default function RecruiterSignup() {
     companyWebsite: "",
     companySize: "",
     industry: "",
+    founded: "",
     // Individual fields
     specialization: "",
     yearsExperience: "",
     // Common fields
     phone: "",
-    location: "",
+    country: "",
+    countryCode: "",
+    city: "",
     agreeToTerms: false,
   });
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [usernameStatus, setUsernameStatus] = useState<
+    "idle" | "checking" | "available" | "unavailable"
+  >("idle");
+  const [usernameMessage, setUsernameMessage] = useState("");
+
+  useEffect(() => {
+    const timer = setTimeout(async () => {
+      if (!formData.username || formData.username.length < 3) {
+        setUsernameStatus("idle");
+        setUsernameMessage("");
+        return;
+      }
+
+      setUsernameStatus("checking");
+      try {
+        const res = await api.checkRecruiterAvailability(formData.username);
+        if (res.username) {
+          if (res.username.available) {
+            setUsernameStatus("available");
+            setUsernameMessage("Username is available");
+          } else {
+            setUsernameStatus("unavailable");
+            setUsernameMessage(
+              res.username.reason === "taken"
+                ? "Username is already taken"
+                : res.username.reason === "too_short"
+                  ? "Username is too short"
+                  : res.username.reason === "too_long"
+                    ? "Username is too long"
+                    : res.username.reason === "invalid_format"
+                      ? "Invalid username format"
+                      : res.username.reason === "reserved"
+                        ? "This username is reserved"
+                        : "Username is not available"
+            );
+          }
+        }
+      } catch (err) {
+        setUsernameStatus("idle");
+        setUsernameMessage("");
+      }
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [formData.username]);
 
   useEffect(() => {
     console.log("RecruiterSignup: Auth state:", {
@@ -127,28 +178,54 @@ export default function RecruiterSignup() {
       return;
     }
 
-    if (formData.recruiterType === "individual" && !formData.specialization) {
-      setError("Specialization is required");
+    if (formData.recruiterType === "individual" && !formData.fullName) {
+      setError("Full name is required");
+      return;
+    }
+
+    if (!formData.country) {
+      setError("Country is required");
+      return;
+    }
+
+    if (!formData.city) {
+      setError("City is required");
+      return;
+    }
+
+    if (usernameStatus === "unavailable") {
+      setError(usernameMessage || "Please choose a valid username");
       return;
     }
 
     setIsLoading(true);
 
     try {
-      await register({
+      const payload: any = {
         email: formData.email,
         password: formData.password,
-        full_name: formData.fullName,
         username: formData.username,
-        // company_name: formData.companyName,
-        // company_website: formData.companyWebsite,
-        // phone: formData.phone,
-        // bio:
-        //   formData.recruiterType === "individual"
-        //     ? `Specialization: ${formData.specialization}, Experience: ${formData.yearsExperience}`
-        //     : `Industry: ${formData.industry}, Size: ${formData.companySize}`,
         recruiter_type: formData.recruiterType,
-      });
+        phone: formData.phone,
+        country: formData.country,
+        city: formData.city,
+        full_name: formData.fullName,
+      };
+
+      if (formData.recruiterType === "company") {
+        payload.company_name = formData.companyName;
+        payload.company_website = formData.companyWebsite;
+        payload.company_size = formData.companySize;
+        payload.industry = formData.industry;
+        if (formData.founded) payload.founded = parseInt(formData.founded, 10);
+      } else {
+        payload.specialization = formData.specialization;
+        if (formData.yearsExperience) payload.years_experience = parseInt(formData.yearsExperience, 10);
+      }
+
+      console.log("Recruiter Signup Payload: ", payload);
+
+      await register(payload);
       router.push("/recruiter/dashboard");
     } catch (err: unknown) {
       if (err instanceof Error) {
@@ -285,11 +362,10 @@ export default function RecruiterSignup() {
                 </label>
                 <div className="grid grid-cols-2 gap-3">
                   <label
-                    className={`relative flex flex-col items-center justify-center p-5 border-2 rounded-2xl cursor-pointer transition-all group ${
-                      formData.recruiterType === "company"
-                        ? "border-teal-dark dark:border-mint bg-teal-dark/5 dark:bg-teal-dark/10 shadow-sm"
-                        : "border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 hover:border-teal-dark/50 dark:hover:border-mint/50 hover:shadow-sm"
-                    }`}
+                    className={`relative flex flex-col items-center justify-center p-5 border-2 rounded-2xl cursor-pointer transition-all group ${formData.recruiterType === "company"
+                      ? "border-teal-dark dark:border-mint bg-teal-dark/5 dark:bg-teal-dark/10 shadow-sm"
+                      : "border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 hover:border-teal-dark/50 dark:hover:border-mint/50 hover:shadow-sm"
+                      }`}
                   >
                     <input
                       type="radio"
@@ -300,11 +376,10 @@ export default function RecruiterSignup() {
                       className="sr-only"
                     />
                     <div
-                      className={`w-14 h-14 rounded-xl flex items-center justify-center mb-3 transition-all ${
-                        formData.recruiterType === "company"
-                          ? "bg-teal-dark dark:bg-teal-dark/20 text-white dark:text-mint"
-                          : "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 group-hover:bg-teal-dark/10 dark:group-hover:bg-teal-dark/10 group-hover:text-teal-dark dark:group-hover:text-mint"
-                      }`}
+                      className={`w-14 h-14 rounded-xl flex items-center justify-center mb-3 transition-all ${formData.recruiterType === "company"
+                        ? "bg-teal-dark dark:bg-teal-dark/20 text-white dark:text-mint"
+                        : "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 group-hover:bg-teal-dark/10 dark:group-hover:bg-teal-dark/10 group-hover:text-teal-dark dark:group-hover:text-mint"
+                        }`}
                     >
                       <Building2 size={28} strokeWidth={2} />
                     </div>
@@ -335,11 +410,10 @@ export default function RecruiterSignup() {
                     )}
                   </label>
                   <label
-                    className={`relative flex flex-col items-center justify-center p-5 border-2 rounded-2xl cursor-pointer transition-all group ${
-                      formData.recruiterType === "individual"
-                        ? "border-teal-dark dark:border-mint bg-teal-dark/5 dark:bg-teal-dark/10 shadow-sm"
-                        : "border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 hover:border-teal-dark/50 dark:hover:border-mint/50 hover:shadow-sm"
-                    }`}
+                    className={`relative flex flex-col items-center justify-center p-5 border-2 rounded-2xl cursor-pointer transition-all group ${formData.recruiterType === "individual"
+                      ? "border-teal-dark dark:border-mint bg-teal-dark/5 dark:bg-teal-dark/10 shadow-sm"
+                      : "border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 hover:border-teal-dark/50 dark:hover:border-mint/50 hover:shadow-sm"
+                      }`}
                   >
                     <input
                       type="radio"
@@ -350,11 +424,10 @@ export default function RecruiterSignup() {
                       className="sr-only"
                     />
                     <div
-                      className={`w-14 h-14 rounded-xl flex items-center justify-center mb-3 transition-all ${
-                        formData.recruiterType === "individual"
-                          ? "bg-teal-dark dark:bg-teal-dark/20 text-white dark:text-mint"
-                          : "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 group-hover:bg-teal-dark/10 dark:group-hover:bg-teal-dark/10 group-hover:text-teal-dark dark:group-hover:text-mint"
-                      }`}
+                      className={`w-14 h-14 rounded-xl flex items-center justify-center mb-3 transition-all ${formData.recruiterType === "individual"
+                        ? "bg-teal-dark dark:bg-teal-dark/20 text-white dark:text-mint"
+                        : "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 group-hover:bg-teal-dark/10 dark:group-hover:bg-teal-dark/10 group-hover:text-teal-dark dark:group-hover:text-mint"
+                        }`}
                     >
                       <User size={28} strokeWidth={2} />
                     </div>
@@ -405,19 +478,34 @@ export default function RecruiterSignup() {
                 </div>
 
                 {/* Full Name */}
-                <div>
-                  <label className="block text-sm font-semibold text-gray-900 dark:text-gray-100 mb-2">
-                    Full Name
-                  </label>
-                  <input
-                    type="text"
-                    name="fullName"
-                    required
-                    className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-teal-dark dark:focus:ring-mint focus:border-transparent outline-none transition-all text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
-                    value={formData.fullName}
-                    onChange={handleChange}
-                    placeholder="John Doe"
-                  />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-900 dark:text-gray-100 mb-2">
+                      Full Name {formData.recruiterType === "individual" && "*"}
+                    </label>
+                    <input
+                      type="text"
+                      name="fullName"
+                      required={formData.recruiterType === "individual"}
+                      className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-teal-dark dark:focus:ring-mint focus:border-transparent outline-none transition-all text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
+                      value={formData.fullName}
+                      onChange={handleChange}
+                      placeholder="John Doe"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-900 dark:text-gray-100 mb-2">
+                      Phone Number
+                    </label>
+                    <input
+                      type="tel"
+                      name="phone"
+                      className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-teal-dark dark:focus:ring-mint focus:border-transparent outline-none transition-all text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
+                      value={formData.phone}
+                      onChange={handleChange}
+                      placeholder="+1 (555) 123-4567"
+                    />
+                  </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -493,12 +581,45 @@ export default function RecruiterSignup() {
                       type="text"
                       name="username"
                       required
-                      className="w-full pl-[200px] pr-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-teal-dark dark:focus:ring-mint focus:border-transparent outline-none transition-all text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
+                      className={`w-full pl-[200px] pr-10 py-3 bg-gray-50 dark:bg-gray-800 border rounded-xl focus:ring-2 focus:ring-teal-dark dark:focus:ring-mint focus:border-transparent outline-none transition-all text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 ${usernameStatus === "unavailable"
+                          ? "border-red-500 focus:ring-red-500"
+                          : usernameStatus === "available"
+                            ? "border-green-500 focus:ring-green-500"
+                            : "border-gray-200 dark:border-gray-700"
+                        }`}
                       value={formData.username}
                       onChange={handleChange}
                       placeholder="your-username"
                     />
+                    {usernameStatus === "checking" && (
+                      <span className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 border-2 border-gray-300 border-t-teal-dark rounded-full animate-spin"></span>
+                    )}
+                    {usernameStatus === "available" && (
+                      <svg
+                        className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-green-500"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M5 13l4 4L19 7"
+                        />
+                      </svg>
+                    )}
                   </div>
+                  {usernameMessage && (
+                    <p
+                      className={`text-xs mt-1.5 font-medium ${usernameStatus === "available"
+                          ? "text-green-600 dark:text-green-400"
+                          : "text-red-600 dark:text-red-400"
+                        }`}
+                    >
+                      {usernameMessage}
+                    </p>
+                  )}
                 </div>
               </div>
 
@@ -511,7 +632,7 @@ export default function RecruiterSignup() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                       <label className="block text-sm font-semibold text-gray-900 dark:text-gray-100 mb-2">
-                        Company Name
+                        Company Name *
                       </label>
                       <input
                         type="text"
@@ -534,6 +655,21 @@ export default function RecruiterSignup() {
                         value={formData.companyWebsite}
                         onChange={handleChange}
                         placeholder="https://company.com"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-900 dark:text-gray-100 mb-2">
+                        Founded Year
+                      </label>
+                      <input
+                        type="number"
+                        name="founded"
+                        min="1800"
+                        max={new Date().getFullYear()}
+                        className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-teal-dark dark:focus:ring-mint focus:border-transparent outline-none transition-all text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
+                        value={formData.founded}
+                        onChange={handleChange}
+                        placeholder="e.g. 2010"
                       />
                     </div>
                     <div>
@@ -612,28 +748,73 @@ export default function RecruiterSignup() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-6 border-t border-gray-200 dark:border-gray-700">
                 <div>
                   <label className="block text-sm font-semibold text-gray-900 dark:text-gray-100 mb-2">
-                    Phone Number
+                    Country *
                   </label>
-                  <input
-                    type="tel"
-                    name="phone"
-                    className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-teal-dark dark:focus:ring-mint focus:border-transparent outline-none transition-all text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
-                    value={formData.phone}
-                    onChange={handleChange}
-                    placeholder="+1 (555) 123-4567"
+                  <CountrySearch
+                    country={formData.country}
+                    renderInput={({
+                      value,
+                      onChange,
+                      onFocus,
+                      onBlur,
+                      onKeyDown,
+                    }) => (
+                      <input
+                        type="text"
+                        name="country"
+                        required
+                        className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-teal-dark dark:focus:ring-mint focus:border-transparent outline-none transition-all text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
+                        value={value}
+                        onChange={onChange}
+                        onFocus={onFocus}
+                        onBlur={onBlur}
+                        onKeyDown={onKeyDown}
+                        placeholder="e.g. USA"
+                      />
+                    )}
+                    onChange={(c) => {
+                      setFormData((prev) => ({
+                        ...prev,
+                        country: c ? c.name : "",
+                        countryCode: c ? c.code : "",
+                        city: "",
+                      }));
+                    }}
                   />
                 </div>
                 <div>
                   <label className="block text-sm font-semibold text-gray-900 dark:text-gray-100 mb-2">
-                    Location
+                    City *
                   </label>
-                  <input
-                    type="text"
-                    name="location"
-                    className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-teal-dark dark:focus:ring-mint focus:border-transparent outline-none transition-all text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
-                    value={formData.location}
-                    onChange={handleChange}
-                    placeholder="San Francisco, CA"
+                  <CitySearch
+                    city={formData.city}
+                    countryCode={formData.countryCode}
+                    renderInput={({
+                      value,
+                      onChange,
+                      onFocus,
+                      onBlur,
+                      onKeyDown,
+                    }) => (
+                      <input
+                        type="text"
+                        name="city"
+                        required
+                        className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-teal-dark dark:focus:ring-mint focus:border-transparent outline-none transition-all text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
+                        value={value}
+                        onChange={onChange}
+                        onFocus={onFocus}
+                        onBlur={onBlur}
+                        onKeyDown={onKeyDown}
+                        placeholder="e.g. San Francisco"
+                      />
+                    )}
+                    onChange={(c) => {
+                      setFormData((prev) => ({
+                        ...prev,
+                        city: c ? c.name : "",
+                      }));
+                    }}
                   />
                 </div>
               </div>

@@ -338,6 +338,25 @@ export class ApiClient {
     });
   }
 
+  async checkRecruiterAvailability(
+    username?: string,
+    company_name?: string,
+  ): Promise<{
+    username?: { value: string; available: boolean; reason: string | null };
+    company_name?: { value: string; available: boolean; reason: string | null; soft_check: boolean };
+  }> {
+    const params = new URLSearchParams();
+    if (username) params.append("username", username);
+    if (company_name) params.append("company_name", company_name);
+    
+    return this.request(
+      `/api/v1/recruiters/auth/check-availability?${params.toString()}`,
+      {},
+      false,
+      false,
+    );
+  }
+
   async getRecruiterProfile(): Promise<Recruiter> {
     return this.request<Recruiter>(
       "/api/v1/recruiters/profile/me",
