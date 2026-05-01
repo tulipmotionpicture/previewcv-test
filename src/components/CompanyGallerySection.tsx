@@ -338,7 +338,7 @@ function CompanyGallerySection({
         {/* Office Gallery Section */}
         <div>
           <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-            Gallery
+            Page Banner
           </h2>
 
           <div className="grid grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-2">
@@ -376,6 +376,7 @@ function CompanyGallerySection({
                 <>
                   <Plus className="w-5 h-5 mb-1 group-hover:scale-110 transition-transform" />
                   <span className="text-[10px] font-medium">Add Photo</span>
+                  <span className="text-[8px] font-medium">Only less than 1MB is allowed and oriantation 6:1 </span>
                 </>
               )}
             </button>
@@ -385,6 +386,7 @@ function CompanyGallerySection({
               ref={galleryInputRef}
               onChange={handleGalleryUpload}
               className="hidden"
+
             />
           </div>
         </div>

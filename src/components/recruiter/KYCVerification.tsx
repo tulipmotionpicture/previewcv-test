@@ -293,22 +293,22 @@ export default function KYCVerification() {
               <div className="flex items-center gap-3">
                 <div
                   className={`p-2.5 rounded-lg ${kycStatus.kyc_status === "approved"
-                      ? "bg-green-100 dark:bg-green-900/30"
-                      : kycStatus.kyc_status === "pending_review"
-                        ? "bg-yellow-100 dark:bg-yellow-900/30"
-                        : kycStatus.kyc_status === "rejected"
-                          ? "bg-red-100 dark:bg-red-900/30"
-                          : "bg-gray-100 dark:bg-gray-700"
+                    ? "bg-green-100 dark:bg-green-900/30"
+                    : kycStatus.kyc_status === "pending_review"
+                      ? "bg-yellow-100 dark:bg-yellow-900/30"
+                      : kycStatus.kyc_status === "rejected"
+                        ? "bg-red-100 dark:bg-red-900/30"
+                        : "bg-gray-100 dark:bg-gray-700"
                     }`}
                 >
                   <Shield
                     className={`w-5 h-5 ${kycStatus.kyc_status === "approved"
-                        ? "text-green-600 dark:text-green-400"
-                        : kycStatus.kyc_status === "pending_review"
-                          ? "text-yellow-600 dark:text-yellow-400"
-                          : kycStatus.kyc_status === "rejected"
-                            ? "text-red-600 dark:text-red-400"
-                            : "text-gray-500 dark:text-gray-400"
+                      ? "text-green-600 dark:text-green-400"
+                      : kycStatus.kyc_status === "pending_review"
+                        ? "text-yellow-600 dark:text-yellow-400"
+                        : kycStatus.kyc_status === "rejected"
+                          ? "text-red-600 dark:text-red-400"
+                          : "text-gray-500 dark:text-gray-400"
                       }`}
                   />
                 </div>
@@ -328,7 +328,7 @@ export default function KYCVerification() {
                 </div>
               </div>
 
-              {kycStatus.kyc_status === "not_submitted" &&
+              {kycStatus.can_resubmit &&
                 documents.length > 0 && (
                   <button
                     onClick={handleSubmitForReview}
@@ -721,20 +721,25 @@ export default function KYCVerification() {
                           >
                             <Download className="w-4 h-4" />
                           </button>
-                          <button
-                            onClick={() => handleEditDocument(doc)}
-                            className="p-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"
-                            title="Edit"
-                          >
-                            <Pencil className="w-4 h-4" />
-                          </button>
-                          <button
-                            onClick={() => handleDelete(doc.id)}
-                            className="p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors"
-                            title="Delete"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
+
+                          {doc.status === "uploaded" && (
+                            <>
+                              <button
+                                onClick={() => handleEditDocument(doc)}
+                                className="p-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"
+                                title="Edit"
+                              >
+                                <Pencil className="w-4 h-4" />
+                              </button>
+                              <button
+                                onClick={() => handleDelete(doc.id)}
+                                className="p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors"
+                                title="Delete"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </>
+                          )}
                         </div>
                       </td>
                     </tr>

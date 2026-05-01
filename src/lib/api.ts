@@ -214,13 +214,26 @@ export class ApiClient {
 
     if (!response.ok) {
       let errorMsg = "An error occurred";
+      let errorData: any = null;
       try {
-        const error = await response.json();
-        errorMsg = error.detail || error.message || errorMsg;
+        errorData = await response.json();
+        if (errorData.detail && typeof errorData.detail === 'object' && errorData.detail.message) {
+          errorMsg = errorData.detail.message;
+        } else if (errorData.detail && typeof errorData.detail === 'string') {
+          errorMsg = errorData.detail;
+        } else {
+          errorMsg = errorData.message || errorMsg;
+        }
       } catch {
         // ignore json parse error
       }
-      throw new Error(errorMsg);
+      const err: any = new Error(errorMsg);
+      err.status = response.status;
+      if (errorData) {
+        err.response = errorData;
+        err.detail = errorData.detail;
+      }
+      throw err;
     }
 
     return response.json();

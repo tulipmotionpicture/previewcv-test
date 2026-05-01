@@ -201,7 +201,7 @@ export default function JobCreationPage({
           .filter(Boolean)
         : [];
 
-      await api.createJob({
+      const response = await api.createJob({
         title: form.title,
         company_name: form.company_name,
         country: form.country,
@@ -223,7 +223,7 @@ export default function JobCreationPage({
       });
 
       showToast("Job posted successfully 🚀", "success");
-      
+
       // Clear form
       setForm(JOB_FORM_INITIAL);
       setStep(0);
@@ -233,10 +233,12 @@ export default function JobCreationPage({
       setSkillInput("");
       setPrefSkillInput("");
 
+      console.log("Job created successfully:", response);
       router.push("/recruiter/dashboard?tab=jobs");
-    } catch (e) {
-      console.error("Job creation error:", e);
-      showToast("Failed to create job. Please try again.", "error");
+    } catch (e: any) {
+      console.error("Job creation failed:", e);
+      const errorMessage = e.detail?.message || e.message || "Failed to create job. Please try again.";
+      showToast(errorMessage, "error");
     } finally {
       setLoading(false);
     }

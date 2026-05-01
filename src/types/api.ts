@@ -372,6 +372,7 @@ export interface KycStatus {
   uploaded_documents_count: number;
   approved_documents_count: number;
   rejected_documents_count: number;
+  can_resubmit: boolean;
   pending_documents_count: number;
 }
 
