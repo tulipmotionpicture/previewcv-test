@@ -2,10 +2,11 @@
 
 import React, { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { ChevronLeft, ChevronRight, Plus, X, Check } from "lucide-react";
+import { ChevronLeft, ChevronRight, Plus, X, Check, Lightbulb } from "lucide-react";
 import { motion } from "framer-motion";
 import { api } from "@/lib/api";
 import { useToast } from "@/context/ToastContext";
+import { useRecruiterAuth } from "@/context/RecruiterAuthContext";
 import { JobFormState, JOB_FORM_INITIAL } from "@/components/recruiter";
 import RichTextEditor from "../ui/RichTextEditor";
 import CountrySearch from "../location/CountrySearch";
@@ -16,8 +17,8 @@ import { JobTitle, Company } from "@/types/masters";
 
 const STEPS = [
   "Core Details",
-  "Skills & Categories",
   "Description",
+  "Skills & Categories",
   "Review & Publish",
 ];
 
@@ -82,15 +83,28 @@ export default function JobCreationPage({
 }: JobCreationProps = {}) {
   const router = useRouter();
   const { showToast } = useToast();
+  const { recruiter } = useRecruiterAuth();
 
   const [step, setStep] = useState(0);
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState<JobFormState>(JOB_FORM_INITIAL);
   const [categoryInput, setCategoryInput] = useState("");
   const [jobTitleInput, setJobTitleInput] = useState("");
+  const [selectedJobTitleId, setSelectedJobTitleId] = useState<number | null>(null);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [suggestions, setSuggestions] = useState<any[]>([]);
+  const [currentSuggestionIndex, setCurrentSuggestionIndex] = useState(0);
+  const [loadingSuggestions, setLoadingSuggestions] = useState(false);
   const [companyInput, setCompanyInput] = useState("");
   const [skillInput, setSkillInput] = useState("");
   const [prefSkillInput, setPrefSkillInput] = useState("");
+
+  React.useEffect(() => {
+    if (recruiter?.company_name && !form.company_name) {
+      setForm((p) => ({ ...p, company_name: recruiter.company_name || "" }));
+      setCompanyInput(recruiter.company_name);
+    }
+  }, [recruiter]);
 
   const progressPercent = ((step + 1) / STEPS.length) * 100;
 
@@ -123,6 +137,48 @@ export default function JobCreationPage({
       ...p,
       [name]: type === "checkbox" ? checked : value,
     }));
+  };
+
+  const fetchSuggestions = async () => {
+    if (!selectedJobTitleId) return;
+    setLoadingSuggestions(true);
+    try {
+      const res = await api.request<any>(
+        `/api/v1/job-descriptions/by-title/${selectedJobTitleId}?page=1&page_size=10`,
+        {},
+        true,
+        true
+      );
+      setSuggestions(res.items || []);
+      setCurrentSuggestionIndex(0);
+      setShowSuggestions(true);
+    } catch (err) {
+      console.error(err);
+      showToast("Failed to fetch job description suggestions", "error");
+    } finally {
+      setLoadingSuggestions(false);
+    }
+  };
+
+  const applySuggestion = (sug: any) => {
+    setForm((prev) => ({
+      ...prev,
+      description: sug.description || prev.description,
+      responsibilities: sug.responsibilities || prev.responsibilities,
+      requirements: sug.requirements || prev.requirements,
+      required_skills: sug.skills_required && sug.skills_required.length > 0
+        ? Array.from(new Set([...(prev.required_skills ? prev.required_skills.split(",").map((s: string) => s.trim()) : []), ...sug.skills_required])).filter(Boolean).join(", ")
+        : prev.required_skills,
+      preferred_skills: sug.skills_preferred && sug.skills_preferred.length > 0
+        ? Array.from(new Set([...(prev.preferred_skills ? prev.preferred_skills.split(",").map((s: string) => s.trim()) : []), ...sug.skills_preferred])).filter(Boolean).join(", ")
+        : prev.preferred_skills,
+      categories: sug.categories_keywords && sug.categories_keywords.length > 0
+        ? Array.from(new Set([...(prev.categories ? prev.categories.split(",").map((s: string) => s.trim()) : []), ...sug.categories_keywords])).filter(Boolean).join(", ")
+        : prev.categories,
+      experience_level: sug.experience_level ? sug.experience_level.toLowerCase() : prev.experience_level
+    }));
+    setShowSuggestions(false);
+    showToast("Suggestion applied successfully", "success");
   };
 
   const addCategory = () => {
@@ -307,13 +363,16 @@ export default function JobCreationPage({
                       onChange={(val: JobTitle | null) => {
                         if (val) {
                           if (val.id > 0) {
+                            setSelectedJobTitleId(val.id);
                             setForm((prev) => ({ ...prev, title: val.title }));
                             setJobTitleInput("");
                           } else {
+                            setSelectedJobTitleId(null);
                             setJobTitleInput(val.title);
                             setForm((prev) => ({ ...prev, title: val.title }));
                           }
                         } else {
+                          setSelectedJobTitleId(null);
                           setJobTitleInput("");
                           setForm((prev) => ({ ...prev, title: "" }));
                         }
@@ -572,8 +631,265 @@ export default function JobCreationPage({
               </div>
             )}
 
-            {/* STEP 2: SKILLS & CATEGORIES */}
+            {/* STEP 2: DESCRIPTION */}
             {step === 1 && (
+              <div className="space-y-6">
+                <div className="relative">
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="text-xs uppercase tracking-widest text-gray-600 dark:text-gray-400 font-medium">
+                      Job Description *
+                    </label>
+
+                    {selectedJobTitleId && (
+                      <button
+                        type="button"
+                        onClick={fetchSuggestions}
+                        disabled={loadingSuggestions}
+                        className="text-sm text-blue-600 hover:text-blue-700 flex items-center gap-1 font-medium disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                      >
+                        {loadingSuggestions ? (
+                          <>
+                            <svg
+                              className="animate-spin h-4 w-4"
+                              xmlns="http://www.w3.org/2000/svg"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                            >
+                              <circle
+                                className="opacity-25"
+                                cx="12"
+                                cy="12"
+                                r="10"
+                                stroke="currentColor"
+                                strokeWidth="4"
+                              />
+                              <path
+                                className="opacity-75"
+                                fill="currentColor"
+                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                              />
+                            </svg>
+                            Loading Suggestions...
+                          </>
+                        ) : (
+                          <>
+                            <Lightbulb className="h-4 w-4" />
+                            Get Suggestions
+                          </>
+                        )}
+                      </button>
+                    )}
+                  </div>
+                  <RichTextEditor
+                    value={form.description}
+                    onChange={(content: string) => {
+                      const event = {
+                        target: {
+                          name: "description",
+                          value: content,
+                        },
+                      } as any;
+                      handleChange(event);
+                    }}
+                    placeholder="Describe the job role, team, and what makes this opportunity unique..."
+                  />
+
+
+                  {showSuggestions && (
+                    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+                      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+                        <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center bg-white dark:bg-gray-800">
+                          <div>
+                            <h4 className="font-semibold text-gray-900 dark:text-white text-lg">Suggested Job Details</h4>
+                            <p className="text-xs text-gray-500 mt-1">Select a suggestion to automatically populate your job form</p>
+                          </div>
+                          <button onClick={() => setShowSuggestions(false)} className="text-gray-500 hover:text-gray-700 p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                            <X className="w-5 h-5" />
+                          </button>
+                        </div>
+
+                        <div className="flex-1 overflow-y-auto">
+                          {loadingSuggestions ? (
+                            <div className="absolute inset-0 flex items-center justify-center bg-white/50 dark:bg-gray-800/50 z-10">
+                              <svg className="animate-spin h-8 w-8 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                              </svg>
+                            </div>
+                          ) : null}
+
+                          {suggestions.length === 0 && !loadingSuggestions ? (
+                            <div className="text-center py-8 text-gray-500">No suggestions found for this job title.</div>
+                          ) : suggestions.length > 0 ? (
+                            <div className="p-6">
+                              <div className="flex flex-wrap gap-2 mb-6">
+                                <span className="px-3 py-1.5 bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300 rounded-full text-sm font-semibold">{suggestions[currentSuggestionIndex].experience_level}</span>
+                                <span className="px-3 py-1.5 bg-purple-100 text-purple-800 dark:bg-purple-900/40 dark:text-purple-300 rounded-full text-sm font-semibold">{suggestions[currentSuggestionIndex].industry_context}</span>
+                              </div>
+                              <div className="space-y-6">
+                                <div>
+                                  <h5 className="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wider mb-2">Description</h5>
+                                  <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-wrap">{suggestions[currentSuggestionIndex].description}</p>
+                                </div>
+                                {suggestions[currentSuggestionIndex].responsibilities && (
+                                  <div>
+                                    <h5 className="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wider mb-2">Responsibilities</h5>
+                                    <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-wrap">{suggestions[currentSuggestionIndex].responsibilities}</p>
+                                  </div>
+                                )}
+                                {suggestions[currentSuggestionIndex].requirements && (
+                                  <div>
+                                    <h5 className="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wider mb-2">Requirements</h5>
+                                    <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-wrap">{suggestions[currentSuggestionIndex].requirements}</p>
+                                  </div>
+                                )}
+                                <div className="grid grid-cols-2 gap-6 pt-4 border-t border-gray-100 dark:border-gray-700">
+                                  <div>
+                                    <h5 className="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wider mb-2">Top Skills</h5>
+                                    <div className="flex flex-wrap gap-2">
+                                      {suggestions[currentSuggestionIndex].skills_required?.map((skill: string, i: number) => (
+                                        <span key={i} className="px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded text-xs">{skill}</span>
+                                      )) || <span className="text-sm text-gray-500">None</span>}
+                                    </div>
+                                  </div>
+                                  <div>
+                                    <h5 className="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wider mb-2">Keywords</h5>
+                                    <div className="flex flex-wrap gap-2">
+                                      {suggestions[currentSuggestionIndex].categories_keywords?.map((kw: string, i: number) => (
+                                        <span key={i} className="px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded text-xs">{kw}</span>
+                                      )) || <span className="text-sm text-gray-500">None</span>}
+                                    </div>
+                                  </div>
+                                </div>
+                                <div className="pt-6 mt-4 flex justify-center border-t border-gray-100 dark:border-gray-700">
+                                  <button onClick={() => applySuggestion(suggestions[currentSuggestionIndex])} className="px-2 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors">
+                                    Use Suggestion
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
+                          ) : null}
+                        </div>
+
+                        {suggestions.length > 1 && (
+                          <div className="p-4 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 flex items-center justify-between">
+                            <button
+                              onClick={() => setCurrentSuggestionIndex(prev => prev - 1)}
+                              disabled={currentSuggestionIndex === 0}
+                              className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-700 transition-colors"
+                            >
+                              Previous
+                            </button>
+                            <span className="text-sm text-gray-600 dark:text-gray-400 font-medium">
+                              Suggestion {currentSuggestionIndex + 1} of {suggestions.length}
+                            </span>
+                            <button
+                              onClick={() => setCurrentSuggestionIndex(prev => prev + 1)}
+                              disabled={currentSuggestionIndex === suggestions.length - 1}
+                              className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-700 transition-colors"
+                            >
+                              Next
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                <div>
+                  <label className="text-xs uppercase tracking-widest text-gray-600 dark:text-gray-400 font-medium mb-2 block">
+                    Responsibilities
+                  </label>
+                  <RichTextEditor
+                    value={form.responsibilities}
+                    onChange={(content: string) => {
+                      const event = {
+                        target: {
+                          name: "responsibilities",
+                          value: content,
+                        },
+                      } as any;
+                      handleChange(event);
+                    }}
+                    placeholder="List key responsibilities and day-to-day activities..."
+                  />
+                </div>
+
+                <div>
+                  <label className="text-xs uppercase tracking-widest text-gray-600 dark:text-gray-400 font-medium mb-2 block">
+                    Requirements *
+                  </label>
+                  <RichTextEditor
+                    value={form.requirements}
+                    onChange={(content: string) => {
+                      const event = {
+                        target: {
+                          name: "requirements",
+                          value: content,
+                        },
+                      } as any;
+                      handleChange(event);
+                    }}
+                    placeholder="List qualifications, education, and experience requirements..."
+                  />
+                </div>
+
+                <div className="grid md:grid-cols-3 gap-6">
+
+                  <div>
+                    <label className="text-xs uppercase tracking-widest text-gray-600 dark:text-gray-400 font-medium mb-2 block">
+                      Currency
+                    </label>
+                    <Select
+                      name="salary_currency"
+                      value={form.salary_currency}
+                      onChange={handleChange}
+                      options={[
+                        { value: "USD", label: "USD" },
+                        { value: "EUR", label: "EUR" },
+                        { value: "GBP", label: "GBP" },
+                        { value: "INR", label: "INR" },
+                        { value: "CAD", label: "CAD" },
+                        { value: "AUD", label: "AUD" },
+                      ]}
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs uppercase tracking-widest text-gray-600 dark:text-gray-400 font-medium mb-2 block">
+                      Min Salary *
+                    </label>
+                    <Input
+                      name="salary_min"
+                      type="number"
+                      value={form.salary_min}
+                      onChange={handleChange}
+                      placeholder="80000"
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-xs uppercase tracking-widest text-gray-600 dark:text-gray-400 font-medium mb-2 block">
+                      Max Salary *
+                    </label>
+                    <Input
+                      name="salary_max"
+                      type="number"
+                      value={form.salary_max}
+                      onChange={handleChange}
+                      placeholder="150000"
+                      required
+                    />
+                  </div>
+
+                </div>
+              </div>
+            )}
+
+
+            {/* STEP 1: SKILLS & CATEGORIES */}
+            {step === 2 && (
               <div className="space-y-6">
                 <div>
                   <label className="text-xs uppercase tracking-widest text-gray-600 dark:text-gray-400 font-medium mb-3 block">
@@ -841,105 +1157,6 @@ export default function JobCreationPage({
               </div>
             )}
 
-            {/* STEP 3: DESCRIPTION */}
-            {step === 2 && (
-              <div className="space-y-6">
-                <div>
-                  <label className="text-xs uppercase tracking-widest text-gray-600 dark:text-gray-400 font-medium mb-2 block">
-                    Job Description *
-                  </label>
-                  <RichTextEditor
-                    value={form.description}
-                    onChange={(content: string) => {
-                      const event = {
-                        target: {
-                          name: "description",
-                          value: content,
-                        },
-                      } as any;
-                      handleChange(event);
-                    }}
-                    placeholder="Describe the job role, team, and what makes this opportunity unique..."
-                  />
-                </div>
-
-                <div>
-                  <label className="text-xs uppercase tracking-widest text-gray-600 dark:text-gray-400 font-medium mb-2 block">
-                    Responsibilities
-                  </label>
-                  <TextArea
-                    name="responsibilities"
-                    value={form.responsibilities}
-                    onChange={handleChange}
-                    placeholder="List key responsibilities and day-to-day activities..."
-                    rows={4}
-                  />
-                </div>
-
-                <div>
-                  <label className="text-xs uppercase tracking-widest text-gray-600 dark:text-gray-400 font-medium mb-2 block">
-                    Requirements *
-                  </label>
-                  <TextArea
-                    name="requirements"
-                    value={form.requirements}
-                    onChange={handleChange}
-                    placeholder="List qualifications, education, and experience requirements..."
-                    rows={4}
-                    required
-                  />
-                </div>
-
-                <div className="grid md:grid-cols-3 gap-6">
-                  <div>
-                    <label className="text-xs uppercase tracking-widest text-gray-600 dark:text-gray-400 font-medium mb-2 block">
-                      Min Salary *
-                    </label>
-                    <Input
-                      name="salary_min"
-                      type="number"
-                      value={form.salary_min}
-                      onChange={handleChange}
-                      placeholder="80000"
-                      required
-                    />
-                  </div>
-
-                  <div>
-                    <label className="text-xs uppercase tracking-widest text-gray-600 dark:text-gray-400 font-medium mb-2 block">
-                      Max Salary *
-                    </label>
-                    <Input
-                      name="salary_max"
-                      type="number"
-                      value={form.salary_max}
-                      onChange={handleChange}
-                      placeholder="150000"
-                      required
-                    />
-                  </div>
-
-                  <div>
-                    <label className="text-xs uppercase tracking-widest text-gray-600 dark:text-gray-400 font-medium mb-2 block">
-                      Currency
-                    </label>
-                    <Select
-                      name="salary_currency"
-                      value={form.salary_currency}
-                      onChange={handleChange}
-                      options={[
-                        { value: "USD", label: "USD" },
-                        { value: "EUR", label: "EUR" },
-                        { value: "GBP", label: "GBP" },
-                        { value: "INR", label: "INR" },
-                        { value: "CAD", label: "CAD" },
-                        { value: "AUD", label: "AUD" },
-                      ]}
-                    />
-                  </div>
-                </div>
-              </div>
-            )}
 
             {/* STEP 4: REVIEW */}
             {step === 3 && (
