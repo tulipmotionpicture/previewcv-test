@@ -300,6 +300,195 @@ export default function JobCreationPage({
     }
   };
 
+  const renderLivePreview = (isReview = false) => (
+    <div className="space-y-4">
+      {/* Title & Company */}
+      {form.title && (
+        <div>
+          <h4 className="text-base font-bold text-gray-900 dark:text-white">
+            {form.title}
+          </h4>
+          {form.company_name && (
+            <p className="text-sm text-gray-600 dark:text-gray-400 font-medium">
+              {form.company_name}
+            </p>
+          )}
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            {form.city}
+            {form.state && `, ${form.state}`}
+          </p>
+        </div>
+      )}
+
+      {/* Badges */}
+      <div className="flex flex-wrap gap-2">
+        {form.job_type && (
+          <div className="px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-xs font-semibold rounded-full">
+            {form.job_type.replace("_", " ").toUpperCase()}
+          </div>
+        )}
+        {form.experience_level && (
+          <div className="px-3 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 text-xs font-semibold rounded-full capitalize">
+            {form.experience_level}
+          </div>
+        )}
+        {form.is_remote && (
+          <div className="px-3 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 text-xs font-semibold rounded-full">
+            Remote
+          </div>
+        )}
+      </div>
+
+      {/* Salary */}
+      {form.salary_min || form.salary_max ? (
+        <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
+          <p className="text-xs uppercase tracking-widest text-gray-600 dark:text-gray-400 font-medium mb-1">
+            Salary Range
+          </p>
+          <p className="text-sm font-semibold text-gray-900 dark:text-white">
+            {form.salary_currency} {form.salary_min || "0"} -{" "}
+            {form.salary_max || "0"}
+          </p>
+        </div>
+      ) : null}
+
+      {/* Required Skills */}
+      {form.required_skills && (
+        <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
+          <p className="text-xs uppercase tracking-widest text-gray-600 dark:text-gray-400 font-medium mb-2">
+            Required Skills
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {form.required_skills
+              .split(",")
+              .map((s) => s.trim())
+              .filter(Boolean)
+              .slice(0, 6)
+              .map((skill) => (
+                <span
+                  key={skill}
+                  className="px-2 py-1 text-xs bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded"
+                >
+                  {skill}
+                </span>
+              ))}
+            {form.required_skills
+              .split(",")
+              .map((s) => s.trim())
+              .filter(Boolean).length > 6 && (
+                <span className="px-2 py-1 text-xs bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded">
+                  +
+                  {form.required_skills
+                    .split(",")
+                    .map((s) => s.trim())
+                    .filter(Boolean).length - 6}
+                </span>
+              )}
+          </div>
+        </div>
+      )}
+
+      {/* Categories */}
+      {form.categories && (
+        <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
+          <p className="text-xs uppercase tracking-widest text-gray-600 dark:text-gray-400 font-medium mb-2">
+            Categories
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {form.categories
+              .split(",")
+              .map((c) => c.trim())
+              .filter(Boolean)
+              .slice(0, 4)
+              .map((cat) => (
+                <span
+                  key={cat}
+                  className="px-2 py-1 text-xs bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 rounded"
+                >
+                  {cat}
+                </span>
+              ))}
+          </div>
+        </div>
+      )}
+
+      {/* Job Description */}
+      {form.description && (
+        <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
+          <p className="text-xs uppercase tracking-widest text-gray-600 dark:text-gray-400 font-medium mb-2">
+            Description
+          </p>
+          <div
+            className={`text-sm text-gray-800 dark:text-gray-200 prose dark:prose-invert max-w-none prose-sm ${!isReview ? 'line-clamp-3' : ''}`}
+            dangerouslySetInnerHTML={{ __html: form.description }}
+          />
+        </div>
+      )}
+
+      {/* Responsibilities */}
+      {form.responsibilities && (
+        <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
+          <p className="text-xs uppercase tracking-widest text-gray-600 dark:text-gray-400 font-medium mb-2">
+            Responsibilities
+          </p>
+          <div
+            className={`text-sm text-gray-800 dark:text-gray-200 prose dark:prose-invert max-w-none prose-sm ${!isReview ? 'line-clamp-3' : ''}`}
+            dangerouslySetInnerHTML={{ __html: form.responsibilities }}
+          />
+        </div>
+      )}
+
+      {/* Requirements */}
+      {form.requirements && (
+        <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
+          <p className="text-xs uppercase tracking-widest text-gray-600 dark:text-gray-400 font-medium mb-2">
+            Requirements
+          </p>
+          <div
+            className={`text-sm text-gray-800 dark:text-gray-200 prose dark:prose-invert max-w-none prose-sm ${!isReview ? 'line-clamp-3' : ''}`}
+            dangerouslySetInnerHTML={{ __html: form.requirements }}
+          />
+        </div>
+      )}
+
+      {!isReview && (
+        <div className="border-t border-gray-200 dark:border-gray-700 pt-4 mt-4">
+          <p className="text-xs uppercase tracking-widest text-gray-600 dark:text-gray-400 font-medium mb-2">
+            Form Completion
+          </p>
+          <div className="flex items-center gap-2">
+            <div className="flex-1 h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+              <motion.div
+                className="h-full bg-gradient-to-r from-green-500 to-green-600"
+                initial={{ width: 0 }}
+                animate={{ width: `${completionPercent}%` }}
+                transition={{ duration: 0.3 }}
+              />
+            </div>
+            <span className="text-xs font-semibold text-gray-700 dark:text-gray-300 w-10">
+              {completionPercent}%
+            </span>
+          </div>
+        </div>
+      )}
+
+      {/* Status */}
+      {form.is_active !== undefined && (
+        <div className="border-t border-gray-200 dark:border-gray-700 pt-4 mt-4">
+          <div className="flex items-center gap-2">
+            <div
+              className={`w-2 h-2 rounded-full ${form.is_active ? "bg-green-500" : "bg-gray-400"
+                }`}
+            />
+            <span className="text-xs font-medium text-gray-700 dark:text-gray-300">
+              {form.is_active ? "Will be published" : "Draft mode"}
+            </span>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+
   return (
     <form className="mx-auto" onSubmit={(e) => {
       e.preventDefault();
@@ -340,9 +529,9 @@ export default function JobCreationPage({
       </div>
 
       {/* CONTENT WITH LIVE PREVIEW */}
-      <div className="grid lg:grid-cols-3 gap-8">
+      <div className={`grid ${step < 3 ? 'lg:grid-cols-3' : 'grid-cols-1'} gap-8`}>
         {/* FORM SECTION */}
-        <div className="lg:col-span-2">
+        <div className={step < 3 ? 'lg:col-span-2' : ''}>
           <motion.div
             key={step}
             initial={{ opacity: 0, x: 20 }}
@@ -729,18 +918,18 @@ export default function JobCreationPage({
                               <div className="space-y-6">
                                 <div>
                                   <h5 className="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wider mb-2">Description</h5>
-                                  <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-wrap">{suggestions[currentSuggestionIndex].description}</p>
+                                  <div className="text-sm text-gray-700 dark:text-gray-300 prose dark:prose-invert max-w-none prose-sm" dangerouslySetInnerHTML={{ __html: suggestions[currentSuggestionIndex].description }} />
                                 </div>
                                 {suggestions[currentSuggestionIndex].responsibilities && (
                                   <div>
                                     <h5 className="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wider mb-2">Responsibilities</h5>
-                                    <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-wrap">{suggestions[currentSuggestionIndex].responsibilities}</p>
+                                    <div className="text-sm text-gray-700 dark:text-gray-300 prose dark:prose-invert max-w-none prose-sm" dangerouslySetInnerHTML={{ __html: suggestions[currentSuggestionIndex].responsibilities }} />
                                   </div>
                                 )}
                                 {suggestions[currentSuggestionIndex].requirements && (
                                   <div>
                                     <h5 className="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wider mb-2">Requirements</h5>
-                                    <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-wrap">{suggestions[currentSuggestionIndex].requirements}</p>
+                                    <div className="text-sm text-gray-700 dark:text-gray-300 prose dark:prose-invert max-w-none prose-sm" dangerouslySetInnerHTML={{ __html: suggestions[currentSuggestionIndex].requirements }} />
                                   </div>
                                 )}
                                 <div className="grid grid-cols-2 gap-6 pt-4 border-t border-gray-100 dark:border-gray-700">
@@ -1161,77 +1350,11 @@ export default function JobCreationPage({
             {/* STEP 4: REVIEW */}
             {step === 3 && (
               <div className="space-y-6">
-                <div className="border-2 border-dashed border-blue-300 dark:border-blue-700 p-6 rounded-lg bg-blue-50 dark:bg-blue-900/20">
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-6">
+                <div className="border border-gray-200 dark:border-gray-700 p-6 rounded-xl bg-white dark:bg-gray-900 shadow-sm">
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-6 border-b border-gray-200 dark:border-gray-700 pb-4">
                     Review Your Job Posting
                   </h3>
-
-                  <div className="grid grid-cols-2 gap-6 text-sm">
-                    <div>
-                      <p className="text-xs uppercase tracking-widest text-gray-600 dark:text-gray-400 font-medium mb-1">
-                        Title
-                      </p>
-                      <p className="font-semibold text-gray-900 dark:text-white">
-                        {form.title || "N/A"}
-                      </p>
-                    </div>
-
-                    <div>
-                      <p className="text-xs uppercase tracking-widest text-gray-600 dark:text-gray-400 font-medium mb-1">
-                        Company
-                      </p>
-                      <p className="font-semibold text-gray-900 dark:text-white">
-                        {form.company_name || "N/A"}
-                      </p>
-                    </div>
-
-                    <div>
-                      <p className="text-xs uppercase tracking-widest text-gray-600 dark:text-gray-400 font-medium mb-1">
-                        Location
-                      </p>
-                      <p className="font-semibold text-gray-900 dark:text-white">
-                        {form.city}, {form.state && `${form.state}, `}
-                        {form.country}
-                      </p>
-                    </div>
-
-                    <div>
-                      <p className="text-xs uppercase tracking-widest text-gray-600 dark:text-gray-400 font-medium mb-1">
-                        Job Type
-                      </p>
-                      <p className="font-semibold text-gray-900 dark:text-white capitalize">
-                        {form.job_type.replace("_", " ")}
-                      </p>
-                    </div>
-
-                    <div>
-                      <p className="text-xs uppercase tracking-widest text-gray-600 dark:text-gray-400 font-medium mb-1">
-                        Experience Level
-                      </p>
-                      <p className="font-semibold text-gray-900 dark:text-white capitalize">
-                        {form.experience_level}
-                      </p>
-                    </div>
-
-                    <div>
-                      <p className="text-xs uppercase tracking-widest text-gray-600 dark:text-gray-400 font-medium mb-1">
-                        Remote
-                      </p>
-                      <p className="font-semibold text-gray-900 dark:text-white">
-                        {form.is_remote ? "Yes" : "No"}
-                      </p>
-                    </div>
-
-                    <div className="col-span-2">
-                      <p className="text-xs uppercase tracking-widest text-gray-600 dark:text-gray-400 font-medium mb-1">
-                        Salary Range
-                      </p>
-                      <p className="font-semibold text-gray-900 dark:text-white">
-                        {form.salary_currency} {form.salary_min || "0"} -{" "}
-                        {form.salary_max || "0"}
-                      </p>
-                    </div>
-                  </div>
+                  {renderLivePreview(true)}
                 </div>
 
                 {/* Status Toggle */}
@@ -1273,183 +1396,16 @@ export default function JobCreationPage({
         </div>
 
         {/* LIVE PREVIEW SECTION */}
-        <div className="hidden lg:block">
-          <div className="sticky top-20 border border-gray-200 dark:border-gray-700 rounded-xl p-6 bg-white dark:bg-gray-900/50 backdrop-blur-sm shadow-sm">
-            {/* <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-6">
-              Live Preview
-            </h3> */}
-
-            <div className="space-y-4">
-              {/* Title & Company */}
-              {form.title && (
-                <div>
-                  <h4 className="text-base font-bold text-gray-900 dark:text-white">
-                    {form.title}
-                  </h4>
-                  {form.company_name && (
-                    <p className="text-sm text-gray-600 dark:text-gray-400 font-medium">
-                      {form.company_name}
-                    </p>
-                  )}
-                  <p className="text-sm text-gray-500 dark:text-gray-400">
-                    {form.city}
-                    {form.state && `, ${form.state}`}
-                  </p>
-                </div>
-              )}
-
-              {/* Badges */}
-              <div className="flex flex-wrap gap-2">
-                {form.job_type && (
-                  <div className="px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-xs font-semibold rounded-full">
-                    {form.job_type.replace("_", " ").toUpperCase()}
-                  </div>
-                )}
-                {form.experience_level && (
-                  <div className="px-3 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 text-xs font-semibold rounded-full capitalize">
-                    {form.experience_level}
-                  </div>
-                )}
-                {form.is_remote && (
-                  <div className="px-3 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 text-xs font-semibold rounded-full">
-                    Remote
-                  </div>
-                )}
-              </div>
-
-              {/* Salary */}
-              {form.salary_min || form.salary_max ? (
-                <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
-                  <p className="text-xs uppercase tracking-widest text-gray-600 dark:text-gray-400 font-medium mb-1">
-                    Salary Range
-                  </p>
-                  <p className="text-sm font-semibold text-gray-900 dark:text-white">
-                    {form.salary_currency} {form.salary_min || "0"} -{" "}
-                    {form.salary_max || "0"}
-                  </p>
-                </div>
-              ) : null}
-
-              {/* Required Skills */}
-              {form.required_skills && (
-                <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
-                  <p className="text-xs uppercase tracking-widest text-gray-600 dark:text-gray-400 font-medium mb-2">
-                    Required Skills
-                  </p>
-                  <div className="flex flex-wrap gap-2">
-                    {form.required_skills
-                      .split(",")
-                      .map((s) => s.trim())
-                      .filter(Boolean)
-                      .slice(0, 6)
-                      .map((skill) => (
-                        <span
-                          key={skill}
-                          className="px-2 py-1 text-xs bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded"
-                        >
-                          {skill}
-                        </span>
-                      ))}
-                    {form.required_skills
-                      .split(",")
-                      .map((s) => s.trim())
-                      .filter(Boolean).length > 6 && (
-                        <span className="px-2 py-1 text-xs bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded">
-                          +
-                          {form.required_skills
-                            .split(",")
-                            .map((s) => s.trim())
-                            .filter(Boolean).length - 6}
-                        </span>
-                      )}
-                  </div>
-                </div>
-              )}
-
-              {/* Categories */}
-              {form.categories && (
-                <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
-                  <p className="text-xs uppercase tracking-widest text-gray-600 dark:text-gray-400 font-medium mb-2">
-                    Categories
-                  </p>
-                  <div className="flex flex-wrap gap-2">
-                    {form.categories
-                      .split(",")
-                      .map((c) => c.trim())
-                      .filter(Boolean)
-                      .slice(0, 4)
-                      .map((cat) => (
-                        <span
-                          key={cat}
-                          className="px-2 py-1 text-xs bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 rounded"
-                        >
-                          {cat}
-                        </span>
-                      ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Job Description */}
-              {form.description && (
-                <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
-                  <p className="text-xs uppercase tracking-widest text-gray-600 dark:text-gray-400 font-medium mb-2">
-                    Description
-                  </p>
-                  <div
-                    className="text-sm text-gray-800 dark:text-gray-200 line-clamp-3 prose dark:prose-invert max-w-none prose-sm"
-                    dangerouslySetInnerHTML={{ __html: form.description }}
-                  />
-                </div>
-              )}
-
-              {/* Responsibilities */}
-              {form.responsibilities && (
-                <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
-                  <p className="text-xs uppercase tracking-widest text-gray-600 dark:text-gray-400 font-medium mb-2">
-                    Responsibilities
-                  </p>
-                  <p className="text-sm text-gray-800 dark:text-gray-200 line-clamp-3 whitespace-pre-wrap">
-                    {form.responsibilities}
-                  </p>
-                </div>
-              )}
-
-              {/* Completion Progress */}
-              <div className="border-t border-gray-200 dark:border-gray-700 pt-4 mt-4">
-                <p className="text-xs uppercase tracking-widest text-gray-600 dark:text-gray-400 font-medium mb-2">
-                  Form Completion
-                </p>
-                <div className="flex items-center gap-2">
-                  <div className="flex-1 h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-                    <motion.div
-                      className="h-full bg-gradient-to-r from-green-500 to-green-600"
-                      initial={{ width: 0 }}
-                      animate={{ width: `${completionPercent}%` }}
-                      transition={{ duration: 0.3 }}
-                    />
-                  </div>
-                  <span className="text-xs font-semibold text-gray-700 dark:text-gray-300 w-10">
-                    {completionPercent}%
-                  </span>
-                </div>
-              </div>
-
-              {/* Status */}
-              <div className="border-t border-gray-200 dark:border-gray-700 pt-4 mt-4">
-                <div className="flex items-center gap-2">
-                  <div
-                    className={`w-2 h-2 rounded-full ${form.is_active ? "bg-green-500" : "bg-gray-400"
-                      }`}
-                  />
-                  <span className="text-xs font-medium text-gray-700 dark:text-gray-300">
-                    {form.is_active ? "Will be published" : "Draft mode"}
-                  </span>
-                </div>
-              </div>
+        {step < 3 && (
+          <div className="hidden lg:block">
+            <div className="sticky top-20 border border-gray-200 dark:border-gray-700 rounded-xl p-6 bg-white dark:bg-gray-900/50 backdrop-blur-sm shadow-sm">
+              {/* <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-6">
+                Live Preview
+              </h3> */}
+              {renderLivePreview(false)}
             </div>
           </div>
-        </div>
+        )}
       </div>
 
       {/* FOOTER */}

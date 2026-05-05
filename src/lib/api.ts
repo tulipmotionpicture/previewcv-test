@@ -217,9 +217,13 @@ export class ApiClient {
       let errorData: any = null;
       try {
         errorData = await response.json();
-        if (errorData.detail && typeof errorData.detail === 'object' && errorData.detail.message) {
+        if (
+          errorData.detail &&
+          typeof errorData.detail === "object" &&
+          errorData.detail.message
+        ) {
           errorMsg = errorData.detail.message;
-        } else if (errorData.detail && typeof errorData.detail === 'string') {
+        } else if (errorData.detail && typeof errorData.detail === "string") {
           errorMsg = errorData.detail;
         } else {
           errorMsg = errorData.message || errorMsg;
@@ -356,12 +360,17 @@ export class ApiClient {
     company_name?: string,
   ): Promise<{
     username?: { value: string; available: boolean; reason: string | null };
-    company_name?: { value: string; available: boolean; reason: string | null; soft_check: boolean };
+    company_name?: {
+      value: string;
+      available: boolean;
+      reason: string | null;
+      soft_check: boolean;
+    };
   }> {
     const params = new URLSearchParams();
     if (username) params.append("username", username);
     if (company_name) params.append("company_name", company_name);
-    
+
     return this.request(
       `/api/v1/recruiters/auth/check-availability?${params.toString()}`,
       {},
@@ -450,6 +459,15 @@ export class ApiClient {
   ): Promise<TopHiringPartnersResponse> {
     return this.request<TopHiringPartnersResponse>(
       `/api/v1/recruiters/profile/top-hiring-partners?limit=${limit}`,
+    );
+  }
+
+  async getTopEmployers(): Promise<TopEmployersResponse> {
+    return this.request<TopEmployersResponse>(
+      `/api/v1/recruiters/profile/top-employers`,
+      {},
+      false,
+      false,
     );
   }
 
@@ -2435,4 +2453,5 @@ import type {
   BucketActivityLog,
   BulkDownloadTaskResponse,
   TaskStatusResponse,
+  TopEmployersResponse,
 } from "@/types/api";

@@ -21,40 +21,12 @@ const Page = dynamic(
   { ssr: false }
 );
 
-// Set up PDF.js worker only on client side with multiple fallback options
+// Set up PDF.js worker only on client side
 if (typeof window !== 'undefined') {
   import('react-pdf').then((pdfjs) => {
-    // Set up worker with proper configuration
-    const setupWorker = () => {
-      try {
-        // Primary: Use local worker file
-        pdfjs.pdfjs.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.js';
-
-        // Test if worker loads, if not, try CDN fallbacks
-        const testWorker = new Worker('/pdf.worker.min.js');
-        testWorker.terminate();
-      } catch (error) {
-        console.warn('Local worker failed, trying CDN:', error);
-        // Fallback to CDN sources
-        const workerSources = [
-          `https://unpkg.com/pdfjs-dist@${pdfjs.pdfjs.version}/build/pdf.worker.min.mjs`,
-          `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.pdfjs.version}/pdf.worker.min.js`,
-          `https://cdn.jsdelivr.net/npm/pdfjs-dist@${pdfjs.pdfjs.version}/build/pdf.worker.min.mjs`
-        ];
-
-        let workerIndex = 0;
-        const tryNextWorker = () => {
-          if (workerIndex < workerSources.length) {
-            pdfjs.pdfjs.GlobalWorkerOptions.workerSrc = workerSources[workerIndex];
-            workerIndex++;
-          }
-        };
-
-        tryNextWorker();
-      }
-    };
-
-    setupWorker();
+    // Explicitly set the worker source to match the exact API version installed
+    // This prevents the "API version does not match Worker version" error caused by an outdated local worker file
+    pdfjs.pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.pdfjs.version}/build/pdf.worker.min.mjs`;
   }).catch((error) => {
     console.warn('Failed to load react-pdf:', error);
   });

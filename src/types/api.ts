@@ -338,6 +338,18 @@ export interface TopHiringPartnersResponse {
   hiring_partners: TopHiringPartner[];
 }
 
+export interface TopEmployersResponse {
+  success: boolean;
+  total: number;
+  top_employers: TopEmployer[];
+}
+
+export interface TopEmployer {
+  recruiter_slug: string;
+  company_name: string;
+  company_logo_url: string;
+}
+
 // KYC Types
 export interface KycDocument {
   id: number;

@@ -88,6 +88,8 @@ export default function Home() {
   const [cardsLoading, setCardsLoading] = useState(true);
   const [blogPosts, setBlogPosts] = useState<BlogPostsResponse | null>(null);
   const [blogLoading, setBlogLoading] = useState(true);
+  const [partners, setPartners] = useState<any[]>([]);
+  const [partnersLoading, setPartnersLoading] = useState(true);
 
   // Fetch job cards data
   useEffect(() => {
@@ -103,6 +105,22 @@ export default function Home() {
       }
     };
     fetchCards();
+  }, []);
+
+  // Fetch top hiring partners
+  useEffect(() => {
+    async function loadPartners() {
+      try {
+        const response = await api.getTopEmployers();
+        setPartners(response.top_employers || []);
+      } catch (error) {
+        console.error("Failed to load top hiring partners:", error);
+      } finally {
+        setPartnersLoading(false);
+      }
+    }
+
+    loadPartners();
   }, []);
 
   // Fetch blog posts data
@@ -221,96 +239,70 @@ export default function Home() {
             {/* Row 1 - Scroll Left */}
             <div className="relative w-full overflow-hidden h-16 md:h-20">
               <div className="absolute top-0 left-0 h-full flex animate-scroll-left w-max">
-                {[
-                  { name: "Imtiaz", src: "/logos/logo-1.png" },
-                  { name: "Thumbay", src: "/logos/logo-2.png" },
-                  { name: "Duncan & Ross", src: "/logos/logo-3.png" },
-                  { name: "Raqmiyat", src: "/logos/logo-4.png" },
-                  { name: "Reportage", src: "/logos/logo-1.png" },
-                  { name: "UBS", src: "/logos/logo-2.png" },
-                  { name: "SK Overseas", src: "/logos/logo-3.png" },
-                  { name: "Ektifa", src: "/logos/logo-4.png" },
-                  { name: "NMC", src: "/logos/logo-1.png" },
-                  { name: "Robt Stone", src: "/logos/logo-2.png" },
-                  { name: "Tarrad", src: "/logos/logo-3.png" },
-                  { name: "ABC", src: "/logos/logo-4.png" },
-                  // Duplicates
-                  { name: "Imtiaz", src: "/logos/logo-1.png" },
-                  { name: "Thumbay", src: "/logos/logo-2.png" },
-                  { name: "Duncan & Ross", src: "/logos/logo-3.png" },
-                  { name: "Raqmiyat", src: "/logos/logo-4.png" },
-                  { name: "Reportage", src: "/logos/logo-1.png" },
-                  { name: "UBS", src: "/logos/logo-2.png" },
-                  { name: "SK Overseas", src: "/logos/logo-3.png" },
-                  { name: "Ektifa", src: "/logos/logo-4.png" },
-                  { name: "NMC", src: "/logos/logo-1.png" },
-                  { name: "Robt Stone", src: "/logos/logo-2.png" },
-                  { name: "Tarrad", src: "/logos/logo-3.png" },
-                  { name: "ABC", src: "/logos/logo-4.png" },
-                ].map((employer, i) => (
-                  <div
-                    key={i}
-                    className="px-2 w-[120px] md:w-[160px] lg:w-[200px] h-full flex-shrink-0"
-                  >
-                    <div className="bg-white p-2 md:p-4 border border-gray-200 rounded-lg flex items-center justify-center hover:shadow-md transition-shadow h-full w-full">
-                      <Image
-                        src={employer.src}
-                        alt={employer.name}
-                        width={100}
-                        height={40}
-                        className="object-contain max-h-12"
-                      />
+                {partnersLoading ? (
+                  [...Array(12)].map((_, i) => (
+                    <div
+                      key={`fallback-1-${i}`}
+                      className="px-2 w-[120px] md:w-[160px] lg:w-[200px] h-full flex-shrink-0"
+                    >
+                      <div className="bg-gray-100 dark:bg-gray-800 p-2 md:p-4 border border-gray-200 dark:border-gray-700 rounded-lg flex items-center justify-center h-full w-full animate-pulse"></div>
                     </div>
-                  </div>
-                ))}
+                  ))
+                ) : (
+                  [...partners, ...partners].map((employer, i) => (
+                    <div
+                      key={`row1-${i}`}
+                      className="px-2 w-[120px] md:w-[160px] lg:w-[200px] h-full flex-shrink-0"
+                    >
+                      <div className="bg-white p-2 md:p-4 border border-gray-200 rounded-lg flex items-center justify-center hover:shadow-md transition-shadow h-full w-full">
+                        <Link href={`/recruiter/${employer.recruiter_slug}`}>
+                          <Image
+                            src={employer.logo_url || "/logos/logo-1.png"}
+                            alt={employer.company_name || "Partner Logo"}
+                            width={100}
+                            height={40}
+                            className="object-contain max-h-12"
+                          />
+                        </Link>
+                      </div>
+                    </div>
+                  ))
+                )}
               </div>
             </div>
 
             {/* Row 2 - Scroll Right */}
             <div className="relative w-full overflow-hidden h-16 md:h-20">
               <div className="absolute top-0 left-0 h-full flex animate-scroll-right w-max">
-                {[
-                  { name: "NMDC", src: "/logos/logo-1.png" },
-                  { name: "BNW", src: "/logos/logo-2.png" },
-                  { name: "HCLTech", src: "/logos/logo-3.png" },
-                  { name: "Wipro", src: "/logos/logo-4.png" },
-                  { name: "Fisher", src: "/logos/logo-1.png" },
-                  { name: "KBC", src: "/logos/logo-2.png" },
-                  { name: "Zulekha Hospital", src: "/logos/logo-3.png" },
-                  { name: "Sundus", src: "/logos/logo-4.png" },
-                  { name: "Salam", src: "/logos/logo-1.png" },
-                  { name: "Sharaf Group", src: "/logos/logo-2.png" },
-                  { name: "Binghatti", src: "/logos/logo-3.png" },
-                  { name: "Innovations Group", src: "/logos/logo-4.png" },
-                  // Duplicates
-                  { name: "NMDC", src: "/logos/logo-1.png" },
-                  { name: "BNW", src: "/logos/logo-2.png" },
-                  { name: "HCLTech", src: "/logos/logo-3.png" },
-                  { name: "Wipro", src: "/logos/logo-4.png" },
-                  { name: "Fisher", src: "/logos/logo-1.png" },
-                  { name: "KBC", src: "/logos/logo-2.png" },
-                  { name: "Zulekha Hospital", src: "/logos/logo-3.png" },
-                  { name: "Sundus", src: "/logos/logo-4.png" },
-                  { name: "Salam", src: "/logos/logo-1.png" },
-                  { name: "Sharaf Group", src: "/logos/logo-2.png" },
-                  { name: "Binghatti", src: "/logos/logo-3.png" },
-                  { name: "Innovations Group", src: "/logos/logo-4.png" },
-                ].map((employer, i) => (
-                  <div
-                    key={i}
-                    className="px-2 w-[120px] md:w-[160px] lg:w-[200px] h-full flex-shrink-0"
-                  >
-                    <div className="bg-white p-2 md:p-4 border border-gray-200 rounded-lg flex items-center justify-center hover:shadow-md transition-shadow h-full w-full">
-                      <Image
-                        src={employer.src}
-                        alt={employer.name}
-                        width={100}
-                        height={40}
-                        className="object-contain max-h-12"
-                      />
+                {partnersLoading ? (
+                  [...Array(12)].map((_, i) => (
+                    <div
+                      key={`fallback-2-${i}`}
+                      className="px-2 w-[120px] md:w-[160px] lg:w-[200px] h-full flex-shrink-0"
+                    >
+                      <div className="bg-gray-100 dark:bg-gray-800 p-2 md:p-4 border border-gray-200 dark:border-gray-700 rounded-lg flex items-center justify-center h-full w-full animate-pulse"></div>
                     </div>
-                  </div>
-                ))}
+                  ))
+                ) : (
+                  [...[...partners].reverse(), ...[...partners].reverse()].map((employer, i) => (
+                    <div
+                      key={`row2-${i}`}
+                      className="px-2 w-[120px] md:w-[160px] lg:w-[200px] h-full flex-shrink-0"
+                    >
+                      <div className="bg-white p-2 md:p-4 border border-gray-200 rounded-lg flex items-center justify-center hover:shadow-md transition-shadow h-full w-full">
+                        <Link href={`/recruiter/${employer.recruiter_slug}`}>
+                          <Image
+                            src={employer.logo_url || "/logos/logo-1.png"}
+                            alt={employer.company_name || "Partner Logo"}
+                            width={100}
+                            height={40}
+                            className="object-contain max-h-12"
+                          />
+                        </Link>
+                      </div>
+                    </div>
+                  ))
+                )}
               </div>
             </div>
           </div>

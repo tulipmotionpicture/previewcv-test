@@ -85,7 +85,7 @@ export default function RecruiterSidebar({
       },
       {
         key: "galleryEvents",
-        label: "Events & Happnings",
+        label: "Events & Happenings",
         icon: <Calendar className="w-5 h-5" />,
       },
     ];

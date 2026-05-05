@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Building2,
   Globe,
@@ -28,6 +28,8 @@ import {
   Camera,
   ShieldCheck,
   User,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import { RecruiterProfile, CompanyEvent } from "@/types";
 import { Job } from "@/types/api";
@@ -52,6 +54,21 @@ export default function RecruiterProfilePublic({
 }: RecruiterProfilePublicProps) {
   // Guard against undefined profile
   const [activeTab, setActiveTab] = useState("about");
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [isFullScreenGallery, setIsFullScreenGallery] = useState(false);
+
+  // Auto-slide effect for banner images
+  useEffect(() => {
+    if (profile?.gallery?.images && profile.gallery.images.length > 1 && !isFullScreenGallery) {
+      const interval = setInterval(() => {
+        setCurrentImageIndex((prev) =>
+          profile.gallery?.images ? (prev === profile.gallery.images.length - 1 ? 0 : prev + 1) : 0
+        );
+      }, 5000);
+      return () => clearInterval(interval);
+    }
+  }, [profile?.gallery?.images, isFullScreenGallery]);
+
   if (!profile) {
     return <div className="text-center py-12">No profile data available</div>;
   }
@@ -59,22 +76,62 @@ export default function RecruiterProfilePublic({
   const tabs = [
     { id: "about", label: "About" },
     { id: "positions", label: "Open Positions" },
-    { id: "events", label: "Events & Happenis" },
+    { id: "events", label: "Events & Happenings" },
   ];
 
   return (
     <div className="min-h-screen mt-12">
       <div className="overflow-hidden">
-        {profile.company_images && profile.company_images.length > 0 ? (
-          profile.company_images.map((img, index) => (
-            <div key={index} className="h-52 w-full relative">
+        {profile.gallery && profile.gallery?.images && profile.gallery.images.length > 0 ? (
+          <div className="h-52 w-full relative group">
+            {profile.gallery.images.map((img: any, index: number) => (
               <img
+                key={index}
                 src={img}
                 alt={`company-${index}`}
-                className="w-full h-full object-cover"
+                onClick={() => setIsFullScreenGallery(true)}
+                className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 cursor-pointer ${index === currentImageIndex ? "opacity-100" : "opacity-0"
+                  }`}
               />
-            </div>
-          ))
+            ))}
+
+            {profile.gallery.images.length > 1 && (
+              <>
+                <button
+                  onClick={() =>
+                    setCurrentImageIndex((prev) =>
+                      profile.gallery?.images ? (prev === 0 ? profile.gallery.images.length - 1 : prev - 1) : 0
+                    )
+                  }
+                  className="absolute left-4 top-1/2 -translate-y-1/2 bg-black/40 hover:bg-black/60 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                >
+                  <ChevronLeft className="w-6 h-6" />
+                </button>
+                <button
+                  onClick={() =>
+                    setCurrentImageIndex((prev) =>
+                      profile.gallery?.images ? (prev === profile.gallery.images.length - 1 ? 0 : prev + 1) : 0
+                    )
+                  }
+                  className="absolute right-4 top-1/2 -translate-y-1/2 bg-black/40 hover:bg-black/60 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                >
+                  <ChevronRight className="w-6 h-6" />
+                </button>
+                <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
+                  {profile.gallery.images.map((_: any, index: number) => (
+                    <button
+                      key={index}
+                      onClick={() => setCurrentImageIndex(index)}
+                      className={`w-2 h-2 rounded-full transition-all ${index === currentImageIndex
+                          ? "bg-white w-4"
+                          : "bg-white/50 hover:bg-white/80"
+                        }`}
+                    />
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
         ) : (
           <div className="h-52 bg-gradient-to-r from-blue-600 to-indigo-700 relative">
             <div className="absolute inset-0 opacity-20 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:20px_20px]" />
@@ -186,11 +243,10 @@ export default function RecruiterProfilePublic({
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`px-8 py-4 text-sm font-bold transition-all border-b-2 whitespace-nowrap ${
-                activeTab === tab.id
-                  ? "border-blue-600 text-blue-600"
-                  : "border-transparent text-slate-500 hover:text-slate-700"
-              }`}
+              className={`px-8 py-4 text-sm font-bold transition-all border-b-2 whitespace-nowrap ${activeTab === tab.id
+                ? "border-blue-600 text-blue-600"
+                : "border-transparent text-slate-500 hover:text-slate-700"
+                }`}
             >
               {tab.label}
             </button>
@@ -450,7 +506,7 @@ export default function RecruiterProfilePublic({
                   Company Gallery
                 </h2>
                 {profile.gallery?.images &&
-                profile.gallery.images.length > 0 ? (
+                  profile.gallery.images.length > 0 ? (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {profile.gallery.images.map((img, i) => (
                       <div
@@ -551,6 +607,74 @@ export default function RecruiterProfilePublic({
           </div>
         </div>
       </div>
+
+
+      {/* Full-Screen Gallery Modal */}
+      {isFullScreenGallery && profile?.gallery?.images && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/95 backdrop-blur-sm">
+          <button
+            onClick={() => setIsFullScreenGallery(false)}
+            className="absolute top-6 right-6 text-white/70 hover:text-white bg-white/10 hover:bg-white/20 p-2 rounded-full transition-colors z-50"
+          >
+            <X className="w-8 h-8" />
+          </button>
+
+          <div className="relative w-full max-w-5xl aspect-[16/9] flex items-center justify-center p-4">
+            {profile.gallery.images.map((img: any, index: number) => (
+              <img
+                key={`full-${index}`}
+                src={img}
+                alt={`full-gallery-${index}`}
+                className={`absolute max-w-full max-h-full object-contain transition-opacity duration-500 ${index === currentImageIndex ? "opacity-100 z-10" : "opacity-0 z-0"
+                  }`}
+              />
+            ))}
+
+            {profile.gallery.images.length > 1 && (
+              <>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setCurrentImageIndex((prev) =>
+                      profile.gallery?.images ? (prev === 0 ? profile.gallery.images.length - 1 : prev - 1) : 0
+                    );
+                  }}
+                  className="absolute left-4 md:left-10 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/80 text-white p-3 rounded-full transition-colors z-50"
+                >
+                  <ChevronLeft className="w-8 h-8" />
+                </button>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setCurrentImageIndex((prev) =>
+                      profile.gallery?.images ? (prev === profile.gallery.images.length - 1 ? 0 : prev + 1) : 0
+                    );
+                  }}
+                  className="absolute right-4 md:right-10 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/80 text-white p-3 rounded-full transition-colors z-50"
+                >
+                  <ChevronRight className="w-8 h-8" />
+                </button>
+
+                <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-3 z-50">
+                  {profile.gallery.images.map((_: any, index: number) => (
+                    <button
+                      key={`dot-${index}`}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setCurrentImageIndex(index);
+                      }}
+                      className={`w-2.5 h-2.5 rounded-full transition-all ${index === currentImageIndex
+                          ? "bg-white w-6"
+                          : "bg-white/40 hover:bg-white/80"
+                        }`}
+                    />
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
