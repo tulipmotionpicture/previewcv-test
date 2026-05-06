@@ -457,7 +457,7 @@ export default function ResumePreviewPage() {
             </div>
 
             {/* Stats Bar */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {/* <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {[
                 {
                   label: "Profile Views",
@@ -486,7 +486,7 @@ export default function ResumePreviewPage() {
                   </div>
                 </div>
               ))}
-            </div>
+            </div> */}
 
             {/* PDF Viewer Container */}
             <div className="bg-slate-800 rounded-2xl shadow-2xl border border-slate-700 overflow-hidden flex flex-col h-[900px]">

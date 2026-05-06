@@ -238,7 +238,13 @@ export default function Home() {
           <div className="flex flex-col gap-4 overflow-hidden py-4">
             {/* Row 1 - Scroll Left */}
             <div className="relative w-full overflow-hidden h-16 md:h-20">
-              <div className="absolute top-0 left-0 h-full flex animate-scroll-left w-max">
+              <div
+                className={`h-full flex ${
+                  partners.length >= 5
+                    ? "absolute top-0 left-0 animate-scroll-left w-max"
+                    : "justify-center relative w-full"
+                }`}
+              >
                 {partnersLoading ? (
                   [...Array(12)].map((_, i) => (
                     <div
@@ -249,62 +255,68 @@ export default function Home() {
                     </div>
                   ))
                 ) : (
-                  [...partners, ...partners].map((employer, i) => (
-                    <div
-                      key={`row1-${i}`}
-                      className="px-2 w-[120px] md:w-[160px] lg:w-[200px] h-full flex-shrink-0"
-                    >
-                      <div className="bg-white p-2 md:p-4 border border-gray-200 rounded-lg flex items-center justify-center hover:shadow-md transition-shadow h-full w-full">
-                        <Link href={`/recruiter/${employer.recruiter_slug}`}>
-                          <Image
-                            src={employer.logo_url || "/logos/logo-1.png"}
-                            alt={employer.company_name || "Partner Logo"}
-                            width={100}
-                            height={40}
-                            className="object-contain max-h-12"
-                          />
-                        </Link>
+                  (partners.length >= 5 ? [...partners, ...partners] : partners).map(
+                    (employer, i) => (
+                      <div
+                        key={`row1-${i}`}
+                        className="px-2 w-[120px] md:w-[160px] lg:w-[200px] h-full flex-shrink-0"
+                      >
+                        <div className="bg-white p-2 md:p-4 border border-gray-200 rounded-lg flex items-center justify-center hover:shadow-md transition-shadow h-full w-full">
+                          <Link href={`/recruiter/${employer.recruiter_slug}`}>
+                            <Image
+                              src={employer.company_logo_url || "/logos/logo-1.png"}
+                              alt={employer.company_name || "Partner Logo"}
+                              width={100}
+                              height={40}
+                              className="object-contain max-h-12"
+                            />
+                          </Link>
+                        </div>
                       </div>
-                    </div>
-                  ))
+                    )
+                  )
                 )}
               </div>
             </div>
 
             {/* Row 2 - Scroll Right */}
-            <div className="relative w-full overflow-hidden h-16 md:h-20">
-              <div className="absolute top-0 left-0 h-full flex animate-scroll-right w-max">
-                {partnersLoading ? (
-                  [...Array(12)].map((_, i) => (
-                    <div
-                      key={`fallback-2-${i}`}
-                      className="px-2 w-[120px] md:w-[160px] lg:w-[200px] h-full flex-shrink-0"
-                    >
-                      <div className="bg-gray-100 dark:bg-gray-800 p-2 md:p-4 border border-gray-200 dark:border-gray-700 rounded-lg flex items-center justify-center h-full w-full animate-pulse"></div>
-                    </div>
-                  ))
-                ) : (
-                  [...[...partners].reverse(), ...[...partners].reverse()].map((employer, i) => (
-                    <div
-                      key={`row2-${i}`}
-                      className="px-2 w-[120px] md:w-[160px] lg:w-[200px] h-full flex-shrink-0"
-                    >
-                      <div className="bg-white p-2 md:p-4 border border-gray-200 rounded-lg flex items-center justify-center hover:shadow-md transition-shadow h-full w-full">
-                        <Link href={`/recruiter/${employer.recruiter_slug}`}>
-                          <Image
-                            src={employer.logo_url || "/logos/logo-1.png"}
-                            alt={employer.company_name || "Partner Logo"}
-                            width={100}
-                            height={40}
-                            className="object-contain max-h-12"
-                          />
-                        </Link>
+            {partners.length >= 5 && (
+              <div className="relative w-full overflow-hidden h-16 md:h-20">
+                <div className="absolute top-0 left-0 h-full flex animate-scroll-right w-max">
+                  {partnersLoading ? (
+                    [...Array(12)].map((_, i) => (
+                      <div
+                        key={`fallback-2-${i}`}
+                        className="px-2 w-[120px] md:w-[160px] lg:w-[200px] h-full flex-shrink-0"
+                      >
+                        <div className="bg-gray-100 dark:bg-gray-800 p-2 md:p-4 border border-gray-200 dark:border-gray-700 rounded-lg flex items-center justify-center h-full w-full animate-pulse"></div>
                       </div>
-                    </div>
-                  ))
-                )}
+                    ))
+                  ) : (
+                    [...[...partners].reverse(), ...[...partners].reverse()].map(
+                      (employer, i) => (
+                        <div
+                          key={`row2-${i}`}
+                          className="px-2 w-[120px] md:w-[160px] lg:w-[200px] h-full flex-shrink-0"
+                        >
+                          <div className="bg-white p-2 md:p-4 border border-gray-200 rounded-lg flex items-center justify-center hover:shadow-md transition-shadow h-full w-full">
+                            <Link href={`/recruiter/${employer.recruiter_slug}`}>
+                              <Image
+                                src={employer.company_logo_url || "/logos/logo-1.png"}
+                                alt={employer.company_name || "Partner Logo"}
+                                width={100}
+                                height={40}
+                                className="object-contain max-h-12"
+                              />
+                            </Link>
+                          </div>
+                        </div>
+                      )
+                    )
+                  )}
+                </div>
               </div>
-            </div>
+            )}
           </div>
         </div>
       </section>

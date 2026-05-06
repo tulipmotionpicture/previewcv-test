@@ -76,10 +76,14 @@ const SkillTag = ({
 
 interface JobCreationProps {
   onNavigateToPricing?: () => void;
+  jobToEdit?: any;
+  onSuccess?: () => void;
 }
 
 export default function JobCreationPage({
   onNavigateToPricing,
+  jobToEdit,
+  onSuccess,
 }: JobCreationProps = {}) {
   const router = useRouter();
   const { showToast } = useToast();
@@ -87,24 +91,48 @@ export default function JobCreationPage({
 
   const [step, setStep] = useState(0);
   const [loading, setLoading] = useState(false);
-  const [form, setForm] = useState<JobFormState>(JOB_FORM_INITIAL);
+  const [form, setForm] = useState<JobFormState>(() => {
+    if (jobToEdit) {
+      return {
+        title: jobToEdit.title || "",
+        company_name: jobToEdit.company_name || "",
+        country: jobToEdit.country || "",
+        state: jobToEdit.state || "",
+        city: jobToEdit.city || "",
+        job_type: jobToEdit.job_type || "full_time",
+        experience_level: jobToEdit.experience_level || "entry",
+        is_remote: jobToEdit.is_remote || false,
+        salary_min: jobToEdit.salary_min ? String(jobToEdit.salary_min) : "",
+        salary_max: jobToEdit.salary_max ? String(jobToEdit.salary_max) : "",
+        salary_currency: jobToEdit.salary_currency || "USD",
+        description: jobToEdit.description || "",
+        requirements: jobToEdit.requirements || "",
+        responsibilities: jobToEdit.responsibilities || "",
+        required_skills: jobToEdit.required_skills?.join(", ") || "",
+        preferred_skills: jobToEdit.preferred_skills?.join(", ") || "",
+        categories: jobToEdit.categories?.join(", ") || "",
+        is_active: jobToEdit.is_active ?? true,
+      };
+    }
+    return JOB_FORM_INITIAL;
+  });
   const [categoryInput, setCategoryInput] = useState("");
-  const [jobTitleInput, setJobTitleInput] = useState("");
+  const [jobTitleInput, setJobTitleInput] = useState(jobToEdit?.title || "");
   const [selectedJobTitleId, setSelectedJobTitleId] = useState<number | null>(null);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [suggestions, setSuggestions] = useState<any[]>([]);
   const [currentSuggestionIndex, setCurrentSuggestionIndex] = useState(0);
   const [loadingSuggestions, setLoadingSuggestions] = useState(false);
-  const [companyInput, setCompanyInput] = useState("");
+  const [companyInput, setCompanyInput] = useState(jobToEdit?.company_name || "");
   const [skillInput, setSkillInput] = useState("");
   const [prefSkillInput, setPrefSkillInput] = useState("");
 
   React.useEffect(() => {
-    if (recruiter?.company_name && !form.company_name) {
+    if (!jobToEdit && recruiter?.company_name && !form.company_name) {
       setForm((p) => ({ ...p, company_name: recruiter.company_name || "" }));
       setCompanyInput(recruiter.company_name);
     }
-  }, [recruiter]);
+  }, [recruiter, jobToEdit]);
 
   const progressPercent = ((step + 1) / STEPS.length) * 100;
 
@@ -257,7 +285,7 @@ export default function JobCreationPage({
           .filter(Boolean)
         : [];
 
-      const response = await api.createJob({
+      const payload = {
         title: form.title,
         company_name: form.company_name,
         country: form.country,
@@ -276,24 +304,28 @@ export default function JobCreationPage({
         required_skills: requiredSkillsArray,
         preferred_skills: preferredSkillsArray,
         categories: categoriesArray,
-      });
+      };
 
-      showToast("Job posted successfully 🚀", "success");
+      if (jobToEdit?.id) {
+        await api.updateJob(jobToEdit.id, payload as any);
+        showToast("Job updated successfully 🚀", "success");
+      } else {
+        await api.createJob(payload);
+        showToast("Job posted successfully 🚀", "success");
+        // Clear form
+        setForm(JOB_FORM_INITIAL);
+        setStep(0);
+        setCategoryInput("");
+        setJobTitleInput("");
+        setCompanyInput("");
+        setSkillInput("");
+        setPrefSkillInput("");
+      }
 
-      // Clear form
-      setForm(JOB_FORM_INITIAL);
-      setStep(0);
-      setCategoryInput("");
-      setJobTitleInput("");
-      setCompanyInput("");
-      setSkillInput("");
-      setPrefSkillInput("");
-
-      console.log("Job created successfully:", response);
-      router.push("/recruiter/dashboard?tab=jobs");
+      if (onSuccess) onSuccess();
     } catch (e: any) {
-      console.error("Job creation failed:", e);
-      const errorMessage = e.detail?.message || e.message || "Failed to create job. Please try again.";
+      console.error(e);
+      const errorMessage = e.detail?.message || e.message || (jobToEdit ? "Failed to update job" : "Failed to create job. Please try again.");
       showToast(errorMessage, "error");
     } finally {
       setLoading(false);
@@ -1431,8 +1463,8 @@ export default function JobCreationPage({
             </>
           ) : (
             <>
-              {step === 3 ? "Publish Job" : "Next Step"}
-              {step === 3 ? <Plus size={16} /> : <ChevronRight size={16} />}
+              {step === 3 ? (jobToEdit ? "Save Changes" : "Publish Job") : "Next Step"}
+              {step === 3 ? (jobToEdit ? <Check size={16} /> : <Plus size={16} />) : <ChevronRight size={16} />}
             </>
           )}
         </button>

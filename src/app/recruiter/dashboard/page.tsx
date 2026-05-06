@@ -13,7 +13,6 @@ import {
 } from "@/types/api";
 import { useRecruiterAuth } from "@/context/RecruiterAuthContext";
 import { useToast } from "@/context/ToastContext";
-import JobModal from "@/components/recruiter/JobModal";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
 import CompanyGallerySection from "@/components/CompanyGallerySection";
 import RecruiterGalleryEventsSection from "@/components/RecruiterGalleryEventsSection";
@@ -96,7 +95,6 @@ export default function RecruiterDashboard() {
   }));
 
   // Edit Job State
-  const [jobModalOpen, setJobModalOpen] = useState(false);
   const [editingJob, setEditingJob] = useState<Job | null>(null);
   const [loadingJobDetails, setLoadingJobDetails] = useState(false);
 
@@ -346,7 +344,6 @@ export default function RecruiterDashboard() {
 
   const handleEditJob = async (job: Job) => {
     setLoadingJobDetails(true);
-    setJobModalOpen(true);
     try {
       const response = await api.getJobPostingDetails(job.id);
       if (response.success && response.job) {
@@ -355,53 +352,15 @@ export default function RecruiterDashboard() {
         // Fallback to passed job data if API fails
         setEditingJob(job);
       }
+      setActiveTab("editJob" as any);
     } catch (error) {
       console.error("Failed to fetch job details:", error);
       // Fallback to passed job data if API fails
       setEditingJob(job);
+      setActiveTab("editJob" as any);
       toast.error("Failed to load latest job details, using cached data");
     } finally {
       setLoadingJobDetails(false);
-    }
-  };
-
-  const handleSaveJob = async (jobId: number | null, data: Partial<Job>) => {
-    try {
-      if (jobId) {
-        await api.updateJob(jobId, data);
-        toast.success("Job updated successfully!");
-      } else {
-        const e = { preventDefault: () => {} } as React.FormEvent;
-
-        const payload = {
-          title: data.title || "",
-          country: data.country || "",
-          state: data.state || "",
-          city: data.city || "",
-          company_name:
-            recruiter?.company_name || recruiter?.display_name || "My Company",
-          job_type: data.job_type || "full_time",
-          experience_level: data.experience_level || "mid",
-          description: data.description || "",
-          requirements: data.requirements || "Requirements not provided.",
-          responsibilities:
-            data.responsibilities || "Responsibilities not provided.",
-          salary_min: data.salary_min || 0,
-          salary_max: data.salary_max || 0,
-          salary_currency: data.salary_currency || "USD",
-          is_remote: data.is_remote || false,
-          required_skills: data.required_skills || [],
-          preferred_skills: data.preferred_skills || [],
-          categories: data.categories || [],
-        };
-
-        await api.createJob(payload as any);
-        toast.success("Job posted successfully!");
-      }
-      await fetchJobs();
-    } catch (error) {
-      toast.error(jobId ? "Failed to update job" : "Failed to create job");
-      throw error;
     }
   };
 
@@ -722,6 +681,19 @@ export default function RecruiterDashboard() {
         {activeTab === "createJob" && (
           <JobCreationPage
             onNavigateToPricing={() => setActiveTab("createJob")}
+            onSuccess={() => {
+              setActiveTab("jobs");
+              fetchJobs();
+            }}
+          />
+        )}
+        {activeTab === ("editJob" as any) && (
+          <JobCreationPage
+            jobToEdit={editingJob}
+            onSuccess={() => {
+              setActiveTab("jobs");
+              fetchJobs();
+            }}
           />
         )}
         {activeTab === "pricing" && <PricingPlans />}
@@ -738,17 +710,6 @@ export default function RecruiterDashboard() {
         }}
       />
 
-      {/* Edit Job Modal */}
-      <JobModal
-        isOpen={jobModalOpen}
-        onClose={() => {
-          setJobModalOpen(false);
-          setEditingJob(null);
-        }}
-        onSave={handleSaveJob}
-        job={editingJob}
-        loadingJobDetails={loadingJobDetails}
-      />
 
       {/* Delete Job Confirmation */}
       <ConfirmDialog
