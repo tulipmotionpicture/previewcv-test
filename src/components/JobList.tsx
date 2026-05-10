@@ -4,6 +4,7 @@ import { Job } from "@/types/api";
 import Link from "next/link";
 import BookmarkButton from "./BookmarkButton";
 import { useToast } from "@/context/ToastContext";
+import { useRouter } from "next/navigation";
 
 interface JobListProps {
   jobs: Job[];
@@ -23,6 +24,7 @@ export default function JobList({ jobs, loading, error }: JobListProps) {
   const [jobsState, setJobsState] = useState(jobs);
   const sharingJobId = useRef<number | null>(null);
   const { success } = useToast();
+  const router = useRouter();
 
   // Update jobs state when props change
   React.useEffect(() => {
@@ -59,7 +61,7 @@ export default function JobList({ jobs, loading, error }: JobListProps) {
           title: job.title,
           url: jobUrl,
         });
-        success("Job shared successfully!");
+        success("Job copied!");
       } catch (err) {
         // Ignore AbortError (user canceled the share)
         if (err instanceof Error && err.name !== "AbortError") {
@@ -71,7 +73,7 @@ export default function JobList({ jobs, loading, error }: JobListProps) {
     } else {
       try {
         await navigator.clipboard.writeText(jobUrl);
-        success("Link copied to clipboard!");
+        success("Job copied!");
       } catch (err) {
         console.error("Failed to copy:", err);
       } finally {
@@ -93,7 +95,8 @@ export default function JobList({ jobs, loading, error }: JobListProps) {
           {jobsState.map((job) => (
             <div
               key={job.id}
-              className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-3 hover:border-blue-300 transition-shadow duration-300 flex flex-col h-full shadow-sm"
+              onClick={() => router.push(`/job/${job.slug}`)}
+              className="cursor-pointer bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-3 hover:border-blue-300 transition-shadow duration-300 flex flex-col h-full shadow-sm"
             >
               <div className="flex items-start justify-between mb-1.5">
                 <div className="flex gap-2.5">
@@ -119,7 +122,7 @@ export default function JobList({ jobs, loading, error }: JobListProps) {
                     </h3>
                     <p className="text-[11px] font-medium text-gray-500 dark:text-gray-400 truncate">
                       <span className="text-gray-900 dark:text-gray-300 font-semibold hover:text-primary-blue transition-colors">
-                        <Link href={job.recruiter_profile_url || ""}>
+                        <Link href={job.recruiter_profile_url || ""} onClick={(e) => e.stopPropagation()}>
                           {job.company_name}
                         </Link>
                       </span>
@@ -133,7 +136,9 @@ export default function JobList({ jobs, loading, error }: JobListProps) {
                 </div>
 
                 {/* Actions */}
-                <div className="flex flex-col gap-1 shrink-0">
+                <div className="flex flex-col gap-1 shrink-0"
+                  onClick={(e) => e.stopPropagation()}
+                >
                   <BookmarkButton
                     jobId={job.id}
                     jobSlug={job.slug}
@@ -144,7 +149,10 @@ export default function JobList({ jobs, loading, error }: JobListProps) {
                     size="sm"
                   />
                   <button
-                    onClick={() => handleShare(job)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleShare(job);
+                    }}
                     className="p-1 text-gray-400 hover:text-primary-blue hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-md transition-colors"
                     title="Share Job"
                   >
@@ -272,6 +280,7 @@ export default function JobList({ jobs, loading, error }: JobListProps) {
 
                 <Link
                   href={`/job/${job.slug}`}
+                  onClick={(e) => e.stopPropagation()}
                   className="px-4 py-2 bg-primary-blue text-white text-xs font-bold rounded-lg hover:bg-blue-700 transition shadow-sm hover:shadow text-center min-w-[100px]"
                 >
                   Apply

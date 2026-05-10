@@ -398,12 +398,12 @@ export default function RecruiterDashboard() {
         setSelectedApplicationDetail((prev) =>
           prev
             ? {
-                ...prev,
-                application: {
-                  ...prev.application,
-                  status: newStatus as Application["status"],
-                },
-              }
+              ...prev,
+              application: {
+                ...prev.application,
+                status: newStatus as Application["status"],
+              },
+            }
             : null,
         );
       }
@@ -500,7 +500,7 @@ export default function RecruiterDashboard() {
                 {/* Recent Job Posting and Onboarding Status */}
                 <div className="mt-6 grid grid-cols-1 lg:grid-cols-3 gap-2">
                   {/* Recent Job Posting Column */}
-                  <div className="lg:col-span-2 flex flex-col gap-4">
+                  <div className="lg:col-span-3 flex flex-col gap-4">
                     <div className="flex items-end justify-between">
                       <div>
                         <h2 className="text-xl font-medium text-gray-900 dark:text-gray-100 ">
@@ -521,7 +521,7 @@ export default function RecruiterDashboard() {
                       loadingJobs={loadingJobs}
                       currentPage={1}
                       totalPages={1}
-                      onPageChange={() => {}}
+                      onPageChange={() => { }}
                       onEditJob={handleEditJob}
                       onDeleteJob={(jobId) => setDeleteJobId(jobId)}
                       onViewApplications={handleViewApplications}
@@ -529,7 +529,7 @@ export default function RecruiterDashboard() {
                   </div>
 
                   {/* Help Guide - Takes 1 column */}
-                  <div className="flex flex-col h-full mt-4">
+                  {/* <div className="flex flex-col h-full mt-4">
                     <h2 className="text-xl font-medium text-gray-900 dark:text-gray-100 mb-6">
                       Help Guide
                     </h2>
@@ -585,7 +585,7 @@ export default function RecruiterDashboard() {
                       </div>
                       <div className="p-4 border-t border-gray-100 dark:border-gray-700"></div>
                     </div>
-                  </div>
+                  </div> */}
                 </div>
               </>
             ) : (

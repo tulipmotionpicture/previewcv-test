@@ -33,8 +33,8 @@ const NAV_ITEMS = [
     label: "Services",
     href: "#", // Dropdown trigger
     dropdown: [
-      { label: "Create Resume", href: "/resume/build" },
-      { label: "Create CV", href: "/cover-letter/create" },
+      { label: "Create Resume", href: "https://letsmakecv.com/resume/builder" },
+      { label: "Create CV", href: "https://letsmakecv.com/cover-letters/builder" },
     ],
   },
 ];

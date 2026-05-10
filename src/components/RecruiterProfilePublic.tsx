@@ -33,6 +33,7 @@ import {
 } from "lucide-react";
 import { RecruiterProfile, CompanyEvent } from "@/types";
 import { Job } from "@/types/api";
+import Link from "next/link";
 
 interface GalleryImage {
   id: string;
@@ -123,8 +124,8 @@ export default function RecruiterProfilePublic({
                       key={index}
                       onClick={() => setCurrentImageIndex(index)}
                       className={`w-2 h-2 rounded-full transition-all ${index === currentImageIndex
-                          ? "bg-white w-4"
-                          : "bg-white/50 hover:bg-white/80"
+                        ? "bg-white w-4"
+                        : "bg-white/50 hover:bg-white/80"
                         }`}
                     />
                   ))}
@@ -312,80 +313,82 @@ export default function RecruiterProfilePublic({
                         key={job.id}
                         className="group p-6 rounded-2xl border border-slate-100 hover:border-blue-200 hover:bg-blue-50/30 transition-all cursor-pointer"
                       >
-                        <header className="flex justify-between items-start mb-4">
-                          <div className="flex-1">
-                            <h4 className="text-lg font-bold text-slate-900 group-hover:text-blue-600 transition-colors mb-2">
-                              {job.title}
-                            </h4>
-                            <div className="flex flex-wrap items-center gap-4 text-sm text-slate-500">
-                              <span className="flex items-center gap-1">
-                                <MapPin className="w-3 h-3" />
-                                {job.is_remote
-                                  ? "Remote"
-                                  : job.location || "Location TBA"}
-                              </span>
-                              <span className="flex items-center gap-1">
-                                <Briefcase className="w-3 h-3" />
-                                {job.job_type
-                                  .split("_")
-                                  .map(
-                                    (w: string) =>
-                                      w.charAt(0).toUpperCase() + w.slice(1),
-                                  )
-                                  .join(" ")}
-                              </span>
-                              {job.experience_level && (
+                        <Link
+                          href={`/job/${job.slug}`}
+                        >
+
+                          <header className="flex justify-between items-start mb-4">
+
+                            <div className="flex-1">
+                              <h4 className="text-lg font-bold text-slate-900 group-hover:text-blue-600 transition-colors mb-2">
+                                {job.title}
+                              </h4>
+                              <div className="flex flex-wrap items-center gap-4 text-sm text-slate-500">
                                 <span className="flex items-center gap-1">
-                                  <Users className="w-3 h-3" />
-                                  {job.experience_level
-                                    .charAt(0)
-                                    .toUpperCase() +
-                                    job.experience_level.slice(1)}
+                                  <MapPin className="w-3 h-3" />
+                                  {job.is_remote
+                                    ? "Remote"
+                                    : job.location || "Location TBA"}
                                 </span>
-                              )}
+                                <span className="flex items-center gap-1">
+                                  <Briefcase className="w-3 h-3" />
+                                  {job.job_type
+                                    .split("_")
+                                    .map(
+                                      (w: string) =>
+                                        w.charAt(0).toUpperCase() + w.slice(1),
+                                    )
+                                    .join(" ")}
+                                </span>
+                                {job.experience_level && (
+                                  <span className="flex items-center gap-1">
+                                    <Users className="w-3 h-3" />
+                                    {job.experience_level
+                                      .charAt(0)
+                                      .toUpperCase() +
+                                      job.experience_level.slice(1)}
+                                  </span>
+                                )}
+                              </div>
                             </div>
-                          </div>
-                          <a
-                            href={`/jobs/${job.slug}`}
-                            className="text-blue-600 font-bold text-sm hover:underline whitespace-nowrap ml-4"
-                          >
-                            View Details
-                          </a>
-                        </header>
 
-                        {job.description && (
-                          <p className="text-sm text-slate-600 mb-4 line-clamp-2">
-                            {job.description}
-                          </p>
-                        )}
 
-                        <footer className="flex items-center justify-between flex-wrap gap-4">
-                          <div className="flex items-center gap-4 text-xs">
-                            {job.salary_min && job.salary_max && (
-                              <span className="font-bold text-slate-700">
-                                ${job.salary_min.toLocaleString()} - $
-                                {job.salary_max.toLocaleString()}
-                                {job.salary_currency
-                                  ? ` ${job.salary_currency}`
-                                  : ""}
-                              </span>
-                            )}
-                            {job.required_skills &&
-                              job.required_skills.length > 0 && (
-                                <span className="font-bold text-slate-400">
-                                  {job.required_skills.length} skills required
+                          </header>
+
+                          {job.description && (
+                            <p className="text-sm text-slate-600 mb-4 line-clamp-2">
+                              {job.description}
+                            </p>
+                          )}
+
+                          <footer className="flex items-center justify-between flex-wrap gap-4">
+                            <div className="flex items-center gap-4 text-xs">
+                              {job.salary_min && job.salary_max && (
+                                <span className="font-bold text-slate-700">
+                                  ${job.salary_min.toLocaleString()} - $
+                                  {job.salary_max.toLocaleString()}
+                                  {job.salary_currency
+                                    ? ` ${job.salary_currency}`
+                                    : ""}
                                 </span>
                               )}
-                          </div>
-                          <div className="flex items-center gap-4 text-xs font-bold text-slate-400">
-                            <span>{job.application_count} applications</span>
-                            <span>{job.view_count} views</span>
-                            <time dateTime={job.posted_date}>
-                              Posted{" "}
-                              {new Date(job.posted_date).toLocaleDateString()}
-                            </time>
-                          </div>
-                        </footer>
+                              {job.required_skills &&
+                                job.required_skills.length > 0 && (
+                                  <span className="font-bold text-slate-400">
+                                    {job.required_skills.length} skills required
+                                  </span>
+                                )}
+                            </div>
+                            <div className="flex items-center gap-4 text-xs font-bold text-slate-400">
+                              <span>{job.application_count} applications</span>
+                              <span>{job.view_count} views</span>
+                              <time dateTime={job.posted_date}>
+                                Posted{" "}
+                                {new Date(job.posted_date).toLocaleDateString()}
+                              </time>
+                            </div>
+                          </footer>
+                        </Link>
                       </article>
                     ))}
                   </div>
@@ -664,8 +667,8 @@ export default function RecruiterProfilePublic({
                         setCurrentImageIndex(index);
                       }}
                       className={`w-2.5 h-2.5 rounded-full transition-all ${index === currentImageIndex
-                          ? "bg-white w-6"
-                          : "bg-white/40 hover:bg-white/80"
+                        ? "bg-white w-6"
+                        : "bg-white/40 hover:bg-white/80"
                         }`}
                     />
                   ))}

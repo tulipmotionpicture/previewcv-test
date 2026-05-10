@@ -110,14 +110,14 @@ export default function Footer() {
                   Blog
                 </Link>
               </li>
-              <li>
+              {/* <li>
                 <Link
                   href="/careers"
                   className="text-gray-700 dark:text-gray-300 hover:text-teal-dark dark:hover:text-mint transition-colors"
                 >
                   Careers
                 </Link>
-              </li>
+              </li> */}
             </ul>
           </div>
 
@@ -143,14 +143,14 @@ export default function Footer() {
                   Terms of Service
                 </Link>
               </li>
-              <li>
+              {/* <li>
                 <Link
                   href="/cookies"
                   className="text-gray-700 dark:text-gray-300 hover:text-teal-dark dark:hover:text-mint transition-colors"
                 >
                   Cookie Policy
                 </Link>
-              </li>
+              </li> */}
             </ul>
           </div>
         </div>

@@ -87,7 +87,7 @@ export default function JobsSidebar() {
       </div>
 
       {/* Create Resume Card */}
-      <Link href="/resume/build" className="group relative overflow-hidden bg-white dark:bg-gray-900 rounded-lg p-5 border border-blue-100 dark:border-blue-900/30 hover:border-blue-200 dark:hover:border-blue-800 transition-all hover:shadow-sm">
+      <Link href="https://letsmakecv.com/resume/builder" className="group relative overflow-hidden bg-white dark:bg-gray-900 rounded-lg p-5 border border-blue-100 dark:border-blue-900/30 hover:border-blue-200 dark:hover:border-blue-800 transition-all hover:shadow-sm">
         <div className="absolute top-0 right-0 w-24 h-24 bg-blue-50 dark:bg-blue-900/20 rounded-bl-[100px] -mr-4 -mt-4 transition-transform group-hover:scale-110"></div>
         <div className="relative flex justify-between items-center z-10">
           <div>
@@ -107,7 +107,7 @@ export default function JobsSidebar() {
       </Link>
 
       {/* Create Cover Letter Card */}
-      <Link href="/cover-letter/create" className="group relative overflow-hidden bg-white dark:bg-gray-900 rounded-lg p-5 border border-purple-100 dark:border-purple-900/30 hover:border-purple-200 dark:hover:border-purple-800 transition-all hover:shadow-sm">
+      <Link href="https://letsmakecv.com/cover-letters/builder" className="group relative overflow-hidden bg-white dark:bg-gray-900 rounded-lg p-5 border border-purple-100 dark:border-purple-900/30 hover:border-purple-200 dark:hover:border-purple-800 transition-all hover:shadow-sm">
         <div className="absolute top-0 right-0 w-24 h-24 bg-purple-50 dark:bg-purple-900/20 rounded-bl-[100px] -mr-4 -mt-4 transition-transform group-hover:scale-110"></div>
         <div className="relative flex justify-between items-center z-10">
           <div>
