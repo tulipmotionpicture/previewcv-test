@@ -5,6 +5,8 @@ import { Recruiter } from "@/types/api";
 import { useRecruiterAuth } from "@/context/RecruiterAuthContext";
 import { Copy, Globe, Pencil, Share2, Plus, X } from "lucide-react";
 import RichTextEditor from "./ui/RichTextEditor";
+import ImageCropper from "./ImageCropper";
+import { useImageCropper } from "@/hooks/useImageCropper";
 
 function CompanyGallerySection({
   recruiter,
@@ -24,6 +26,9 @@ function CompanyGallerySection({
   const [uploadingGallery, setUploadingGallery] = useState<boolean>(false);
   const [saving, setSaving] = useState<boolean>(false);
 
+  const logoInputRef = useRef<HTMLInputElement>(null);
+  const galleryInputRef = useRef<HTMLInputElement>(null);
+
   // Form State
   const [formData, setFormData] = useState({
     display_name: recruiter.display_name || "",
@@ -32,8 +37,11 @@ function CompanyGallerySection({
     bio: recruiter.bio || "",
   });
 
-  const logoInputRef = useRef<HTMLInputElement>(null);
-  const galleryInputRef = useRef<HTMLInputElement>(null);
+  // Image Cropper Hook
+  const cropper = useImageCropper({
+    maxFileSizeMB: 1,
+    onError: (error) => toast?.error(error),
+  });
 
   // Update local state when prop changes
   useEffect(() => {
@@ -141,12 +149,25 @@ function CompanyGallerySection({
     const file = e.target.files?.[0];
     if (!file) return;
 
+    cropper.handleFileSelect(file);
+  };
+
+  const handleCropConfirm = async () => {
     setUploadingGallery(true);
     try {
-      const res = await api.uploadRecruiterGalleryImage(file);
+      const croppedFile = await cropper.getCroppedImage();
+      if (!croppedFile) {
+        toast?.error("Failed to crop image");
+        return;
+      }
+
+      const res = await api.uploadRecruiterGalleryImage(croppedFile);
       const url = res?.url || res?.image_url || null;
       if (url) setGallery((prev) => [url, ...prev]);
-      toast?.success("Image uploaded");
+      toast?.success("Image uploaded successfully");
+
+      // Close cropper and reset state
+      cropper.closeCropper();
     } catch {
       toast?.error("Gallery upload failed");
     } finally {
@@ -376,7 +397,9 @@ function CompanyGallerySection({
                 <>
                   <Plus className="w-5 h-5 mb-1 group-hover:scale-110 transition-transform" />
                   <span className="text-[10px] font-medium">Add Photo</span>
-                  <span className="text-[8px] font-medium">Only less than 1MB is allowed and oriantation 6:1 </span>
+                  <span className="text-[8px] font-medium">
+                    Only less than 1MB is allowed and oriantation 6:1{" "}
+                  </span>
                 </>
               )}
             </button>
@@ -386,7 +409,6 @@ function CompanyGallerySection({
               ref={galleryInputRef}
               onChange={handleGalleryUpload}
               className="hidden"
-
             />
           </div>
         </div>
@@ -408,6 +430,23 @@ function CompanyGallerySection({
           )}
         </button>
       </div>
+
+      {/* Image Cropper Modal */}
+      <ImageCropper
+        isOpen={cropper.showCropper}
+        imageSrc={cropper.imageToCrop}
+        crop={cropper.crop}
+        zoom={cropper.zoom}
+        aspect={6 / 1}
+        onCropChange={cropper.setCrop}
+        onZoomChange={cropper.setZoom}
+        onCropComplete={cropper.handleCropComplete}
+        onConfirm={handleCropConfirm}
+        onCancel={cropper.closeCropper}
+        isProcessing={uploadingGallery || cropper.isProcessing}
+        title="Crop Image (6:1 Aspect Ratio)"
+        confirmLabel="Crop & Upload"
+      />
     </div>
   );
 }

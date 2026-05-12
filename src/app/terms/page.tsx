@@ -55,9 +55,7 @@ export default function TermsAndConditionsPage() {
             <div className="space-y-4 text-gray-700 leading-relaxed">
               <div>
                 <p className="font-semibold text-gray-900 mb-2">Legal Entity</p>
-                <p>
-                  Accurabyte Technologies (to be incorporated in Georgia, USA)
-                </p>
+                <p>Accurabyte technology LLc -Georgia, Tbilisi,</p>
               </div>
               <div>
                 <p className="font-semibold text-gray-900 mb-2">
