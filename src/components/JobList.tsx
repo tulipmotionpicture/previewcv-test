@@ -14,8 +14,9 @@ interface JobListProps {
 
 function formatSalary(job: Job) {
   if (job.salary_min && job.salary_max) {
-    return `${job.salary_currency || "USD"} ${job.salary_min} - ${job.salary_max
-      }`;
+    return `${job.salary_currency || "USD"} ${job.salary_min} - ${
+      job.salary_max
+    }`;
   }
   return "Competitive Salary";
 }
@@ -122,7 +123,10 @@ export default function JobList({ jobs, loading, error }: JobListProps) {
                     </h3>
                     <p className="text-[11px] font-medium text-gray-500 dark:text-gray-400 truncate">
                       <span className="text-gray-900 dark:text-gray-300 font-semibold hover:text-primary-blue transition-colors">
-                        <Link href={job.recruiter_profile_url || ""} onClick={(e) => e.stopPropagation()}>
+                        <Link
+                          href={job.recruiter_profile_url || ""}
+                          onClick={(e) => e.stopPropagation()}
+                        >
                           {job.company_name}
                         </Link>
                       </span>
@@ -136,7 +140,8 @@ export default function JobList({ jobs, loading, error }: JobListProps) {
                 </div>
 
                 {/* Actions */}
-                <div className="flex flex-col gap-1 shrink-0"
+                <div
+                  className="flex flex-col gap-1 shrink-0"
                   onClick={(e) => e.stopPropagation()}
                 >
                   <BookmarkButton
@@ -212,7 +217,9 @@ export default function JobList({ jobs, loading, error }: JobListProps) {
                       .join(" ")
                       .replace("Competitive Salary", "Competitive")}
                   </span>
-                  <span className="text-[10px] text-slate-400 font-medium ml-0.5">/month</span>
+                  <span className="text-[10px] text-slate-400 font-medium ml-0.5">
+                    /month
+                  </span>
                 </div>
 
                 {job.is_remote && (

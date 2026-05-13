@@ -60,10 +60,18 @@ export default function RecruiterProfilePublic({
 
   // Auto-slide effect for banner images
   useEffect(() => {
-    if (profile?.gallery?.images && profile.gallery.images.length > 1 && !isFullScreenGallery) {
+    if (
+      profile?.gallery?.images &&
+      profile.gallery.images.length > 1 &&
+      !isFullScreenGallery
+    ) {
       const interval = setInterval(() => {
         setCurrentImageIndex((prev) =>
-          profile.gallery?.images ? (prev === profile.gallery.images.length - 1 ? 0 : prev + 1) : 0
+          profile.gallery?.images
+            ? prev === profile.gallery.images.length - 1
+              ? 0
+              : prev + 1
+            : 0,
         );
       }, 5000);
       return () => clearInterval(interval);
@@ -83,7 +91,9 @@ export default function RecruiterProfilePublic({
   return (
     <div className="min-h-screen mt-12">
       <div className="overflow-hidden">
-        {profile.gallery && profile.gallery?.images && profile.gallery.images.length > 0 ? (
+        {profile.gallery &&
+        profile.gallery?.images &&
+        profile.gallery.images.length > 0 ? (
           <div className="h-52 w-full relative group">
             {profile.gallery.images.map((img: any, index: number) => (
               <img
@@ -91,8 +101,9 @@ export default function RecruiterProfilePublic({
                 src={img}
                 alt={`company-${index}`}
                 onClick={() => setIsFullScreenGallery(true)}
-                className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 cursor-pointer ${index === currentImageIndex ? "opacity-100" : "opacity-0"
-                  }`}
+                className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 cursor-pointer ${
+                  index === currentImageIndex ? "opacity-100" : "opacity-0"
+                }`}
               />
             ))}
 
@@ -101,7 +112,11 @@ export default function RecruiterProfilePublic({
                 <button
                   onClick={() =>
                     setCurrentImageIndex((prev) =>
-                      profile.gallery?.images ? (prev === 0 ? profile.gallery.images.length - 1 : prev - 1) : 0
+                      profile.gallery?.images
+                        ? prev === 0
+                          ? profile.gallery.images.length - 1
+                          : prev - 1
+                        : 0,
                     )
                   }
                   className="absolute left-4 top-1/2 -translate-y-1/2 bg-black/40 hover:bg-black/60 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
@@ -111,7 +126,11 @@ export default function RecruiterProfilePublic({
                 <button
                   onClick={() =>
                     setCurrentImageIndex((prev) =>
-                      profile.gallery?.images ? (prev === profile.gallery.images.length - 1 ? 0 : prev + 1) : 0
+                      profile.gallery?.images
+                        ? prev === profile.gallery.images.length - 1
+                          ? 0
+                          : prev + 1
+                        : 0,
                     )
                   }
                   className="absolute right-4 top-1/2 -translate-y-1/2 bg-black/40 hover:bg-black/60 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
@@ -123,10 +142,11 @@ export default function RecruiterProfilePublic({
                     <button
                       key={index}
                       onClick={() => setCurrentImageIndex(index)}
-                      className={`w-2 h-2 rounded-full transition-all ${index === currentImageIndex
-                        ? "bg-white w-4"
-                        : "bg-white/50 hover:bg-white/80"
-                        }`}
+                      className={`w-2 h-2 rounded-full transition-all ${
+                        index === currentImageIndex
+                          ? "bg-white w-4"
+                          : "bg-white/50 hover:bg-white/80"
+                      }`}
                     />
                   ))}
                 </div>
@@ -168,71 +188,73 @@ export default function RecruiterProfilePublic({
             </div>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 py-6 border-t border-slate-100">
-            <div className="flex items-center gap-3 text-slate-600">
-              <div className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center">
-                <Briefcase className="w-5 h-5 text-slate-400" />
-              </div>
-              <div>
-                <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                  Industry
-                </p>
-                <p className="text-sm font-bold">
-                  {profile.industry || "Not specified"}
-                </p>
-              </div>
-            </div>
-            <div className="flex items-center gap-3 text-slate-600">
-              <div className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center">
-                <Users className="w-5 h-5 text-slate-400" />
-              </div>
-              <div>
-                <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                  Company Size
-                </p>
-                <p className="text-sm font-bold">
-                  {profile.company_size || "Not specified"}
-                </p>
-              </div>
-            </div>
-            <div className="flex items-center gap-3 text-slate-600">
-              <div className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center">
-                <MapPin className="w-5 h-5 text-slate-400" />
-              </div>
-              <div>
-                <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                  Location
-                </p>
-                <p className="text-sm font-bold">
-                  {profile.location || "Not specified"}
-                </p>
-              </div>
-            </div>
-            <div className="flex items-center gap-3 text-slate-600">
-              <div className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center">
-                <ExternalLink className="w-5 h-5 text-slate-400" />
-              </div>
-              <div>
-                <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                  Website
-                </p>
-                {profile.company_website ? (
-                  <a
-                    href={profile.company_website}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="text-sm font-bold text-blue-600 hover:underline"
-                  >
-                    Visit Site
-                  </a>
-                ) : (
-                  <p className="text-sm font-bold text-slate-400">
-                    Not available
+          {profile.recruiter_type === "company" && (
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 py-6 border-t border-slate-100">
+              <div className="flex items-center gap-3 text-slate-600">
+                <div className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center">
+                  <Briefcase className="w-5 h-5 text-slate-400" />
+                </div>
+                <div>
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                    Industry
                   </p>
-                )}
+                  <p className="text-sm font-bold">
+                    {profile.industry || "Not specified"}
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3 text-slate-600">
+                <div className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center">
+                  <Users className="w-5 h-5 text-slate-400" />
+                </div>
+                <div>
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                    Company Size
+                  </p>
+                  <p className="text-sm font-bold">
+                    {profile.company_size || "Not specified"}
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3 text-slate-600">
+                <div className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center">
+                  <MapPin className="w-5 h-5 text-slate-400" />
+                </div>
+                <div>
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                    Location
+                  </p>
+                  <p className="text-sm font-bold">
+                    {profile.location || "Not specified"}
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3 text-slate-600">
+                <div className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center">
+                  <ExternalLink className="w-5 h-5 text-slate-400" />
+                </div>
+                <div>
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                    Website
+                  </p>
+                  {profile.company_website ? (
+                    <a
+                      href={profile.company_website}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-sm font-bold text-blue-600 hover:underline"
+                    >
+                      Visit Site
+                    </a>
+                  ) : (
+                    <p className="text-sm font-bold text-slate-400">
+                      Not available
+                    </p>
+                  )}
+                </div>
               </div>
             </div>
-          </div>
+          )}
         </div>
       </div>
       <div className="max-w-7xl mx-auto px-4 py-2">
@@ -244,10 +266,11 @@ export default function RecruiterProfilePublic({
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`px-8 py-4 text-sm font-bold transition-all border-b-2 whitespace-nowrap ${activeTab === tab.id
-                ? "border-blue-600 text-blue-600"
-                : "border-transparent text-slate-500 hover:text-slate-700"
-                }`}
+              className={`px-8 py-4 text-sm font-bold transition-all border-b-2 whitespace-nowrap ${
+                activeTab === tab.id
+                  ? "border-blue-600 text-blue-600"
+                  : "border-transparent text-slate-500 hover:text-slate-700"
+              }`}
             >
               {tab.label}
             </button>
@@ -313,12 +336,8 @@ export default function RecruiterProfilePublic({
                         key={job.id}
                         className="group p-6 rounded-2xl border border-slate-100 hover:border-blue-200 hover:bg-blue-50/30 transition-all cursor-pointer"
                       >
-                        <Link
-                          href={`/job/${job.slug}`}
-                        >
-
+                        <Link href={`/job/${job.slug}`}>
                           <header className="flex justify-between items-start mb-4">
-
                             <div className="flex-1">
                               <h4 className="text-lg font-bold text-slate-900 group-hover:text-blue-600 transition-colors mb-2">
                                 {job.title}
@@ -351,8 +370,6 @@ export default function RecruiterProfilePublic({
                                 )}
                               </div>
                             </div>
-
-
                           </header>
 
                           {job.description && (
@@ -509,7 +526,7 @@ export default function RecruiterProfilePublic({
                   Company Gallery
                 </h2>
                 {profile.gallery?.images &&
-                  profile.gallery.images.length > 0 ? (
+                profile.gallery.images.length > 0 ? (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {profile.gallery.images.map((img, i) => (
                       <div
@@ -611,7 +628,6 @@ export default function RecruiterProfilePublic({
         </div>
       </div>
 
-
       {/* Full-Screen Gallery Modal */}
       {isFullScreenGallery && profile?.gallery?.images && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/95 backdrop-blur-sm">
@@ -628,8 +644,11 @@ export default function RecruiterProfilePublic({
                 key={`full-${index}`}
                 src={img}
                 alt={`full-gallery-${index}`}
-                className={`absolute max-w-full max-h-full object-contain transition-opacity duration-500 ${index === currentImageIndex ? "opacity-100 z-10" : "opacity-0 z-0"
-                  }`}
+                className={`absolute max-w-full max-h-full object-contain transition-opacity duration-500 ${
+                  index === currentImageIndex
+                    ? "opacity-100 z-10"
+                    : "opacity-0 z-0"
+                }`}
               />
             ))}
 
@@ -639,7 +658,11 @@ export default function RecruiterProfilePublic({
                   onClick={(e) => {
                     e.stopPropagation();
                     setCurrentImageIndex((prev) =>
-                      profile.gallery?.images ? (prev === 0 ? profile.gallery.images.length - 1 : prev - 1) : 0
+                      profile.gallery?.images
+                        ? prev === 0
+                          ? profile.gallery.images.length - 1
+                          : prev - 1
+                        : 0,
                     );
                   }}
                   className="absolute left-4 md:left-10 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/80 text-white p-3 rounded-full transition-colors z-50"
@@ -650,7 +673,11 @@ export default function RecruiterProfilePublic({
                   onClick={(e) => {
                     e.stopPropagation();
                     setCurrentImageIndex((prev) =>
-                      profile.gallery?.images ? (prev === profile.gallery.images.length - 1 ? 0 : prev + 1) : 0
+                      profile.gallery?.images
+                        ? prev === profile.gallery.images.length - 1
+                          ? 0
+                          : prev + 1
+                        : 0,
                     );
                   }}
                   className="absolute right-4 md:right-10 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/80 text-white p-3 rounded-full transition-colors z-50"
@@ -666,10 +693,11 @@ export default function RecruiterProfilePublic({
                         e.stopPropagation();
                         setCurrentImageIndex(index);
                       }}
-                      className={`w-2.5 h-2.5 rounded-full transition-all ${index === currentImageIndex
-                        ? "bg-white w-6"
-                        : "bg-white/40 hover:bg-white/80"
-                        }`}
+                      className={`w-2.5 h-2.5 rounded-full transition-all ${
+                        index === currentImageIndex
+                          ? "bg-white w-6"
+                          : "bg-white/40 hover:bg-white/80"
+                      }`}
                     />
                   ))}
                 </div>

@@ -7,409 +7,433 @@ import { usePathname, useRouter } from "next/navigation";
 import config from "@/config";
 import { useAuth } from "@/context/AuthContext";
 import { useRecruiterAuth } from "@/context/RecruiterAuthContext";
-import { Menu, X, ChevronDown, User, LogOut, LayoutDashboard } from "lucide-react";
+import {
+  Menu,
+  X,
+  ChevronDown,
+  User,
+  LogOut,
+  LayoutDashboard,
+} from "lucide-react";
 
 interface HeaderLink {
-    label: string;
-    href: string;
+  label: string;
+  href: string;
 }
 
 interface FloatingHeaderProps {
-    links?: HeaderLink[];
-    cta?: {
-        label: string;
-        href: string;
-        variant?: "primary" | "secondary" | "dark";
-    };
-    logoHref?: string;
-    showAuthButtons?: boolean;
-    logoSrc?: string;
-    hideOnScroll?: boolean;
+  links?: HeaderLink[];
+  cta?: {
+    label: string;
+    href: string;
+    variant?: "primary" | "secondary" | "dark";
+  };
+  logoHref?: string;
+  showAuthButtons?: boolean;
+  logoSrc?: string;
+  hideOnScroll?: boolean;
 }
 
 interface NavItem {
-    label: string;
-    href: string;
-    dropdown?: { label: string; href: string }[];
+  label: string;
+  href: string;
+  dropdown?: { label: string; href: string }[];
 }
 
 const NAV_ITEMS: NavItem[] = [
-    { label: "Jobs", href: "/jobs" },
-    { label: "Blogs", href: "/blog" },
-    {
-        label: "Services",
-        href: "#",
-        dropdown: [
-            { label: "Create Resume", href: "https://letsmakecv.com/auth/login" },
-            { label: "Create CV", href: "https://letsmakecv.com/auth/login" },
-        ]
-    }
+  { label: "Jobs", href: "/jobs" },
+  { label: "Blogs", href: "/blog" },
+  {
+    label: "Services",
+    href: "#",
+    dropdown: [
+      { label: "Create Resume", href: "https://letsmakecv.com/auth/login" },
+      { label: "Create CV", href: "https://letsmakecv.com/auth/login" },
+    ],
+  },
 ];
 
 export default function FloatingHeader({
-    links = [],
-    cta,
-    logoHref = "/",
-    showAuthButtons = false,
-    logoSrc,
-    hideOnScroll = false,
+  links = [],
+  cta,
+  logoHref = "/",
+  showAuthButtons = false,
+  logoSrc,
+  hideOnScroll = false,
 }: FloatingHeaderProps) {
-    const pathname = usePathname();
-    const router = useRouter();
-    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-    const [isServicesOpen, setIsServicesOpen] = useState(false);
-    const [isProfileOpen, setIsProfileOpen] = useState(false);
-    const [scrolled, setScrolled] = useState(false);
-    const profileRef = useRef<HTMLDivElement>(null);
+  const pathname = usePathname();
+  const router = useRouter();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isServicesOpen, setIsServicesOpen] = useState(false);
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  const profileRef = useRef<HTMLDivElement>(null);
 
-    const {
-        user: candidateUser,
-        isAuthenticated: isCandidateAuth,
-        logout: candidateLogout,
-        loading: candidateLoading,
-    } = useAuth();
-    const {
-        recruiter: recruiterUser,
-        isAuthenticated: isRecruiterAuth,
-        logout: recruiterLogout,
-        loading: recruiterLoading,
-    } = useRecruiterAuth();
+  const {
+    user: candidateUser,
+    isAuthenticated: isCandidateAuth,
+    logout: candidateLogout,
+    loading: candidateLoading,
+  } = useAuth();
+  const {
+    recruiter: recruiterUser,
+    isAuthenticated: isRecruiterAuth,
+    logout: recruiterLogout,
+    loading: recruiterLoading,
+  } = useRecruiterAuth();
 
-    const isAuthenticated = isCandidateAuth || isRecruiterAuth;
-    const isLoading = candidateLoading || recruiterLoading;
+  const isAuthenticated = isCandidateAuth || isRecruiterAuth;
+  const isLoading = candidateLoading || recruiterLoading;
 
-    useEffect(() => {
-        const handleScroll = () => {
-            setScrolled(window.scrollY > 20);
-        };
-        window.addEventListener("scroll", handleScroll);
-        // Check initial scroll
-        handleScroll();
-        return () => window.removeEventListener("scroll", handleScroll);
-    }, []);
-
-    useEffect(() => {
-        function handleClickOutside(event: MouseEvent) {
-            if (profileRef.current && !profileRef.current.contains(event.target as Node)) {
-                setIsProfileOpen(false);
-            }
-        }
-        document.addEventListener("mousedown", handleClickOutside);
-        return () => document.removeEventListener("mousedown", handleClickOutside);
-    }, []);
-
-    // Prevent scrolling when mobile menu is open
-    useEffect(() => {
-        if (isMobileMenuOpen) {
-            document.body.style.overflow = "hidden";
-        } else {
-            document.body.style.overflow = "unset";
-        }
-        return () => {
-            document.body.style.overflow = "unset";
-        };
-    }, [isMobileMenuOpen]);
-
-    const handleLogout = async () => {
-        try {
-            if (isCandidateAuth) {
-                await candidateLogout();
-                router.push("/candidate/login");
-            } else if (isRecruiterAuth) {
-                await recruiterLogout();
-            }
-        } catch (error) {
-            console.error("Logout failed:", error);
-        }
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 20);
     };
+    window.addEventListener("scroll", handleScroll);
+    // Check initial scroll
+    handleScroll();
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
-    const dashboardLink = isRecruiterAuth ? "/recruiter/dashboard" : "/candidate/dashboard";
-    const userDisplayName = isRecruiterAuth ? recruiterUser?.display_name || recruiterUser?.company_name : candidateUser?.full_name;
-    const userProfileImage = isRecruiterAuth ? recruiterUser?.profile_url : null;
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (
+        profileRef.current &&
+        !profileRef.current.contains(event.target as Node)
+      ) {
+        setIsProfileOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
-    return (
-        <>
-            <nav
-                className={`fixed z-50 transition-all duration-300 ${scrolled
-                    ? hideOnScroll
-                        ? "-translate-y-full opacity-0 pointer-events-none"
-                        : "top-2 left-1/2 -translate-x-1/2 w-full max-w-[95%] md:max-w-4xl"
-                    : "top-0 left-0 right-0 w-full max-w-full"
-                    }`}
-            >
-                <div
-                    className={`bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl px-4 md:px-6 py-3 border-gray-100 dark:border-gray-800 flex items-center justify-between transition-all duration-300 ${scrolled
-                        ? "rounded-full shadow-lg border dark:border-gray-700"
-                        : "rounded-none shadow-sm border-b dark:border-b-gray-800"
-                        }`}
-                >
-                    {/* Logo */}
-                    <Link
-                        href={logoHref}
-                        className="flex items-center gap-2 hover:opacity-80 transition-opacity"
-                    >
-                        <Image
-                            src={logoSrc || config.app.logoUrl}
-                            alt={config.app.name}
-                            width={120}
-                            height={36}
-                            className="h-8 w-auto object-contain"
-                            priority
-                        />
-                    </Link>
+  // Prevent scrolling when mobile menu is open
+  useEffect(() => {
+    if (isMobileMenuOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "unset";
+    }
+    return () => {
+      document.body.style.overflow = "unset";
+    };
+  }, [isMobileMenuOpen]);
 
-                    <div className="hidden md:flex items-center gap-6 lg:gap-8">
-                        {NAV_ITEMS.map((item) => {
-                            if (item.dropdown) {
-                                return (
-                                    <div key={item.label} className="relative group">
-                                        <button className="flex items-center gap-1 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-primary-blue dark:hover:text-blue-400 transition-colors py-2">
-                                            {item.label}
-                                            <ChevronDown size={14} />
-                                        </button>
-                                        <div className="absolute top-full left-0 w-48 bg-white dark:bg-gray-800 shadow-lg rounded-xl border border-gray-100 dark:border-gray-700 py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 transform translate-y-2 group-hover:translate-y-0">
-                                            {item.dropdown.map((subItem) => (
-                                                <Link
-                                                    key={subItem.label}
-                                                    href={subItem.href}
-                                                    className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50 hover:text-primary-blue dark:hover:text-blue-400"
-                                                >
-                                                    {subItem.label}
-                                                </Link>
-                                            ))}
-                                        </div>
-                                    </div>
-                                );
-                            }
-                            return (
-                                <Link
-                                    key={item.href}
-                                    href={item.href}
-                                    className="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-primary-blue dark:hover:text-blue-400 transition-colors whitespace-nowrap"
-                                >
-                                    {item.label}
-                                </Link>
-                            );
-                        })}
-                    </div>
+  const handleLogout = async () => {
+    try {
+      if (isCandidateAuth) {
+        await candidateLogout();
+        router.push("/candidate/login");
+      } else if (isRecruiterAuth) {
+        await recruiterLogout();
+      }
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
+  };
 
-                    {/* Right Actions */}
-                    <div className="hidden md:flex items-center gap-4">
-                        {showAuthButtons && (
-                            <>
-                                {!isLoading && isAuthenticated ? (
-                                    <div className="relative" ref={profileRef}>
-                                        <button
-                                            onClick={() => setIsProfileOpen(!isProfileOpen)}
-                                            className="flex items-center gap-2 pl-2 pr-1 py-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors focus:outline-none"
-                                        >
-                                            <span className="text-sm font-semibold text-gray-700 dark:text-gray-300 max-w-[100px] truncate">
-                                                {userDisplayName?.split(' ')[0]}
-                                            </span>
-                                            <div className="h-8 w-8 rounded-full bg-gray-200 dark:bg-gray-700 overflow-hidden ring-2 ring-white dark:ring-gray-800 shadow-sm flex items-center justify-center">
-                                                {userProfileImage ? (
-                                                    <Image
-                                                        src={userProfileImage}
-                                                        alt="Profile"
-                                                        width={32}
-                                                        height={32}
-                                                        className="h-full w-full object-cover"
-                                                    />
-                                                ) : (
-                                                    <User size={16} className="text-gray-500" />
-                                                )}
-                                            </div>
-                                        </button>
+  const dashboardLink = isRecruiterAuth
+    ? "/recruiter/dashboard"
+    : "/candidate/dashboard";
+  const userDisplayName = isRecruiterAuth
+    ? recruiterUser?.display_name || recruiterUser?.company_name
+    : candidateUser?.full_name;
+  const userProfileImage = isRecruiterAuth
+    ? recruiterUser?.company_logo_url
+    : null;
 
-                                        {isProfileOpen && (
-                                            <div className="absolute right-0 mt-3 w-56 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-100 dark:border-gray-700 py-2 animate-in fade-in zoom-in-95 duration-200 origin-top-right">
-                                                <div className="px-4 py-3 border-b border-gray-50 dark:border-gray-700">
-                                                    <p className="text-sm font-bold text-gray-900 dark:text-white truncate">
-                                                        {userDisplayName || "User"}
-                                                    </p>
-                                                    <p className="text-xs text-gray-500 dark:text-gray-400 truncate mt-0.5">
-                                                        {isRecruiterAuth ? recruiterUser?.email : candidateUser?.email}
-                                                    </p>
-                                                </div>
-                                                <div className="py-1">
-                                                    <Link
-                                                        href={dashboardLink}
-                                                        className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-black dark:hover:text-white"
-                                                        onClick={() => setIsProfileOpen(false)}
-                                                    >
-                                                        <LayoutDashboard size={16} />
-                                                        Dashboard
-                                                    </Link>
-                                                </div>
-                                                <div className="py-1 border-t border-gray-50 dark:border-gray-700">
-                                                    <button
-                                                        onClick={handleLogout}
-                                                        className="flex w-full items-center gap-2 px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"
-                                                    >
-                                                        <LogOut size={16} />
-                                                        Logout
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        )}
-                                    </div>
-                                ) : (
-                                    <div className="flex items-center gap-4">
-                                        {links.map(link => (
-                                            <Link
-                                                key={link.href}
-                                                href={link.href}
-                                                className="text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-black dark:hover:text-white transition-colors"
-                                            >
-                                                {link.label.replace(' Login', '')}
-                                            </Link>
-                                        ))}
+  return (
+    <>
+      <nav
+        className={`fixed z-50 transition-all duration-300 ${
+          scrolled
+            ? hideOnScroll
+              ? "-translate-y-full opacity-0 pointer-events-none"
+              : "top-2 left-1/2 -translate-x-1/2 w-full max-w-[95%] md:max-w-4xl"
+            : "top-0 left-0 right-0 w-full max-w-full"
+        }`}
+      >
+        <div
+          className={`bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl px-4 md:px-6 py-3 border-gray-100 dark:border-gray-800 flex items-center justify-between transition-all duration-300 ${
+            scrolled
+              ? "rounded-full shadow-lg border dark:border-gray-700"
+              : "rounded-none shadow-sm border-b dark:border-b-gray-800"
+          }`}
+        >
+          {/* Logo */}
+          <Link
+            href={logoHref}
+            className="flex items-center gap-2 hover:opacity-80 transition-opacity"
+          >
+            <Image
+              src={logoSrc || config.app.logoUrl}
+              alt={config.app.name}
+              width={120}
+              height={36}
+              className="h-8 w-auto object-contain"
+              priority
+            />
+          </Link>
 
-                                        {cta && (
-                                            <Link
-                                                href={cta.href}
-                                                className="px-5 py-2 bg-primary-blue text-white text-sm font-bold rounded-lg transition-all hover:bg-blue-700 shadow-md shadow-primary-blue/20 hover:shadow-primary-blue/30 whitespace-nowrap"
-                                            >
-                                                {cta.label}
-                                            </Link>
-                                        )}
-                                    </div>
-                                )}
-                            </>
-                        )}
-                    </div>
-
-                    {/* Mobile Menu Toggle */}
-                    <div className="md:hidden flex items-center gap-3">
-                        {/* We can show minimal auth on mobile if needed, but keeping it simple */}
-                        <button
-                            onClick={() => setIsMobileMenuOpen(true)}
-                            className="p-2 text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors"
-                            aria-label="Open menu"
+          <div className="hidden md:flex items-center gap-6 lg:gap-8">
+            {NAV_ITEMS.map((item) => {
+              if (item.dropdown) {
+                return (
+                  <div key={item.label} className="relative group">
+                    <button className="flex items-center gap-1 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-primary-blue dark:hover:text-blue-400 transition-colors py-2">
+                      {item.label}
+                      <ChevronDown size={14} />
+                    </button>
+                    <div className="absolute top-full left-0 w-48 bg-white dark:bg-gray-800 shadow-lg rounded-xl border border-gray-100 dark:border-gray-700 py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 transform translate-y-2 group-hover:translate-y-0">
+                      {item.dropdown.map((subItem) => (
+                        <Link
+                          key={subItem.label}
+                          href={subItem.href}
+                          className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50 hover:text-primary-blue dark:hover:text-blue-400"
                         >
-                            <Menu size={24} />
-                        </button>
+                          {subItem.label}
+                        </Link>
+                      ))}
                     </div>
-                </div>
-            </nav>
+                  </div>
+                );
+              }
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-primary-blue dark:hover:text-blue-400 transition-colors whitespace-nowrap"
+                >
+                  {item.label}
+                </Link>
+              );
+            })}
+          </div>
 
-            {/* Mobile Menu Sidebar (Right Side) */}
-            {isMobileMenuOpen && (
-                <>
-                    {/* Backdrop */}
-                    <div
-                        className="fixed inset-0 bg-black/40 z-[9998] backdrop-blur-sm md:hidden animate-in fade-in duration-200"
-                        onClick={() => setIsMobileMenuOpen(false)}
-                    />
-
-                    {/* Sidebar */}
-                    <div className="fixed top-0 right-0 h-full w-[280px] bg-white dark:bg-gray-900 z-[9999] shadow-2xl p-5 flex flex-col gap-6 animate-in slide-in-from-right duration-300 md:hidden overflow-y-auto">
-                        <div className="flex justify-between items-center px-1">
-                            <Image
-                                src={logoSrc || config.app.logoUrl}
-                                alt={config.app.name}
-                                width={100}
-                                height={30}
-                                className="h-7 w-auto object-contain"
-                            />
-                            <button
-                                onClick={() => setIsMobileMenuOpen(false)}
-                                className="p-2 text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors"
-                            >
-                                <X size={24} />
-                            </button>
-                        </div>
-
-                        <div className="flex flex-col gap-2">
-                            {NAV_ITEMS.map((item) => {
-                                if (item.dropdown) {
-                                    return (
-                                        <div key={item.label}>
-                                            <button
-                                                onClick={() => setIsServicesOpen(!isServicesOpen)}
-                                                className="flex w-full items-center justify-between px-4 py-3 text-base font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-primary-blue dark:hover:text-blue-400 rounded-xl transition-colors"
-                                            >
-                                                {item.label}
-                                                <ChevronDown size={16} className={`transition-transform ${isServicesOpen ? 'rotate-180' : ''}`} />
-                                            </button>
-                                            {isServicesOpen && (
-                                                <div className="pl-8 border-l-2 border-gray-100 dark:border-gray-800 my-2 flex flex-col gap-2">
-                                                    {item.dropdown.map((subItem) => (
-                                                        <Link
-                                                            key={subItem.label}
-                                                            href={subItem.href}
-                                                            onClick={() => setIsMobileMenuOpen(false)}
-                                                            className="block py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-primary-blue dark:hover:text-blue-400"
-                                                        >
-                                                            {subItem.label}
-                                                        </Link>
-                                                    ))}
-                                                </div>
-                                            )}
-                                        </div>
-                                    );
-                                }
-                                return (
-                                    <Link
-                                        key={item.href}
-                                        href={item.href}
-                                        onClick={() => setIsMobileMenuOpen(false)}
-                                        className="px-4 py-3 text-base font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-primary-blue dark:hover:text-blue-400 rounded-xl transition-colors"
-                                    >
-                                        {item.label}
-                                    </Link>
-                                );
-                            })}
-                            {/* Add auth links to mobile menu if not authenticated */}
-                            {!isAuthenticated && links.map(link => (
-                                <Link
-                                    key={link.href}
-                                    href={link.href}
-                                    onClick={() => setIsMobileMenuOpen(false)}
-                                    className="px-4 py-3 text-base font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-primary-blue dark:hover:text-blue-400 rounded-xl transition-colors"
-                                >
-                                    {link.label}
-                                </Link>
-                            ))}
-                        </div>
-
-                        <div className="h-px bg-gray-100 dark:bg-gray-800" />
-
-                        {isAuthenticated ? (
-                            <div className="flex flex-col gap-2">
-                                <Link
-                                    href={dashboardLink}
-                                    onClick={() => setIsMobileMenuOpen(false)}
-                                    className="flex items-center gap-3 px-4 py-3 text-base font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-xl"
-                                >
-                                    <LayoutDashboard size={20} /> Dashboard
-                                </Link>
-                                <button
-                                    onClick={() => {
-                                        handleLogout();
-                                        setIsMobileMenuOpen(false);
-                                    }}
-                                    className="flex items-center gap-3 px-4 py-3 text-base font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-xl w-full text-left"
-                                >
-                                    <LogOut size={20} /> Logout
-                                </button>
-                            </div>
+          {/* Right Actions */}
+          <div className="hidden md:flex items-center gap-4">
+            {showAuthButtons && (
+              <>
+                {!isLoading && isAuthenticated ? (
+                  <div className="relative" ref={profileRef}>
+                    <button
+                      onClick={() => setIsProfileOpen(!isProfileOpen)}
+                      className="flex items-center gap-2 pl-2 pr-1 py-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors focus:outline-none"
+                    >
+                      <span className="text-sm font-semibold text-gray-700 dark:text-gray-300 max-w-[100px] truncate">
+                        {userDisplayName?.split(" ")[0]}
+                      </span>
+                      <div className="h-8 w-8 rounded-full bg-gray-200 dark:bg-gray-700 overflow-hidden ring-2 ring-white dark:ring-gray-800 shadow-sm flex items-center justify-center">
+                        {userProfileImage ? (
+                          <Image
+                            src={userProfileImage}
+                            alt="Profile"
+                            width={32}
+                            height={32}
+                            className="h-full w-full object-cover"
+                          />
                         ) : (
-                            <div className="flex flex-col gap-3 mt-auto">
-                                {cta && (
-                                    <Link
-                                        href={cta.href}
-                                        onClick={() => setIsMobileMenuOpen(false)}
-                                        className="w-full text-center py-3 bg-primary-blue text-white text-sm font-bold rounded-xl shadow-lg shadow-primary-blue/20"
-                                    >
-                                        {cta.label}
-                                    </Link>
-                                )}
-                            </div>
+                          <User size={16} className="text-gray-500" />
                         )}
-                    </div>
-                </>
+                      </div>
+                    </button>
+
+                    {isProfileOpen && (
+                      <div className="absolute right-0 mt-3 w-56 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-100 dark:border-gray-700 py-2 animate-in fade-in zoom-in-95 duration-200 origin-top-right">
+                        <div className="px-4 py-3 border-b border-gray-50 dark:border-gray-700">
+                          <p className="text-sm font-bold text-gray-900 dark:text-white truncate">
+                            {userDisplayName || "User"}
+                          </p>
+                          <p className="text-xs text-gray-500 dark:text-gray-400 truncate mt-0.5">
+                            {isRecruiterAuth
+                              ? recruiterUser?.email
+                              : candidateUser?.email}
+                          </p>
+                        </div>
+                        <div className="py-1">
+                          <Link
+                            href={dashboardLink}
+                            className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-black dark:hover:text-white"
+                            onClick={() => setIsProfileOpen(false)}
+                          >
+                            <LayoutDashboard size={16} />
+                            Dashboard
+                          </Link>
+                        </div>
+                        <div className="py-1 border-t border-gray-50 dark:border-gray-700">
+                          <button
+                            onClick={handleLogout}
+                            className="flex w-full items-center gap-2 px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"
+                          >
+                            <LogOut size={16} />
+                            Logout
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-4">
+                    {links.map((link) => (
+                      <Link
+                        key={link.href}
+                        href={link.href}
+                        className="text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-black dark:hover:text-white transition-colors"
+                      >
+                        {link.label.replace(" Login", "")}
+                      </Link>
+                    ))}
+
+                    {cta && (
+                      <Link
+                        href={cta.href}
+                        className="px-5 py-2 bg-primary-blue text-white text-sm font-bold rounded-lg transition-all hover:bg-blue-700 shadow-md shadow-primary-blue/20 hover:shadow-primary-blue/30 whitespace-nowrap"
+                      >
+                        {cta.label}
+                      </Link>
+                    )}
+                  </div>
+                )}
+              </>
             )}
+          </div>
+
+          {/* Mobile Menu Toggle */}
+          <div className="md:hidden flex items-center gap-3">
+            {/* We can show minimal auth on mobile if needed, but keeping it simple */}
+            <button
+              onClick={() => setIsMobileMenuOpen(true)}
+              className="p-2 text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors"
+              aria-label="Open menu"
+            >
+              <Menu size={24} />
+            </button>
+          </div>
+        </div>
+      </nav>
+
+      {/* Mobile Menu Sidebar (Right Side) */}
+      {isMobileMenuOpen && (
+        <>
+          {/* Backdrop */}
+          <div
+            className="fixed inset-0 bg-black/40 z-[9998] backdrop-blur-sm md:hidden animate-in fade-in duration-200"
+            onClick={() => setIsMobileMenuOpen(false)}
+          />
+
+          {/* Sidebar */}
+          <div className="fixed top-0 right-0 h-full w-[280px] bg-white dark:bg-gray-900 z-[9999] shadow-2xl p-5 flex flex-col gap-6 animate-in slide-in-from-right duration-300 md:hidden overflow-y-auto">
+            <div className="flex justify-between items-center px-1">
+              <Image
+                src={logoSrc || config.app.logoUrl}
+                alt={config.app.name}
+                width={100}
+                height={30}
+                className="h-7 w-auto object-contain"
+              />
+              <button
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="p-2 text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors"
+              >
+                <X size={24} />
+              </button>
+            </div>
+
+            <div className="flex flex-col gap-2">
+              {NAV_ITEMS.map((item) => {
+                if (item.dropdown) {
+                  return (
+                    <div key={item.label}>
+                      <button
+                        onClick={() => setIsServicesOpen(!isServicesOpen)}
+                        className="flex w-full items-center justify-between px-4 py-3 text-base font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-primary-blue dark:hover:text-blue-400 rounded-xl transition-colors"
+                      >
+                        {item.label}
+                        <ChevronDown
+                          size={16}
+                          className={`transition-transform ${isServicesOpen ? "rotate-180" : ""}`}
+                        />
+                      </button>
+                      {isServicesOpen && (
+                        <div className="pl-8 border-l-2 border-gray-100 dark:border-gray-800 my-2 flex flex-col gap-2">
+                          {item.dropdown.map((subItem) => (
+                            <Link
+                              key={subItem.label}
+                              href={subItem.href}
+                              onClick={() => setIsMobileMenuOpen(false)}
+                              className="block py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-primary-blue dark:hover:text-blue-400"
+                            >
+                              {subItem.label}
+                            </Link>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  );
+                }
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="px-4 py-3 text-base font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-primary-blue dark:hover:text-blue-400 rounded-xl transition-colors"
+                  >
+                    {item.label}
+                  </Link>
+                );
+              })}
+              {/* Add auth links to mobile menu if not authenticated */}
+              {!isAuthenticated &&
+                links.map((link) => (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="px-4 py-3 text-base font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-primary-blue dark:hover:text-blue-400 rounded-xl transition-colors"
+                  >
+                    {link.label}
+                  </Link>
+                ))}
+            </div>
+
+            <div className="h-px bg-gray-100 dark:bg-gray-800" />
+
+            {isAuthenticated ? (
+              <div className="flex flex-col gap-2">
+                <Link
+                  href={dashboardLink}
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="flex items-center gap-3 px-4 py-3 text-base font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-xl"
+                >
+                  <LayoutDashboard size={20} /> Dashboard
+                </Link>
+                <button
+                  onClick={() => {
+                    handleLogout();
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className="flex items-center gap-3 px-4 py-3 text-base font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-xl w-full text-left"
+                >
+                  <LogOut size={20} /> Logout
+                </button>
+              </div>
+            ) : (
+              <div className="flex flex-col gap-3 mt-auto">
+                {cta && (
+                  <Link
+                    href={cta.href}
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="w-full text-center py-3 bg-primary-blue text-white text-sm font-bold rounded-xl shadow-lg shadow-primary-blue/20"
+                  >
+                    {cta.label}
+                  </Link>
+                )}
+              </div>
+            )}
+          </div>
         </>
-    );
+      )}
+    </>
+  );
 }

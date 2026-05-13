@@ -22,6 +22,7 @@ export interface Recruiter {
   company_size?: string;
   industry?: string;
   bio?: string;
+  kyc_status: string;
   location?: string;
   linkedin_url?: string;
   phone?: string;

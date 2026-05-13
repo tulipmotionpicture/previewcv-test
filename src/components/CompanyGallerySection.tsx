@@ -285,7 +285,7 @@ function CompanyGallerySection({
       <div className="space-y-8">
         {/* Form Section */}
         <div className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5 uppercase">
                 Display Name
@@ -340,7 +340,7 @@ function CompanyGallerySection({
                 placeholder="company@email.com"
               />
             </div>
-          </div>
+          </div> */}
 
           <div>
             <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5 uppercase">

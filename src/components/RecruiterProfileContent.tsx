@@ -50,11 +50,12 @@ interface CompanyProfileData {
   // Type
   recruiterType: "individual" | "company";
 
-  // Identity (Read-only)
+  // Identity
   displayName: string;
   username: string;
   profileUrl: string;
   email: string;
+  kyc_status: string;
 
   // Individual-specific fields
   fullName: string;
@@ -96,6 +97,7 @@ const recruiterToProfileData = (
     username: recruiter.username || "",
     profileUrl: recruiter.profile_url || "",
     email: recruiter.email || "",
+    kyc_status: recruiter.kyc_status || "",
 
     // Individual-specific
     fullName: recruiter.full_name || "",
@@ -140,6 +142,7 @@ const profileDataToRecruiter = (
     linkedin_url: profile.linkedinUrl,
     bio: profile.about,
     display_name: profile.displayName,
+    kyc_status: profile.kyc_status,
 
     // Individual-specific
     ...(isIndividual && {
@@ -185,6 +188,7 @@ export default function App({ jobs, events }: RecruiterProfileContentProps) {
     specialization: "",
     companyName: "",
     industry: "",
+    kyc_status: "",
     companySize: "",
     logoUrl: "https://via.placeholder.com/200",
     websiteUrl: "",
@@ -208,6 +212,9 @@ export default function App({ jobs, events }: RecruiterProfileContentProps) {
     description: "",
     type: "Webinar",
   });
+
+  const isProfileLocked =
+    profile.kyc_status?.trim().toLowerCase() === "approved";
 
   // Fetch profile data on component mount
   useEffect(() => {
@@ -249,6 +256,12 @@ export default function App({ jobs, events }: RecruiterProfileContentProps) {
   }, []);
 
   const handleSave = async () => {
+    if (isProfileLocked) {
+      setErrorMessage("This profile is locked after KYC approval.");
+      setShowError(true);
+      return;
+    }
+
     try {
       setIsSaving(true);
       setShowError(false);
@@ -280,45 +293,6 @@ export default function App({ jobs, events }: RecruiterProfileContentProps) {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const addGalleryImage = () => {
-    const newImg: GalleryImage = {
-      id: Math.random().toString(36).substr(2, 9),
-      url: `https://picsum.photos/seed/${Math.random()}/800/600`,
-      caption: "New Photo",
-    };
-    setProfile((prev) => ({ ...prev, gallery: [...prev.gallery, newImg] }));
-  };
-
-  const removeGalleryImage = (id: string) => {
-    setProfile((prev) => ({
-      ...prev,
-      gallery: prev.gallery.filter((img) => img.id !== id),
-    }));
-  };
-
-  const addEvent = () => {
-    if (!newEvent.title || !newEvent.date) return;
-    const event: CompanyEvent = {
-      ...newEvent,
-      id: Math.random().toString(36).substr(2, 9),
-    };
-    setProfile((prev) => ({ ...prev, events: [event, ...prev.events] }));
-    setNewEvent({
-      title: "",
-      date: "",
-      location: "",
-      description: "",
-      type: "Webinar",
-    });
-  };
-
-  const removeEvent = (id: string) => {
-    setProfile((prev) => ({
-      ...prev,
-      events: prev.events.filter((e) => e.id !== id),
-    }));
-  };
-
   return (
     <div className="min-h-screen bg-[#F9FAFC] dark:bg-[#121111] transition-colors duration-300">
       <main className="px-4 sm:px-6 py-8">
@@ -339,7 +313,7 @@ export default function App({ jobs, events }: RecruiterProfileContentProps) {
         )}
         {/* Profile Hero Section */}
         <div className="bg-white dark:bg-[#282727] rounded-3xl border border-slate-200 dark:border-gray-700 shadow-sm overflow-hidden mb-8">
-          <div className="h-32 bg-gradient-to-r from-blue-600 to-indigo-700 relative">
+          <div className="h-32 bg-linear-to-r from-blue-600 to-indigo-700 relative">
             <div className="absolute -bottom-12 left-8 p-1 bg-white dark:bg-[#282727] rounded-2xl shadow-lg">
               <div className="w-24 h-24 rounded-xl overflow-hidden bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-gray-700 relative group">
                 <img
@@ -348,7 +322,10 @@ export default function App({ jobs, events }: RecruiterProfileContentProps) {
                   className="w-full h-full object-cover"
                   referrerPolicy="no-referrer"
                 />
-                <button className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white">
+                <button
+                  disabled={isProfileLocked}
+                  className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white disabled:cursor-not-allowed disabled:opacity-60"
+                >
                   <Camera className="w-6 h-6" />
                 </button>
               </div>
@@ -415,10 +392,11 @@ export default function App({ jobs, events }: RecruiterProfileContentProps) {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as TabType)}
-                className={`flex items-center gap-2 py-4 text-sm font-bold transition-all relative whitespace-nowrap ${activeTab === tab.id
-                  ? "text-blue-600 dark:text-blue-400"
-                  : "text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-400"
-                  }`}
+                className={`flex items-center gap-2 py-4 text-sm font-bold transition-all relative whitespace-nowrap ${
+                  activeTab === tab.id
+                    ? "text-blue-600 dark:text-blue-400"
+                    : "text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-400"
+                }`}
               >
                 <tab.icon className="w-4 h-4" />
                 {tab.label}
@@ -440,7 +418,7 @@ export default function App({ jobs, events }: RecruiterProfileContentProps) {
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className="fixed top-20 left-1/2 -translate-x-1/2 z-[60] bg-emerald-600 dark:bg-emerald-700 text-white px-6 py-3 rounded-full shadow-xl flex items-center gap-3"
+              className="fixed top-20 left-1/2 -translate-x-1/2 z-60 bg-emerald-600 dark:bg-emerald-700 text-white px-6 py-3 rounded-full shadow-xl flex items-center gap-3"
             >
               <CheckCircle2 className="w-5 h-5" />
               <span className="font-bold">Changes saved successfully!</span>
@@ -455,7 +433,7 @@ export default function App({ jobs, events }: RecruiterProfileContentProps) {
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className="fixed top-20 left-1/2 -translate-x-1/2 z-[60] bg-red-600 dark:bg-red-700 text-white px-6 py-3 rounded-full shadow-xl flex items-center gap-3"
+              className="fixed top-20 left-1/2 -translate-x-1/2 z-60 bg-red-600 dark:bg-red-700 text-white px-6 py-3 rounded-full shadow-xl flex items-center gap-3"
             >
               <AlertCircle className="w-5 h-5" />
               <span className="font-bold">{errorMessage}</span>
@@ -499,12 +477,13 @@ export default function App({ jobs, events }: RecruiterProfileContentProps) {
                                   displayName: e.target.value,
                                 })
                               }
+                              readOnly={isProfileLocked}
                               className="w-full bg-slate-50 dark:bg-[#1a1a1a] border border-slate-200 dark:border-gray-600 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all dark:text-white"
                             />
                           </div>
                           <div className="space-y-2">
                             <label className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
-                              Display Name (Read-only)
+                              Display Name
                             </label>
                             <input
                               type="text"
@@ -521,6 +500,7 @@ export default function App({ jobs, events }: RecruiterProfileContentProps) {
                             <input
                               type="text"
                               value={profile.specialization}
+                              readOnly={isProfileLocked}
                               onChange={(e) =>
                                 setProfile({
                                   ...profile,
@@ -539,6 +519,7 @@ export default function App({ jobs, events }: RecruiterProfileContentProps) {
                             <input
                               type="number"
                               value={profile.yearsExperience}
+                              readOnly={isProfileLocked}
                               onChange={(e) =>
                                 setProfile({
                                   ...profile,
@@ -557,6 +538,7 @@ export default function App({ jobs, events }: RecruiterProfileContentProps) {
                             <input
                               type="text"
                               value={profile.location}
+                              readOnly={isProfileLocked}
                               onChange={(e) =>
                                 setProfile({
                                   ...profile,
@@ -578,6 +560,7 @@ export default function App({ jobs, events }: RecruiterProfileContentProps) {
                             <input
                               type="text"
                               value={profile.companyName}
+                              readOnly={isProfileLocked}
                               onChange={(e) =>
                                 setProfile({
                                   ...profile,
@@ -590,7 +573,7 @@ export default function App({ jobs, events }: RecruiterProfileContentProps) {
                           </div>
                           <div className="space-y-2">
                             <label className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
-                              Display Name (Read-only)
+                              Display Name
                             </label>
                             <input
                               type="text"
@@ -605,6 +588,7 @@ export default function App({ jobs, events }: RecruiterProfileContentProps) {
                             </label>
                             <select
                               value={profile.industry}
+                              disabled={isProfileLocked}
                               onChange={(e) =>
                                 setProfile({
                                   ...profile,
@@ -628,6 +612,7 @@ export default function App({ jobs, events }: RecruiterProfileContentProps) {
                             </label>
                             <select
                               value={profile.companySize}
+                              disabled={isProfileLocked}
                               onChange={(e) =>
                                 setProfile({
                                   ...profile,
@@ -652,6 +637,7 @@ export default function App({ jobs, events }: RecruiterProfileContentProps) {
                             <input
                               type="url"
                               value={profile.websiteUrl}
+                              readOnly={isProfileLocked}
                               onChange={(e) =>
                                 setProfile({
                                   ...profile,
@@ -669,6 +655,7 @@ export default function App({ jobs, events }: RecruiterProfileContentProps) {
                             <input
                               type="text"
                               value={profile.location}
+                              readOnly={isProfileLocked}
                               onChange={(e) =>
                                 setProfile({
                                   ...profile,
@@ -698,6 +685,7 @@ export default function App({ jobs, events }: RecruiterProfileContentProps) {
                         <input
                           type="url"
                           value={profile.linkedinUrl}
+                          readOnly={isProfileLocked}
                           onChange={(e) =>
                             setProfile({
                               ...profile,
@@ -730,7 +718,7 @@ export default function App({ jobs, events }: RecruiterProfileContentProps) {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div className="space-y-2">
                         <label className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
-                          Username (Read-only)
+                          Username
                         </label>
                         <input
                           type="text"
@@ -741,7 +729,7 @@ export default function App({ jobs, events }: RecruiterProfileContentProps) {
                       </div>
                       <div className="space-y-2">
                         <label className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
-                          Email Address (Read-only)
+                          Email Address
                         </label>
                         <input
                           type="email"
@@ -757,6 +745,7 @@ export default function App({ jobs, events }: RecruiterProfileContentProps) {
                         <input
                           type="tel"
                           value={profile.phone}
+                          readOnly={isProfileLocked}
                           onChange={(e) =>
                             setProfile({
                               ...profile,
@@ -809,7 +798,7 @@ export default function App({ jobs, events }: RecruiterProfileContentProps) {
                           />
                         </div>
                       </div>
-                      <button className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-600 text-white font-bold py-3 px-8 rounded-xl transition-all shadow-lg shadow-blue-900/20 dark:shadow-blue-900/40 active:scale-95">
+                      <button className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-600 text-white font-bold py-3 px-8 rounded-xl transition-all shadow-lg shadow-blue-900/20 dark:shadow-blue-900/40 active:scale-95 disabled:bg-slate-400 dark:disabled:bg-slate-600 disabled:cursor-not-allowed">
                         Update Password
                       </button>
                     </div>
@@ -867,7 +856,7 @@ export default function App({ jobs, events }: RecruiterProfileContentProps) {
                 <div className="pt-6 space-y-3">
                   <button
                     onClick={handleSave}
-                    disabled={isSaving || isLoading}
+                    disabled={isSaving || isLoading || isProfileLocked}
                     className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-600 disabled:bg-slate-400 dark:disabled:bg-slate-600 text-white py-3 rounded-xl font-bold text-sm transition-all active:scale-95"
                   >
                     {isSaving ? (
