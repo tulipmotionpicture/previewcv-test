@@ -14,8 +14,8 @@ export const metadata: Metadata = {
   title: "PreviewCV - Resume Viewer",
   description: "Secure PDF resume viewer for shared resume links",
   icons: {
-    icon: config.app.logoUrl || "/favicon.ico",
-    apple: config.app.logoUrl || "/favicon.ico",
+    icon: config.app.favIcon || "/favicon.ico",
+    apple: config.app.favIcon || "/favicon.ico",
   },
 };
 

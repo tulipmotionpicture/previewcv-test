@@ -3,34 +3,11 @@
  * Renders PDF files with react-pdf for better cross-browser compatibility
  */
 
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import dynamic from 'next/dynamic';
-import LoadingSpinner from './LoadingSpinner';
-import '../styles/pdf-viewer.css';
-
-// Dynamically import react-pdf components to avoid SSR issues
-const Document = dynamic(
-  () => import('react-pdf').then((mod) => mod.Document),
-  { ssr: false }
-);
-
-const Page = dynamic(
-  () => import('react-pdf').then((mod) => mod.Page),
-  { ssr: false }
-);
-
-// Set up PDF.js worker only on client side
-if (typeof window !== 'undefined') {
-  import('react-pdf').then((pdfjs) => {
-    // Explicitly set the worker source to match the exact API version installed
-    // This prevents the "API version does not match Worker version" error caused by an outdated local worker file
-    pdfjs.pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.pdfjs.version}/build/pdf.worker.min.mjs`;
-  }).catch((error) => {
-    console.warn('Failed to load react-pdf:', error);
-  });
-}
+import { useState, useEffect } from "react";
+import LoadingSpinner from "./LoadingSpinner";
+import "../styles/pdf-viewer.css";
 
 interface PDFViewerProps {
   pdfUrl: string;
@@ -45,21 +22,20 @@ interface PDFViewerProps {
 export default function PDFViewer({
   pdfUrl,
   resumeName,
-  className = '',
+  className = "",
   expiresIn,
   onReloadRequired,
-  viewCount
+  viewCount,
 }: PDFViewerProps) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [timeUntilExpiry, setTimeUntilExpiry] = useState<number | null>(expiresIn || null);
+  const [timeUntilExpiry, setTimeUntilExpiry] = useState<number | null>(
+    expiresIn || null,
+  );
   const [isExpired, setIsExpired] = useState(false);
   const [showExpirationWarning, setShowExpirationWarning] = useState(false);
-  const [numPages, setNumPages] = useState<number | null>(null);
-  const [pageNumber, setPageNumber] = useState(1);
-  const [scale, setScale] = useState(1.0);
   const [isMounted, setIsMounted] = useState(false);
-  const [showAllPages, setShowAllPages] = useState(true); // Show all pages by default
+  const hasValidPdfUrl = typeof pdfUrl === "string" && pdfUrl.trim().length > 0;
 
   // Ensure component only renders on client side
   useEffect(() => {
@@ -73,8 +49,6 @@ export default function PDFViewer({
     setIsExpired(false);
     setShowExpirationWarning(false);
     setTimeUntilExpiry(expiresIn || null);
-    setNumPages(null);
-    setPageNumber(1);
   }, [pdfUrl, expiresIn]);
 
   // Handle expiration countdown
@@ -82,7 +56,7 @@ export default function PDFViewer({
     if (!timeUntilExpiry || timeUntilExpiry <= 0) return;
 
     const interval = setInterval(() => {
-      setTimeUntilExpiry(prev => {
+      setTimeUntilExpiry((prev) => {
         if (!prev || prev <= 1) {
           setIsExpired(true);
           setShowExpirationWarning(false);
@@ -104,45 +78,8 @@ export default function PDFViewer({
   }, [timeUntilExpiry, showExpirationWarning]);
 
   const onDocumentLoadSuccess = ({ numPages }: { numPages: number }) => {
-    setNumPages(numPages);
     setLoading(false);
     setError(null);
-  };
-
-  const onDocumentLoadError = (error: Error) => {
-    setLoading(false);
-    console.error('PDF load error:', error);
-
-    // Check if it's a worker-related error
-    if (error.message.includes('worker') || error.message.includes('fetch')) {
-      setError('PDF worker failed to load. Please refresh the page or try opening the PDF directly.');
-    } else {
-      setError('Failed to load PDF document');
-    }
-  };
-
-  const goToPrevPage = () => {
-    setPageNumber(prevPage => Math.max(prevPage - 1, 1));
-  };
-
-  const goToNextPage = () => {
-    setPageNumber(prevPage => Math.min(prevPage + 1, numPages || 1));
-  };
-
-  const zoomIn = () => {
-    setScale(prevScale => Math.min(prevScale + 0.25, 3.0));
-  };
-
-  const zoomOut = () => {
-    setScale(prevScale => Math.max(prevScale - 0.25, 0.5));
-  };
-
-  const resetZoom = () => {
-    setScale(1.0);
-  };
-
-  const toggleViewMode = () => {
-    setShowAllPages(!showAllPages);
   };
 
   const downloadPdf = () => {
@@ -151,17 +88,17 @@ export default function PDFViewer({
       return;
     }
 
-    const link = document.createElement('a');
+    const link = document.createElement("a");
     link.href = pdfUrl;
     link.download = `${resumeName}.pdf`;
-    link.target = '_blank';
+    link.target = "_blank";
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
   };
 
   const formatTimeRemaining = (seconds: number): string => {
-    if (seconds <= 0) return 'Expired';
+    if (seconds <= 0) return "Expired";
 
     const hours = Math.floor(seconds / 3600);
     const minutes = Math.floor((seconds % 3600) / 60);
@@ -201,7 +138,7 @@ export default function PDFViewer({
   };
 
   const handleViewDirectly = () => {
-    window.open(pdfUrl, '_blank');
+    window.open(pdfUrl, "_blank");
   };
 
   return (
@@ -231,93 +168,21 @@ export default function PDFViewer({
         </div>
 
         <div className="flex items-center space-x-2">
-          {/* PDF Controls */}
-          {numPages && (
-            <div className="flex items-center space-x-2">
-              {!showAllPages && (
-                <>
-                  <button
-                    type="button"
-                    onClick={goToPrevPage}
-                    disabled={pageNumber <= 1}
-                    className="p-1 text-gray-500 hover:text-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
-                    title="Previous page"
-                  >
-                    ◀
-                  </button>
-                  <span className="text-xs text-gray-600">
-                    {pageNumber} / {numPages}
-                  </span>
-                  <button
-                    type="button"
-                    onClick={goToNextPage}
-                    disabled={pageNumber >= numPages}
-                    className="p-1 text-gray-500 hover:text-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
-                    title="Next page"
-                  >
-                    ▶
-                  </button>
-
-                  <div className="mx-2 h-4 w-px bg-gray-300"></div>
-                </>
-              )}
-
-              <button
-                type="button"
-                onClick={toggleViewMode}
-                className="p-1 text-gray-500 hover:text-gray-700"
-                title={showAllPages ? "Single page view" : "Continuous view"}
-              >
-                {showAllPages ? '📄' : '📋'}
-              </button>
-
-              <div className="mx-2 h-4 w-px bg-gray-300"></div>
-
-              <button
-                type="button"
-                onClick={zoomOut}
-                className="p-1 text-gray-500 hover:text-gray-700"
-                title="Zoom out"
-              >
-                ➖
-              </button>
-              <span className="text-xs text-gray-600">
-                {Math.round(scale * 100)}%
-              </span>
-              <button
-                type="button"
-                onClick={zoomIn}
-                className="p-1 text-gray-500 hover:text-gray-700"
-                title="Zoom in"
-              >
-                ➕
-              </button>
-              <button
-                type="button"
-                onClick={resetZoom}
-                className="p-1 text-xs text-gray-500 hover:text-gray-700"
-                title="Reset zoom"
-              >
-                100%
-              </button>
-            </div>
-          )}
-
           {/* Expiration Timer and Download Button */}
           <div className="flex items-center space-x-2">
             {timeUntilExpiry !== null && (
-              <div className={`flex items-center space-x-1 text-xs px-2 py-1 rounded-md ${isExpired
-                  ? 'bg-red-50 text-red-600 border border-red-200'
-                  : timeUntilExpiry <= 300
-                    ? 'bg-amber-50 text-amber-600 border border-amber-200'
-                    : 'bg-gray-50 text-gray-500 border border-gray-200'
-                }`}>
-                <span>{isExpired ? '🔒' : '⏰'}</span>
+              <div
+                className={`flex items-center space-x-1 text-xs px-2 py-1 rounded-md ${
+                  isExpired
+                    ? "bg-red-50 text-red-600 border border-red-200"
+                    : timeUntilExpiry <= 300
+                      ? "bg-amber-50 text-amber-600 border border-amber-200"
+                      : "bg-gray-50 text-gray-500 border border-gray-200"
+                }`}
+              >
+                <span>{isExpired ? "🔒" : "⏰"}</span>
                 <span className="font-medium">
-                  {isExpired
-                    ? 'Expired'
-                    : formatTimeRemaining(timeUntilExpiry)
-                  }
+                  {isExpired ? "Expired" : formatTimeRemaining(timeUntilExpiry)}
                 </span>
               </div>
             )}
@@ -326,12 +191,13 @@ export default function PDFViewer({
               type="button"
               onClick={handleDownloadClick}
               title={isExpired ? "Reload page to download" : "Download PDF"}
-              className={`p-2 rounded-lg transition-colors ${isExpired
-                  ? 'text-red-500 hover:text-red-700 hover:bg-red-50 border border-red-200'
-                  : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'
-                }`}
+              className={`p-2 rounded-lg transition-colors ${
+                isExpired
+                  ? "text-red-500 hover:text-red-700 hover:bg-red-50 border border-red-200"
+                  : "text-gray-500 hover:text-gray-700 hover:bg-gray-100"
+              }`}
             >
-              {isExpired ? '↻' : '⤓'}
+              {isExpired ? "↻" : "⤓"}
             </button>
           </div>
         </div>
@@ -349,7 +215,10 @@ export default function PDFViewer({
       )}
 
       {/* PDF Viewer Content */}
-      <div className="flex-1 relative" style={{ height: 'calc(100vh - 160px)' }}>
+      <div
+        className="flex-1 relative"
+        style={{ height: "calc(100vh - 160px)" }}
+      >
         {isExpired ? (
           <div className="w-full h-full bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
             <div className="w-full h-full flex items-center justify-center bg-gray-50">
@@ -363,7 +232,8 @@ export default function PDFViewer({
                 </h3>
 
                 <p className="text-gray-600 mb-6 text-sm leading-relaxed">
-                  The PDF link has expired for security reasons. Please reload the page to generate a new link.
+                  The PDF link has expired for security reasons. Please reload
+                  the page to generate a new link.
                 </p>
 
                 <button
@@ -379,59 +249,26 @@ export default function PDFViewer({
           </div>
         ) : (
           <div className="w-full h-full bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-            <div className="w-full h-full overflow-auto flex justify-center bg-gray-100">
-              {isMounted ? (
-                <Document
-                  file={pdfUrl}
-                  onLoadSuccess={onDocumentLoadSuccess}
-                  onLoadError={onDocumentLoadError}
-                  loading={<LoadingSpinner size="large" />}
-                  error={
-                    <div className="text-center p-8">
-                      <div className="text-red-500 mb-4">❌</div>
-                      <p className="text-gray-600 mb-4">Failed to load PDF</p>
-                      <div className="space-y-2">
-                        <button
-                          type="button"
-                          onClick={handleViewDirectly}
-                          className="w-full bg-primary-blue hover:bg-blue-700 text-white px-4 py-2 rounded-lg"
-                        >
-                          Open PDF Directly
-                        </button>
-                        <button
-                          type="button"
-                          onClick={handleRefreshPage}
-                          className="w-full bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg"
-                        >
-                          Refresh Page
-                        </button>
-                      </div>
-                    </div>
-                  }
-                >
-                  {showAllPages ? (
-                    // Render all pages continuously
-                    Array.from(new Array(numPages), (el, index) => (
-                      <Page
-                        key={`page_${index + 1}`}
-                        pageNumber={index + 1}
-                        scale={scale}
-                        renderTextLayer={false}
-                        renderAnnotationLayer={false}
-                        className="shadow-lg mb-4"
-                      />
-                    ))
-                  ) : (
-                    // Render single page
-                    <Page
-                      pageNumber={pageNumber}
-                      scale={scale}
-                      renderTextLayer={false}
-                      renderAnnotationLayer={false}
-                      className="shadow-lg"
-                    />
-                  )}
-                </Document>
+            <div className="w-full h-full overflow-hidden flex justify-center bg-gray-100">
+              {!hasValidPdfUrl ? (
+                <div className="flex items-center justify-center w-full h-full">
+                  <div className="text-center p-8 max-w-md">
+                    <div className="text-red-500 mb-4">❌</div>
+                    <p className="text-gray-600 mb-2 font-medium">
+                      No PDF URL available
+                    </p>
+                    <p className="text-sm text-gray-500">
+                      The resume record did not include a valid PDF link.
+                    </p>
+                  </div>
+                </div>
+              ) : isMounted ? (
+                <iframe
+                  src={pdfUrl}
+                  title={resumeName}
+                  className="w-full h-full border-0 bg-white"
+                  onLoad={() => setLoading(false)}
+                />
               ) : (
                 <div className="flex items-center justify-center w-full h-full">
                   <LoadingSpinner size="large" />
@@ -446,7 +283,7 @@ export default function PDFViewer({
       {showExpirationWarning && !isExpired && (
         <div className="absolute top-16 left-4 right-4 bg-amber-50 border border-amber-200 rounded-lg p-4 z-30 shadow-lg">
           <div className="flex items-start space-x-3">
-            <div className="flex-shrink-0">
+            <div className="shrink-0">
               <span className="text-amber-500 text-lg">⚠</span>
             </div>
             <div className="flex-1">
@@ -454,8 +291,9 @@ export default function PDFViewer({
                 PDF Link Expiring Soon
               </h4>
               <p className="text-amber-700 text-sm mt-1">
-                This PDF link will expire in {formatTimeRemaining(timeUntilExpiry!)}.
-                Download now or reload the page to get a fresh link.
+                This PDF link will expire in{" "}
+                {formatTimeRemaining(timeUntilExpiry!)}. Download now or reload
+                the page to get a fresh link.
               </p>
               <div className="mt-3 flex space-x-2">
                 <button
@@ -511,15 +349,15 @@ export default function PDFViewer({
 export function SimplePDFViewer({
   pdfUrl,
   resumeName,
-  className = ''
-}: Omit<PDFViewerProps, 'onError'>) {
+  className = "",
+}: Omit<PDFViewerProps, "onError">) {
   return (
     <div className={`w-full h-full ${className}`}>
       <iframe
         src={pdfUrl}
         title={`Resume: ${resumeName}`}
         className="w-full h-screen border-0"
-        style={{ minHeight: 'calc(100vh - 120px)' }}
+        style={{ minHeight: "calc(100vh - 120px)" }}
         loading="lazy"
       />
     </div>

@@ -110,6 +110,12 @@ function ResumeViewerButton({
   );
 }
 
+const RECRUITER_STATS = [
+  { target: 50, suffix: "K+", label: "CVs Created" },
+  { target: 12, suffix: "K+", label: "Recruiters" },
+  { target: 2, suffix: "M+", label: "CV Views" },
+] as const;
+
 export default function ResumePreviewPage() {
   const params = useParams();
   const router = useRouter();
@@ -123,6 +129,37 @@ export default function ResumePreviewPage() {
   const [pdfAccessible, setPdfAccessible] = useState<boolean | null>(null);
   const [isReviewMode, setIsReviewMode] = useState(false);
   const [showModal, setShowModal] = useState(false);
+  const [, setSelectedAudience] = useState<"recruiter" | "candidate">(
+    "recruiter",
+  );
+  const [animatedStats, setAnimatedStats] = useState<number[]>(
+    RECRUITER_STATS.map(() => 0),
+  );
+
+  useEffect(() => {
+    const duration = 1400;
+    let frameId = 0;
+    const start = performance.now();
+
+    const tick = (now: number) => {
+      const progress = Math.min((now - start) / duration, 1);
+      const easedProgress = 1 - Math.pow(1 - progress, 3);
+
+      setAnimatedStats(
+        RECRUITER_STATS.map((stat) =>
+          Math.min(stat.target, Math.floor(stat.target * easedProgress)),
+        ),
+      );
+
+      if (progress < 1) {
+        frameId = requestAnimationFrame(tick);
+      }
+    };
+
+    frameId = requestAnimationFrame(tick);
+
+    return () => cancelAnimationFrame(frameId);
+  }, []);
 
   const fetchResumeData = useCallback(
     async (permanentToken: string) => {
@@ -315,16 +352,29 @@ export default function ResumePreviewPage() {
     );
   }
 
-  const LockedFeature = ({ children, label = "Login to Unlock" }: { children: React.ReactNode; label?: string }) => (
+  const LockedFeature = ({
+    children,
+    label = "Login to Unlock",
+  }: {
+    children: React.ReactNode;
+    label?: string;
+  }) => (
     <div className="relative group">
       <div className="blur-[2px] pointer-events-none opacity-60 transition-all group-hover:blur-[3px]">
         {children}
       </div>
       <div className="absolute inset-0 flex items-center justify-center z-10">
-        <Link href={"/recruiter/login?redirect=" + encodeURIComponent(window.location.pathname)}>
+        <Link
+          href={
+            "/recruiter/login?redirect=" +
+            encodeURIComponent(window.location.pathname)
+          }
+        >
           <div className="bg-white/90 backdrop-blur-sm border border-slate-200 px-4 py-2 rounded-full shadow-lg flex items-center gap-2 cursor-pointer hover:bg-white transition-colors">
             <Lock size={14} className="text-blue-600" />
-            <span className="text-xs font-semibold text-slate-900">{label}</span>
+            <span className="text-xs font-semibold text-slate-900">
+              {label}
+            </span>
           </div>
         </Link>
       </div>
@@ -491,7 +541,7 @@ export default function ResumePreviewPage() {
             {/* PDF Viewer Container */}
             <div className="bg-slate-800 rounded-2xl shadow-2xl border border-slate-700 overflow-hidden flex flex-col h-[900px]">
               {/* PDF Toolbar */}
-              <div className="bg-slate-900 px-6 py-3 border-b border-slate-700 flex items-center justify-between text-white">
+              {/* <div className="bg-slate-900 px-6 py-3 border-b border-slate-700 flex items-center justify-between text-white">
                 <div className="flex items-center gap-4">
                   <span className="text-sm font-medium">
                     {resumeData.candidate?.full_name ||
@@ -499,12 +549,12 @@ export default function ResumePreviewPage() {
                       "Resume"}
                     .pdf
                   </span>
-                  {/* {resumeData.source_type && (
+                  {resumeData.source_type && (
                     <Badge className="bg-blue-500/20 text-blue-300 border border-blue-500/30 text-xs">
                       {resumeData.source_type.charAt(0).toUpperCase() +
                         resumeData.source_type.slice(1)}
                     </Badge>
-                  )} */}
+                  )}
                 </div>
 
                 <div className="flex items-center gap-2">
@@ -527,7 +577,7 @@ export default function ResumePreviewPage() {
                     Print
                   </ResumeViewerButton>
                 </div>
-              </div>
+              </div> */}
 
               {/* PDF Content Area */}
               <div className="flex-1 bg-slate-700 overflow-auto flex justify-center">
@@ -569,177 +619,289 @@ export default function ResumePreviewPage() {
             <div className="sticky top-24 space-y-6">
               {/* Recruiter Tools Card */}
               <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-                <div className="bg-slate-900 p-5 text-white">
-                  <div className="flex items-center justify-between">
-                    <h3 className="font-bold text-white flex items-center gap-2">
-                      <Zap size={18} className="text-blue-400" />
-                      Recruiter Tools
-                    </h3>
-                    <Badge className="bg-blue-500/20 text-blue-300 border border-blue-500/30 text-xs font-bold">
-                      PRO
-                    </Badge>
-                  </div>
-                  <p className="text-sm text-slate-400 mt-2">
-                    Manage this candidate and streamline your hiring process.
-                  </p>
-                </div>
-                {
-                  isAuthenticated ? (
-                    <div className="p-5 space-y-4">
-                      {/* Contact Information */}
-                      <div className="space-y-3">
-                        {/* Email */}
-                        {resumeData?.candidate?.contact?.email && (
-                          <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
-                            <p className="text-xs font-semibold text-blue-600 uppercase tracking-wider mb-1 flex items-center gap-2">
-                              <Mail size={14} /> Email
-                            </p>
-                            <p className="text-sm font-medium text-slate-900 break-all">
-                              {resumeData.candidate.contact.email}
-                            </p>
-                          </div>
-                        )}
-
-                        {/* Phone */}
-                        {resumeData?.candidate?.contact?.phone && (
-                          <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
-                            <p className="text-xs font-semibold text-blue-600 uppercase tracking-wider mb-1">
-                              Phone
-                            </p>
-                            <p className="text-sm font-medium text-slate-900">
-                              {resumeData.candidate.contact.phone}
-                            </p>
-                          </div>
-                        )}
-
-                        {/* Address */}
-                        {resumeData?.candidate?.contact?.address && (
-                          <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
-                            <p className="text-xs font-semibold text-blue-600 uppercase tracking-wider mb-1">
-                              Address
-                            </p>
-                            <p className="text-sm font-medium text-slate-900">
-                              {resumeData.candidate.contact.address}
-                            </p>
-                          </div>
-                        )}
-
-                        {/* Website */}
-                        {resumeData?.candidate?.contact?.website && (
-                          <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
-                            <p className="text-xs font-semibold text-blue-600 uppercase tracking-wider mb-1 flex items-center gap-2">
-                              <Globe size={14} /> Website
-                            </p>
-                            <a
-                              href={resumeData.candidate.contact.website}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-sm font-medium text-blue-600 hover:text-blue-700 break-all"
-                            >
-                              {resumeData.candidate.contact.website}
-                            </a>
-                          </div>
-                        )}
-
-                        {/* LinkedIn */}
-                        {resumeData?.candidate?.contact?.linkedin && (
-                          <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
-                            <p className="text-xs font-semibold text-blue-600 uppercase tracking-wider mb-1 flex items-center gap-2">
-                              <Linkedin size={14} /> LinkedIn
-                            </p>
-                            <a
-                              href={resumeData.candidate.contact.linkedin}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-sm font-medium text-blue-600 hover:text-blue-700 break-all"
-                            >
-                              {resumeData.candidate.contact.linkedin}
-                            </a>
-                          </div>
-                        )}
-
-                        {/* GitHub */}
-                        {resumeData?.candidate?.contact?.github && (
-                          <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
-                            <p className="text-xs font-semibold text-blue-600 uppercase tracking-wider mb-1 flex items-center gap-2">
-                              <Github size={14} /> GitHub
-                            </p>
-                            <a
-                              href={resumeData.candidate.contact.github}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-sm font-medium text-blue-600 hover:text-blue-700 break-all"
-                            >
-                              {resumeData.candidate.contact.github}
-                            </a>
-                          </div>
-                        )}
+                {isAuthenticated ? (
+                  <div className=" space-y-4">
+                    <div className="bg-slate-900 p-5 text-white">
+                      <div className="flex items-center justify-between">
+                        <h3 className="font-bold text-white flex items-center gap-2">
+                          <Zap size={18} className="text-blue-400" />
+                          Recruiter Tools
+                        </h3>
+                        <Badge className="bg-blue-500/20 text-blue-300 border border-blue-500/30 text-xs font-bold">
+                          PRO
+                        </Badge>
                       </div>
+                      <p className="text-sm text-slate-400 mt-2">
+                        Manage this candidate and streamline your hiring
+                        process.
+                      </p>
+                    </div>
+                    {/* Contact Information */}
+                    <div className="space-y-3 p-5">
+                      {/* Email */}
+                      {resumeData?.candidate?.contact?.email && (
+                        <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
+                          <p className="text-xs font-semibold text-blue-600 uppercase tracking-wider mb-1 flex items-center gap-2">
+                            <Mail size={14} /> Email
+                          </p>
+                          <p className="text-sm font-medium text-slate-900 break-all">
+                            {resumeData.candidate.contact.email}
+                          </p>
+                        </div>
+                      )}
 
-                      {/* Additional Actions - Always show for authenticated users */}
-                      {isAuthenticated && (
-                        <div className="space-y-3 mt-4 pt-4 border-t border-slate-200">
-                          <div className="flex items-center gap-3 p-3 rounded-lg bg-emerald-50">
-                            <div className="w-5 h-5 rounded-full bg-emerald-500 flex items-center justify-center">
-                              <span className="text-white text-xs">✓</span>
-                            </div>
-                            <span className="text-sm font-medium text-emerald-700">
-                              Send to Hiring Board
-                            </span>
-                          </div>
-                          <div className="flex items-center gap-3 p-3 rounded-lg bg-emerald-50">
-                            <div className="w-5 h-5 rounded-full bg-emerald-500 flex items-center justify-center">
-                              <span className="text-white text-xs">✓</span>
-                            </div>
-                            <span className="text-sm font-medium text-emerald-700">
-                              Add to Pipeline
-                            </span>
-                          </div>
-                          <div className="flex items-center gap-3 p-3 rounded-lg bg-emerald-50">
-                            <div className="w-5 h-5 rounded-full bg-emerald-500 flex items-center justify-center">
-                              <span className="text-white text-xs">✓</span>
-                            </div>
-                            <span className="text-sm font-medium text-emerald-700">
-                              Add Phone Details
-                            </span>
-                          </div>
+                      {/* Phone */}
+                      {resumeData?.candidate?.contact?.phone && (
+                        <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
+                          <p className="text-xs font-semibold text-blue-600 uppercase tracking-wider mb-1">
+                            Phone
+                          </p>
+                          <p className="text-sm font-medium text-slate-900">
+                            {resumeData.candidate.contact.phone}
+                          </p>
+                        </div>
+                      )}
+
+                      {/* Address */}
+                      {resumeData?.candidate?.contact?.address && (
+                        <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
+                          <p className="text-xs font-semibold text-blue-600 uppercase tracking-wider mb-1">
+                            Address
+                          </p>
+                          <p className="text-sm font-medium text-slate-900">
+                            {resumeData.candidate.contact.address}
+                          </p>
+                        </div>
+                      )}
+
+                      {/* Website */}
+                      {resumeData?.candidate?.contact?.website && (
+                        <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
+                          <p className="text-xs font-semibold text-blue-600 uppercase tracking-wider mb-1 flex items-center gap-2">
+                            <Globe size={14} /> Website
+                          </p>
+                          <a
+                            href={resumeData.candidate.contact.website}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-sm font-medium text-blue-600 hover:text-blue-700 break-all"
+                          >
+                            {resumeData.candidate.contact.website}
+                          </a>
+                        </div>
+                      )}
+
+                      {/* LinkedIn */}
+                      {resumeData?.candidate?.contact?.linkedin && (
+                        <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
+                          <p className="text-xs font-semibold text-blue-600 uppercase tracking-wider mb-1 flex items-center gap-2">
+                            <Linkedin size={14} /> LinkedIn
+                          </p>
+                          <a
+                            href={resumeData.candidate.contact.linkedin}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-sm font-medium text-blue-600 hover:text-blue-700 break-all"
+                          >
+                            {resumeData.candidate.contact.linkedin}
+                          </a>
+                        </div>
+                      )}
+
+                      {/* GitHub */}
+                      {resumeData?.candidate?.contact?.github && (
+                        <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
+                          <p className="text-xs font-semibold text-blue-600 uppercase tracking-wider mb-1 flex items-center gap-2">
+                            <Github size={14} /> GitHub
+                          </p>
+                          <a
+                            href={resumeData.candidate.contact.github}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-sm font-medium text-blue-600 hover:text-blue-700 break-all"
+                          >
+                            {resumeData.candidate.contact.github}
+                          </a>
                         </div>
                       )}
                     </div>
-                  ) : (
-                    <div className="p-5 space-y-4 h-[300px]">
 
-                      <div className="space-y-3">
-                        <LockedFeature label="Login to Access Features">
-                          <div className="flex items-center gap-3 p-3 rounded-lg bg-slate-100 border border-slate-200">
-                            <div className="w-5 h-5 rounded-full bg-slate-200 flex items-center justify-center">
-                              <span className="text-slate-400 text-xs">🔒</span>
-                            </div>
-                            <span className="text-sm font-medium text-slate-500">Send to Hiring Board</span>
+                    {/* Additional Actions - Always show for authenticated users */}
+                    {isAuthenticated && (
+                      <div className="space-y-3 mt-4 pt-4 border-t border-slate-200">
+                        <div className="flex items-center gap-3 p-3 rounded-lg bg-emerald-50">
+                          <div className="w-5 h-5 rounded-full bg-emerald-500 flex items-center justify-center">
+                            <span className="text-white text-xs">✓</span>
                           </div>
+                          <span className="text-sm font-medium text-emerald-700">
+                            Send to Hiring Board
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-3 p-3 rounded-lg bg-emerald-50">
+                          <div className="w-5 h-5 rounded-full bg-emerald-500 flex items-center justify-center">
+                            <span className="text-white text-xs">✓</span>
+                          </div>
+                          <span className="text-sm font-medium text-emerald-700">
+                            Add to Pipeline
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-3 p-3 rounded-lg bg-emerald-50">
+                          <div className="w-5 h-5 rounded-full bg-emerald-500 flex items-center justify-center">
+                            <span className="text-white text-xs">✓</span>
+                          </div>
+                          <span className="text-sm font-medium text-emerald-700">
+                            Add Phone Details
+                          </span>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="">
+                    <div className="overflow-hidden rounded-xl border border-slate-200 bg-[#f8fafc] shadow-[0_10px_30px_rgba(15,23,42,0.08)]">
+                      <div className="bg-[#091638] text-white">
+                        <div
+                          className="px-6 sm:px-8 pt-6 sm:pt-8 pb-8"
+                          style={{
+                            backgroundImage:
+                              "linear-gradient(rgba(148,163,184,0.09) 1px, transparent 1px), linear-gradient(90deg, rgba(148,163,184,0.09) 1px, transparent 1px)",
+                            backgroundSize: "40px 40px",
+                          }}
+                        >
+                          <p className="text-[11px] sm:text-[13px] font-bold tracking-[0.14em] uppercase text-[#36c2ff]">
+                            PreviewCV · LetsMakeCV
+                          </p>
 
-                          {/* Pipeline Button (Blurred) */}
-                          <div className="flex items-center gap-3 p-3 rounded-lg bg-slate-100 border border-slate-200">
-                            <div className="w-5 h-5 rounded-full bg-slate-200 flex items-center justify-center">
-                              <span className="text-slate-400 text-xs">🔒</span>
-                            </div>
-                            <span className="text-sm font-medium text-slate-500">Add to Pipeline</span>
-                          </div>
+                          <h4 className="mt-4 text-[18px] sm:text-[28px] leading-[1.1] font-extrabold text-white">
+                            CVs that work as
+                            <br />
+                            <span className="text-[#37bff9]">
+                              hard as you do
+                            </span>
+                          </h4>
 
-                          {/* Phone Details Button (Blurred) */}
-                          <div className="flex items-center gap-3 p-3 rounded-lg bg-slate-100 border border-slate-200">
-                            <div className="w-5 h-5 rounded-full bg-slate-200 flex items-center justify-center">
-                              <span className="text-slate-400 text-xs">🔒</span>
+                          <p className="mt-4 max-w-xl text-[15px] sm:text-[12px] leading-[1.5] text-slate-300 font-medium">
+                            Build once, share anywhere. Recruiters always see
+                            your latest — no attachments, no version chaos.
+                          </p>
+                        </div>
+
+                        <div className="grid grid-cols-3 border-t border-slate-700">
+                          {RECRUITER_STATS.map((stat, index) => (
+                            <div
+                              key={stat.label}
+                              className="px-2 sm:px-3 py-5 text-center border-r border-slate-700 last:border-r-0"
+                            >
+                              <div className="text-2xl sm:text-2xl font-extrabold text-white">
+                                {animatedStats[index]}
+                                {stat.suffix}
+                              </div>
+
+                              <div className="mt-1 text-[10px] sm:text-[8px] uppercase tracking-[0.12em] font-bold text-slate-400">
+                                {stat.label}
+                              </div>
                             </div>
-                            <span className="text-sm font-medium text-slate-500">Add Phone Details</span>
-                          </div>
-                        </LockedFeature>
+                          ))}
+                        </div>
                       </div>
 
+                      <div className="px-4 sm:px-4 py-2 sm:py-4 bg-[#f8fafc]">
+                        <p className="text-[11px] sm:text-[13px] font-bold uppercase tracking-[0.14em] text-slate-400">
+                          How it works
+                        </p>
 
+                        <div className="mt-5 space-y-2">
+                          {[
+                            {
+                              num: "1",
+                              title: "Build on LetsMakeCV",
+                              desc: "AI-powered builder. Professional CV in minutes, not hours.",
+                              dot: "bg-[#d9eaf7] text-[#0c6ba8]",
+                            },
+                            {
+                              num: "2",
+                              title: "Get a shareable link",
+                              desc: "One link, like the one you're viewing right now. Always live.",
+                              dot: "bg-[#d5efe2] text-[#1f7a4f]",
+                            },
+                            {
+                              num: "3",
+                              title: "Recruiters view instantly",
+                              desc: "No downloads. No outdated PDFs. Updates reflect immediately.",
+                              dot: "bg-[#f6e8c4] text-[#9a6200]",
+                            },
+                          ].map((item) => (
+                            <div
+                              key={item.num}
+                              className="flex gap-4 items-start"
+                            >
+                              <div
+                                className={`w-9 h-9 rounded-full flex items-center justify-center font-extrabold text-lg shrink-0 ${item.dot}`}
+                              >
+                                {item.num}
+                              </div>
+
+                              <div>
+                                <p className="text-[12px] sm:text-[14px] font-extrabold text-slate-800 leading-tight">
+                                  {item.title}
+                                </p>
+
+                                <p className="mt-1 text-[14px] sm:text-[15px] leading-[1.5] text-slate-500 font-medium">
+                                  {item.desc}
+                                </p>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+
+                        <div className="mt-6 rounded-2xl border border-slate-200 bg-[#eef2f7] px-5 py-4 flex items-center gap-4">
+                          <div className="flex -space-x-2">
+                            {[
+                              { name: "AK", bg: "bg-[#dbe7f8] text-[#2558a7]" },
+                              { name: "SR", bg: "bg-[#f7e0eb] text-[#9c2258]" },
+                              { name: "MJ", bg: "bg-[#dff4e8] text-[#0f7a4d]" },
+                              { name: "OB", bg: "bg-[#f7ebd5] text-[#976300]" },
+                            ].map((avatar) => (
+                              <span
+                                key={avatar.name}
+                                className={`w-8 h-8 rounded-full border-2 border-[#eef2f7] grid place-items-center text-[11px] font-extrabold ${avatar.bg}`}
+                              >
+                                {avatar.name}
+                              </span>
+                            ))}
+                          </div>
+
+                          <p className="text-[14px] sm:text-[15px] leading-[1.5] text-slate-500 font-medium">
+                            <strong className="text-slate-800">
+                              4,200+ candidates
+                            </strong>{" "}
+                            landed interviews this month using PreviewCV links
+                          </p>
+                        </div>
+
+                        <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                          <a
+                            href="https://letsmakecv.com"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex justify-center items-center rounded-xl border-2 border-emerald-600 text-emerald-600 font-bold text-sm sm:text-base py-3 hover:bg-emerald-50 transition-colors"
+                          >
+                            Build my CV →
+                          </a>
+
+                          <a
+                            href="https://previewcv.com/recruiter"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex justify-center items-center rounded-xl bg-[#1e2a56] text-white font-bold text-sm sm:text-base py-3 hover:bg-[#243165] transition-colors"
+                          >
+                            For recruiters →
+                          </a>
+                        </div>
+                      </div>
                     </div>
-                  )
-                }
+                  </div>
+                )}
               </div>
             </div>
           </div>
