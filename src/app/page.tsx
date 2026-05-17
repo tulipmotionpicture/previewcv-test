@@ -245,18 +245,19 @@ export default function Home() {
                     : "justify-center relative w-full"
                 }`}
               >
-                {partnersLoading ? (
-                  [...Array(12)].map((_, i) => (
-                    <div
-                      key={`fallback-1-${i}`}
-                      className="px-2 w-[120px] md:w-[160px] lg:w-[200px] h-full flex-shrink-0"
-                    >
-                      <div className="bg-gray-100 dark:bg-gray-800 p-2 md:p-4 border border-gray-200 dark:border-gray-700 rounded-lg flex items-center justify-center h-full w-full animate-pulse"></div>
-                    </div>
-                  ))
-                ) : (
-                  (partners.length >= 5 ? [...partners, ...partners] : partners).map(
-                    (employer, i) => (
+                {partnersLoading
+                  ? [...Array(12)].map((_, i) => (
+                      <div
+                        key={`fallback-1-${i}`}
+                        className="px-2 w-[120px] md:w-[160px] lg:w-[200px] h-full flex-shrink-0"
+                      >
+                        <div className="bg-gray-100 dark:bg-gray-800 p-2 md:p-4 border border-gray-200 dark:border-gray-700 rounded-lg flex items-center justify-center h-full w-full animate-pulse"></div>
+                      </div>
+                    ))
+                  : (partners.length >= 5
+                      ? [...partners, ...partners]
+                      : partners
+                    ).map((employer, i) => (
                       <div
                         key={`row1-${i}`}
                         className="px-2 w-[120px] md:w-[160px] lg:w-[200px] h-full flex-shrink-0"
@@ -264,7 +265,9 @@ export default function Home() {
                         <div className="bg-white p-2 md:p-4 border border-gray-200 rounded-lg flex items-center justify-center hover:shadow-md transition-shadow h-full w-full">
                           <Link href={`/recruiter/${employer.recruiter_slug}`}>
                             <Image
-                              src={employer.company_logo_url || "/logos/logo-1.png"}
+                              src={
+                                employer.company_logo_url || "/logos/logo-1.png"
+                              }
                               alt={employer.company_name || "Partner Logo"}
                               width={100}
                               height={40}
@@ -273,9 +276,7 @@ export default function Home() {
                           </Link>
                         </div>
                       </div>
-                    )
-                  )
-                )}
+                    ))}
               </div>
             </div>
 
@@ -283,26 +284,32 @@ export default function Home() {
             {partners.length >= 5 && (
               <div className="relative w-full overflow-hidden h-16 md:h-20">
                 <div className="absolute top-0 left-0 h-full flex animate-scroll-right w-max">
-                  {partnersLoading ? (
-                    [...Array(12)].map((_, i) => (
-                      <div
-                        key={`fallback-2-${i}`}
-                        className="px-2 w-[120px] md:w-[160px] lg:w-[200px] h-full flex-shrink-0"
-                      >
-                        <div className="bg-gray-100 dark:bg-gray-800 p-2 md:p-4 border border-gray-200 dark:border-gray-700 rounded-lg flex items-center justify-center h-full w-full animate-pulse"></div>
-                      </div>
-                    ))
-                  ) : (
-                    [...[...partners].reverse(), ...[...partners].reverse()].map(
-                      (employer, i) => (
+                  {partnersLoading
+                    ? [...Array(12)].map((_, i) => (
+                        <div
+                          key={`fallback-2-${i}`}
+                          className="px-2 w-[120px] md:w-[160px] lg:w-[200px] h-full flex-shrink-0"
+                        >
+                          <div className="bg-gray-100 dark:bg-gray-800 p-2 md:p-4 border border-gray-200 dark:border-gray-700 rounded-lg flex items-center justify-center h-full w-full animate-pulse"></div>
+                        </div>
+                      ))
+                    : [
+                        ...[...partners].reverse(),
+                        ...[...partners].reverse(),
+                      ].map((employer, i) => (
                         <div
                           key={`row2-${i}`}
                           className="px-2 w-[120px] md:w-[160px] lg:w-[200px] h-full flex-shrink-0"
                         >
                           <div className="bg-white p-2 md:p-4 border border-gray-200 rounded-lg flex items-center justify-center hover:shadow-md transition-shadow h-full w-full">
-                            <Link href={`/recruiter/${employer.recruiter_slug}`}>
+                            <Link
+                              href={`/recruiter/${employer.recruiter_slug}`}
+                            >
                               <Image
-                                src={employer.company_logo_url || "/logos/logo-1.png"}
+                                src={
+                                  employer.company_logo_url ||
+                                  "/logos/logo-1.png"
+                                }
                                 alt={employer.company_name || "Partner Logo"}
                                 width={100}
                                 height={40}
@@ -311,9 +318,7 @@ export default function Home() {
                             </Link>
                           </div>
                         </div>
-                      )
-                    )
-                  )}
+                      ))}
                 </div>
               </div>
             )}
@@ -514,7 +519,9 @@ export default function Home() {
 
             <p className="text-xs lg:text-sm text-gray-600 dark:text-gray-400 mb-6">
               Stand out with a{" "}
-              <span className="text-primary-blue font-semibold">customized</span>{" "}
+              <span className="text-primary-blue font-semibold">
+                customized
+              </span>{" "}
               cover letter.
             </p>
 
@@ -780,12 +787,11 @@ export default function Home() {
       </section>
       {/* Direct Market Pulse Section */}
       {/* Direct Market Pulse Section */}
-      <section className="w-full max-w-7xl mx-auto px-4 lg:px-6 mb-6 lg:mb-8">
+      {/* <section className="w-full max-w-7xl mx-auto px-4 lg:px-6 mb-6 lg:mb-8">
         <div className=" dark:bg-gray-800 rounded-[32px] p-6 lg:p-10 relative overflow-hidden  dark:border-gray-700 animate-in fade-in duration-700">
-          {/* Page Header */}
+        Page Header
           <div className="mb-8 lg:mb-12">
             <h1 className="text-xl lg:text-3xl font-bold text-zinc-900 dark:text-gray-100 tracking-tight text-left mb-2 lg:mb-4">
-              Direct Market Pulse
             </h1>
             <p className="text-sm text-zinc-500 dark:text-gray-400 font-medium text-left max-w-2xl">
               Live activity from our recruitment engine. Verified matching in
@@ -794,14 +800,13 @@ export default function Home() {
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16">
-            {/* Left Column: Trending Roles */}
+        
             <div>
               <h2 className="text-lg lg:text-xl font-semibold text-zinc-900 dark:text-gray-100 mb-4 lg:mb-6 tracking-tight text-left ml-2 lg:ml-0">
                 Trending Roles
               </h2>
 
               <div className="space-y-4 lg:space-y-6">
-                {/* Wrapper Card for all roles */}
                 <div className="bg-white dark:bg-gray-700/50 rounded-2xl p-4 lg:p-6 shadow-sm border border-zinc-200/60 dark:border-zinc-700">
                   {[
                     {
@@ -850,7 +855,6 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Right Column: Featured Talent */}
             <div>
               <h2 className="text-lg lg:text-xl font-semibold text-zinc-900 dark:text-gray-100 mb-4 lg:mb-6 tracking-tight text-left ml-2 lg:ml-0">
                 Featured Talent
@@ -899,7 +903,6 @@ export default function Home() {
                     className="bg-white dark:bg-gray-700/50 rounded-2xl p-5 shadow-sm border border-zinc-200/60 dark:border-zinc-700 hover:shadow-md transition-shadow"
                   >
                     <div className="flex items-start gap-4">
-                      {/* Avatar */}
                       <img
                         src={talent.avatar}
                         alt={talent.name}
@@ -921,7 +924,6 @@ export default function Home() {
                           </span>
                         </div>
 
-                        {/* Skills Tags */}
                         <div className="flex flex-wrap gap-2 mt-3">
                           {talent.skills.map((skill, i) => (
                             <span
@@ -940,7 +942,7 @@ export default function Home() {
             </div>
           </div>
         </div>
-      </section>
+      </section> */}
 
       {/* Social Proof Section */}
       <section className="w-full bg-[#164863] py-6 lg:py-16 relative overflow-hidden">
