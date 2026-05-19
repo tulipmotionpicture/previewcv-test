@@ -175,19 +175,19 @@ export default async function JobDetailsPage({
                         <span className="text-gray-500">₹</span>
                         {job.salary_min
                           ? formatCurrency(
-                            job.salary_min,
-                            job.salary_currency || "USD",
-                          )
-                            .replace("US$", "")
-                            .replace("$", "")
+                              job.salary_min,
+                              job.salary_currency || "USD",
+                            )
+                              .replace("US$", "")
+                              .replace("$", "")
                           : ""}
                         {job.salary_max
                           ? ` - ${formatCurrency(
-                            job.salary_max,
-                            job.salary_currency || "USD",
-                          )
-                            .replace("US$", "")
-                            .replace("$", "")}`
+                              job.salary_max,
+                              job.salary_currency || "USD",
+                            )
+                              .replace("US$", "")
+                              .replace("$", "")}`
                           : ""}
                       </div>
                     )}
@@ -230,7 +230,7 @@ export default async function JobDetailsPage({
 
             {/* Job Description Card */}
             <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg overflow-hidden">
-              <div className="bg-[#005FFF] p-2">
+              <div className="bg-[#0077b5] p-2">
                 <h2 className="text-md font-bold text-white">About the Role</h2>
               </div>
 
@@ -268,7 +268,7 @@ export default async function JobDetailsPage({
 
             {/* Skills Card */}
             <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg overflow-hidden">
-              <div className="bg-[#005FFF] p-2">
+              <div className="bg-[#0077b5] p-2">
                 <h3 className="text-md font-bold text-white">Key Skills</h3>
               </div>
               <div className="p-6">
@@ -283,17 +283,17 @@ export default async function JobDetailsPage({
                   ))}
                   {(!job.required_skills ||
                     job.required_skills.length === 0) && (
-                      <span className="text-sm text-gray-500">
-                        No specific skills listed
-                      </span>
-                    )}
+                    <span className="text-sm text-gray-500">
+                      No specific skills listed
+                    </span>
+                  )}
                 </div>
               </div>
             </div>
 
             {/* About the Company Card */}
             <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg overflow-hidden">
-              <div className="bg-[#005FFF] p-2">
+              <div className="bg-[#0077b5] p-2">
                 <h3 className="text-md font-bold text-white">
                   About the company
                 </h3>
