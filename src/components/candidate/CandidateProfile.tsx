@@ -1,15 +1,18 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Camera } from "lucide-react";
+import { Camera, Eye, EyeOff, MapPin, Briefcase, Phone, Mail, User, Info, Lock } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/context/ToastContext";
+import { api } from "@/lib/api";
 
 export default function CandidateProfile() {
     const { user, updateProfile } = useAuth();
     const { success, error } = useToast();
 
     const [isEditing, setIsEditing] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
+    const [isEditingPassword, setIsEditingPassword] = useState(false);
 
     const [formData, setFormData] = useState({
         full_name: "",
@@ -18,6 +21,9 @@ export default function CandidateProfile() {
         location: "",
         current_position: "",
         bio: "",
+        current_password: "",
+        new_password: "",
+        confirm_new_password: "",
     });
 
     useEffect(() => {
@@ -29,6 +35,9 @@ export default function CandidateProfile() {
                 location: user.location || "",
                 current_position: user.current_position || "",
                 bio: user.bio || "",
+                current_password: "",
+                new_password: "",
+                confirm_new_password: "",
             });
         }
     }, [user]);
@@ -46,8 +55,8 @@ export default function CandidateProfile() {
 
     const handleCancel = () => {
         if (!user) return;
-
         setFormData({
+            ...formData,
             full_name: user.full_name || "",
             email: user.email || "",
             phone: user.phone || "",
@@ -55,8 +64,45 @@ export default function CandidateProfile() {
             current_position: user.current_position || "",
             bio: user.bio || "",
         });
-
         setIsEditing(false);
+    };
+
+    const handleCancelPassword = () => {
+        setFormData({
+            ...formData,
+            current_password: "",
+            new_password: "",
+            confirm_new_password: "",
+        });
+        setIsEditingPassword(false);
+    };
+
+    const handleSavePassword = async () => {
+        if (!formData.current_password || !formData.new_password) {
+            error("Please fill in all password fields");
+            return;
+        }
+        if (formData.new_password !== formData.confirm_new_password) {
+            error("New passwords do not match");
+            return;
+        }
+        try {
+            await api.candidateChangePassword({
+                current_password: formData.current_password,
+                new_password: formData.new_password,
+            });
+            success("Password updated successfully!");
+            setFormData({
+                ...formData,
+                current_password: "",
+                new_password: "",
+                confirm_new_password: "",
+            });
+            setIsEditingPassword(false);
+        } catch (err: any) {
+            console.error(err);
+            error(err.message || "Failed to update password");
+        }
     };
 
     const DetailRow = ({
@@ -66,6 +112,7 @@ export default function CandidateProfile() {
         field,
         type = "text",
         placeholder = "",
+        icon: Icon,
     }: {
         label: string;
         value: string;
@@ -73,198 +120,186 @@ export default function CandidateProfile() {
         field?: keyof typeof formData;
         type?: string;
         placeholder?: string;
+        icon?: any;
     }) => (
-        <div className="grid grid-cols-[220px_1fr] py-4 border-b border-gray-100 last:border-b-0">
-            <div className="text-sm font-semibold text-slate-500">
-                {label}
+        <div className="flex flex-col py-3 border-b border-gray-100 last:border-b-0">
+            <div className="flex items-center gap-2 mb-1">
+                {Icon && <Icon className="w-4 h-4 text-slate-400" />}
+                <span className="text-xs font-semibold tracking-wider text-slate-500 uppercase">
+                    {label}
+                </span>
             </div>
 
-            <div className="text-sm font-semibold text-gray-900">
+            <div className="text-sm font-medium text-gray-900 mt-1">
                 {isEditing && field ? (
                     field === "bio" ? (
                         <textarea
                             value={formData[field]}
-                            onChange={(e) =>
-                                setFormData({ ...formData, [field]: e.target.value })
-                            }
+                            onChange={(e) => setFormData({ ...formData, [field]: e.target.value })}
                             rows={3}
-                            className="w-full border border-gray-200 rounded-md px-3 py-2 text-sm font-normal focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                            className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm font-normal focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-shadow bg-gray-50/50 focus:bg-white"
                             placeholder={placeholder}
                         />
                     ) : (
-                        <input
-                            type={type}
-                            value={formData[field]}
-                            onChange={(e) =>
-                                setFormData({ ...formData, [field]: e.target.value })
-                            }
-                            disabled={field === "email"}
-                            className="w-full border border-gray-200 rounded-md px-3 py-2 text-sm font-normal focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:bg-gray-50"
-                            placeholder={placeholder}
-                        />
+                        <div className="relative flex items-center w-full">
+                            <input
+                                type={type === "password" && showPassword ? "text" : type}
+                                value={formData[field]}
+                                onChange={(e) => setFormData({ ...formData, [field]: e.target.value })}
+                                disabled={field === "email"}
+                                className={`w-full border border-gray-200 rounded-lg px-4 py-2.5 ${type === "password" ? "pr-10" : ""} text-sm font-normal focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:bg-gray-100 disabled:text-gray-500 transition-shadow bg-gray-50/50 focus:bg-white`}
+                                placeholder={placeholder}
+                            />
+                            {type === "password" && (
+                                <button
+                                    type="button"
+                                    onClick={() => setShowPassword(!showPassword)}
+                                    onMouseDown={(e) => e.preventDefault()}
+                                    className="absolute right-3 text-gray-400 hover:text-indigo-600 transition-colors"
+                                >
+                                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                                </button>
+                            )}
+                        </div>
                     )
+                ) : type === "password" ? (
+                    "********"
                 ) : (
-                    value || "None"
+                    value || <span className="text-gray-400 italic font-normal">Not provided</span>
                 )}
             </div>
         </div>
     );
 
     return (
-        <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+        <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 max-w-6xl mx-auto pb-12">
 
-            {/* ================= Header / Banner ================= */}
-            <div className="relative mb-10">
+            {/* Header Text */}
+            <div className="mb-8">
+                <h1 className="text-2xl font-bold text-gray-900">My Profile</h1>
+                <p className="text-slate-500 text-sm mt-1">Manage your personal information and security settings.</p>
+            </div>
 
-                <div className="h-[200px] rounded-xl overflow-hidden border border-gray-100 bg-white relative">
+            <div className="grid grid-cols-1 lg:grid-cols-[320px_1fr] gap-8">
 
-                    <div
-                        className="absolute inset-0"
-                        style={{
-                            backgroundImage: `
-                linear-gradient(to right, #f1f5f9 1px, transparent 1px),
-                linear-gradient(to bottom, #f1f5f9 1px, transparent 1px)
-              `,
-                            backgroundSize: "40px 40px",
-                        }}
-                    />
+                {/* Left Column: Profile Card */}
+                <div className="space-y-6">
+                    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
 
-                    {/* Member Since */}
-                    <div className="absolute right-8 top-1/2 translate-y-1/2 text-right z-10">
-                        <p className="text-sm font-semibold text-gray-900">
-                            Member Since
-                        </p>
-                        <p className="text-sm text-slate-500">
-                            {user?.created_at
-                                ? new Date(user.created_at).toLocaleDateString("en-US", {
-                                    month: "long",
-                                    year: "numeric",
-                                })
-                                : "July 2025"}
-                        </p>
-                    </div>
-                </div>
 
-                {/* Profile row */}
-                <div className="absolute left-10 top-[20px] text-center items-center gap-4">
-
-                    {/* Avatar */}
-                    <div className="relative ">
-                        <div className="w-[96px] ml-6 h-[96px] rounded-full border-4 border-white overflow-hidden bg-red-800">
-                            <img
-                                src={
-                                    user?.profile_image_url ||
-                                    `https://ui-avatars.com/api/?name=${encodeURIComponent(
-                                        user?.full_name || "User Name"
-                                    )}&background=random`
-                                }
-                                alt="profile"
-                                className="w-full h-full object-cover "
-                            />
-                        </div>
-
-                        {isEditing && (
-                            <div className="absolute inset-0 rounded-full bg-black/40 flex items-center justify-center cursor-pointer">
-                                <Camera className="w-6 h-6 text-white" />
+                        {/* Avatar & Info */}
+                        <div className="px-6 pb-6 relative text-center mt-20">
+                            <div className="w-24 h-24 rounded-full border-4 border-white overflow-hidden bg-white mx-auto -mt-12 shadow-sm relative">
+                                <img
+                                    src={
+                                        user?.profile_image_url ||
+                                        `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                                            user?.full_name || "User Name"
+                                        )}&background=6366f1&color=fff&size=150`
+                                    }
+                                    alt="profile"
+                                    className="w-full h-full object-cover"
+                                />
                             </div>
-                        )}
-                    </div>
 
-                    {/* Name + role */}
-                    <div className="pr-20">
-                        <h1 className="text-xl font-bold text-gray-900">
-                            {formData.full_name || "User Name"}
-                        </h1>
-                        <p className="text-slate-500">
-                            {formData.current_position || "No position set"}
-                        </p>
-                    </div>
-
-                </div>
-            </div>
-
-            {/* ================= Personal Details ================= */}
-            <div className="bg-white rounded-xl border border-gray-100 overflow-hidden">
-
-                <div className="px-6 py-2 border-b border-slate-900 bg-slate-900 flex justify-between items-center">
-                    <h3 className="text-lg font-bold text-white">
-                        Personal details
-                    </h3>
-
-                    {!isEditing ? (
-                        <button
-                            onClick={() => setIsEditing(true)}
-                            className="text-sm font-medium text-white hover:text-gray-200"
-                        >
-                            Edit
-                        </button>
-                    ) : (
-                        <div className="flex gap-4">
-                            <button
-                                onClick={handleCancel}
-                                className="text-sm font-medium text-gray-400 hover:text-gray-200"
-                            >
-                                Cancel
-                            </button>
-                            <button
-                                onClick={handleSave}
-                                className="text-sm font-medium text-white hover:text-gray-200"
-                            >
-                                Save
-                            </button>
+                            <h2 className="text-lg font-bold text-gray-900 mt-4">
+                                {formData.full_name || "User Name"}
+                            </h2>
+                            <p className="text-sm font-medium text-indigo-600 mt-1">
+                                Candidate
+                            </p>
                         </div>
-                    )}
+                    </div>
                 </div>
 
-                <div className="px-6">
+                {/* Right Column: Forms */}
+                <div className="space-y-8">
 
-                    <DetailRow
-                        label="Full Name"
-                        value={formData.full_name}
-                        isEditing={isEditing}
-                        field="full_name"
-                    />
+                    {/* Personal Details Card */}
+                    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+                        <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+                            <div className="flex items-center gap-2">
+                                <User className="w-5 h-5 text-indigo-500" />
+                                <h3 className="text-base font-bold text-gray-900">Personal Details</h3>
+                            </div>
 
-                    <DetailRow
-                        label="Email Address"
-                        value={formData.email}
-                        isEditing={isEditing}
-                        field="email"
-                        type="email"
-                    />
+                            {!isEditing ? (
+                                <button
+                                    onClick={() => setIsEditing(true)}
+                                    className="text-sm font-medium text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50 px-3 py-1.5 rounded-md transition-colors"
+                                >
+                                    Edit Profile
+                                </button>
+                            ) : (
+                                <div className="flex items-center gap-2">
+                                    <button
+                                        onClick={handleCancel}
+                                        className="text-sm font-medium text-slate-500 hover:text-slate-700 hover:bg-slate-100 px-3 py-1.5 rounded-md transition-colors"
+                                    >
+                                        Cancel
+                                    </button>
+                                    <button
+                                        onClick={handleSave}
+                                        className="text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 px-4 py-1.5 rounded-md shadow-sm transition-colors"
+                                    >
+                                        Save Changes
+                                    </button>
+                                </div>
+                            )}
+                        </div>
 
-                    <DetailRow
-                        label="Phone Number"
-                        value={formData.phone}
-                        isEditing={isEditing}
-                        field="phone"
-                        type="tel"
-                    />
+                        <div className="p-6">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-2">
+                                {DetailRow({ label: "Full Name", value: formData.full_name, isEditing: isEditing, field: "full_name", icon: User })}
+                                {DetailRow({ label: "Email Address", value: formData.email, isEditing: isEditing, field: "email", type: "email", icon: Mail })}
+                            </div>
+                        </div>
+                    </div>
 
-                    <DetailRow
-                        label="Location"
-                        value={formData.location}
-                        isEditing={isEditing}
-                        field="location"
-                    />
+                    {/* Security Card */}
+                    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+                        <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+                            <div className="flex items-center gap-2">
+                                <Lock className="w-5 h-5 text-purple-500" />
+                                <h3 className="text-base font-bold text-gray-900">Security & Password</h3>
+                            </div>
 
-                    <DetailRow
-                        label="Current Position"
-                        value={formData.current_position}
-                        isEditing={isEditing}
-                        field="current_position"
-                    />
+                            {!isEditingPassword ? (
+                                <button
+                                    onClick={() => setIsEditingPassword(true)}
+                                    className="text-sm font-medium text-purple-600 hover:text-purple-700 hover:bg-purple-50 px-3 py-1.5 rounded-md transition-colors"
+                                >
+                                    Change Password
+                                </button>
+                            ) : (
+                                <div className="flex items-center gap-2">
+                                    <button
+                                        onClick={handleCancelPassword}
+                                        className="text-sm font-medium text-slate-500 hover:text-slate-700 hover:bg-slate-100 px-3 py-1.5 rounded-md transition-colors"
+                                    >
+                                        Cancel
+                                    </button>
+                                    <button
+                                        onClick={handleSavePassword}
+                                        className="text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 px-4 py-1.5 rounded-md shadow-sm transition-colors"
+                                    >
+                                        Update Password
+                                    </button>
+                                </div>
+                            )}
+                        </div>
 
-                    <DetailRow
-                        label="About Me"
-                        value={formData.bio}
-                        isEditing={isEditing}
-                        field="bio"
-                    />
+                        <div className="p-6 max-w-lg">
+                            <div className="space-y-2">
+                                {DetailRow({ label: "Current Password", value: "", type: "password", placeholder: "Enter current password", isEditing: isEditingPassword, field: "current_password" })}
+                                {DetailRow({ label: "New Password", value: "", type: "password", placeholder: "Enter new password", isEditing: isEditingPassword, field: "new_password" })}
+                                {DetailRow({ label: "Confirm New Password", value: "", type: "password", placeholder: "Confirm new password", isEditing: isEditingPassword, field: "confirm_new_password" })}
+                            </div>
+                        </div>
+                    </div>
 
                 </div>
             </div>
-
-        </div>
+        </div >
     );
 }

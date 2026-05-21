@@ -15,7 +15,6 @@ import { useRecruiterAuth } from "@/context/RecruiterAuthContext";
 import {
   FileText,
   Download,
-  Share2,
   Printer,
   Eye,
   Clock,
@@ -486,14 +485,14 @@ export default function ResumePreviewPage() {
                   >
                     Download PDF
                   </ResumeViewerButton> */}
-                  <ResumeViewerButton
+                  {/* <ResumeViewerButton
                     variant="outline"
                     size="sm"
                     icon={Share2}
                     onClick={handleShare}
                   >
                     Share
-                  </ResumeViewerButton>
+                  </ResumeViewerButton> */}
                   {/* <ResumeViewerButton
                     variant="outline"
                     size="sm"

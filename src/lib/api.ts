@@ -288,6 +288,18 @@ export class ApiClient {
     );
   }
 
+  async candidateChangePassword(data: { current_password: string; new_password: string }): Promise<any> {
+    return this.request<any>(
+      "/api/v1/users/me/change-password",
+      {
+        method: "POST",
+        body: JSON.stringify(data),
+      },
+      true,
+      false,
+    );
+  }
+
   async candidateRefreshToken(
     refreshToken: string,
   ): Promise<{ access_token: string }> {
