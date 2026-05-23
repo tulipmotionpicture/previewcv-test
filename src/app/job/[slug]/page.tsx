@@ -154,8 +154,8 @@ export default async function JobDetailsPage({
                       <MapPin className="w-4 h-4 text-gray-400" />
                       {job.location}
                     </div>
-                    <div className="w-px h-4 bg-gray-300 dark:bg-gray-700"></div>
-                    <div className="flex items-center gap-1.5">
+                    {/* <div className="w-px h-4 bg-gray-300 dark:bg-gray-700"></div> */}
+                    {/* <div className="flex items-center gap-1.5">
                       <Briefcase className="w-4 h-4 text-gray-400" />
                       {job.experience_level
                         ? `${job.experience_level.replace("entry", "0-2").replace("mid", "2-5").replace("senior", "5+").replace("executive", "10+")} years`
@@ -166,7 +166,7 @@ export default async function JobDetailsPage({
                       {job.experience_level
                         ? `${job.experience_level.replace("entry", "0-2").replace("mid", "2-5").replace("senior", "5+").replace("executive", "10+")} years`
                         : "Experience not specified"}
-                    </div>
+                    </div>*/}
                   </div>
 
                   <div className="flex flex-wrap gap-2 mb-4">
@@ -175,19 +175,19 @@ export default async function JobDetailsPage({
                         <span className="text-gray-500">₹</span>
                         {job.salary_min
                           ? formatCurrency(
-                              job.salary_min,
-                              job.salary_currency || "USD",
-                            )
-                              .replace("US$", "")
-                              .replace("$", "")
+                            job.salary_min,
+                            job.salary_currency || "USD",
+                          )
+                            .replace("US$", "")
+                            .replace("$", "")
                           : ""}
                         {job.salary_max
                           ? ` - ${formatCurrency(
-                              job.salary_max,
-                              job.salary_currency || "USD",
-                            )
-                              .replace("US$", "")
-                              .replace("$", "")}`
+                            job.salary_max,
+                            job.salary_currency || "USD",
+                          )
+                            .replace("US$", "")
+                            .replace("$", "")}`
                           : ""}
                       </div>
                     )}
@@ -247,9 +247,10 @@ export default async function JobDetailsPage({
                     <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-3">
                       Responsibilities
                     </h2>
-                    <div className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed whitespace-pre-line">
-                      {job.responsibilities}
-                    </div>
+                    <div
+                      className="prose prose-sm prose-slate dark:prose-invert max-w-none text-gray-600 dark:text-gray-300"
+                      dangerouslySetInnerHTML={{ __html: job.responsibilities }}
+                    />
                   </section>
                 )}
 
@@ -258,9 +259,10 @@ export default async function JobDetailsPage({
                     <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-3">
                       Requirements
                     </h2>
-                    <div className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed whitespace-pre-line">
-                      {job.requirements}
-                    </div>
+                    <div
+                      className="prose prose-sm prose-slate dark:prose-invert max-w-none text-gray-600 dark:text-gray-300"
+                      dangerouslySetInnerHTML={{ __html: job.requirements }}
+                    />
                   </section>
                 )}
               </div>
@@ -283,10 +285,10 @@ export default async function JobDetailsPage({
                   ))}
                   {(!job.required_skills ||
                     job.required_skills.length === 0) && (
-                    <span className="text-sm text-gray-500">
-                      No specific skills listed
-                    </span>
-                  )}
+                      <span className="text-sm text-gray-500">
+                        No specific skills listed
+                      </span>
+                    )}
                 </div>
               </div>
             </div>

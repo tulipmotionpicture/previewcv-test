@@ -92,8 +92,8 @@ export default function RecruiterProfilePublic({
     <div className="min-h-screen mt-12">
       <div className="overflow-hidden">
         {profile.gallery &&
-        profile.gallery?.images &&
-        profile.gallery.images.length > 0 ? (
+          profile.gallery?.images &&
+          profile.gallery.images.length > 0 ? (
           <div className="h-52 w-full relative group">
             {profile.gallery.images.map((img: any, index: number) => (
               <img
@@ -101,9 +101,8 @@ export default function RecruiterProfilePublic({
                 src={img}
                 alt={`company-${index}`}
                 onClick={() => setIsFullScreenGallery(true)}
-                className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 cursor-pointer ${
-                  index === currentImageIndex ? "opacity-100" : "opacity-0"
-                }`}
+                className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 cursor-pointer ${index === currentImageIndex ? "opacity-100" : "opacity-0"
+                  }`}
               />
             ))}
 
@@ -142,11 +141,10 @@ export default function RecruiterProfilePublic({
                     <button
                       key={index}
                       onClick={() => setCurrentImageIndex(index)}
-                      className={`w-2 h-2 rounded-full transition-all ${
-                        index === currentImageIndex
-                          ? "bg-white w-4"
-                          : "bg-white/50 hover:bg-white/80"
-                      }`}
+                      className={`w-2 h-2 rounded-full transition-all ${index === currentImageIndex
+                        ? "bg-white w-4"
+                        : "bg-white/50 hover:bg-white/80"
+                        }`}
                     />
                   ))}
                 </div>
@@ -181,7 +179,7 @@ export default function RecruiterProfilePublic({
                   </h1>
                   <p className="text-slate-500 font-medium">
                     {profile.specialization ||
-                      `${profile.years_experience || 0}+ years experience`}
+                      `${profile.industry}`}
                   </p>
                 </div>
               </div>
@@ -196,7 +194,7 @@ export default function RecruiterProfilePublic({
                 </div>
                 <div>
                   <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                    Industry
+                    Industry Sector
                   </p>
                   <p className="text-sm font-bold">
                     {profile.industry || "Not specified"}
@@ -266,11 +264,10 @@ export default function RecruiterProfilePublic({
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`px-8 py-4 text-sm font-bold transition-all border-b-2 whitespace-nowrap ${
-                activeTab === tab.id
-                  ? "border-blue-600 text-blue-600"
-                  : "border-transparent text-slate-500 hover:text-slate-700"
-              }`}
+              className={`px-8 py-4 text-sm font-bold transition-all border-b-2 whitespace-nowrap ${activeTab === tab.id
+                ? "border-blue-600 text-blue-600"
+                : "border-transparent text-slate-500 hover:text-slate-700"
+                }`}
             >
               {tab.label}
             </button>
@@ -526,7 +523,7 @@ export default function RecruiterProfilePublic({
                   Company Gallery
                 </h2>
                 {profile.gallery?.images &&
-                profile.gallery.images.length > 0 ? (
+                  profile.gallery.images.length > 0 ? (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {profile.gallery.images.map((img, i) => (
                       <div
@@ -561,20 +558,39 @@ export default function RecruiterProfilePublic({
                 Recruiter Info
               </h3>
               <div className="space-y-6">
-                {profile.created_at && (
+                {profile.recruiter_type === "company" ? (
                   <div>
-                    <p className="text-xs font-bold text-slate-400 mb-1">
-                      Founded
-                    </p>
-                    <p className="text-sm font-bold text-slate-700">
-                      {new Date(profile.created_at).toLocaleDateString()}
-                    </p>
+                    {profile.created_at && (
+                      <div>
+                        <p className="text-xs font-bold text-slate-400 mb-1">
+                          Established
+                        </p>
+                        <p className="text-sm font-bold text-slate-700">
+                          {new Date(profile.created_at).getFullYear()}
+                        </p>
+                      </div>
+                    )}
+                  </div>) : (
+                  <div>
+                    {profile.years_experience && (
+                      <div>
+                        <p className="text-xs font-bold text-slate-400 mb-1">
+                          Years of Experience
+                        </p>
+                        <p className="text-sm font-bold text-slate-700">
+                          {profile.years_experience}
+                        </p>
+                      </div>
+                    )}
                   </div>
-                )}
+                )
+                }
+
+
                 {profile.location && (
                   <div>
                     <p className="text-xs font-bold text-slate-400 mb-1">
-                      Headquarter
+                      Headquarters
                     </p>
                     <p className="text-sm font-bold text-slate-700">
                       {profile.location}
@@ -585,7 +601,7 @@ export default function RecruiterProfilePublic({
                 {profile.industry && (
                   <div>
                     <p className="text-xs font-bold text-slate-400 mb-1">
-                      Industry
+                      Industry Sector
                     </p>
                     <p className="text-sm font-bold text-slate-700">
                       {profile.industry}
@@ -596,7 +612,7 @@ export default function RecruiterProfilePublic({
                   <div className="flex items-center gap-2 px-3 py-2 bg-green-50 border border-green-100 rounded-lg">
                     <CheckCircle2 className="w-4 h-4 text-green-600" />
                     <span className="text-xs font-bold text-green-700">
-                      Verified Recruiter
+                      Verified Employer
                     </span>
                   </div>
                 )}
@@ -644,11 +660,10 @@ export default function RecruiterProfilePublic({
                 key={`full-${index}`}
                 src={img}
                 alt={`full-gallery-${index}`}
-                className={`absolute max-w-full max-h-full object-contain transition-opacity duration-500 ${
-                  index === currentImageIndex
-                    ? "opacity-100 z-10"
-                    : "opacity-0 z-0"
-                }`}
+                className={`absolute max-w-full max-h-full object-contain transition-opacity duration-500 ${index === currentImageIndex
+                  ? "opacity-100 z-10"
+                  : "opacity-0 z-0"
+                  }`}
               />
             ))}
 
@@ -693,11 +708,10 @@ export default function RecruiterProfilePublic({
                         e.stopPropagation();
                         setCurrentImageIndex(index);
                       }}
-                      className={`w-2.5 h-2.5 rounded-full transition-all ${
-                        index === currentImageIndex
-                          ? "bg-white w-6"
-                          : "bg-white/40 hover:bg-white/80"
-                      }`}
+                      className={`w-2.5 h-2.5 rounded-full transition-all ${index === currentImageIndex
+                        ? "bg-white w-6"
+                        : "bg-white/40 hover:bg-white/80"
+                        }`}
                     />
                   ))}
                 </div>
