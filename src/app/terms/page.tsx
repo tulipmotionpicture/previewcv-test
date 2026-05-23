@@ -55,7 +55,7 @@ export default function TermsAndConditionsPage() {
             <div className="space-y-4 text-gray-700 leading-relaxed">
               <div>
                 <p className="font-semibold text-gray-900 mb-2">Legal Entity</p>
-                <p>Accurabyte technology LLc -Georgia, Tbilisi,</p>
+                <p>ACCURABYTE TECHNOLOGIES LLC<br /> -Georgia, Tbilisi,</p>
               </div>
               <div>
                 <p className="font-semibold text-gray-900 mb-2">
@@ -401,14 +401,17 @@ export default function TermsAndConditionsPage() {
             </div>
             <div className="space-y-4 text-gray-700 leading-relaxed">
               <p>
-                Some features require payment. Prices are displayed at checkout
-                before purchase.
+                Some features of the Platforms may require payment. All prices and applicable charges will be clearly displayed at checkout prior to purchase. By completing a transaction, the user authorizes payment processing through our designated third-party payment provider.
               </p>
               <p>
-                All transactions are final and non-refundable, except where
-                required by statutory law.
+                Users may request a refund within 14 calendar days from the date of purchase, provided the request is made in accordance with our payment provider’s applicable refund requirements and processing procedures.
               </p>
-              <p>Fees may be updated at any time at our discretion.</p>
+              <p>
+                If a refund is approved, it will be issued to the original payment method used during purchase. Processing times may vary depending on the payment provider or financial institution.
+              </p>
+              <p>
+                Fees, pricing structures, and paid service offerings may be modified at any time at the Company’s discretion, with updated pricing reflected on the Platforms or at checkout before purchase.
+              </p>
             </div>
           </section>
 
