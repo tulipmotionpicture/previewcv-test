@@ -43,6 +43,22 @@ const nextConfig: NextConfig = {
   turbopack: {
     root: ".",
   },
+
+  async headers() {
+    return [
+      {
+        source: "/sso/(.*)",
+        headers: [
+          // ALLOW previewcv origins to embed (assuming this is previewcv, we allow letsmakecv to embed)
+          // Actually, the guide says: Replace previewcv.com with letsmakecv.com on the previewcv app.
+          { key: "Content-Security-Policy",
+            value: "frame-ancestors https://letsmakecv.com https://www.letsmakecv.com http://localhost:3000 http://localhost:3001;" },
+          // Remove any default X-Frame-Options on this route
+          { key: "X-Frame-Options", value: "" },
+        ],
+      },
+    ];
+  },
 };
 
 export default nextConfig;

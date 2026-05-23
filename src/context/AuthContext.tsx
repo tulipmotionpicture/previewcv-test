@@ -7,8 +7,11 @@ import React, {
   useEffect,
   ReactNode,
 } from "react";
+import { useRouter } from "next/navigation";
 import { User } from "@/types/api";
 import { api } from "@/lib/api";
+import { useSsoBootstrap } from "@/lib/sso/useSsoBootstrap";
+import { peerOriginForCurrentSite, currentOrigin } from "@/lib/sso/config";
 
 interface AuthContextType {
   user: User | null;
@@ -27,8 +30,16 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
+  const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+
+  useSsoBootstrap({
+    onLoggedIn: (ssoUser) => {
+      setUser(ssoUser as User);
+      router.refresh();
+    },
+  });
 
   useEffect(() => {
     checkAuth();
@@ -130,6 +141,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       if (typeof window !== "undefined") {
         localStorage.removeItem("access_token");
         localStorage.removeItem("refresh_token");
+
+        // Propagate to peer (best effort, no need to await)
+        const peer = peerOriginForCurrentSite();
+        const here = currentOrigin();
+        if (peer && here) {
+          const iframe = document.createElement("iframe");
+          iframe.style.display = "none";
+          iframe.src = `${peer}/sso/logout?return=${encodeURIComponent(here)}`;
+          document.body.appendChild(iframe);
+          setTimeout(() => iframe.remove(), 2000);
+        }
       }
       setUser(null);
     }
