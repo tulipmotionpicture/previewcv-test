@@ -161,6 +161,7 @@ export default function CandidateLogin() {
             />
           </div>
 
+
           <div className="mb-8">
             <h2 className="text-3xl font-black text-gray-900 dark:text-gray-100 mb-2">
               Sign In
@@ -168,6 +169,48 @@ export default function CandidateLogin() {
             <p className="text-gray-600 dark:text-gray-400">
               Access your candidate account
             </p>
+          </div>
+          {/* LetsMakeCV Integration Promo */}
+          <div className="my-6 rounded-2xl border border-teal-dark/10 bg-teal-50/30 dark:border-mint/20 dark:bg-mint/5 overflow-hidden">
+            <div className="p-5 flex items-start gap-4">
+              <div className="w-12 h-12 rounded-xl bg-teal-dark dark:bg-teal-dark/50 text-white dark:text-mint flex items-center justify-center flex-shrink-0 shadow-sm shadow-teal-dark/20 dark:shadow-none">
+                <FileText size={24} strokeWidth={1.5} />
+              </div>
+              <div className="flex-1 flex flex-col sm:flex-row sm:items-start justify-between gap-3">
+                <div>
+                  <h3 className="font-medium text-gray-900 dark:text-gray-100 text-sm mb-1">
+                    Already using LetsMakeCV?
+                  </h3>
+                  <p className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed pr-2">
+                    Use the same email to instantly access your ATS-friendly resumes in PreviewCV.
+                  </p>
+                </div>
+                <div className="flex-shrink-0">
+                  <div className="text-[11px] font-medium text-gray-500 dark:text-gray-400 mb-1.5">Powered by</div>
+                  <div className="flex justify-end items-center">
+                    <img src="https://letsmakecv.b-cdn.net/assets_letsmakecv/logo.png" alt="LetsMakeCV"
+                      className="h-6 object-contain"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="bg-teal-50/80 dark:bg-mint/10 px-5 py-3.5 flex items-center justify-between text-sm font-semibold text-teal-dark dark:text-mint">
+              <div className="flex items-center gap-2">
+                {/* <FileText size={16} strokeWidth /={2} /> */}
+                <span>ATS Resumes</span>
+              </div>
+              <div className="w-1 h-1 rounded-full bg-teal-200 dark:bg-mint/30"></div>
+              <div className="flex items-center gap-2">
+                {/* <RefreshCw size={16} strokeWidth={2} /> */}
+                <span>Auto Synced</span>
+              </div>
+              <div className="w-1 h-1 rounded-full bg-teal-200 dark:bg-mint/30"></div>
+              <div className="flex items-center gap-2">
+                {/* <CheckCircle2 size={16} strokeWidth={2} /> */}
+                <span>Ready to Apply</span>
+              </div>
+            </div>
           </div>
 
           {error && (
@@ -251,48 +294,7 @@ export default function CandidateLogin() {
               )}
             </button>
 
-            {/* LetsMakeCV Integration Promo */}
-            <div className="my-6 rounded-2xl border border-teal-dark/10 bg-teal-50/30 dark:border-mint/20 dark:bg-mint/5 overflow-hidden">
-              <div className="p-5 flex items-start gap-4">
-                <div className="w-12 h-12 rounded-xl bg-teal-dark dark:bg-teal-dark/50 text-white dark:text-mint flex items-center justify-center flex-shrink-0 shadow-sm shadow-teal-dark/20 dark:shadow-none">
-                  <FileText size={24} strokeWidth={1.5} />
-                </div>
-                <div className="flex-1 flex flex-col sm:flex-row sm:items-start justify-between gap-3">
-                  <div>
-                    <h3 className="font-medium text-gray-900 dark:text-gray-100 text-sm mb-1">
-                      Already using LetsMakeCV?
-                    </h3>
-                    <p className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed pr-2">
-                      Use the same email to instantly access your ATS-friendly resumes in PreviewCV.
-                    </p>
-                  </div>
-                  <div className="flex-shrink-0">
-                    <div className="text-[11px] font-medium text-gray-500 dark:text-gray-400 mb-1.5">Powered by</div>
-                    <div className="flex justify-end items-center">
-                      <img src="https://letsmakecv.b-cdn.net/assets_letsmakecv/logo.png" alt="LetsMakeCV"
-                        className="h-6 object-contain"
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div className="bg-teal-50/80 dark:bg-mint/10 px-5 py-3.5 flex items-center justify-between text-sm font-semibold text-teal-dark dark:text-mint">
-                <div className="flex items-center gap-2">
-                  {/* <FileText size={16} strokeWidth /={2} /> */}
-                  <span>ATS Resumes</span>
-                </div>
-                <div className="w-1 h-1 rounded-full bg-teal-200 dark:bg-mint/30"></div>
-                <div className="flex items-center gap-2">
-                  {/* <RefreshCw size={16} strokeWidth={2} /> */}
-                  <span>Auto Synced</span>
-                </div>
-                <div className="w-1 h-1 rounded-full bg-teal-200 dark:bg-mint/30"></div>
-                <div className="flex items-center gap-2">
-                  {/* <CheckCircle2 size={16} strokeWidth={2} /> */}
-                  <span>Ready to Apply</span>
-                </div>
-              </div>
-            </div>
+
 
             <div className="relative my-6">
               <div className="absolute inset-0 flex items-center">

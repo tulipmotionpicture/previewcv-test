@@ -31,6 +31,7 @@ import {
   Users,
   Building2,
   Share2,
+  FileText,
 } from "lucide-react";
 
 interface JobDetailsClientProps {
@@ -235,9 +236,9 @@ export default function JobDetailsClient({ job, slug }: JobDetailsClientProps) {
       >
         <div className="flex items-start justify-between mb-4">
           <div className="flex items-start gap-3">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center shadow-md">
+            {/* <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center shadow-md">
               <Sparkles className="w-4 h-4 text-white" />
-            </div>
+            </div> */}
             <div>
               <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100">
                 Apply for this Job
@@ -416,15 +417,59 @@ export default function JobDetailsClient({ job, slug }: JobDetailsClientProps) {
             </div>
 
             {!isAuthenticated ? (
-              <button
-                onClick={() =>
-                  router.push(`/candidate/login?redirect=/job/${slug}`)
-                }
-                className="w-full py-3 bg-[#0077b5] hover:bg-[#006097] text-white font-bold rounded-lg transition-all shadow-lg shadow-blue-200 dark:shadow-none flex items-center justify-center gap-2 text-sm"
-              >
-                <LogIn className="w-4 h-4" />
-                Login to Apply
-              </button>
+              <>
+                {/* LetsMakeCV Integration Promo */}
+                <div className="my-6 rounded-2xl border border-teal-dark/10 bg-teal-50/30 dark:border-mint/20 dark:bg-mint/5 overflow-hidden">
+                  <div className="p-2 flex items-start gap-2">
+                    {/* <div className="w-12 h-12 rounded-xl bg-teal-dark dark:bg-teal-dark/50 text-white dark:text-mint flex items-center justify-center flex-shrink-0 shadow-sm shadow-teal-dark/20 dark:shadow-none">
+                      <FileText size={24} strokeWidth={1.5} />
+                    </div> */}
+                    <div className="flex-1 flex flex-col sm:flex-row sm:items-start justify-between gap-3">
+                      <div>
+                        <h3 className="text-gray-900 dark:text-gray-100 text-xs mb-1">
+                          Already using LetsMakeCV?
+                        </h3>
+                        <p className="text-[10px] text-gray-600 dark:text-gray-400 leading-relaxed pr-2">
+                          Use the same email to instantly access your ATS-friendly resumes in PreviewCV.
+                        </p>
+                      </div>
+                      <div className="flex-shrink-0">
+                        <div className="text-[11px] font-medium text-gray-500 dark:text-gray-400 mb-1.5">Powered by</div>
+                        <div className="flex justify-end items-center">
+                          <img src="https://letsmakecv.b-cdn.net/assets_letsmakecv/logo.png" alt="LetsMakeCV"
+                            className="h-6 object-contain"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="bg-teal-50/80 dark:bg-mint/10 px-2 py-3.5 flex items-center justify-between text-xs font-semibold text-teal-dark dark:text-mint">
+                    <div className="flex items-center gap-2">
+                      {/* <FileText size={16} strokeWidth /={2} /> */}
+                      <span>ATS Resumes</span>
+                    </div>
+                    <div className="w-1 h-1 rounded-full bg-teal-200 dark:bg-mint/30"></div>
+                    <div className="flex items-center gap-2">
+                      {/* <RefreshCw size={16} strokeWidth={2} /> */}
+                      <span>Auto Synced</span>
+                    </div>
+                    <div className="w-1 h-1 rounded-full bg-teal-200 dark:bg-mint/30"></div>
+                    <div className="flex items-center gap-2">
+                      {/* <CheckCircle2 size={16} strokeWidth={2} /> */}
+                      <span>Ready to Apply</span>
+                    </div>
+                  </div>
+                </div>
+                <button
+                  onClick={() =>
+                    router.push(`/candidate/login?redirect=/job/${slug}`)
+                  }
+                  className="w-full py-3 bg-[#0077b5] hover:bg-[#006097] text-white font-bold rounded-lg transition-all shadow-lg shadow-blue-200 dark:shadow-none flex items-center justify-center gap-2 text-sm"
+                >
+                  <LogIn className="w-4 h-4" />
+                  Login to Apply
+                </button>
+              </>
             ) : (
               <button
                 type="submit"
