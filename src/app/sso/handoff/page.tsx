@@ -24,21 +24,27 @@ export default function SSOHandoffPage() {
       }
     };
 
-    // 1. Validate return origin against the allowlist.
+    // 1. Verify that 'return' is an allowed origin.
+    console.log("[SSO Handoff] Received return origin:", ret);
+    
     if (!ret || !(SSO_ALLOWED_ORIGINS as readonly string[]).includes(ret)) {
-      // Nothing we can do – just close out silently.
+      console.log("[SSO Handoff] Origin not allowed, aborting.");
+      reply({ status: "anonymous" });
       return;
     }
 
-    // 2. Read local token.
+    // 2. Read the token from local storage (or cookie if you switch to that)
     let token: string | null = null;
     try {
       token = window.localStorage.getItem(LS_ACCESS_TOKEN);
+      console.log("[SSO Handoff] Token found in localStorage:", !!token);
     } catch {
+      console.log("[SSO Handoff] localStorage read error.");
       token = null; // localStorage blocked (private mode, etc.)
     }
 
     if (!token) {
+      console.log("[SSO Handoff] No token, replying anonymous.");
       reply({ status: "anonymous" });
       return;
     }
