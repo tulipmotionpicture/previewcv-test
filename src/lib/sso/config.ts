@@ -9,6 +9,8 @@ export const SSO_ALLOWED_ORIGINS = [
   "https://www.letsmakecv.com",
   "https://previewcv.com",
   "https://www.previewcv.com",
+  "https://letsmakecv.tulip-software.com",
+  "https://previewcv.tulip-software.com",
   "http://localhost:3000",
   "http://localhost:3001",
 ] as const;
@@ -24,6 +26,8 @@ export const SSO_PEER: Record<string, string | null> = {
   "https://www.letsmakecv.com": "https://www.previewcv.com",
   "https://previewcv.com": "https://letsmakecv.com",
   "https://www.previewcv.com": "https://www.letsmakecv.com",
+  "https://letsmakecv.tulip-software.com": "https://previewcv.tulip-software.com",
+  "https://previewcv.tulip-software.com": "https://letsmakecv.tulip-software.com",
   "http://localhost:3000": "http://localhost:3001",
   "http://localhost:3001": "http://localhost:3000",
 };

@@ -26,7 +26,7 @@ export default function SSOHandoffPage() {
 
     // 1. Verify that 'return' is an allowed origin.
     console.log("[SSO Handoff] Received return origin:", ret);
-    
+
     if (!ret || !(SSO_ALLOWED_ORIGINS as readonly string[]).includes(ret)) {
       console.log("[SSO Handoff] Origin not allowed, aborting.");
       reply({ status: "anonymous" });
@@ -72,11 +72,14 @@ export default function SSOHandoffPage() {
           return;
         }
 
+        console.log("api called ===>")
         const json = (await res.json()) as { ticket: string; expires_in: number };
         reply({ status: "ok", ticket: json.ticket });
       } catch {
+        console.log("api catch ===>")
         reply({ status: "anonymous" });
       } finally {
+        console.log("api finally ===>")
         window.clearTimeout(timeoutId);
       }
     })();

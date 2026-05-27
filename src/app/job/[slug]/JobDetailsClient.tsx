@@ -32,6 +32,7 @@ import {
   Building2,
   Share2,
   FileText,
+  File,
 } from "lucide-react";
 
 interface JobDetailsClientProps {
@@ -331,6 +332,32 @@ export default function JobDetailsClient({ job, slug }: JobDetailsClientProps) {
               />
             </div>
 
+            <div className="my-2 overflow-hidden rounded-2xl border border-teal-dark/20 bg-teal-50 dark:border-mint/20 dark:bg-mint/5">
+              <div className="flex items-end justify-between p-3">
+
+
+                <div className="w-full">
+                  <h3 className="text-xs text-gray-900 dark:text-white font-semibold">
+                    {builderResumes.length} ATS-ready resumes synced
+                  </h3>
+
+                  <p className="text-[10px] text-gray-800 dark:text-gray-400">
+                    Imported directly from LetsMakeCV
+                  </p>
+
+                  <p className="text-[10px] font-medium text-teal-700 dark:text-mint">
+                    Select a resume to apply instantly
+                  </p>
+                </div>
+                <div className="flex items-end">
+                  <img
+                    src="https://letsmakecv.b-cdn.net/assets_letsmakecv/logo.png"
+                    alt="LetsMakeCV"
+                    className="h-10 object-contain"
+                  />
+                </div>
+              </div>
+            </div>
             <div>
               <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5">
                 Resume <span className="text-red-500">*</span>
