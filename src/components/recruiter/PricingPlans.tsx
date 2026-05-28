@@ -1,36 +1,75 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Check, Zap, Crown, Star, DollarSign } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Check, Zap, Crown, Star } from "lucide-react";
 import { api } from "@/lib/api";
-import type { JobPlan, CvPlan, SubscriptionDashboard } from "@/types/api";
+import { initPaddle, openCheckout, formatDisplayPrice } from "@/lib/paddle";
+import type {
+  JobPlan,
+  CvPlan,
+  SubscriptionDashboard,
+  CheckoutContextResponse,
+} from "@/types/api";
 import { useToast } from "@/context/ToastContext";
+import ConfirmDialog from "@/components/ui/ConfirmDialog";
+
+type CurrencyHint = "USD" | "INR";
+
+const isFreePlan = (plan: JobPlan | CvPlan): boolean => {
+  return Number(plan.price_usd) === 0 && Number(plan.price_inr) === 0;
+};
+
+const symbolFor = (currency: CurrencyHint) =>
+  currency === "INR" ? "₹" : "$";
+
+const priceFor = (
+  plan: JobPlan | CvPlan,
+  currency: CurrencyHint,
+): string => (currency === "INR" ? plan.price_inr : plan.price_usd);
 
 export default function PricingPlans() {
   const { showToast } = useToast();
+  const router = useRouter();
   const [jobPlans, setJobPlans] = useState<JobPlan[]>([]);
   const [cvPlans, setCvPlans] = useState<CvPlan[]>([]);
   const [subscription, setSubscription] =
     useState<SubscriptionDashboard | null>(null);
   const [loading, setLoading] = useState(true);
-  const [currency, setCurrency] = useState<"usd" | "inr">("usd");
+  // Currency is auto-detected via /pricing/detect-location; no manual toggle.
+  const [currency, setCurrency] = useState<CurrencyHint>("USD");
+  const [countryName, setCountryName] = useState<string | null>(null);
   const [subscribing, setSubscribing] = useState(false);
+  const [busyPlanKey, setBusyPlanKey] = useState<string | null>(null);
+
+  // CV replacement-warning modal state
+  const [pendingCvCheckout, setPendingCvCheckout] = useState<{
+    ctx: CheckoutContextResponse;
+    planName: string;
+  } | null>(null);
 
   useEffect(() => {
-    fetchPlans();
+    void fetchPlans();
   }, []);
 
   const fetchPlans = async () => {
     try {
       setLoading(true);
-      const [jobPlansData, cvPlansData, subscriptionData] = await Promise.all([
-        api.getJobPlans(),
-        api.getCvPlans(),
-        api.getSubscriptionDashboard().catch(() => null),
-      ]);
+      const [jobPlansData, cvPlansData, subscriptionData, geo] =
+        await Promise.all([
+          api.getJobPlans(),
+          api.getCvPlans(),
+          api.getSubscriptionDashboard().catch(() => null),
+          api.detectLocation().catch(() => null),
+        ]);
       setJobPlans(jobPlansData);
       setCvPlans(cvPlansData);
       setSubscription(subscriptionData);
+      if (geo) {
+        const detected = (geo.currency || "USD").toUpperCase();
+        setCurrency(detected === "INR" ? "INR" : "USD");
+        setCountryName(geo.country_name || null);
+      }
     } catch (error) {
       console.error("Failed to fetch pricing plans:", error);
     } finally {
@@ -40,82 +79,151 @@ export default function PricingPlans() {
 
   const getFeatures = (plan: JobPlan): string[] => {
     const features: string[] = [];
-
     if (plan.job_post_limit !== null) {
       features.push(`${plan.job_post_limit} active job listings`);
     } else {
       features.push("Unlimited active job listings");
     }
-
     if (plan.applicants_per_job !== null) {
       features.push(`${plan.applicants_per_job} applicant reveals per job`);
     } else {
       features.push("Unlimited applicant reveals");
     }
-
     features.push(`${plan.job_duration_days} days job duration`);
-
     if (plan.has_analytics) features.push("Advanced analytics");
     else if (plan.has_limited_analytics) features.push("Basic analytics");
-
     if (plan.has_featured_jobs) features.push("Featured job listings");
     if (plan.has_bulk_messaging) features.push("Bulk messaging");
     if (plan.has_priority_support) features.push("Priority support");
-
     return features;
   };
 
   const getCvFeatures = (plan: CvPlan): string[] => {
     const features: string[] = [];
-
     features.push(`${plan.credits_per_period} CV unlocks per month`);
     features.push("90-day access per profile");
-
     if (plan.has_bulk_download) features.push("Bulk download");
     if (plan.has_advanced_filters) features.push("Advanced search filters");
     if (plan.has_priority_cv_access)
       features.push("Priority access to new profiles");
-
     return features;
   };
 
-  const handleJobPlanSubscribe = async (planId: number) => {
+  const successUrlFor = (type: "job" | "cv"): string => {
+    if (typeof window === "undefined") return "";
+    return `${window.location.origin}/recruiter/billing/success?type=${type}`;
+  };
+
+  /**
+   * Launch the Paddle.js overlay with the backend-issued context.
+   * Returns once the overlay is open; checkout.completed redirects via Paddle.
+   */
+  const launchOverlay = async (
+    ctx: CheckoutContextResponse,
+    type: "job" | "cv",
+  ) => {
+    const paddle = await initPaddle(ctx.client_token, ctx.environment);
+    await openCheckout(
+      paddle,
+      ctx,
+      {
+        onCompleted: () => {
+          router.push(`/recruiter/billing/success?type=${type}`);
+        },
+        onClosed: () => {
+          // User dismissed without paying — no toast (avoids noise).
+        },
+        onError: () => {
+          showToast(
+            "Checkout failed. Please try again or contact support.",
+            "error",
+          );
+        },
+      },
+      successUrlFor(type),
+    );
+  };
+
+  const handleJobPlanSubscribe = async (plan: JobPlan) => {
+    const key = `job-${plan.id}`;
     try {
       setSubscribing(true);
-      await api.createJobSubscription({
-        plan_config_id: planId,
-        payment_gateway: currency === "usd" ? "stripe" : "razorpay",
+      setBusyPlanKey(key);
+
+      if (isFreePlan(plan)) {
+        // Free plan path — legacy endpoint still accepts free plans.
+        await api.createJobSubscription({ plan_config_id: plan.id });
+        showToast("Free Job plan activated.", "success");
+        await fetchPlans();
+        return;
+      }
+
+      const ctx = await api.paddleCheckoutJob({
+        plan_config_id: plan.id,
+        currency_hint: currency,
+        success_url: successUrlFor("job"),
       });
-      showToast("Successfully subscribed to job posting plan!", "success");
-      await fetchPlans();
-    } catch (error: any) {
+      await launchOverlay(ctx, "job");
+    } catch (error: unknown) {
       console.error("Failed to subscribe:", error);
-      showToast(
-        error?.message || "Failed to subscribe. Please try again.",
-        "error",
-      );
+      const msg =
+        error instanceof Error ? error.message : "Failed to subscribe.";
+      showToast(msg, "error");
     } finally {
       setSubscribing(false);
+      setBusyPlanKey(null);
     }
   };
 
-  const handleCvPlanPurchase = async (planId: number) => {
+  const handleCvPlanPurchase = async (plan: CvPlan) => {
+    const key = `cv-${plan.id}`;
     try {
       setSubscribing(true);
-      await api.createCvSubscription({
-        plan_config_id: planId,
-        payment_gateway: currency === "usd" ? "stripe" : "razorpay",
+      setBusyPlanKey(key);
+
+      if (isFreePlan(plan)) {
+        await api.createCvSubscription({ plan_config_id: plan.id });
+        showToast("Free CV plan activated.", "success");
+        await fetchPlans();
+        return;
+      }
+
+      const ctx = await api.paddleCheckoutCv({
+        plan_config_id: plan.id,
+        currency_hint: currency,
+        success_url: successUrlFor("cv"),
       });
-      showToast("Successfully purchased CV credits!", "success");
-      await fetchPlans();
-    } catch (error: any) {
+
+      // If buying this pack would replace an active pack with unused credits,
+      // surface a confirmation modal before opening the Paddle overlay.
+      if (ctx.will_replace_active_pack) {
+        setPendingCvCheckout({ ctx, planName: plan.name });
+        return;
+      }
+
+      await launchOverlay(ctx, "cv");
+    } catch (error: unknown) {
       console.error("Failed to purchase:", error);
-      showToast(
-        error?.message || "Failed to purchase. Please try again.",
-        "error",
-      );
+      const msg = error instanceof Error ? error.message : "Failed to purchase.";
+      showToast(msg, "error");
     } finally {
       setSubscribing(false);
+      setBusyPlanKey(null);
+    }
+  };
+
+  const confirmCvReplacement = async () => {
+    if (!pendingCvCheckout) return;
+    const { ctx } = pendingCvCheckout;
+    try {
+      setSubscribing(true);
+      await launchOverlay(ctx, "cv");
+    } catch (error: unknown) {
+      const msg = error instanceof Error ? error.message : "Failed to open checkout.";
+      showToast(msg, "error");
+    } finally {
+      setSubscribing(false);
+      setPendingCvCheckout(null);
     }
   };
 
@@ -132,35 +240,19 @@ export default function PricingPlans() {
     );
   }
 
+  const localeLabel =
+    countryName && currency === "INR"
+      ? `Detected location: ${countryName} (₹). `
+      : countryName
+        ? `Detected location: ${countryName} ($). `
+        : "";
+
   return (
     <div className="space-y-12">
-      {/* Currency Toggle */}
-      <div className="flex items-center justify-center gap-3">
-        <span
-          className={`text-sm font-medium ${currency === "usd"
-            ? "text-gray-900 dark:text-white"
-            : "text-gray-500 dark:text-gray-400"
-            }`}
-        >
-          USD
-        </span>
-        <button
-          onClick={() => setCurrency(currency === "usd" ? "inr" : "usd")}
-          className="relative w-14 h-7 bg-gray-200 dark:bg-gray-700 rounded-full transition-colors"
-        >
-          <div
-            className={`absolute top-0.5 left-0.5 w-6 h-6 bg-primary-blue rounded-full transition-transform ${currency === "inr" ? "translate-x-7" : ""
-              }`}
-          />
-        </button>
-        <span
-          className={`text-sm font-medium ${currency === "inr"
-            ? "text-gray-900 dark:text-white"
-            : "text-gray-500 dark:text-gray-400"
-            }`}
-        >
-          INR
-        </span>
+      {/* Geo / currency disclosure */}
+      <div className="text-center text-xs text-gray-500 dark:text-gray-400 -mb-6">
+        {localeLabel}
+        Final currency is determined by your billing address at checkout.
       </div>
 
       {/* Job Posting Plans */}
@@ -178,6 +270,8 @@ export default function PricingPlans() {
           {jobPlans.map((plan, index) => {
             const isCurrentPlan =
               subscription?.job_subscription?.plan_config_id === plan.id;
+            const free = isFreePlan(plan);
+            const busy = busyPlanKey === `job-${plan.id}`;
             return (
               <div
                 key={plan.id}
@@ -214,12 +308,11 @@ export default function PricingPlans() {
                   </p>
                   <div className="flex items-baseline justify-center gap-1">
                     <span className="text-sm text-gray-500 dark:text-gray-400">
-                      {currency === "usd" ? "$" : "₹"}
+                      {symbolFor(currency)}
                     </span>
                     <span className="text-4xl font-bold text-gray-900 dark:text-white">
-                      {currency === "usd" ? plan.price_usd : plan.price_inr}
+                      {priceFor(plan, currency)}
                     </span>
-
                   </div>
                 </div>
 
@@ -235,7 +328,7 @@ export default function PricingPlans() {
                 </ul>
 
                 <button
-                  onClick={() => handleJobPlanSubscribe(plan.id)}
+                  onClick={() => void handleJobPlanSubscribe(plan)}
                   disabled={subscribing || isCurrentPlan}
                   className={`w-full py-2.5 rounded-lg font-semibold transition-colors ${subscribing || isCurrentPlan
                     ? "bg-gray-300 dark:bg-gray-600 text-gray-500 cursor-not-allowed"
@@ -244,11 +337,13 @@ export default function PricingPlans() {
                       : "bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-900 dark:text-white"
                     }`}
                 >
-                  {subscribing
+                  {busy
                     ? "Processing..."
                     : isCurrentPlan
                       ? "Current Plan"
-                      : "Get Started"}
+                      : free
+                        ? "Activate Free"
+                        : "Subscribe"}
                 </button>
               </div>
             );
@@ -271,6 +366,8 @@ export default function PricingPlans() {
           {cvPlans.map((plan, index) => {
             const isCurrentPlan =
               subscription?.cv_subscription?.plan_config_id === plan.id;
+            const free = isFreePlan(plan);
+            const busy = busyPlanKey === `cv-${plan.id}`;
             return (
               <div
                 key={plan.id}
@@ -307,10 +404,10 @@ export default function PricingPlans() {
                   </p>
                   <div className="flex items-baseline justify-center gap-1 mb-2">
                     <span className="text-sm text-gray-500 dark:text-gray-400">
-                      {currency === "usd" ? "$" : "₹"}
+                      {symbolFor(currency)}
                     </span>
                     <span className="text-4xl font-bold text-gray-900 dark:text-white">
-                      {currency === "usd" ? plan.price_usd : plan.price_inr}
+                      {priceFor(plan, currency)}
                     </span>
                   </div>
                   <div className="inline-flex items-center gap-1 px-3 py-1 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-full text-sm font-semibold">
@@ -333,7 +430,7 @@ export default function PricingPlans() {
                 </div>
 
                 <button
-                  onClick={() => handleCvPlanPurchase(plan.id)}
+                  onClick={() => void handleCvPlanPurchase(plan)}
                   disabled={subscribing || isCurrentPlan}
                   className={`w-full py-2.5 rounded-lg font-semibold transition-colors ${subscribing || isCurrentPlan
                     ? "bg-gray-300 dark:bg-gray-600 text-gray-500 cursor-not-allowed"
@@ -342,17 +439,47 @@ export default function PricingPlans() {
                       : "bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-900 dark:text-white"
                     }`}
                 >
-                  {subscribing
+                  {busy
                     ? "Processing..."
                     : isCurrentPlan
                       ? "Current Plan"
-                      : "Purchase"}
+                      : free
+                        ? "Activate Free"
+                        : "Purchase"}
                 </button>
               </div>
             );
           })}
         </div>
       </div>
+
+      {/* CV replacement confirmation */}
+      <ConfirmDialog
+        isOpen={!!pendingCvCheckout}
+        onClose={() => setPendingCvCheckout(null)}
+        onConfirm={() => void confirmCvReplacement()}
+        title={
+          pendingCvCheckout
+            ? `Replace your active CV pack with ${pendingCvCheckout.planName}?`
+            : "Replace active CV pack?"
+        }
+        message={
+          pendingCvCheckout
+            ? `You currently have ${pendingCvCheckout.ctx.active_pack_credits_remaining ?? 0} unused credits` +
+              (pendingCvCheckout.ctx.active_pack_expires_at
+                ? ` (expiring ${new Date(pendingCvCheckout.ctx.active_pack_expires_at).toLocaleDateString()})`
+                : "") +
+              `. Purchasing a new pack will replace the active one and any unused credits will be lost.` +
+              (pendingCvCheckout.ctx.display_amount_minor != null
+                ? ` You'll be charged ${formatDisplayPrice(pendingCvCheckout.ctx.display_amount_minor, pendingCvCheckout.ctx.display_currency)}.`
+                : "")
+            : ""
+        }
+        confirmText="Continue to checkout"
+        cancelText="Keep current pack"
+        variant="danger"
+        loading={subscribing}
+      />
     </div>
   );
 }

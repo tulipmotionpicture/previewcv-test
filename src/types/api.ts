@@ -432,6 +432,9 @@ export interface JobPlan {
   sort_order: number;
   created_at: string;
   updated_at: string;
+  // Paddle plan mapping (admin-managed)
+  paddle_product_id?: string | null;
+  paddle_price_id?: string | null;
 }
 
 export interface CvPlan {
@@ -450,6 +453,10 @@ export interface CvPlan {
   sort_order: number;
   created_at: string;
   updated_at: string;
+  // Paddle plan mapping (admin-managed)
+  paddle_product_id?: string | null;
+  paddle_price_id?: string | null;
+  credit_validity_days?: number | null;
 }
 
 export interface RecruiterPricingResponse {
@@ -458,13 +465,25 @@ export interface RecruiterPricingResponse {
 }
 
 // Subscription Types
+export type SubscriptionStatus =
+  | "active"
+  | "cancelled"
+  | "expired"
+  | "paused"
+  | "past_due"
+  | "replaced"
+  | "refunded";
+
 export interface JobSubscription {
   id: number;
   recruiter_id: number;
   plan_config_id: number;
-  status: "active" | "cancelled" | "expired" | "paused";
+  status: SubscriptionStatus;
   stripe_subscription_id: string | null;
   razorpay_subscription_id: string | null;
+  paddle_subscription_id?: string | null;
+  paddle_transaction_id?: string | null;
+  paddle_customer_id?: string | null;
   current_period_start: string;
   current_period_end: string;
   jobs_posted_this_period: number;
@@ -483,11 +502,14 @@ export interface CvSubscription {
   id: number;
   recruiter_id: number;
   plan_config_id: number;
-  status: "active" | "cancelled" | "expired" | "paused";
+  status: SubscriptionStatus;
   credits_remaining: number;
   credits_used_this_period: number;
   stripe_subscription_id: string | null;
   razorpay_subscription_id: string | null;
+  paddle_subscription_id?: string | null;
+  paddle_transaction_id?: string | null;
+  paddle_customer_id?: string | null;
   current_period_start: string;
   current_period_end: string;
   canceled_at: string | null;
@@ -498,6 +520,10 @@ export interface CvSubscription {
   credits_percentage_used?: number;
   has_credits?: boolean;
   days_until_renewal?: number;
+  // CV credit pack (Paddle hybrid model) fields
+  pack_type?: "free" | "one_time" | null;
+  pack_expires_at?: string | null;
+  credits_purchased?: number | null;
 }
 
 export interface SubscriptionDashboard {
@@ -559,12 +585,10 @@ export interface CreditTransaction {
 
 export interface CreateJobSubscriptionRequest {
   plan_config_id: number;
-  payment_gateway: "stripe" | "razorpay";
 }
 
 export interface CreateCvSubscriptionRequest {
   plan_config_id: number;
-  payment_gateway: "stripe" | "razorpay";
 }
 
 export interface CancelSubscriptionRequest {
@@ -910,4 +934,93 @@ export interface TaskStatusResponse {
   error?: string;
   created_at: string;
   updated_at: string;
+}
+
+// ============================================================================
+// Geo-location (currency auto-detect)
+// Backend: GET /api/v1/pricing/detect-location
+// ============================================================================
+export interface GeoLocationResponse {
+  country_code: string;
+  country_name?: string | null;
+  is_domestic: boolean;
+  currency: string; // "USD" | "INR" | ...
+  payment_gateway: string;
+  detection_method: string;
+}
+
+// ============================================================================
+// Paddle hybrid payment integration
+// Backend routes: /api/v1/payments/paddle/*
+// ============================================================================
+
+export type PaddleEnvironment = "sandbox" | "production";
+
+export type PaddlePurchaseKind = "job_subscription" | "cv_pack";
+
+export type PaddleEffectiveFrom = "next_billing_period" | "immediately";
+
+export type PaddleProrationMode =
+  | "prorated_immediately"
+  | "prorated_next_billing_period"
+  | "full_immediately"
+  | "full_next_billing_period"
+  | "do_not_bill";
+
+export interface CheckoutCustomData {
+  recruiter_id: number;
+  plan_type: "job" | "cv";
+  plan_config_id: number;
+  purchase_kind: PaddlePurchaseKind;
+  [k: string]: unknown;
+}
+
+export interface CheckoutCustomerInfo {
+  id?: string | null;
+  email?: string | null;
+}
+
+export interface CheckoutContextRequest {
+  plan_config_id: number;
+  currency_hint?: string | null;
+  success_url?: string | null;
+}
+
+export interface CheckoutContextResponse {
+  client_token: string;
+  environment: PaddleEnvironment;
+  price_id: string;
+  is_subscription: boolean;
+  customer: CheckoutCustomerInfo;
+  custom_data: CheckoutCustomData;
+  success_url?: string | null;
+  locale?: string | null;
+  display_amount_minor?: number | null;
+  display_currency?: string | null;
+  // CV-pack replacement awareness (only present for CV checkout)
+  will_replace_active_pack?: boolean;
+  active_pack_credits_remaining?: number | null;
+  active_pack_expires_at?: string | null;
+}
+
+export interface PaddlePortalLinkResponse {
+  url: string;
+  expires_at?: string | null;
+}
+
+export interface PaddleSubscriptionCancelRequest {
+  effective_from: PaddleEffectiveFrom;
+  cancellation_reason?: string | null;
+}
+
+export interface PaddleSubscriptionUpdateRequest {
+  new_plan_config_id: number;
+  proration_billing_mode?: PaddleProrationMode;
+}
+
+export interface PaddleMutationAck {
+  status: string; // "scheduled" | "applied" | ...
+  paddle_subscription_id: string;
+  effective_from?: string | null;
+  message?: string | null;
 }

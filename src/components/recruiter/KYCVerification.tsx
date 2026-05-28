@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState, useCallback, Fragment } from "react";
+import { useRouter } from "next/navigation";
 import { useToast } from "@/context/ToastContext";
 import {
   Shield,
@@ -18,11 +19,13 @@ import {
   BadgeCheck,
   FileCheck,
   Sparkles,
+  CreditCard,
 } from "lucide-react";
 import { api } from "@/lib/api";
 import type { KycDocument, KycStatus, KycRequirement } from "@/types/api";
 
 export default function KYCVerification() {
+  const router = useRouter();
   const { showToast } = useToast();
   const [kycStatus, setKycStatus] = useState<KycStatus | null>(null);
   const [documents, setDocuments] = useState<KycDocument[]>([]);
@@ -284,6 +287,34 @@ export default function KYCVerification() {
           Complete your identity verification to unlock all platform features
         </p>
       </div>
+
+      {/* Post-approval CTA → explore pricing/billing */}
+      {kycStatus?.kyc_status === "approved" && (
+        <div className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-5 flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div className="p-2.5 rounded-lg bg-white dark:bg-gray-800 border border-blue-200 dark:border-blue-700">
+              <CreditCard className="w-5 h-5 text-primary-blue dark:text-blue-400" />
+            </div>
+            <div>
+              <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
+                You&apos;re verified — explore your plan options
+              </h3>
+              <p className="text-xs text-gray-600 dark:text-gray-400 mt-0.5">
+                Your free Job plan is already active. Upgrade for more posts or
+                add CV credits to unlock candidate profiles.
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={() =>
+              router.push("/recruiter/dashboard?tab=pricing")
+            }
+            className="shrink-0 px-4 py-2 bg-primary-blue hover:bg-blue-700 text-white text-sm font-medium rounded-lg"
+          >
+            View Plans
+          </button>
+        </div>
+      )}
 
       {/* Status Overview */}
       {kycStatus && (

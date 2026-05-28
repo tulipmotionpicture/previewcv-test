@@ -33,6 +33,13 @@ import {
   RecruiterDashboardAnalytics,
   SearchResultCountTrendResponse,
   SearchHistoryResponse,
+  GeoLocationResponse,
+  CheckoutContextRequest,
+  CheckoutContextResponse,
+  PaddlePortalLinkResponse,
+  PaddleSubscriptionCancelRequest,
+  PaddleSubscriptionUpdateRequest,
+  PaddleMutationAck,
 } from "@/types/api";
 import {
   ReviewedResumeMetadata,
@@ -827,6 +834,84 @@ export class ApiClient {
       "/api/v1/recruiter/subscriptions/cv",
       {
         method: "DELETE",
+        body: JSON.stringify(data),
+      },
+      true,
+      true,
+    );
+  }
+
+  // --- Geo / Pricing detection (public, no auth) ---
+  async detectLocation(): Promise<GeoLocationResponse> {
+    return this.request(
+      "/api/v1/pricing/detect-location",
+      {},
+      false,
+      false,
+    );
+  }
+
+  // --- Paddle hybrid checkout / management ---
+  async paddleCheckoutJob(
+    data: CheckoutContextRequest,
+  ): Promise<CheckoutContextResponse> {
+    return this.request(
+      "/api/v1/payments/paddle/checkout/job",
+      {
+        method: "POST",
+        body: JSON.stringify(data),
+      },
+      true,
+      true,
+    );
+  }
+
+  async paddleCheckoutCv(
+    data: CheckoutContextRequest,
+  ): Promise<CheckoutContextResponse> {
+    return this.request(
+      "/api/v1/payments/paddle/checkout/cv",
+      {
+        method: "POST",
+        body: JSON.stringify(data),
+      },
+      true,
+      true,
+    );
+  }
+
+  async paddleOpenPortal(): Promise<PaddlePortalLinkResponse> {
+    return this.request(
+      "/api/v1/payments/paddle/portal",
+      { method: "POST" },
+      true,
+      true,
+    );
+  }
+
+  async paddleCancelSubscription(
+    paddleSubscriptionId: string,
+    data: PaddleSubscriptionCancelRequest,
+  ): Promise<PaddleMutationAck> {
+    return this.request(
+      `/api/v1/payments/paddle/subscription/${encodeURIComponent(paddleSubscriptionId)}/cancel`,
+      {
+        method: "POST",
+        body: JSON.stringify(data),
+      },
+      true,
+      true,
+    );
+  }
+
+  async paddleUpdateSubscription(
+    paddleSubscriptionId: string,
+    data: PaddleSubscriptionUpdateRequest,
+  ): Promise<PaddleMutationAck> {
+    return this.request(
+      `/api/v1/payments/paddle/subscription/${encodeURIComponent(paddleSubscriptionId)}`,
+      {
+        method: "PATCH",
         body: JSON.stringify(data),
       },
       true,

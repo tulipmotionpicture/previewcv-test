@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect, useCallback, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { api } from "@/lib/api";
 import {
   Job,
@@ -52,7 +52,22 @@ interface JobFilters {
 }
 
 export default function RecruiterDashboard() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="animate-spin rounded-full h-10 w-10 border-2 border-gray-200 border-t-primary-blue" />
+        </div>
+      }
+    >
+      <RecruiterDashboardInner />
+    </Suspense>
+  );
+}
+
+function RecruiterDashboardInner() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const {
     recruiter,
     logout,
@@ -122,6 +137,27 @@ export default function RecruiterDashboard() {
         // If KYC is not approved, redirect to KYC tab
         if (status.kyc_status !== "approved") {
           setActiveTab("kyc");
+          return;
+        }
+
+        // KYC approved — honor ?tab=… deep link (e.g. after Paddle redirect).
+        const requested = searchParams?.get("tab");
+        const allowed: DashboardTab[] = [
+          "stats",
+          "ats",
+          "gallery",
+          "galleryEvents",
+          "profile",
+          "jobs",
+          "kyc",
+          "subscriptions",
+          "pricing",
+          "cvSearch",
+          "buckets",
+          "createJob",
+        ];
+        if (requested && (allowed as string[]).includes(requested)) {
+          setActiveTab(requested as DashboardTab);
         }
       } catch (error) {
         console.error("Failed to fetch KYC status:", error);
@@ -131,7 +167,7 @@ export default function RecruiterDashboard() {
     if (isAuthenticated) {
       fetchKycStatus();
     }
-  }, [isAuthenticated]);
+  }, [isAuthenticated, searchParams]);
 
   useEffect(() => {
     if (activeTab === "ats" || selectedJobId) {
