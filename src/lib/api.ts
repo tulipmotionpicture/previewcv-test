@@ -553,9 +553,8 @@ export class ApiClient {
       );
     }
     const queryString = params.toString();
-    const endpoint = `/api/v1/recruiters/jobs/posting/${jobId}/applications${
-      queryString ? `?${queryString}` : ""
-    }`;
+    const endpoint = `/api/v1/recruiters/jobs/posting/${jobId}/applications${queryString ? `?${queryString}` : ""
+      }`;
     return this.request<JobApplicationsResponse>(endpoint, {}, true, true);
   }
 
@@ -1161,6 +1160,11 @@ export class ApiClient {
     );
   }
 
+  async getPdfResumeById(id: number): Promise<any> {
+    return this.request<any>(`/api/v1/download/resume/${id}?download_type=url&force_download=false`, {}, true);
+  }
+
+
   async getPdfResumeShareLink(id: number): Promise<{
     permanent_link: string;
     token: string;
@@ -1231,7 +1235,7 @@ export class ApiClient {
     success: boolean;
     filters: Record<
       string,
-      { name: string; value: string; count: number; [key: string]: any }[]
+      { name: string; value: string; count: number;[key: string]: any }[]
     >;
     location_hierarchy?: Record<string, any>;
   }> {
@@ -1239,7 +1243,7 @@ export class ApiClient {
       success: boolean;
       filters: Record<
         string,
-        { name: string; value: string; count: number; [key: string]: any }[]
+        { name: string; value: string; count: number;[key: string]: any }[]
       >;
       location_hierarchy?: Record<string, any>;
     }>("/api/v1/jobs/filters", {}, false, false);

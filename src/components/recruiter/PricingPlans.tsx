@@ -240,20 +240,8 @@ export default function PricingPlans() {
     );
   }
 
-  const localeLabel =
-    countryName && currency === "INR"
-      ? `Detected location: ${countryName} (₹). `
-      : countryName
-        ? `Detected location: ${countryName} ($). `
-        : "";
-
   return (
-    <div className="space-y-12">
-      {/* Geo / currency disclosure */}
-      <div className="text-center text-xs text-gray-500 dark:text-gray-400 -mb-6">
-        {localeLabel}
-        Final currency is determined by your billing address at checkout.
-      </div>
+    <div className="space-y-12 my-12 max-w-7xl mx-auto">
 
       {/* Job Posting Plans */}
       <div>
@@ -466,13 +454,13 @@ export default function PricingPlans() {
         message={
           pendingCvCheckout
             ? `You currently have ${pendingCvCheckout.ctx.active_pack_credits_remaining ?? 0} unused credits` +
-              (pendingCvCheckout.ctx.active_pack_expires_at
-                ? ` (expiring ${new Date(pendingCvCheckout.ctx.active_pack_expires_at).toLocaleDateString()})`
-                : "") +
-              `. Purchasing a new pack will replace the active one and any unused credits will be lost.` +
-              (pendingCvCheckout.ctx.display_amount_minor != null
-                ? ` You'll be charged ${formatDisplayPrice(pendingCvCheckout.ctx.display_amount_minor, pendingCvCheckout.ctx.display_currency)}.`
-                : "")
+            (pendingCvCheckout.ctx.active_pack_expires_at
+              ? ` (expiring ${new Date(pendingCvCheckout.ctx.active_pack_expires_at).toLocaleDateString()})`
+              : "") +
+            `. Purchasing a new pack will replace the active one and any unused credits will be lost.` +
+            (pendingCvCheckout.ctx.display_amount_minor != null
+              ? ` You'll be charged ${formatDisplayPrice(pendingCvCheckout.ctx.display_amount_minor, pendingCvCheckout.ctx.display_currency)}.`
+              : "")
             : ""
         }
         confirmText="Continue to checkout"

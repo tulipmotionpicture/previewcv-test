@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { api } from "@/lib/api";
+import { api, ApiClient } from "@/lib/api";
 import type { JobPlan, CvPlan } from "@/types/api";
 import { Check, Crown, Star, Zap } from "lucide-react";
 import FloatingHeader from "./FloatingHeader";
@@ -15,7 +15,8 @@ const PricingPage: React.FC<PricingPageProps> = ({ onNavigate }) => {
   const [jobPlans, setJobPlans] = useState<JobPlan[]>([]);
   const [cvPlans, setCvPlans] = useState<CvPlan[]>([]);
   const [loading, setLoading] = useState(true);
-  const [currency, setCurrency] = useState<"usd" | "inr">("usd");
+  const [currency, setCurrency] = useState<CurrencyHint>("INR");
+  const [countryName, setCountryName] = useState<string | null>(null);
 
   useEffect(() => {
     fetchPlans();
@@ -25,6 +26,13 @@ const PricingPage: React.FC<PricingPageProps> = ({ onNavigate }) => {
     try {
       setLoading(true);
       const data = await api.getRecruiterPricing();
+      const currencyData = await api.detectLocation().catch(() => null);
+
+      if (currencyData) {
+        const detected = (currencyData.currency || "USD").toUpperCase();
+        setCurrency(detected === "INR" ? "INR" : "USD");
+        setCountryName(currencyData.country_name || null);
+      }
       setJobPlans(data.job_plans);
       setCvPlans(data.cv_plans);
     } catch (error) {
@@ -64,6 +72,20 @@ const PricingPage: React.FC<PricingPageProps> = ({ onNavigate }) => {
     if (plan.has_priority_cv_access) features.push("Priority CV Access");
     return features;
   };
+
+  type CurrencyHint = "USD" | "INR";
+
+  const isFreePlan = (plan: JobPlan | CvPlan): boolean => {
+    return Number(plan.price_usd) === 0 && Number(plan.price_inr) === 0;
+  };
+
+  const symbolFor = (currency: CurrencyHint) =>
+    currency === "INR" ? "₹" : "$";
+
+  const priceFor = (
+    plan: JobPlan | CvPlan,
+    currency: CurrencyHint,
+  ): string => (currency === "INR" ? plan.price_inr : plan.price_usd);
 
   const PlanCardSkeleton = () => (
     <div className="bg-white dark:bg-gray-800 p-8 rounded-2xl border-2 border-gray-200 dark:border-gray-700 animate-pulse">
@@ -133,34 +155,6 @@ const PricingPage: React.FC<PricingPageProps> = ({ onNavigate }) => {
           </div>
         </div>
 
-        {/* Currency Toggle */}
-        <div className="flex items-center justify-center gap-3 mb-12">
-          <span
-            className={`text-sm font-medium ${currency === "usd"
-              ? "text-gray-900 dark:text-white"
-              : "text-gray-500 dark:text-gray-400"
-              }`}
-          >
-            USD
-          </span>
-          <button
-            onClick={() => setCurrency(currency === "usd" ? "inr" : "usd")}
-            className="relative w-14 h-7 bg-gray-200 dark:bg-gray-700 rounded-full transition-colors"
-          >
-            <div
-              className={`absolute top-0.5 left-0.5 w-6 h-6 bg-primary-blue rounded-full transition-transform ${currency === "inr" ? "translate-x-7" : ""
-                }`}
-            />
-          </button>
-          <span
-            className={`text-sm font-medium ${currency === "inr"
-              ? "text-gray-900 dark:text-white"
-              : "text-gray-500 dark:text-gray-400"
-              }`}
-          >
-            INR
-          </span>
-        </div>
 
         {/* Job Posting Plans */}
         <div className="mb-16">
@@ -234,10 +228,10 @@ const PricingPage: React.FC<PricingPageProps> = ({ onNavigate }) => {
                     <div className="mb-6">
                       <div className="flex items-baseline gap-1">
                         <span className="text-sm text-gray-900 dark:text-white">
-                          {currency === "usd" ? "$" : "₹"}
+                          {symbolFor(currency)}
                         </span>
                         <span className="text-5xl font-bold text-gray-900 dark:text-white">
-                          {currency === "usd" ? plan.price_usd : plan.price_inr}
+                          {priceFor(plan, currency)}
                         </span>
                       </div>
                       <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
@@ -357,10 +351,12 @@ const PricingPage: React.FC<PricingPageProps> = ({ onNavigate }) => {
                     <div className="mb-6">
                       <div className="flex items-baseline gap-1">
                         <span className="text-sm text-gray-900 dark:text-white">
-                          {currency === "usd" ? "$" : "₹"}
+                          {symbolFor(currency)}
                         </span>
                         <span className="text-5xl font-bold text-gray-900 dark:text-white">
-                          {currency === "usd" ? plan.price_usd : plan.price_inr}
+                          {isFreePlan(plan)
+                            ? "Free"
+                            : priceFor(plan, currency)}
                         </span>
                       </div>
                       <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">

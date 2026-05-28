@@ -140,14 +140,20 @@ export default function JobDetailsClient({ job, slug }: JobDetailsClientProps) {
       ]);
 
       if (Array.isArray(pdfRes)) {
-        setPdfResumes(pdfRes);
+        setPdfResumes(pdfRes.map((r: any) => ({
+          ...r,
+          resumeFrom: "pdfResumes"
+        })));
       } else if (pdfRes && pdfRes.resumes) {
         setPdfResumes(pdfRes.resumes);
       } else {
         setPdfResumes([]);
       }
 
-      setBuilderResumes(Array.isArray(builderRes) ? builderRes : []);
+      setBuilderResumes(Array.isArray(builderRes) ? builderRes.map((r: any) => ({
+        ...r,
+        resumeFrom: "builderResumes"
+      })) : []);
 
       const storedResumeId = localStorage.getItem("last_uploaded_resume_id");
       if (storedResumeId) {
@@ -227,6 +233,44 @@ export default function JobDetailsClient({ job, slug }: JobDetailsClientProps) {
       maximumFractionDigits: 0,
     }).format(amount);
   };
+
+
+  const [pdfResumeUrl, setPdfResumeUrl] = useState("");
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isPreviewLoading, setIsPreviewLoading] = useState(false);
+
+  const openModal = () => setIsModalOpen(true);
+  const closeModal = () => setIsModalOpen(false);
+
+  const handelResumeView = async (id: number) => {
+    try {
+      setIsPreviewLoading(true);
+      setPdfResumeUrl(""); // clear old preview
+      openModal();
+
+      const isPdf = pdfResumes.some((r) => r.id === id);
+
+      let data;
+      if (isPdf) {
+        data = await api.getPdfResumeDownloadUrl(id);
+      } else {
+        data = await api.getPdfResumeById(id);
+      }
+
+      if (data && data.download_url) {
+        setPdfResumeUrl(data.download_url);
+      } else {
+        throw new Error("Invalid response");
+      }
+    } catch (err) {
+      console.error("Failed to load resume preview", err);
+      alert("Failed to load resume preview. Please try again.");
+      closeModal();
+    } finally {
+      setIsPreviewLoading(false);
+    }
+  };
+
 
   return (
     <div className="space-y-8 pt-10">
@@ -423,19 +467,7 @@ export default function JobDetailsClient({ job, slug }: JobDetailsClientProps) {
               </button>
               <button
                 type="button"
-                onClick={async () => {
-                  if (resumeId) {
-                    try {
-                      const data = await api.getLinkedEntities(resumeId);
-                      setLinkedEntities(data);
-                      setShowLinkedDataModal(true);
-                    } catch (err) {
-                      alert("Failed to load saved data.");
-                    }
-                  } else {
-                    alert("Please select a resume first");
-                  }
-                }}
+                onClick={resumeId ? () => handelResumeView(resumeId) : () => alert("Please select a resume first")}
                 className="flex items-center justify-center gap-1.5 px-3 py-2.5 bg-white hover:bg-gray-50 text-gray-700 border border-gray-200 rounded-lg text-xs font-bold transition-all"
               >
                 <Eye className="w-3.5 h-3.5 text-blue-500" />
@@ -764,6 +796,58 @@ export default function JobDetailsClient({ job, slug }: JobDetailsClientProps) {
           </div>
         </div>
       </div>
+
+
+      {/* Resume Preview Modal */}
+      <div
+        id="job-preview-modal"
+        className={`fixed inset-0 bg-black/60 z-[100] backdrop-blur-sm transition-opacity duration-300 ${
+          isModalOpen ? "opacity-100 flex items-center justify-center" : "opacity-0 pointer-events-none"
+        }`}
+        onClick={closeModal}
+      >
+        <div
+          className={`bg-white dark:bg-gray-900 rounded-2xl shadow-2xl max-w-4xl w-full mx-4 overflow-hidden transform transition-all duration-300 ${
+            isModalOpen ? "scale-100 translate-y-0" : "scale-95 translate-y-4"
+          }`}
+          onClick={(e) => e.stopPropagation()}
+        >
+          {/* Modal Header */}
+          <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-gray-800">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-blue-50 dark:bg-blue-900/30 rounded-xl flex items-center justify-center text-primary-blue">
+                <FileText className="w-5 h-5" />
+              </div>
+              <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">Resume Preview</h2>
+            </div>
+            <button
+              onClick={closeModal}
+              className="p-2 text-gray-400 hover:text-gray-700 hover:bg-gray-100 dark:hover:text-gray-300 dark:hover:bg-gray-800 rounded-xl transition-colors"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+
+          {/* Modal Content */}
+          <div className="relative w-full h-[75vh] bg-gray-50 dark:bg-gray-950">
+            {isPreviewLoading ? (
+              <div className="absolute inset-0 flex flex-col items-center justify-center text-gray-500">
+                <div className="animate-spin w-8 h-8 border-4 border-primary-blue border-t-transparent rounded-full mb-4"></div>
+                <p className="text-sm font-medium animate-pulse">Loading preview...</p>
+              </div>
+            ) : pdfResumeUrl ? (
+              <iframe
+                src={pdfResumeUrl}
+                className="w-full h-full border-0"
+                title="Resume Preview"
+              />
+            ) : null}
+          </div>
+        </div>
+      </div>
+
+
+
     </div>
   );
 }

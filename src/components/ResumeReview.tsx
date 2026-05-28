@@ -247,12 +247,24 @@ export default function ResumeReview({ resumeId, onSaveComplete, portfolioId, pe
         return;
       }
       const { api } = await import('@/lib/api');
-      const data = await api.getLinkedEntities(resumeId);
-      setLinkedEntities(data);
+      const responseData = await api.getLinkedEntities(resumeId);
+      let parsedData = responseData;
+      if (typeof parsedData === 'string') {
+        try {
+          parsedData = JSON.parse(parsedData);
+        } catch(e) {}
+      }
+      setLinkedEntities(parsedData);
       setShowLinkedData(true);
-    } catch (err) {
-      console.error('Failed to fetch linked entities:', err);
-      alert('Failed to load saved data. Please try again.');
+    } catch (err: any) {
+      setLinkedEntities({
+        resume_id: resumeId,
+        status: "failed",
+        metadata: null,
+        error: err.message || "PreviewCV API error: 500",
+        parsed_at: null
+      });
+      setShowLinkedData(true);
     }
   };
 
