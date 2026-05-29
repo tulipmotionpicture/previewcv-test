@@ -9,46 +9,47 @@ import {
   normalizeOrigin,
 } from "@/lib/sso/config";
 
+/**
+ * SSO handoff page (top-level, redirect-based).
+ *
+ * Old behaviour: rendered nothing, replied via postMessage from a hidden
+ * iframe. Broken in production by browser storage partitioning.
+ *
+ * New behaviour: top-level navigation. Reads its own (unpartitioned)
+ * localStorage, mints a ticket if logged in, 302s the user back to
+ * `?return=<peer-receive-url>` with the ticket in the URL fragment.
+ *
+ * Fragments aren't sent to servers; tickets are single-use + 60s TTL;
+ * fragment leak via history is acceptable.
+ *
+ * Path validation on `return`: must be `/sso/receive` on an allow-listed
+ * origin. Prevents this endpoint from being abused as an open redirector.
+ */
 export default function SSOHandoffPage() {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    const ret = normalizeOrigin(params.get("return"));
+    const ret = validateReturnUrl(params.get("return"));
 
-    // Always reply to the parent – never leave it hanging (when we can).
-    const reply = (data: Record<string, unknown>) => {
-      if (!ret) return; // can't reply safely without a verified target
-      try {
-        window.parent.postMessage({ type: "sso", ...data }, ret);
-      } catch {
-        /* parent may already be gone – ignore */
-      }
-    };
+    if (!ret) return; // unsafe/unknown — stay blank, do nothing.
 
-    // 1. Validate return origin against the allowlist.
-    if (!ret || !(SSO_ALLOWED_ORIGINS as readonly string[]).includes(ret)) {
-      // Untrusted/unknown parent – stay silent.
-      return;
-    }
-
-    // 2. Read local token.
     let token: string | null = null;
     try {
       token = window.localStorage.getItem(LS_ACCESS_TOKEN);
     } catch {
-      token = null; // localStorage blocked (private mode, etc.)
+      token = null;
     }
 
     if (!token) {
-      reply({ status: "anonymous" });
+      window.location.replace(`${ret}?sso=anon`);
       return;
     }
 
-    // 3. Mint a ticket for the requesting peer.
     const ctrl = new AbortController();
-    const timeoutId = window.setTimeout(() => ctrl.abort(), 5000);
+    const timeoutId = window.setTimeout(() => ctrl.abort(), 8000);
 
     (async () => {
       try {
+        const audience = new URL(ret).origin;
         const res = await fetch(apiUrl("auth/sso/ticket"), {
           method: "POST",
           signal: ctrl.signal,
@@ -56,26 +57,50 @@ export default function SSOHandoffPage() {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
-          body: JSON.stringify({ audience: ret }),
+          body: JSON.stringify({ audience }),
         });
 
         if (!res.ok) {
-          // 401 → our local token is stale; treat as anonymous.
-          // 4xx/5xx → still treat as anonymous so peer falls back gracefully.
-          reply({ status: "anonymous" });
+          window.location.replace(`${ret}?sso=anon`);
           return;
         }
 
         const json = (await res.json()) as { ticket: string; expires_in: number };
-        reply({ status: "ok", ticket: json.ticket });
+        window.location.replace(`${ret}#ticket=${encodeURIComponent(json.ticket)}`);
       } catch {
-        reply({ status: "anonymous" });
+        window.location.replace(`${ret}?sso=anon`);
       } finally {
         window.clearTimeout(timeoutId);
       }
     })();
   }, []);
 
-  // Render absolutely nothing – this page only lives inside a hidden iframe.
-  return null;
+  return (
+    <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "system-ui, sans-serif", color: "#666" }}>
+      <p>Signing you in…</p>
+    </div>
+  );
+}
+
+/**
+ * Validate `return`: must parse as a URL, origin must be allow-listed,
+ * path must be exactly `/sso/receive`. Returns the cleaned return URL
+ * (origin + `/sso/receive`) or null.
+ */
+function validateReturnUrl(raw: string | null): string | null {
+  if (!raw) return null;
+  let u: URL;
+  try {
+    u = new URL(raw);
+  } catch {
+    return null;
+  }
+  const origin = normalizeOrigin(u.origin);
+  if (!origin || !(SSO_ALLOWED_ORIGINS as readonly string[]).includes(origin)) {
+    return null;
+  }
+  if (u.pathname !== "/sso/receive") {
+    return null;
+  }
+  return `${origin}/sso/receive`;
 }

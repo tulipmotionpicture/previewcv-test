@@ -3,128 +3,89 @@
 
 import { useEffect } from "react";
 import {
-  apiUrl,
   LS_ACCESS_TOKEN,
-  LS_REFRESH_TOKEN,
-  LS_USER_TYPE,
-  SSO_BOOTSTRAP_TIMEOUT_MS,
   currentOrigin,
   isAllowedOrigin,
-  normalizeOrigin,
   peerOriginForCurrentSite,
 } from "./config";
 
-type SsoMessage =
-  | { type: "sso"; status: "ok"; ticket: string }
-  | { type: "sso"; status: "anonymous" };
-
 /**
- * Call this once at the root of the app (e.g. in your root layout or a
- * top-level <AuthProvider>). It runs only in the browser, only once per
- * full page load, and only when the user has no local access_token.
+ * Top-level-redirect SSO bootstrap.
  *
- * onLoggedIn:  fired after a successful exchange so you can hydrate your
- *              auth store / re-fetch user / router.refresh().
+ * Why redirect (not iframe): modern browsers partition `localStorage` by
+ * top-frame origin (Chrome 2024+, Safari ITP, Firefox TCP). An iframe
+ * at letsmakecv.com inside previewcv.com sees an EMPTY partitioned
+ * storage, not letsmakecv's real one — the previous iframe + postMessage
+ * approach silently fails in production.
+ *
+ * Flow:
+ *   1. Anonymous visitor lands on previewcv.com (or letsmakecv.com).
+ *   2. Stash original URL in sessionStorage as `sso_return_to`.
+ *   3. Top-level redirect to peer's /sso/handoff?return=<here>/sso/receive
+ *   4. Peer's handoff page:
+ *        - if logged in -> mint ticket -> redirect to our /sso/receive#ticket=XYZ
+ *        - if anonymous -> redirect to our /sso/receive?sso=anon
+ *   5. Our /sso/receive page exchanges ticket (or notes anon), stores
+ *      tokens, then navigates to the original URL.
+ *
+ * Loop prevention: sessionStorage.sso_checked = "1" after any attempt
+ * (success or anon). Cleared on logout/tab close.
+ *
+ * Skip conditions:
+ *   - Already have a local access_token.
+ *   - On an /sso/* route — those drive themselves.
+ *   - sso_checked is set (already attempted this session).
+ *   - URL has `?sso=anon` (peer just told us "not logged in").
+ *   - Origin / peer not configured.
+ *
+ * onLoggedIn: kept for API compat but no longer fires from this hook —
+ * the actual login happens on /sso/receive after the bounce.
  */
-export function useSsoBootstrap(opts: { onLoggedIn?: (user: unknown) => void } = {}) {
+export function useSsoBootstrap(_opts: { onLoggedIn?: (user: unknown) => void } = {}) {
   useEffect(() => {
     if (typeof window === "undefined") return;
 
-    // Avoid running inside the handoff iframe itself.
     if (window.location.pathname.startsWith("/sso/")) return;
 
-    // If we're already logged in locally, nothing to do.
     try {
       if (window.localStorage.getItem(LS_ACCESS_TOKEN)) return;
     } catch {
-      return; // localStorage blocked – give up silently.
+      return;
+    }
+
+    try {
+      if (window.sessionStorage.getItem("sso_checked") === "1") return;
+    } catch {
+      return;
+    }
+
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("sso") === "anon") {
+      try { window.sessionStorage.setItem("sso_checked", "1"); } catch { /* ignore */ }
+      params.delete("sso");
+      const qs = params.toString();
+      const cleanUrl =
+        window.location.pathname + (qs ? `?${qs}` : "") + window.location.hash;
+      window.history.replaceState(null, "", cleanUrl);
+      return;
     }
 
     const here = currentOrigin();
-    if (!isAllowedOrigin(here)) return; // unknown origin (preview deploys, etc.)
+    if (!isAllowedOrigin(here)) return;
 
     const peer = peerOriginForCurrentSite();
-    if (!peer) return; // no peer mapped – SSO disabled for this origin.
+    if (!peer) return;
 
-    // Guard against double-mounts (React strict mode, fast refresh).
-    const FLAG = "__sso_bootstrap_in_flight__";
-    if ((window as unknown as Record<string, unknown>)[FLAG]) return;
-    (window as unknown as Record<string, unknown>)[FLAG] = true;
+    try {
+      const target =
+        window.location.pathname + window.location.search + window.location.hash;
+      window.sessionStorage.setItem("sso_return_to", target);
+    } catch { /* ignore */ }
 
-    // ---- mount hidden iframe ----------------------------------------------
-    const iframe = document.createElement("iframe");
-    iframe.setAttribute("aria-hidden", "true");
-    iframe.setAttribute("title", "sso");
-    iframe.style.position = "absolute";
-    iframe.style.width = "0";
-    iframe.style.height = "0";
-    iframe.style.border = "0";
-    iframe.style.opacity = "0";
-    iframe.style.pointerEvents = "none";
-    iframe.referrerPolicy = "no-referrer";
-    iframe.src = `${peer}/sso/handoff?return=${encodeURIComponent(here!)}`;
-
-    let finished = false;
-
-    const cleanup = () => {
-      if (finished) return;
-      finished = true;
-      window.removeEventListener("message", onMessage);
-      try { iframe.remove(); } catch { }
-      try { delete (window as unknown as Record<string, unknown>)[FLAG]; } catch { }
-      window.clearTimeout(timeoutId);
-    };
-
-    const onMessage = async (evt: MessageEvent) => {
-      // Strict origin check – ignore anything else.
-      if (normalizeOrigin(evt.origin) !== peer) return;
-      const data = evt.data as SsoMessage | undefined;
-      if (!data || data.type !== "sso") return;
-
-      if (data.status === "anonymous") {
-        cleanup();
-        return;
-      }
-
-      if (data.status === "ok" && data.ticket) {
-        try {
-          const res = await fetch(apiUrl("auth/sso/exchange"), {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ ticket: data.ticket }),
-          });
-
-          if (!res.ok) {
-            cleanup();
-            return;
-          }
-
-          const json = await res.json();
-
-          // Persist tokens – same shape your /auth/login handler uses.
-          try {
-            window.localStorage.setItem(LS_ACCESS_TOKEN, json.access_token);
-            window.localStorage.setItem(LS_REFRESH_TOKEN, json.refresh_token);
-            window.localStorage.setItem(LS_USER_TYPE, "user");
-          } catch { /* private mode */ }
-
-          opts.onLoggedIn?.(json.user);
-        } catch {
-          /* swallow – user just stays anonymous */
-        } finally {
-          cleanup();
-        }
-      }
-    };
-
-    window.addEventListener("message", onMessage);
-
-    // Fail-safe timeout – peer unreachable / extension blocked the iframe.
-    const timeoutId = window.setTimeout(cleanup, SSO_BOOTSTRAP_TIMEOUT_MS);
-
-    document.body.appendChild(iframe);
-
-    return cleanup;
+    const ret = `${here}/sso/receive`;
+    window.location.replace(
+      `${peer}/sso/handoff?return=${encodeURIComponent(ret)}`,
+    );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 }
