@@ -118,7 +118,7 @@ export default function ResumeUpload({ onUploadSuccess, existingResumeId, varian
             {/* Text Content */}
             <div className="text-center space-y-1">
               <h3 className={`${isMinimal ? "text-sm" : "text-xl"} font-bold text-[#0C4A6E] dark:text-gray-100`}>
-                {uploading ? "Uploading..." : "Drop your Resume here"}
+                {uploading ? "Uploading..." : "Drop your Resume/CV here"}
               </h3>
               {!isMinimal && (
                 <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">

@@ -1,7 +1,8 @@
 import React, { useState } from "react";
-import { MapPin, Clock, ChevronDown, ChevronUp } from "lucide-react";
+import { MapPin, Clock, ChevronDown, ChevronUp, Building2 } from "lucide-react";
 import { Job } from "../../types/jobs";
 import Link from "next/link";
+import Image from "next/image";
 
 interface RelevantJobItemProps {
   job: Job;
@@ -27,8 +28,8 @@ const RelevantJobItem: React.FC<RelevantJobItemProps> = ({ job }) => {
         <div className="flex justify-between items-start mb-2">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-lg overflow-hidden border border-slate-100">
-              <img
-                src={job.company_logo_url || ""}
+              {/* <img
+                src={job.company_logo_url || '/logo.jpg'}
                 alt={job.company_name}
                 className="w-full h-full object-cover"
                 onError={(e) => {
@@ -37,8 +38,25 @@ const RelevantJobItem: React.FC<RelevantJobItemProps> = ({ job }) => {
                     "hidden",
                   );
                 }}
-              />
+              /> */}
 
+              {job.company_logo_url ? (
+                <Image
+                  width={40}
+                  height={40}
+                  src={job.company_logo_url}
+                  alt={job.company_name}
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    e.currentTarget.style.display = "none";
+                    e.currentTarget.nextElementSibling?.classList.remove(
+                      "hidden",
+                    );
+                  }}
+                />
+              ) : (
+                <Building2 className="w-8 h-8 text-gray-400" />
+              )}
             </div>
             <div>
               <h4 className="font-bold text-slate-900 leading-tight">

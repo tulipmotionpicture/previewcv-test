@@ -73,7 +73,7 @@ export default function JobsSidebar() {
                     </div>
                   )}
                   <span className="text-[10px] font-medium text-gray-700 dark:text-gray-300 text-center line-clamp-1 group-hover:text-primary-blue dark:group-hover:text-blue-400 transition">
-                    {partner.company_name || "Unknown"}
+                    {partner.company_name?.trim().slice(0, 17) || ""}
                   </span>
                 </Link>
               ))}
