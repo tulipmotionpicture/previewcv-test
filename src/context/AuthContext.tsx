@@ -20,7 +20,12 @@ interface AuthContextType {
   register: (
     email: string,
     password: string,
-    fullName: string
+    fullName: string,
+    antiBot?: {
+      company_url?: string;
+      form_loaded_at?: number;
+      recaptcha_token?: string | null;
+    }
   ) => Promise<void>;
   logout: () => Promise<void>;
   updateProfile: (data: Partial<User>) => Promise<void>;
@@ -109,9 +114,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const register = async (
     email: string,
     password: string,
-    fullName: string
+    fullName: string,
+    antiBot?: {
+      company_url?: string;
+      form_loaded_at?: number;
+      recaptcha_token?: string | null;
+    }
   ) => {
-    const response = await api.candidateRegister(email, password, fullName);
+    const response = await api.candidateRegister(email, password, fullName, antiBot);
     if (response.access_token) {
       if (typeof window !== "undefined") {
         // Clear recruiter tokens to ensure only one role is logged in at a time

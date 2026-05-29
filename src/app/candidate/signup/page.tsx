@@ -7,6 +7,9 @@ import Image from "next/image";
 import config from "@/config";
 import { useAuth } from "@/context/AuthContext";
 import { api } from "@/lib/api";
+import { Honeypot } from "@/lib/anti-bot/honeypot";
+import { useFormLoadedAt } from "@/lib/anti-bot/useFormLoadedAt";
+import { useRecaptcha } from "@/lib/anti-bot/useRecaptcha";
 import {
   Briefcase,
   Target,
@@ -28,6 +31,11 @@ export default function CandidateSignup() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+
+  // Anti-bot: honeypot value, form-mount timestamp, reCAPTCHA executor.
+  const [companyUrl, setCompanyUrl] = useState("");
+  const formLoadedAt = useFormLoadedAt();
+  const executeRecaptcha = useRecaptcha();
 
   useEffect(() => {
     if (!authLoading && isAuthenticated) {
@@ -53,7 +61,14 @@ export default function CandidateSignup() {
     }
 
     try {
-      await register(email, password, fullName);
+      // Generate reCAPTCHA token at submit time. Returns null on
+      // failure — backend treats missing token as a soft pass.
+      const recaptchaToken = await executeRecaptcha("register");
+      await register(email, password, fullName, {
+        company_url: companyUrl,
+        form_loaded_at: formLoadedAt,
+        recaptcha_token: recaptchaToken,
+      });
       router.push("/candidate/dashboard");
     } catch (err: unknown) {
       if (err instanceof Error) {
@@ -191,6 +206,8 @@ export default function CandidateSignup() {
           )}
 
           <form className="space-y-5" onSubmit={handleSignup}>
+            {/* Anti-bot honeypot — hidden from real users, populated by bots. */}
+            <Honeypot value={companyUrl} onChange={setCompanyUrl} />
             <div>
               <label className="block text-sm font-semibold text-gray-900 dark:text-gray-100 mb-2">
                 Full Name

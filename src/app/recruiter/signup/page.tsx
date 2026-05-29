@@ -7,6 +7,9 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRecruiterAuth } from "@/context/RecruiterAuthContext";
 import { api } from "@/lib/api";
+import { Honeypot } from "@/lib/anti-bot/honeypot";
+import { useFormLoadedAt } from "@/lib/anti-bot/useFormLoadedAt";
+import { useRecaptcha } from "@/lib/anti-bot/useRecaptcha";
 import CountrySearch from "@/components/location/CountrySearch";
 import CitySearch from "@/components/location/CitySearch";
 import {
@@ -32,6 +35,12 @@ export default function RecruiterSignup() {
     isAuthenticated,
     loading: authLoading,
   } = useRecruiterAuth();
+
+  // Anti-bot: honeypot value, form-mount timestamp, reCAPTCHA executor.
+  const [companyUrl, setCompanyUrl] = useState("");
+  const formLoadedAt = useFormLoadedAt();
+  const executeRecaptcha = useRecaptcha();
+
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -225,6 +234,14 @@ export default function RecruiterSignup() {
 
       console.log("Recruiter Signup Payload: ", payload);
 
+      // Anti-bot: attach honeypot value, form-mount timestamp, and a
+      // reCAPTCHA v3 token. All three are optional on the backend, so a
+      // null token (e.g. ad-blocker swallowed the Google script) is fine.
+      const recaptchaToken = await executeRecaptcha("register");
+      payload.company_url = companyUrl;
+      payload.form_loaded_at = formLoadedAt;
+      if (recaptchaToken) payload.recaptcha_token = recaptchaToken;
+
       await register(payload);
       router.push("/recruiter/dashboard");
     } catch (err: unknown) {
@@ -355,6 +372,8 @@ export default function RecruiterSignup() {
             )}
 
             <form className="space-y-6" onSubmit={handleSubmit}>
+              {/* Anti-bot honeypot — hidden from real users, populated by bots. */}
+              <Honeypot value={companyUrl} onChange={setCompanyUrl }/>
               {/* Recruiter Type Selection */}
               <div>
                 <label className="block text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3">

@@ -262,10 +262,21 @@ export class ApiClient {
     email: string,
     password: string,
     full_name: string,
+    antiBot?: {
+      company_url?: string;
+      form_loaded_at?: number;
+      recaptcha_token?: string | null;
+    },
   ): Promise<AuthResponse> {
+    // Anti-bot fields are forwarded verbatim. Backend treats all three as
+    // optional, so omitting them (or passing nulls) is safe.
+    const body: Record<string, unknown> = { email, password, full_name };
+    if (antiBot?.company_url !== undefined) body.company_url = antiBot.company_url;
+    if (antiBot?.form_loaded_at !== undefined) body.form_loaded_at = antiBot.form_loaded_at;
+    if (antiBot?.recaptcha_token) body.recaptcha_token = antiBot.recaptcha_token;
     return this.request<AuthResponse>("/api/v1/auth/register", {
       method: "POST",
-      body: JSON.stringify({ email, password, full_name }),
+      body: JSON.stringify(body),
     });
   }
 
