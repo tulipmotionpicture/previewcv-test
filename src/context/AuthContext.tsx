@@ -37,6 +37,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   useSsoBootstrap({
     onLoggedIn: (ssoUser) => {
       setUser(ssoUser as User);
+      setLoading(false);
       router.refresh();
     },
   });

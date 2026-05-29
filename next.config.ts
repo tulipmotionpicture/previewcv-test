@@ -49,10 +49,9 @@ const nextConfig: NextConfig = {
       {
         source: "/sso/(.*)",
         headers: [
-          // ALLOW previewcv origins to embed (assuming this is previewcv, we allow letsmakecv to embed)
-          // Actually, the guide says: Replace previewcv.com with letsmakecv.com on the previewcv app.
+          // This is previewcv: allow letsmakecv (the peer) to embed our /sso/* pages.
           { key: "Content-Security-Policy",
-            value: "frame-ancestors https://letsmakecv.com https://www.letsmakecv.com https://letsmakecv.tulip-software.com https://previewcv.tulip-software.com http://localhost:3000 http://localhost:3001;" },
+            value: "frame-ancestors https://letsmakecv.com https://www.letsmakecv.com http://localhost:3000;" },
           // Remove any default X-Frame-Options on this route
           { key: "X-Frame-Options", value: "" },
         ],

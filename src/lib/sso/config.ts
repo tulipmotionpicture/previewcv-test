@@ -2,15 +2,14 @@
 
 /**
  * Origins that are permitted to participate in SSO.
- * MUST match the backend SSO_ALLOWED_ORIGINS env var.
+ * MUST match the backend SSO_ALLOWED_ORIGINS env var AND the
+ * letsmakecv frontend's copy of this list byte-for-byte.
  */
 export const SSO_ALLOWED_ORIGINS = [
   "https://letsmakecv.com",
   "https://www.letsmakecv.com",
   "https://previewcv.com",
   "https://www.previewcv.com",
-  "https://letsmakecv.tulip-software.com",
-  "https://previewcv.tulip-software.com",
   "http://localhost:3000",
   "http://localhost:3001",
 ] as const;
@@ -19,21 +18,43 @@ export const SSO_ALLOWED_ORIGINS = [
  * Map every allowed origin to its peer.
  * - apex ↔ apex
  * - www  ↔ www
- * - localhost has no peer (both apps share port 3000 locally; SSO is a no‑op).
+ * - localhost: letsmakecv runs on :3000, previewcv runs on :3001.
  */
 export const SSO_PEER: Record<string, string | null> = {
   "https://letsmakecv.com": "https://previewcv.com",
   "https://www.letsmakecv.com": "https://www.previewcv.com",
   "https://previewcv.com": "https://letsmakecv.com",
   "https://www.previewcv.com": "https://www.letsmakecv.com",
-  "https://letsmakecv.tulip-software.com": "https://previewcv.tulip-software.com",
-  "https://previewcv.tulip-software.com": "https://letsmakecv.tulip-software.com",
   "http://localhost:3000": "http://localhost:3001",
   "http://localhost:3001": "http://localhost:3000",
 };
 
-/** Backend API base URL (already configured per app). */
-export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL!;
+/**
+ * Raw backend API base URL from env. Other modules in this repo may rely on
+ * this being set without a trailing /api/v1 (see src/lib/api.ts which appends
+ * /api/v1 itself), so we keep it as-is.
+ */
+export const API_BASE_URL = (process.env.NEXT_PUBLIC_API_URL || "https://letsmakecv.tulip-software.com").trim();
+
+/**
+ * Build a backend URL for an SSO endpoint regardless of whether
+ * NEXT_PUBLIC_API_URL ends with /api/v1 or not, or has a trailing slash.
+ *
+ * Example: apiUrl("auth/sso/ticket")
+ *   env="https://x.com"            -> "https://x.com/api/v1/auth/sso/ticket"
+ *   env="https://x.com/"           -> "https://x.com/api/v1/auth/sso/ticket"
+ *   env="https://x.com/api/v1"     -> "https://x.com/api/v1/auth/sso/ticket"
+ *   env="https://x.com/api/v1/"    -> "https://x.com/api/v1/auth/sso/ticket"
+ *   env=" https://x.com/api/v1/ "  -> "https://x.com/api/v1/auth/sso/ticket"
+ */
+export function apiUrl(path: string): string {
+  let base = API_BASE_URL.replace(/\/+$/, ""); // strip trailing slashes
+  if (/\/api\/v1$/i.test(base)) {
+    base = base.replace(/\/api\/v1$/i, "");
+  }
+  const cleanPath = path.replace(/^\/+/, ""); // strip leading slashes
+  return `${base}/api/v1/${cleanPath}`;
+}
 
 /** Hard timeout for the SSO bootstrap iframe (ms). */
 export const SSO_BOOTSTRAP_TIMEOUT_MS = 3000;

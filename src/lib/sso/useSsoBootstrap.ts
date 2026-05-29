@@ -3,7 +3,7 @@
 
 import { useEffect } from "react";
 import {
-  API_BASE_URL,
+  apiUrl,
   LS_ACCESS_TOKEN,
   LS_REFRESH_TOKEN,
   LS_USER_TYPE,
@@ -44,12 +44,12 @@ export function useSsoBootstrap(opts: { onLoggedIn?: (user: unknown) => void } =
     if (!isAllowedOrigin(here)) return; // unknown origin (preview deploys, etc.)
 
     const peer = peerOriginForCurrentSite();
-    if (!peer) return; // localhost – SSO disabled in dev (see §6).
+    if (!peer) return; // no peer mapped – SSO disabled for this origin.
 
     // Guard against double-mounts (React strict mode, fast refresh).
     const FLAG = "__sso_bootstrap_in_flight__";
-    if ((window as any)[FLAG]) return;
-    (window as any)[FLAG] = true;
+    if ((window as unknown as Record<string, unknown>)[FLAG]) return;
+    (window as unknown as Record<string, unknown>)[FLAG] = true;
 
     // ---- mount hidden iframe ----------------------------------------------
     const iframe = document.createElement("iframe");
@@ -71,7 +71,7 @@ export function useSsoBootstrap(opts: { onLoggedIn?: (user: unknown) => void } =
       finished = true;
       window.removeEventListener("message", onMessage);
       try { iframe.remove(); } catch { }
-      try { delete (window as any)[FLAG]; } catch { }
+      try { delete (window as unknown as Record<string, unknown>)[FLAG]; } catch { }
       window.clearTimeout(timeoutId);
     };
 
@@ -88,7 +88,7 @@ export function useSsoBootstrap(opts: { onLoggedIn?: (user: unknown) => void } =
 
       if (data.status === "ok" && data.ticket) {
         try {
-          const res = await fetch(`${API_BASE_URL}/api/v1/auth/sso/exchange`, {
+          const res = await fetch(apiUrl("auth/sso/exchange"), {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ ticket: data.ticket }),
@@ -105,7 +105,7 @@ export function useSsoBootstrap(opts: { onLoggedIn?: (user: unknown) => void } =
           try {
             window.localStorage.setItem(LS_ACCESS_TOKEN, json.access_token);
             window.localStorage.setItem(LS_REFRESH_TOKEN, json.refresh_token);
-            window.localStorage.setItem(LS_USER_TYPE, "user"); // or candidate
+            window.localStorage.setItem(LS_USER_TYPE, "user");
           } catch { /* private mode */ }
 
           opts.onLoggedIn?.(json.user);

@@ -3,7 +3,7 @@
 
 import { useEffect } from "react";
 import {
-  API_BASE_URL,
+  apiUrl,
   LS_ACCESS_TOKEN,
   SSO_ALLOWED_ORIGINS,
   normalizeOrigin,
@@ -14,7 +14,7 @@ export default function SSOHandoffPage() {
     const params = new URLSearchParams(window.location.search);
     const ret = normalizeOrigin(params.get("return"));
 
-    // Always reply to the parent – never leave it hanging.
+    // Always reply to the parent – never leave it hanging (when we can).
     const reply = (data: Record<string, unknown>) => {
       if (!ret) return; // can't reply safely without a verified target
       try {
@@ -24,27 +24,21 @@ export default function SSOHandoffPage() {
       }
     };
 
-    // 1. Verify that 'return' is an allowed origin.
-    console.log("[SSO Handoff] Received return origin:", ret);
-
+    // 1. Validate return origin against the allowlist.
     if (!ret || !(SSO_ALLOWED_ORIGINS as readonly string[]).includes(ret)) {
-      console.log("[SSO Handoff] Origin not allowed, aborting.");
-      reply({ status: "anonymous" });
+      // Untrusted/unknown parent – stay silent.
       return;
     }
 
-    // 2. Read the token from local storage (or cookie if you switch to that)
+    // 2. Read local token.
     let token: string | null = null;
     try {
       token = window.localStorage.getItem(LS_ACCESS_TOKEN);
-      console.log("[SSO Handoff] Token found in localStorage:", !!token);
     } catch {
-      console.log("[SSO Handoff] localStorage read error.");
       token = null; // localStorage blocked (private mode, etc.)
     }
 
     if (!token) {
-      console.log("[SSO Handoff] No token, replying anonymous.");
       reply({ status: "anonymous" });
       return;
     }
@@ -55,7 +49,7 @@ export default function SSOHandoffPage() {
 
     (async () => {
       try {
-        const res = await fetch(`${API_BASE_URL}/api/v1/auth/sso/ticket`, {
+        const res = await fetch(apiUrl("auth/sso/ticket"), {
           method: "POST",
           signal: ctrl.signal,
           headers: {
@@ -72,14 +66,11 @@ export default function SSOHandoffPage() {
           return;
         }
 
-        console.log("api called ===>")
         const json = (await res.json()) as { ticket: string; expires_in: number };
         reply({ status: "ok", ticket: json.ticket });
       } catch {
-        console.log("api catch ===>")
         reply({ status: "anonymous" });
       } finally {
-        console.log("api finally ===>")
         window.clearTimeout(timeoutId);
       }
     })();
