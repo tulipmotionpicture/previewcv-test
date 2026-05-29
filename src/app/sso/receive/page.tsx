@@ -34,14 +34,18 @@ import {
 export default function SSOReceivePage() {
   useEffect(() => {
     const url = new URL(window.location.href);
-
-    try {
-      window.sessionStorage.setItem("sso_checked", "1");
-    } catch { /* ignore */ }
-
     const returnTo = getReturnTo();
 
+    // Anonymous bounce-back: peer told us user isn't logged in there.
+    // Set the loop guard so we don't immediately retry SSO on next page.
+    // (The bootstrap hook's hasFreshAnonCheck() reads this with a TTL.)
     if (url.searchParams.get("sso") === "anon") {
+      try {
+        window.sessionStorage.setItem(
+          "sso_checked",
+          JSON.stringify({ at: Date.now() }),
+        );
+      } catch { /* ignore */ }
       finish(returnTo);
       return;
     }
@@ -50,6 +54,8 @@ export default function SSOReceivePage() {
     const ticket = fragParams.get("ticket");
 
     if (!ticket) {
+      // Direct visit with no ticket and no anon flag. Don't set the loop
+      // guard — bootstrap should still try SSO on the next regular page.
       finish(returnTo);
       return;
     }
@@ -67,6 +73,8 @@ export default function SSOReceivePage() {
         });
 
         if (!res.ok) {
+          // Exchange failed (stale ticket, network blip, etc.). Don't
+          // permanently block SSO — let the user retry on next visit.
           finish(returnTo);
           return;
         }
@@ -81,6 +89,9 @@ export default function SSOReceivePage() {
           window.localStorage.setItem(LS_ACCESS_TOKEN, json.access_token);
           window.localStorage.setItem(LS_REFRESH_TOKEN, json.refresh_token);
           window.localStorage.setItem(LS_USER_TYPE, "user");
+          // Successful exchange — clear any leftover anon-bounce flag so
+          // subsequent /sso/receive direct visits don't get confused.
+          window.sessionStorage.removeItem("sso_checked");
         } catch { /* private mode */ }
 
         finish(returnTo);
