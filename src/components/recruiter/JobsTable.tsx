@@ -13,9 +13,13 @@ import {
   Download,
   MapPin,
   Briefcase,
+  Share2,
+  Copy,
 } from "lucide-react";
 import config from "@/config";
 import { generateQRCodeDataURL, downloadElementAsImage } from "@/utils/qr";
+import { useToast } from "@/context/ToastContext";
+import { api } from "@/lib/api";
 interface JobsTableProps {
   jobs: Job[];
   loadingJobs: boolean;
@@ -44,9 +48,28 @@ export default function JobsTable({
   } | null>(null);
   const [mounted, setMounted] = useState(false);
   const [qrJob, setQrJob] = useState<Job | null>(null);
+  const [shareJob, setShareJob] = useState<Job | null>(null);
   const [qrDataUrl, setQrDataUrl] = useState<string>("");
+  const toast = useToast();
 
   useEffect(() => setMounted(true), []);
+
+
+  async function getJobBySlug(slug: string): Promise<Job | null> {
+    try {
+      const response = await api.getJobBySlug(slug);
+      return response.job;
+    } catch (error) {
+      return null;
+    }
+  }
+
+  const handleShareJob = async (job: Job) => {
+    const data = await getJobBySlug(job.slug);
+    if (data) {
+      setShareJob(data);
+    }
+  }
 
   useEffect(() => {
     if (qrJob) {
@@ -70,6 +93,8 @@ export default function JobsTable({
     }
   };
 
+
+  console.log(shareJob, "share job data")
   // Helper for relative time
   function formatTimeAgo(dateString: string) {
     const date = new Date(dateString);
@@ -106,9 +131,8 @@ export default function JobsTable({
                 ].map((heading, index) => (
                   <th
                     key={heading}
-                    className={`px-4 py-3 text-xs bg-[#2F4269] font-bold text-white dark:text-gray-500 uppercase tracking-wider ${
-                      index === 4 ? "text-right" : "text-left"
-                    }`}
+                    className={`px-4 py-3 text-xs bg-[#2F4269] font-bold text-white dark:text-gray-500 uppercase tracking-wider ${index === 4 ? "text-right" : "text-left"
+                      }`}
                   >
                     {heading}
                   </th>
@@ -133,11 +157,10 @@ export default function JobsTable({
                   {/* Status */}
                   <td className="px-4 py-3">
                     <span
-                      className={`inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium ${
-                        job.is_active
-                          ? "bg-[#E6F4EA] text-[#1E7F3A] dark:bg-green-900/30 dark:text-green-400"
-                          : "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400"
-                      }`}
+                      className={`inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium ${job.is_active
+                        ? "bg-[#E6F4EA] text-[#1E7F3A] dark:bg-green-900/30 dark:text-green-400"
+                        : "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400"
+                        }`}
                     >
                       {job.is_active ? "Active" : "Inactive"}
                     </span>
@@ -161,156 +184,171 @@ export default function JobsTable({
                   </td>
                   {/* Actions */}
                   <td className="px-4 py-3 text-right">
-                    <div className="relative inline-block text-left">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          const btn = e.currentTarget as HTMLElement;
-                          const rect = btn.getBoundingClientRect();
-                          const menuWidth = 192; // w-48
-                          const menuHeight = 150; // approximate
-                          const viewportWidth = window.innerWidth;
-                          const viewportHeight = window.innerHeight;
+                    <div className="flex items-center justify-end gap-1">
 
-                          // Calculate horizontal position (prefer right-aligned with button)
-                          let left = rect.right - menuWidth;
-                          // Ensure menu stays within viewport with 8px margin
-                          if (left < 8) left = 8;
-                          if (left + menuWidth > viewportWidth - 8) {
-                            left = viewportWidth - menuWidth - 8;
-                          }
+                      <div className="relative inline-block text-left">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            const btn = e.currentTarget as HTMLElement;
+                            const rect = btn.getBoundingClientRect();
+                            const menuWidth = 192; // w-48
+                            const menuHeight = 150; // approximate
+                            const viewportWidth = window.innerWidth;
+                            const viewportHeight = window.innerHeight;
 
-                          // Calculate vertical position (prefer below button)
-                          let top = rect.bottom + 8;
-                          // If menu would overflow bottom, position above button instead
-                          if (top + menuHeight > viewportHeight - 8) {
-                            top = rect.top - menuHeight - 8;
-                          }
+                            // Calculate horizontal position (prefer right-aligned with button)
+                            let left = rect.right - menuWidth;
+                            // Ensure menu stays within viewport with 8px margin
+                            if (left < 8) left = 8;
+                            if (left + menuWidth > viewportWidth - 8) {
+                              left = viewportWidth - menuWidth - 8;
+                            }
 
-                          setMenuPosition({
-                            top: Math.max(8, top + window.scrollY),
-                            left: left + window.scrollX,
-                          });
-                          setOpenMenuJobId(
-                            openMenuJobId === job.id ? null : job.id,
-                          );
-                        }}
-                        className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-                      >
-                        <MoreHorizontal className="w-5 h-5 text-gray-400 dark:text-gray-300" />
-                      </button>
+                            // Calculate vertical position (prefer below button)
+                            let top = rect.bottom + 8;
+                            // If menu would overflow bottom, position above button instead
+                            if (top + menuHeight > viewportHeight - 8) {
+                              top = rect.top - menuHeight - 8;
+                            }
 
-                      {openMenuJobId === job.id &&
-                        menuPosition &&
-                        createPortal(
-                          <>
-                            <div
-                              className="fixed inset-0 z-10"
-                              onClick={() => {
-                                setOpenMenuJobId(null);
-                                setMenuPosition(null);
-                              }}
-                            ></div>
-                            <div
-                              style={{
-                                top: menuPosition.top,
-                                left: menuPosition.left,
-                              }}
-                              className="fixed w-48 rounded-md bg-white dark:bg-[#1E1E1E] shadow-lg border border-gray-300 ring-black ring-opacity-5 z-20 dark:border-gray-700 animate-in fade-in zoom-in-95 duration-200"
-                            >
-                              <div className="py-1">
-                                <button
-                                  onClick={() => {
-                                    onEditJob(job);
-                                    setOpenMenuJobId(null);
-                                    setMenuPosition(null);
-                                  }}
-                                  className="flex items-center gap-2 w-full px-4 py-2.5 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
-                                >
-                                  <svg
-                                    className="w-4 h-4 text-gray-400"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                    stroke="currentColor"
+                            setMenuPosition({
+                              top: Math.max(8, top + window.scrollY),
+                              left: left + window.scrollX,
+                            });
+                            setOpenMenuJobId(
+                              openMenuJobId === job.id ? null : job.id,
+                            );
+                          }}
+                          className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                        >
+                          <MoreHorizontal className="w-5 h-5 text-gray-400 dark:text-gray-300" />
+                        </button>
+
+                        {openMenuJobId === job.id &&
+                          menuPosition &&
+                          createPortal(
+                            <>
+                              <div
+                                className="fixed inset-0 z-10"
+                                onClick={() => {
+                                  setOpenMenuJobId(null);
+                                  setMenuPosition(null);
+                                }}
+                              ></div>
+                              <div
+                                style={{
+                                  top: menuPosition.top,
+                                  left: menuPosition.left,
+                                }}
+                                className="fixed w-48 rounded-md bg-white dark:bg-[#1E1E1E] shadow-lg border border-gray-300 ring-black ring-opacity-5 z-20 dark:border-gray-700 animate-in fade-in zoom-in-95 duration-200"
+                              >
+                                <div className="py-1">
+                                  <button
+                                    onClick={() => {
+                                      onEditJob(job);
+                                      setOpenMenuJobId(null);
+                                      setMenuPosition(null);
+                                    }}
+                                    className="flex items-center gap-2 w-full px-4 py-2.5 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
                                   >
-                                    <path
-                                      strokeLinecap="round"
-                                      strokeLinejoin="round"
-                                      strokeWidth={2}
-                                      d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
-                                    />
-                                  </svg>
-                                  Edit Job
-                                </button>
-                                <button
-                                  onClick={() => {
-                                    onViewApplications(job.id);
-                                    setOpenMenuJobId(null);
-                                    setMenuPosition(null);
-                                  }}
-                                  className="flex items-center gap-2 w-full px-4 py-2.5 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
-                                >
-                                  <svg
-                                    className="w-4 h-4 text-gray-400"
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                    stroke="currentColor"
+                                    <svg
+                                      className="w-4 h-4 text-gray-400"
+                                      fill="none"
+                                      viewBox="0 0 24 24"
+                                      stroke="currentColor"
+                                    >
+                                      <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={2}
+                                        d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
+                                      />
+                                    </svg>
+                                    Edit Job
+                                  </button>
+                                  <button
+                                    onClick={() => {
+                                      onViewApplications(job.id);
+                                      setOpenMenuJobId(null);
+                                      setMenuPosition(null);
+                                    }}
+                                    className="flex items-center gap-2 w-full px-4 py-2.5 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
                                   >
-                                    <path
-                                      strokeLinecap="round"
-                                      strokeLinejoin="round"
-                                      strokeWidth={2}
-                                      d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                                    />
-                                    <path
-                                      strokeLinecap="round"
-                                      strokeLinejoin="round"
-                                      strokeWidth={2}
-                                      d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-                                    />
-                                  </svg>
-                                  View Applications
-                                </button>
-                                <button
-                                  onClick={() => {
-                                    onDeleteJob(job.id);
-                                    setOpenMenuJobId(null);
-                                    setMenuPosition(null);
-                                  }}
-                                  className="flex items-center gap-2 w-full px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
-                                >
-                                  <svg
-                                    className="w-4 h-4"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                    stroke="currentColor"
+                                    <svg
+                                      className="w-4 h-4 text-gray-400"
+                                      xmlns="http://www.w3.org/2000/svg"
+                                      fill="none"
+                                      viewBox="0 0 24 24"
+                                      stroke="currentColor"
+                                    >
+                                      <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={2}
+                                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                                      />
+                                      <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={2}
+                                        d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                                      />
+                                    </svg>
+                                    View Applications
+                                  </button>
+                                  <button
+                                    onClick={() => {
+                                      onDeleteJob(job.id);
+                                      setOpenMenuJobId(null);
+                                      setMenuPosition(null);
+                                    }}
+                                    className="flex items-center gap-2 w-full px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
                                   >
-                                    <path
-                                      strokeLinecap="round"
-                                      strokeLinejoin="round"
-                                      strokeWidth={2}
-                                      d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                                    />
-                                  </svg>
-                                  Deactivate Job
-                                </button>
-                                <button
-                                  onClick={() => {
-                                    setQrJob(job);
-                                    setOpenMenuJobId(null);
-                                    setMenuPosition(null);
-                                  }}
-                                  className="flex items-center gap-2 w-full px-4 py-2.5 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
-                                >
-                                  <QrCode className="w-4 h-4" />
-                                  Show QR Code
-                                </button>
+                                    <svg
+                                      className="w-4 h-4"
+                                      fill="none"
+                                      viewBox="0 0 24 24"
+                                      stroke="currentColor"
+                                    >
+                                      <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={2}
+                                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                                      />
+                                    </svg>
+                                    Deactivate Job
+                                  </button>
+                                  <button
+                                    onClick={() => {
+                                      setQrJob(job);
+                                      setOpenMenuJobId(null);
+                                      setMenuPosition(null);
+                                    }}
+                                    className="flex items-center gap-2 w-full px-4 py-2.5 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                                  >
+                                    <QrCode className="w-4 h-4" />
+                                    Show QR Code
+                                  </button>
+                                  <button
+                                    onClick={() => {
+                                      handleShareJob(job);
+                                      setOpenMenuJobId(null);
+                                      setMenuPosition(null);
+
+                                    }}
+                                    className="flex items-center gap-2 w-full px-4 py-2.5 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                                  >
+                                    <Share2 className="w-4 h-4" />
+                                    Share job
+                                  </button>
+                                </div>
                               </div>
-                            </div>
-                          </>,
-                          document.body,
-                        )}
+                            </>,
+                            document.body,
+                          )}
+                      </div>
                     </div>
                   </td>
                 </tr>
@@ -357,11 +395,10 @@ export default function JobsTable({
                 <button
                   key={page}
                   onClick={() => onPageChange(page)}
-                  className={`min-w-[32px] h-8 px-2 flex items-center justify-center rounded-lg text-sm font-medium transition-colors ${
-                    currentPage === page
-                      ? "bg-primary-blue text-white shadow-sm"
-                      : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
-                  }`}
+                  className={`min-w-[32px] h-8 px-2 flex items-center justify-center rounded-lg text-sm font-medium transition-colors ${currentPage === page
+                    ? "bg-primary-blue text-white shadow-sm"
+                    : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
+                    }`}
                 >
                   {page}
                 </button>
@@ -526,6 +563,79 @@ export default function JobsTable({
                   </p>
                 </div>
               )}
+            </div>
+          </div>,
+          document.body,
+        )}
+
+      {/* Share Job Modal */}
+      {shareJob &&
+        mounted &&
+        createPortal(
+          <div className="fixed inset-0 z-9 flex items-center justify-center p-4 sm:p-6 bg-slate-900/60 backdrop-blur-sm">
+            <div className="w-full max-w-2xl bg-white dark:bg-[#1E1E1E] rounded-2xl shadow-2xl relative flex flex-col max-h-[90vh] animate-in fade-in zoom-in duration-300 overflow-hidden">
+              <div className="flex items-center justify-between p-6 border-b border-gray-100 dark:border-gray-800">
+                <h3 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                  <Share2 className="w-5 h-5 text-blue-600" />
+                  Share Job
+                </h3>
+                <button
+                  onClick={() => setShareJob(null)}
+                  className="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <div className="p-6 overflow-y-auto custom-scrollbar flex-1 bg-gray-50/50 dark:bg-[#1A1A1A]">
+                <div className="mb-6">
+                  <h4 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">{shareJob.title}</h4>
+                  <div className="flex flex-wrap items-center gap-4 text-sm font-medium text-gray-600 dark:text-gray-400">
+                    <span className="text-primary-blue bg-blue-50 dark:bg-blue-900/30 px-3 py-1 rounded-full">{shareJob.company_name}</span>
+                    <span className="flex items-center gap-1.5"><MapPin className="w-4 h-4" /> {shareJob.is_remote ? "Remote" : shareJob.location || "Location TBA"}</span>
+                    <span className="flex items-center gap-1.5"><Briefcase className="w-4 h-4" /> {shareJob.job_type?.split("_").map((w: string) => w.charAt(0).toUpperCase() + w.slice(1)).join(" ")}</span>
+                  </div>
+                </div>
+
+                <div className="prose prose-sm sm:prose-base dark:prose-invert max-w-none bg-white dark:bg-[#282727] p-6 rounded-xl border border-gray-100 dark:border-gray-800 shadow-sm">
+                  <div
+                    dangerouslySetInnerHTML={{ __html: shareJob.description || "<p>No description provided.</p>" }}
+                    className="[&>p]:mb-4 [&>ul]:list-disc [&>ul]:ml-6 [&>ul]:mb-4 [&>ol]:list-decimal [&>ol]:ml-6 [&>ol]:mb-4 [&>h1]:text-xl [&>h1]:font-bold [&>h1]:mb-3 [&>h2]:text-lg [&>h2]:font-bold [&>h2]:mb-3 [&>h3]:text-base [&>h3]:font-bold [&>h3]:mb-2 text-gray-700 dark:text-gray-300"
+                  />
+                </div>
+              </div>
+
+              <div className="p-6 border-t border-gray-100 dark:border-gray-800 bg-white dark:bg-[#1E1E1E] flex flex-col sm:flex-row gap-4">
+                <button
+                  onClick={() => {
+                    const tempDiv = document.createElement("div");
+                    tempDiv.innerHTML = shareJob.description || "";
+                    const descriptionText = tempDiv.textContent || tempDiv.innerText || "";
+
+                    const url = `${window.location.origin}/job/${shareJob.slug}`;
+                    const content = `${shareJob.title}\n${descriptionText}\n\nApply here: ${url}`;
+
+                    navigator.clipboard.writeText(content);
+                    toast.success("Job content copied to clipboard!");
+                  }}
+                  className="flex flex-1 items-center justify-center gap-2 px-5 py-3.5 bg-white dark:bg-[#282727] text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-gray-700 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800 transition-all font-bold text-sm shadow-sm"
+                >
+                  <Copy className="w-5 h-5" />
+                  <span>Copy Content</span>
+                </button>
+
+                <button
+                  onClick={() => {
+                    const url = `${window.location.origin}/job/${shareJob.slug}`;
+                    const linkedinUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`;
+                    window.open(linkedinUrl, '_blank', 'width=800,height=700,noopener,noreferrer');
+                  }}
+                  className="flex flex-1 items-center justify-center gap-2 px-5 py-3.5 bg-[#0A66C2] text-white rounded-xl hover:bg-[#004182] transition-all font-bold text-sm shadow-sm"
+                >
+                  <Share2 className="w-5 h-5" />
+                  <span>Share on LinkedIn</span>
+                </button>
+              </div>
             </div>
           </div>,
           document.body,
