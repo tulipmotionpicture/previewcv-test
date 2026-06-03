@@ -359,6 +359,7 @@ function RecruiterDashboardInner() {
         salary_min: jobForm.salary_min ? Number(jobForm.salary_min) : 0,
         salary_max: jobForm.salary_max ? Number(jobForm.salary_max) : 0,
         salary_currency: jobForm.salary_currency,
+        salary_type: jobForm.salary_type,
         is_remote: jobForm.is_remote,
         required_skills: parseList(jobForm.required_skills),
         preferred_skills: parseList(jobForm.preferred_skills),

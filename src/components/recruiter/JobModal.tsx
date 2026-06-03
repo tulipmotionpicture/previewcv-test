@@ -8,6 +8,7 @@ import RichTextEditor from "../ui/RichTextEditor";
 import MaximizableModal from "@/components/common/MaximizableModal";
 import { JobSearch, SkillSearch } from "../masters";
 import { JobTitle } from "@/types/masters";
+import { getCurrencyOptions } from "@/lib/salary";
 
 interface JobModalProps {
   isOpen: boolean;
@@ -45,6 +46,7 @@ export default function JobModal({
     salary_min: "",
     salary_max: "",
     salary_currency: "USD",
+    salary_type: "yearly",
     is_remote: false,
     is_active: true,
     required_skills: "" as string,
@@ -73,6 +75,7 @@ export default function JobModal({
           salary_min: job.salary_min?.toString() || "",
           salary_max: job.salary_max?.toString() || "",
           salary_currency: job.salary_currency || "USD",
+          salary_type: job.salary_type || "yearly",
           is_remote: job.is_remote || false,
           is_active: job.status === "active",
           required_skills: job.required_skills?.join(", ") || "",
@@ -96,6 +99,7 @@ export default function JobModal({
           salary_min: "",
           salary_max: "",
           salary_currency: "USD",
+          salary_type: "yearly",
           is_remote: false,
           is_active: true,
           required_skills: "" as string,
@@ -150,6 +154,7 @@ export default function JobModal({
           ? parseInt(formData.salary_max)
           : undefined,
         salary_currency: formData.salary_currency,
+        salary_type: formData.salary_type as Job["salary_type"],
         is_remote: formData.is_remote,
         is_active: formData.is_active,
         required_skills: formData.required_skills
@@ -452,23 +457,38 @@ export default function JobModal({
             </div>
           </div>
 
-          {/* Row 2: Monthly Salary */}
+          {/* Row 2: Salary */}
           <div className="space-y-2">
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-              Monthly Salary
+              Salary
             </label>
-            <div className="flex items-center gap-4">
-              <div className="relative w-32">
+            <div className="flex items-center gap-4 flex-wrap">
+              <div className="relative w-36">
+                <select
+                  name="salary_type"
+                  value={formData.salary_type}
+                  onChange={onChange}
+                  className="w-full appearance-none px-4 py-2.5 bg-white dark:bg-[#282727] border border-gray-200 dark:border-gray-700 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all dark:text-white pr-8"
+                >
+                  <option value="hourly">Hourly</option>
+                  <option value="weekly">Weekly</option>
+                  <option value="monthly">Monthly</option>
+                  <option value="yearly">Yearly</option>
+                </select>
+                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+              </div>
+              <div className="relative w-44">
                 <select
                   name="salary_currency"
                   value={formData.salary_currency}
                   onChange={onChange}
                   className="w-full appearance-none px-4 py-2.5 bg-white dark:bg-[#282727] border border-gray-200 dark:border-gray-700 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all dark:text-white pr-8"
                 >
-                  <option value="USD">USD</option>
-                  <option value="INR">INR</option>
-                  <option value="EUR">EUR</option>
-                  <option value="GBP">GBP</option>
+                  {getCurrencyOptions().map((opt) => (
+                    <option key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </option>
+                  ))}
                 </select>
                 <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
               </div>
