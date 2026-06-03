@@ -38,6 +38,7 @@ export type JobFormState = {
   salary_min: string;
   salary_max: string;
   salary_currency: string;
+  salary_type: "hourly" | "weekly" | "monthly" | "yearly";
   is_remote: boolean;
   is_active: boolean;
   required_skills: string;
@@ -61,6 +62,7 @@ export const JOB_FORM_INITIAL: JobFormState = {
   salary_min: "",
   salary_max: "",
   salary_currency: "USD",
+  salary_type: "yearly",
   is_remote: false,
   is_active: true,
   required_skills: "",

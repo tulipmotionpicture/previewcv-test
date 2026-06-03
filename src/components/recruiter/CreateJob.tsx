@@ -105,6 +105,7 @@ export default function JobCreationPage({
         salary_min: jobToEdit.salary_min ? String(jobToEdit.salary_min) : "",
         salary_max: jobToEdit.salary_max ? String(jobToEdit.salary_max) : "",
         salary_currency: jobToEdit.salary_currency || "USD",
+        salary_type: jobToEdit.salary_type || "yearly",
         description: jobToEdit.description || "",
         requirements: jobToEdit.requirements || "",
         responsibilities: jobToEdit.responsibilities || "",
@@ -299,6 +300,7 @@ export default function JobCreationPage({
         salary_min: form.salary_min ? parseInt(form.salary_min) : null,
         salary_max: form.salary_max ? parseInt(form.salary_max) : null,
         salary_currency: form.salary_currency,
+        salary_type: form.salary_type,
         is_remote: form.is_remote,
         is_active: form.is_active,
         required_skills: requiredSkillsArray,
@@ -1056,8 +1058,24 @@ export default function JobCreationPage({
                   />
                 </div>
 
-                <div className="grid md:grid-cols-3 gap-6">
+                <div className="grid md:grid-cols-4 gap-6">
 
+                  <div>
+                    <label className="text-xs uppercase tracking-widest text-gray-600 dark:text-gray-400 font-medium mb-2 block">
+                      Pay Period
+                    </label>
+                    <Select
+                      name="salary_type"
+                      value={form.salary_type}
+                      onChange={handleChange}
+                      options={[
+                        { value: "hourly", label: "Hourly" },
+                        { value: "weekly", label: "Weekly" },
+                        { value: "monthly", label: "Monthly" },
+                        { value: "yearly", label: "Yearly" },
+                      ]}
+                    />
+                  </div>
                   <div>
                     <label className="text-xs uppercase tracking-widest text-gray-600 dark:text-gray-400 font-medium mb-2 block">
                       Currency

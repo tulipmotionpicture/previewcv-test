@@ -95,6 +95,7 @@ export interface Job {
   salary_min?: number;
   salary_max?: number;
   salary_currency?: string;
+  salary_type?: "hourly" | "weekly" | "monthly" | "yearly";
   is_remote: boolean;
   categories: string[];
   required_skills: string[];
@@ -201,6 +202,7 @@ export interface Application {
   salary_min?: number | null;
   salary_max?: number | null;
   salary_currency?: string;
+  salary_type?: "hourly" | "weekly" | "monthly" | "yearly";
   is_job_active?: boolean;
   posted_date?: string;
   application_deadline?: string | null;
