@@ -185,6 +185,12 @@ export default function JobDetailsClient({ job, slug }: JobDetailsClientProps) {
       return;
     }
 
+    // TODO(candidate verification): once the backend ships a candidate
+    // resend-verification endpoint, block applying unless the candidate is
+    // verified (require user.is_active === true && user.is_verified === true),
+    // mirroring the recruiter email gate (src/lib/recruiterVerification.ts +
+    // RecruiterVerificationBanner). Show a banner + resend action for candidates.
+
     if (!resumeId) {
       alert("Please select or upload a resume before applying.");
       return;

@@ -16,6 +16,7 @@ import { JobSearch, SkillSearch, CompanySearch } from "../masters";
 import { JobTitle, Company } from "@/types/masters";
 import { JobContentVariant } from "@/types/api";
 import { getCurrencyOptions } from "@/lib/salary";
+import { recruiterNeedsVerification } from "@/lib/recruiterVerification";
 
 const STEPS = [
   "Core Details",
@@ -499,6 +500,11 @@ export default function JobCreationPage({
   const back = () => setStep((s) => Math.max(s - 1, 0));
 
   const submit = async () => {
+    // Backstop: an unverified recruiter cannot post jobs.
+    if (recruiterNeedsVerification(recruiter)) {
+      showToast("Please verify your email before posting a job.", "error");
+      return;
+    }
     // Re-validate every data step before sending; jump to the first failing
     // step, then focus the offending field so the user sees what's missing.
     for (const s of [0, 1, 2]) {

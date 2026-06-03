@@ -454,6 +454,22 @@ export class ApiClient {
     );
   }
 
+  // Resend the recruiter email-verification message. Public endpoint that takes
+  // the recruiter's email in the body.
+  async resendRecruiterVerification(
+    email: string,
+  ): Promise<{ message: string }> {
+    return this.request<{ message: string }>(
+      "/api/v1/recruiters/auth/resend-verification",
+      {
+        method: "POST",
+        body: JSON.stringify({ email }),
+      },
+      false,
+      true,
+    );
+  }
+
   async recruiterResetPassword(email: string): Promise<{ email: string }> {
     return this.request<{ email: string }>(
       "/api/v1/recruiters/auth/password-reset/request",

@@ -39,7 +39,8 @@ import type {
   JobFormState,
   JobManagementTab,
 } from "@/components/recruiter";
-import { ArrowRight, Clock, Shield, Search, Bell, Plus } from "lucide-react";
+import { ArrowRight, Clock, Shield, Search, Bell, Plus, Mail } from "lucide-react";
+import { recruiterNeedsVerification } from "@/lib/recruiterVerification";
 import { Button } from "@/components/ui";
 
 interface JobFilters {
@@ -320,8 +321,33 @@ function RecruiterDashboardInner() {
     }
   };
 
+  const [resendingVerification, setResendingVerification] = useState(false);
+  const handleResendVerification = async () => {
+    if (resendingVerification || !recruiter?.email) return;
+    setResendingVerification(true);
+    try {
+      await api.resendRecruiterVerification(recruiter.email);
+      toast.success("Verification email sent. Please check your inbox.");
+    } catch (error: unknown) {
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : "Could not send the verification email. Please try again.",
+      );
+    } finally {
+      setResendingVerification(false);
+    }
+  };
+
   const handleCreateJob = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Backstop: an unverified recruiter cannot post jobs (covers the
+    // JobManagement → JobModal quick-create path, which routes through here).
+    if (recruiterNeedsVerification(recruiter)) {
+      toast.error("Please verify your email before posting a job.");
+      return;
+    }
 
     const title = jobForm.title.trim();
     const country = jobForm.country.trim();
@@ -715,15 +741,38 @@ function RecruiterDashboardInner() {
           />
         )}
 
-        {activeTab === "createJob" && (
-          <JobCreationPage
-            onNavigateToPricing={() => setActiveTab("createJob")}
-            onSuccess={() => {
-              setActiveTab("jobs");
-              fetchJobs();
-            }}
-          />
-        )}
+        {activeTab === "createJob" &&
+          (recruiterNeedsVerification(recruiter) ? (
+            <div className="rounded-xl border border-amber-200 bg-amber-50 p-8 text-center dark:border-amber-700 dark:bg-amber-900/30">
+              <Mail className="mx-auto mb-3 h-8 w-8 text-amber-600 dark:text-amber-400" />
+              <h3 className="mb-1 text-base font-semibold text-amber-900 dark:text-amber-100">
+                Verify your email to post jobs
+              </h3>
+              <p className="mx-auto mb-4 max-w-md text-sm text-amber-800 dark:text-amber-200">
+                Your email address
+                {recruiter?.email ? ` (${recruiter.email})` : ""} hasn&apos;t been
+                verified yet. Please verify it to start posting jobs.
+              </p>
+              <button
+                type="button"
+                onClick={handleResendVerification}
+                disabled={resendingVerification}
+                className="rounded-md bg-amber-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-amber-700 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {resendingVerification
+                  ? "Sending…"
+                  : "Resend verification email"}
+              </button>
+            </div>
+          ) : (
+            <JobCreationPage
+              onNavigateToPricing={() => setActiveTab("createJob")}
+              onSuccess={() => {
+                setActiveTab("jobs");
+                fetchJobs();
+              }}
+            />
+          ))}
         {activeTab === ("editJob" as any) && (
           <JobCreationPage
             jobToEdit={editingJob}
