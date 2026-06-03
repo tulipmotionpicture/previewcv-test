@@ -242,24 +242,121 @@ export default function JobCreationPage({
     }));
   };
 
-  const next = () => setStep((s) => Math.min(s + 1, 3));
+  // Rich-text fields render as HTML; treat tag-only/whitespace content as empty.
+  const isRichTextEmpty = (html: string) =>
+    !html ||
+    html
+      .replace(/<[^>]*>/g, "")
+      .replace(/&nbsp;/g, " ")
+      .trim().length === 0;
+
+  // Count non-empty entries in a comma-separated field (skills/categories).
+  const countList = (value: string) =>
+    value
+      ? value.split(",").map((x) => x.trim()).filter(Boolean).length
+      : 0;
+
+  // Scroll to and focus the field that failed validation so the user's
+  // attention is drawn to it. Each field's wrapper carries id={`field-<key>`};
+  // we focus the first focusable element inside it (input/select/textarea or
+  // the rich-text editor's contenteditable area).
+  const focusField = (field: string) => {
+    if (typeof window === "undefined") return;
+    // Defer so any step change has rendered the target before we focus it.
+    setTimeout(() => {
+      const wrapper = document.getElementById(`field-${field}`);
+      if (!wrapper) return;
+      wrapper.scrollIntoView({ behavior: "smooth", block: "center" });
+      const focusable = wrapper.querySelector<HTMLElement>(
+        'input, select, textarea, [contenteditable="true"], .ProseMirror',
+      );
+      focusable?.focus();
+    }, 60);
+  };
+
+  type StepError = { field: string; message: string };
+
+  // Returns the first validation error for a given step, or null if it passes.
+  // Every field is mandatory except the remote-friendly checkbox and the
+  // Publish-immediately toggle.
+  const validateStep = (s: number): StepError | null => {
+    if (s === 0) {
+      if (!form.title.trim())
+        return { field: "title", message: "Please enter a job title." };
+      if (!form.company_name.trim())
+        return { field: "company_name", message: "Please enter a company name." };
+      if (!form.job_type)
+        return { field: "job_type", message: "Please select a job type." };
+      if (!form.experience_level)
+        return { field: "experience_level", message: "Please select an experience level." };
+      if (!form.country.trim())
+        return { field: "country", message: "Please select a country." };
+      if (!form.state.trim())
+        return { field: "state", message: "Please select a state/region." };
+      if (!form.city.trim())
+        return { field: "city", message: "Please select a city." };
+    }
+    if (s === 1) {
+      if (isRichTextEmpty(form.description))
+        return { field: "description", message: "Please enter a job description." };
+      if (isRichTextEmpty(form.responsibilities))
+        return { field: "responsibilities", message: "Please enter the responsibilities." };
+      if (isRichTextEmpty(form.requirements))
+        return { field: "requirements", message: "Please enter the requirements." };
+      if (!form.salary_type)
+        return { field: "salary_type", message: "Please select a pay period." };
+      if (!form.salary_currency)
+        return { field: "salary_currency", message: "Please select a currency." };
+
+      const min = Number(form.salary_min);
+      const max = Number(form.salary_max);
+      if (!form.salary_min.trim() || Number.isNaN(min))
+        return { field: "salary_min", message: "Please enter a valid minimum salary." };
+      if (min <= 0)
+        return { field: "salary_min", message: "Minimum salary must be greater than 0." };
+      if (!form.salary_max.trim() || Number.isNaN(max))
+        return { field: "salary_max", message: "Please enter a valid maximum salary." };
+      if (max <= 0)
+        return { field: "salary_max", message: "Maximum salary must be greater than 0." };
+      if (max < min)
+        return {
+          field: "salary_max",
+          message: "Maximum salary must be greater than or equal to the minimum salary.",
+        };
+    }
+    if (s === 2) {
+      if (countList(form.required_skills) < 1)
+        return { field: "required_skills", message: "Please add at least one required skill." };
+      if (countList(form.preferred_skills) < 1)
+        return { field: "preferred_skills", message: "Please add at least one preferred skill." };
+      if (countList(form.categories) < 1)
+        return { field: "categories", message: "Please add at least one category/keyword." };
+    }
+    return null;
+  };
+
+  const next = () => {
+    const error = validateStep(step);
+    if (error) {
+      showToast(error.message, "error");
+      focusField(error.field);
+      return;
+    }
+    setStep((s) => Math.min(s + 1, 3));
+  };
   const back = () => setStep((s) => Math.max(s - 1, 0));
 
   const submit = async () => {
-    if (
-      !form.title ||
-      !form.company_name ||
-      !form.country ||
-      !form.city ||
-      !form.job_type ||
-      !form.experience_level ||
-      !form.description ||
-      !form.requirements ||
-      !form.salary_min ||
-      !form.salary_max
-    ) {
-      showToast("Please fill all the required fields before submitting.", "error");
-      return;
+    // Re-validate every data step before sending; jump to the first failing
+    // step, then focus the offending field so the user sees what's missing.
+    for (const s of [0, 1, 2]) {
+      const error = validateStep(s);
+      if (error) {
+        showToast(error.message, "error");
+        setStep(s);
+        focusField(error.field);
+        return;
+      }
     }
 
     try {
@@ -524,7 +621,7 @@ export default function JobCreationPage({
   );
 
   return (
-    <form className="mx-auto" onSubmit={(e) => {
+    <form className="mx-auto" noValidate onSubmit={(e) => {
       e.preventDefault();
       if (step === 3) submit();
       else next();
@@ -577,7 +674,7 @@ export default function JobCreationPage({
             {step === 0 && (
               <div className="space-y-6">
                 <div className="grid md:grid-cols-2 gap-6">
-                  <div>
+                  <div id="field-title">
                     <label className="text-xs uppercase tracking-widest text-gray-600 dark:text-gray-400 font-medium mb-2 block">
                       Job Title *
                     </label>
@@ -629,7 +726,7 @@ export default function JobCreationPage({
                     />
                   </div>
 
-                  <div>
+                  <div id="field-company_name">
                     <label className="text-xs uppercase tracking-widest text-gray-600 dark:text-gray-400 font-medium mb-2 block">
                       Company Name *
                     </label>
@@ -678,7 +775,7 @@ export default function JobCreationPage({
                     />
                   </div>
 
-                  <div>
+                  <div id="field-job_type">
                     <label className="text-xs uppercase tracking-widest text-gray-600 dark:text-gray-400 font-medium mb-2 block">
                       Job Type *
                     </label>
@@ -699,7 +796,7 @@ export default function JobCreationPage({
                     />
                   </div>
 
-                  <div>
+                  <div id="field-experience_level">
                     <label className="text-xs uppercase tracking-widest text-gray-600 dark:text-gray-400 font-medium mb-2 block">
                       Experience Level *
                     </label>
@@ -721,7 +818,7 @@ export default function JobCreationPage({
                     />
                   </div>
 
-                  <div>
+                  <div id="field-country">
                     <label className="text-xs uppercase tracking-widest text-gray-600 dark:text-gray-400 font-medium mb-2 block">
                       Country *
                     </label>
@@ -756,9 +853,9 @@ export default function JobCreationPage({
                     />
                   </div>
 
-                  <div>
+                  <div id="field-state">
                     <label className="text-xs uppercase tracking-widest text-gray-600 dark:text-gray-400 font-medium mb-2 block">
-                      State/Region
+                      State/Region *
                     </label>
                     <StateSearch
                       state={form.state}
@@ -789,7 +886,7 @@ export default function JobCreationPage({
                     />
                   </div>
 
-                  <div>
+                  <div id="field-city">
                     <label className="text-xs uppercase tracking-widest text-gray-600 dark:text-gray-400 font-medium mb-2 block">
                       City *
                     </label>
@@ -857,7 +954,7 @@ export default function JobCreationPage({
             {/* STEP 2: DESCRIPTION */}
             {step === 1 && (
               <div className="space-y-6">
-                <div className="relative">
+                <div className="relative" id="field-description">
                   <div className="flex items-center justify-between mb-2">
                     <label className="text-xs uppercase tracking-widest text-gray-600 dark:text-gray-400 font-medium">
                       Job Description *
@@ -1020,9 +1117,9 @@ export default function JobCreationPage({
                   )}
                 </div>
 
-                <div>
+                <div id="field-responsibilities">
                   <label className="text-xs uppercase tracking-widest text-gray-600 dark:text-gray-400 font-medium mb-2 block">
-                    Responsibilities
+                    Responsibilities *
                   </label>
                   <RichTextEditor
                     value={form.responsibilities}
@@ -1039,7 +1136,7 @@ export default function JobCreationPage({
                   />
                 </div>
 
-                <div>
+                <div id="field-requirements">
                   <label className="text-xs uppercase tracking-widest text-gray-600 dark:text-gray-400 font-medium mb-2 block">
                     Requirements *
                   </label>
@@ -1060,7 +1157,7 @@ export default function JobCreationPage({
 
                 <div className="grid md:grid-cols-4 gap-6">
 
-                  <div>
+                  <div id="field-salary_type">
                     <label className="text-xs uppercase tracking-widest text-gray-600 dark:text-gray-400 font-medium mb-2 block">
                       Pay Period
                     </label>
@@ -1076,7 +1173,7 @@ export default function JobCreationPage({
                       ]}
                     />
                   </div>
-                  <div>
+                  <div id="field-salary_currency">
                     <label className="text-xs uppercase tracking-widest text-gray-600 dark:text-gray-400 font-medium mb-2 block">
                       Currency
                     </label>
@@ -1094,13 +1191,14 @@ export default function JobCreationPage({
                       ]}
                     />
                   </div>
-                  <div>
+                  <div id="field-salary_min">
                     <label className="text-xs uppercase tracking-widest text-gray-600 dark:text-gray-400 font-medium mb-2 block">
                       Min Salary *
                     </label>
                     <Input
                       name="salary_min"
                       type="number"
+                      min="1"
                       value={form.salary_min}
                       onChange={handleChange}
                       placeholder="80000"
@@ -1108,13 +1206,14 @@ export default function JobCreationPage({
                     />
                   </div>
 
-                  <div>
+                  <div id="field-salary_max">
                     <label className="text-xs uppercase tracking-widest text-gray-600 dark:text-gray-400 font-medium mb-2 block">
                       Max Salary *
                     </label>
                     <Input
                       name="salary_max"
                       type="number"
+                      min="1"
                       value={form.salary_max}
                       onChange={handleChange}
                       placeholder="150000"
@@ -1130,9 +1229,9 @@ export default function JobCreationPage({
             {/* STEP 1: SKILLS & CATEGORIES */}
             {step === 2 && (
               <div className="space-y-6">
-                <div>
+                <div id="field-required_skills">
                   <label className="text-xs uppercase tracking-widest text-gray-600 dark:text-gray-400 font-medium mb-3 block">
-                    Required Skills
+                    Required Skills *
                   </label>
                   <div className="flex gap-2 mb-3">
                     <div className="flex-1">
@@ -1243,9 +1342,9 @@ export default function JobCreationPage({
                   )}
                 </div>
 
-                <div>
+                <div id="field-preferred_skills">
                   <label className="text-xs uppercase tracking-widest text-gray-600 dark:text-gray-400 font-medium mb-3 block">
-                    Preferred Skills
+                    Preferred Skills *
                   </label>
                   <div className="flex gap-2 mb-3">
                     <div className="flex-1">
@@ -1356,9 +1455,9 @@ export default function JobCreationPage({
                   )}
                 </div>
 
-                <div>
+                <div id="field-categories">
                   <label className="text-xs uppercase tracking-widest text-gray-600 dark:text-gray-400 font-medium mb-3 block">
-                    Categories/Keywords
+                    Categories/Keywords *
                   </label>
                   <div className="flex gap-2 mb-3">
                     <Input
