@@ -162,10 +162,20 @@ export default function JobCreationPage({
   // Full ISO 4217 currency list for the currency dropdowns (computed once).
   const currencyOptions = useMemo(() => getCurrencyOptions(), []);
 
+  // For a NEW job, pre-fill Company Name from the recruiter's /me profile:
+  // individual recruiters → their full name, company recruiters → company name.
+  // Edit mode or an already-typed value is left untouched.
   React.useEffect(() => {
-    if (!jobToEdit && recruiter?.company_name && !form.company_name) {
-      setForm((p) => ({ ...p, company_name: recruiter.company_name || "" }));
-      setCompanyInput(recruiter.company_name);
+    if (jobToEdit || form.company_name) return;
+    const prefill =
+      recruiter?.recruiter_type === "individual"
+        ? recruiter?.full_name
+        : recruiter?.recruiter_type === "company"
+          ? recruiter?.company_name
+          : recruiter?.company_name || recruiter?.full_name;
+    if (prefill) {
+      setForm((p) => ({ ...p, company_name: prefill }));
+      setCompanyInput(prefill);
     }
   }, [recruiter, jobToEdit]);
 
