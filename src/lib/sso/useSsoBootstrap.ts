@@ -4,6 +4,7 @@
 import { useEffect } from "react";
 import {
   LS_ACCESS_TOKEN,
+  LS_RECRUITER_ACCESS_TOKEN,
   currentOrigin,
   isAllowedOrigin,
   peerOriginForCurrentSite,
@@ -63,7 +64,12 @@ export function useSsoBootstrap(_opts: { onLoggedIn?: (user: unknown) => void } 
     if (window.location.pathname.startsWith("/sso/")) return;
 
     try {
+      // Already a candidate session → nothing to bootstrap.
       if (window.localStorage.getItem(LS_ACCESS_TOKEN)) return;
+      // A recruiter is logged in → candidate SSO must NOT run, or the
+      // cross-site handoff/receive flow would wipe the recruiter tokens and
+      // drop them onto candidate pages on refresh.
+      if (window.localStorage.getItem(LS_RECRUITER_ACCESS_TOKEN)) return;
     } catch {
       return;
     }

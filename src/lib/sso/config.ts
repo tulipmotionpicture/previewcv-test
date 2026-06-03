@@ -64,6 +64,12 @@ export const LS_ACCESS_TOKEN = "access_token";
 export const LS_REFRESH_TOKEN = "refresh_token";
 export const LS_USER_TYPE = "user_type";
 
+/**
+ * Recruiter session token key. Candidate SSO must NOT run when a recruiter is
+ * logged in, otherwise the cross-site handoff clobbers the recruiter session.
+ */
+export const LS_RECRUITER_ACCESS_TOKEN = "recruiter_access_token";
+
 /** Normalize an origin string the same way the backend does. */
 export function normalizeOrigin(o: string | null | undefined): string | null {
   if (!o) return null;

@@ -7,6 +7,7 @@ import {
   LS_ACCESS_TOKEN,
   LS_REFRESH_TOKEN,
   LS_USER_TYPE,
+  LS_RECRUITER_ACCESS_TOKEN,
 } from "@/lib/sso/config";
 
 /**
@@ -35,6 +36,17 @@ export default function SSOReceivePage() {
   useEffect(() => {
     const url = new URL(window.location.href);
     const returnTo = getReturnTo();
+
+    // Safety net: never overwrite a logged-in recruiter session. Candidate SSO
+    // and recruiter auth use separate tokens; if a recruiter is signed in, skip
+    // the exchange entirely and send them back where they were (defends against
+    // any path that reaches /sso/receive while a recruiter session exists).
+    try {
+      if (window.localStorage.getItem(LS_RECRUITER_ACCESS_TOKEN)) {
+        finish(returnTo);
+        return;
+      }
+    } catch { /* ignore */ }
 
     // Anonymous bounce-back: peer told us user isn't logged in there.
     // Set the loop guard so we don't immediately retry SSO on next page.
