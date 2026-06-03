@@ -40,6 +40,7 @@ import {
   PaddleSubscriptionCancelRequest,
   PaddleSubscriptionUpdateRequest,
   PaddleMutationAck,
+  JobContentGenerateResponse,
 } from "@/types/api";
 import {
   ReviewedResumeMetadata,
@@ -1224,6 +1225,27 @@ export class ApiClient {
   async createJob(data: unknown): Promise<{ success: boolean; job: Job }> {
     return this.request<{ success: boolean; job: Job }>(
       "/api/v1/recruiters/jobs/create",
+      {
+        method: "POST",
+        body: JSON.stringify(data),
+      },
+      true,
+      true,
+    );
+  }
+
+  // Generate AI job-content variants from the recruiter's Step-1 inputs.
+  // Recruiter-authenticated; the response may take a while to return.
+  async generateJobContent(data: {
+    job_title: string;
+    company_name?: string;
+    job_type: string;
+    experience_level: string;
+    is_remote?: boolean;
+    salary_currency?: string;
+  }): Promise<JobContentGenerateResponse> {
+    return this.request<JobContentGenerateResponse>(
+      "/api/v1/recruiters/jobs/generate-content",
       {
         method: "POST",
         body: JSON.stringify(data),

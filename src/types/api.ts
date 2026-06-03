@@ -116,6 +116,28 @@ export interface Job {
   is_applied: boolean;
 }
 
+// One AI-generated content variant returned by
+// POST /api/v1/recruiters/jobs/generate-content. The text fields are PLAIN TEXT
+// (newlines + "- " bullets), not HTML.
+export interface JobContentVariant {
+  label: string;
+  description: string;
+  responsibilities?: string | null;
+  requirements?: string | null;
+  salary_currency?: string;
+  salary_min?: number | null;
+  salary_max?: number | null;
+  salary_type?: "hourly" | "weekly" | "monthly" | "yearly" | string;
+  required_skills?: string[];
+  preferred_skills?: string[];
+  categories?: string[];
+}
+
+export interface JobContentGenerateResponse {
+  variants: JobContentVariant[];
+  status?: string;
+}
+
 export interface ApplicationApplicant {
   id: number;
   email: string;

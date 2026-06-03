@@ -14,6 +14,7 @@ import StateSearch from "../location/StateSearch";
 import CitySearch from "../location/CitySearch";
 import { JobSearch, SkillSearch, CompanySearch } from "../masters";
 import { JobTitle, Company } from "@/types/masters";
+import { JobContentVariant } from "@/types/api";
 
 const STEPS = [
   "Core Details",
@@ -120,13 +121,42 @@ export default function JobCreationPage({
   const [categoryInput, setCategoryInput] = useState("");
   const [jobTitleInput, setJobTitleInput] = useState(jobToEdit?.title || "");
   const [selectedJobTitleId, setSelectedJobTitleId] = useState<number | null>(null);
-  const [showSuggestions, setShowSuggestions] = useState(false);
-  const [suggestions, setSuggestions] = useState<any[]>([]);
-  const [currentSuggestionIndex, setCurrentSuggestionIndex] = useState(0);
-  const [loadingSuggestions, setLoadingSuggestions] = useState(false);
+  // Old "Get Suggestions" state — retired with the AI generate-content flow (see below).
+  // const [showSuggestions, setShowSuggestions] = useState(false);
+  // const [suggestions, setSuggestions] = useState<any[]>([]);
+  // const [currentSuggestionIndex, setCurrentSuggestionIndex] = useState(0);
+  // const [loadingSuggestions, setLoadingSuggestions] = useState(false);
   const [companyInput, setCompanyInput] = useState(jobToEdit?.company_name || "");
   const [skillInput, setSkillInput] = useState("");
   const [prefSkillInput, setPrefSkillInput] = useState("");
+
+  // --- AI content generation (POST /api/v1/recruiters/jobs/generate-content) ---
+  type GenPhase = "currency" | "generating" | "variants" | "error";
+  const [showGenModal, setShowGenModal] = useState(false);
+  const [genPhase, setGenPhase] = useState<GenPhase>("currency");
+  const [genCurrency, setGenCurrency] = useState(form.salary_currency || "USD");
+  const [variants, setVariants] = useState<JobContentVariant[]>([]);
+  const [variantIndex, setVariantIndex] = useState(0);
+  const [genError, setGenError] = useState("");
+  const [genMsgIndex, setGenMsgIndex] = useState(0);
+
+  const GEN_MESSAGES = [
+    "Analyzing the role…",
+    "Drafting 3 tailored variants…",
+    "Writing responsibilities & requirements…",
+    "Estimating a fair salary range…",
+    "Polishing the final wording…",
+    "Almost there…",
+  ];
+
+  // Cycle the loading status message while a generation request is in flight.
+  React.useEffect(() => {
+    if (!showGenModal || genPhase !== "generating") return;
+    const id = setInterval(() => {
+      setGenMsgIndex((i) => (i + 1) % GEN_MESSAGES.length);
+    }, 2500);
+    return () => clearInterval(id);
+  }, [showGenModal, genPhase, GEN_MESSAGES.length]);
 
   React.useEffect(() => {
     if (!jobToEdit && recruiter?.company_name && !form.company_name) {
@@ -168,6 +198,12 @@ export default function JobCreationPage({
     }));
   };
 
+  // ----------------------------------------------------------------------------
+  // OLD "Get Suggestions" wiring — replaced by the AI generate-content flow below.
+  // Previously fetched canned suggestions from GET
+  // /api/v1/job-descriptions/by-title/{id}. Kept (commented) for reference.
+  // ----------------------------------------------------------------------------
+  /*
   const fetchSuggestions = async () => {
     if (!selectedJobTitleId) return;
     setLoadingSuggestions(true);
@@ -208,6 +244,108 @@ export default function JobCreationPage({
     }));
     setShowSuggestions(false);
     showToast("Suggestion applied successfully", "success");
+  };
+  */
+
+  // Convert plain text ("\n" newlines, "- "/"• " bullets) into simple HTML for the
+  // TipTap RichTextEditor (which stores/renders HTML).
+  const generatedTextToHtml = (text?: string | null) => {
+    if (!text) return "";
+    const escape = (s: string) =>
+      s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    const lines = text.split("\n").map((l) => l.trim());
+    let html = "";
+    let inList = false;
+    for (const line of lines) {
+      if (!line) {
+        if (inList) { html += "</ul>"; inList = false; }
+        continue;
+      }
+      if (/^[-•]\s+/.test(line)) {
+        if (!inList) { html += "<ul>"; inList = true; }
+        html += `<li>${escape(line.replace(/^[-•]\s+/, ""))}</li>`;
+      } else {
+        if (inList) { html += "</ul>"; inList = false; }
+        html += `<p>${escape(line)}</p>`;
+      }
+    }
+    if (inList) html += "</ul>";
+    return html;
+  };
+
+  // Open the generation modal — but first validate the Step-1 inputs the API needs.
+  const openGenerate = () => {
+    const missing = !form.title.trim()
+      ? { field: "title", message: "Please enter a job title in Step 1 first." }
+      : !form.company_name.trim()
+        ? { field: "company_name", message: "Please enter a company name in Step 1 first." }
+        : !form.job_type
+          ? { field: "job_type", message: "Please select a job type in Step 1 first." }
+          : !form.experience_level
+            ? { field: "experience_level", message: "Please select an experience level in Step 1 first." }
+            : null;
+    if (missing) {
+      showToast(missing.message, "error");
+      setStep(0);
+      focusField(missing.field);
+      return;
+    }
+    setGenCurrency(form.salary_currency || "USD");
+    setGenError("");
+    setVariants([]);
+    setGenPhase("currency");
+    setShowGenModal(true);
+  };
+
+  // Call generate-content with the confirmed currency. May take a while.
+  const runGenerate = async () => {
+    setGenError("");
+    setGenMsgIndex(0);
+    setGenPhase("generating");
+    setForm((p) => ({ ...p, salary_currency: genCurrency }));
+    try {
+      const res = await api.generateJobContent({
+        job_title: form.title,
+        company_name: form.company_name,
+        job_type: form.job_type,
+        experience_level: form.experience_level,
+        is_remote: form.is_remote,
+        salary_currency: genCurrency,
+      });
+      const list = res?.variants || [];
+      if (!list.length) {
+        setGenError("No content was generated. Please try again.");
+        setGenPhase("error");
+        return;
+      }
+      setVariants(list);
+      setVariantIndex(0);
+      setGenPhase("variants");
+    } catch (e: any) {
+      console.error(e);
+      setGenError(e?.message || "Failed to generate content. Please try again.");
+      setGenPhase("error");
+    }
+  };
+
+  // Apply the chosen variant — OVERWRITE the Step 2 + Step 3 fields.
+  const applyVariant = (v: JobContentVariant) => {
+    setForm((prev) => ({
+      ...prev,
+      description: generatedTextToHtml(v.description),
+      responsibilities: generatedTextToHtml(v.responsibilities),
+      requirements: generatedTextToHtml(v.requirements),
+      salary_currency: v.salary_currency || prev.salary_currency,
+      salary_min: v.salary_min != null ? String(v.salary_min) : "",
+      salary_max: v.salary_max != null ? String(v.salary_max) : "",
+      salary_type:
+        (v.salary_type as JobFormState["salary_type"]) || "yearly",
+      required_skills: (v.required_skills || []).join(", "),
+      preferred_skills: (v.preferred_skills || []).join(", "),
+      categories: (v.categories || []).join(", "),
+    }));
+    setShowGenModal(false);
+    showToast("Content applied — review Step 2 & Step 3.", "success");
   };
 
   const addCategory = () => {
@@ -960,45 +1098,43 @@ export default function JobCreationPage({
                       Job Description *
                     </label>
 
-                    {selectedJobTitleId && (
-                      <button
-                        type="button"
-                        onClick={fetchSuggestions}
-                        disabled={loadingSuggestions}
-                        className="text-sm text-blue-600 hover:text-blue-700 flex items-center gap-1 font-medium disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
-                      >
-                        {loadingSuggestions ? (
-                          <>
-                            <svg
-                              className="animate-spin h-4 w-4"
-                              xmlns="http://www.w3.org/2000/svg"
-                              fill="none"
-                              viewBox="0 0 24 24"
-                            >
-                              <circle
-                                className="opacity-25"
-                                cx="12"
-                                cy="12"
-                                r="10"
-                                stroke="currentColor"
-                                strokeWidth="4"
-                              />
-                              <path
-                                className="opacity-75"
-                                fill="currentColor"
-                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                              />
-                            </svg>
-                            Loading Suggestions...
-                          </>
-                        ) : (
-                          <>
-                            <Lightbulb className="h-4 w-4" />
-                            Get Suggestions
-                          </>
-                        )}
-                      </button>
-                    )}
+                    <button
+                      type="button"
+                      onClick={openGenerate}
+                      disabled={showGenModal && genPhase === "generating"}
+                      className="text-sm text-blue-600 hover:text-blue-700 flex items-center gap-1 font-medium disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                    >
+                      {showGenModal && genPhase === "generating" ? (
+                        <>
+                          <svg
+                            className="animate-spin h-4 w-4"
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                          >
+                            <circle
+                              className="opacity-25"
+                              cx="12"
+                              cy="12"
+                              r="10"
+                              stroke="currentColor"
+                              strokeWidth="4"
+                            />
+                            <path
+                              className="opacity-75"
+                              fill="currentColor"
+                              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                            />
+                          </svg>
+                          Generating…
+                        </>
+                      ) : (
+                        <>
+                          <Lightbulb className="h-4 w-4" />
+                          Get Suggestions
+                        </>
+                      )}
+                    </button>
                   </div>
                   <RichTextEditor
                     value={form.description}
@@ -1015,97 +1151,204 @@ export default function JobCreationPage({
                   />
 
 
-                  {showSuggestions && (
+                  {showGenModal && (
                     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
                       <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+                        {/* Header */}
                         <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center bg-white dark:bg-gray-800">
                           <div>
-                            <h4 className="font-semibold text-gray-900 dark:text-white text-lg">Suggested Job Details</h4>
-                            <p className="text-xs text-gray-500 mt-1">Select a suggestion to automatically populate your job form</p>
+                            <h4 className="font-semibold text-gray-900 dark:text-white text-lg flex items-center gap-2">
+                              <Lightbulb className="h-5 w-5 text-blue-600" />
+                              AI Job Content
+                            </h4>
+                            <p className="text-xs text-gray-500 mt-1">
+                              {genPhase === "currency" && "Confirm the salary currency, then we'll draft tailored content."}
+                              {genPhase === "generating" && "Generating tailored content from your job details…"}
+                              {genPhase === "variants" && "Pick a variant to fill in Step 2 & Step 3."}
+                              {genPhase === "error" && "Something went wrong."}
+                            </p>
                           </div>
-                          <button onClick={() => setShowSuggestions(false)} className="text-gray-500 hover:text-gray-700 p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                          <button
+                            type="button"
+                            onClick={() => setShowGenModal(false)}
+                            disabled={genPhase === "generating"}
+                            className="text-gray-500 hover:text-gray-700 p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                          >
                             <X className="w-5 h-5" />
                           </button>
                         </div>
 
+                        {/* Body */}
                         <div className="flex-1 overflow-y-auto">
-                          {loadingSuggestions ? (
-                            <div className="absolute inset-0 flex items-center justify-center bg-white/50 dark:bg-gray-800/50 z-10">
-                              <svg className="animate-spin h-8 w-8 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          {/* Phase: currency */}
+                          {genPhase === "currency" && (
+                            <div className="p-8 max-w-sm mx-auto">
+                              <label className="text-xs uppercase tracking-widest text-gray-600 dark:text-gray-400 font-medium mb-2 block">
+                                Salary Currency
+                              </label>
+                              <Select
+                                value={genCurrency}
+                                onChange={(e) => setGenCurrency(e.target.value)}
+                                options={[
+                                  { value: "USD", label: "USD" },
+                                  { value: "EUR", label: "EUR" },
+                                  { value: "GBP", label: "GBP" },
+                                  { value: "INR", label: "INR" },
+                                  { value: "CAD", label: "CAD" },
+                                  { value: "AUD", label: "AUD" },
+                                ]}
+                              />
+                              <p className="text-xs text-gray-500 mt-3">
+                                We&apos;ll generate 3 content variants tailored to{" "}
+                                <span className="font-medium">{form.title || "this role"}</span>. This can take up to ~30 seconds.
+                              </p>
+                            </div>
+                          )}
+
+                          {/* Phase: generating */}
+                          {genPhase === "generating" && (
+                            <div className="p-12 flex flex-col items-center justify-center text-center gap-4 min-h-[260px]">
+                              <svg className="animate-spin h-10 w-10 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                               </svg>
+                              <p className="text-base font-semibold text-gray-900 dark:text-white">{GEN_MESSAGES[genMsgIndex]}</p>
+                              <p className="text-xs text-gray-500 max-w-xs">
+                                Crafting 3 tailored variants — this can take up to ~30 seconds. Please keep this window open.
+                              </p>
+                              <div className="flex gap-1.5 mt-2">
+                                {GEN_MESSAGES.map((_, i) => (
+                                  <span
+                                    key={i}
+                                    className={`h-1.5 rounded-full transition-all ${i === genMsgIndex ? "w-6 bg-blue-600" : "w-1.5 bg-gray-300 dark:bg-gray-600"}`}
+                                  />
+                                ))}
+                              </div>
                             </div>
-                          ) : null}
+                          )}
 
-                          {suggestions.length === 0 && !loadingSuggestions ? (
-                            <div className="text-center py-8 text-gray-500">No suggestions found for this job title.</div>
-                          ) : suggestions.length > 0 ? (
+                          {/* Phase: error */}
+                          {genPhase === "error" && (
+                            <div className="p-12 flex flex-col items-center justify-center text-center gap-3 min-h-[220px]">
+                              <div className="text-red-600 text-sm font-medium max-w-sm">{genError || "Failed to generate content."}</div>
+                              <button
+                                type="button"
+                                onClick={() => setGenPhase("currency")}
+                                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-sm font-medium transition-colors"
+                              >
+                                Try again
+                              </button>
+                            </div>
+                          )}
+
+                          {/* Phase: variants */}
+                          {genPhase === "variants" && variants[variantIndex] && (
                             <div className="p-6">
-                              <div className="flex flex-wrap gap-2 mb-6">
-                                <span className="px-3 py-1.5 bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300 rounded-full text-sm font-semibold">{suggestions[currentSuggestionIndex].experience_level}</span>
-                                <span className="px-3 py-1.5 bg-purple-100 text-purple-800 dark:bg-purple-900/40 dark:text-purple-300 rounded-full text-sm font-semibold">{suggestions[currentSuggestionIndex].industry_context}</span>
+                              <div className="flex flex-wrap items-center gap-2 mb-6">
+                                <span className="px-3 py-1.5 bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300 rounded-full text-sm font-semibold">
+                                  {variants[variantIndex].label}
+                                </span>
+                                {(variants[variantIndex].salary_min != null || variants[variantIndex].salary_max != null) && (
+                                  <span className="px-3 py-1.5 bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300 rounded-full text-sm font-semibold">
+                                    {variants[variantIndex].salary_currency} {variants[variantIndex].salary_min ?? "—"} – {variants[variantIndex].salary_max ?? "—"} / {variants[variantIndex].salary_type}
+                                  </span>
+                                )}
                               </div>
                               <div className="space-y-6">
                                 <div>
                                   <h5 className="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wider mb-2">Description</h5>
-                                  <div className="text-sm text-gray-700 dark:text-gray-300 prose dark:prose-invert max-w-none prose-sm" dangerouslySetInnerHTML={{ __html: suggestions[currentSuggestionIndex].description }} />
+                                  <p className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-line">{variants[variantIndex].description}</p>
                                 </div>
-                                {suggestions[currentSuggestionIndex].responsibilities && (
+                                {variants[variantIndex].responsibilities && (
                                   <div>
                                     <h5 className="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wider mb-2">Responsibilities</h5>
-                                    <div className="text-sm text-gray-700 dark:text-gray-300 prose dark:prose-invert max-w-none prose-sm" dangerouslySetInnerHTML={{ __html: suggestions[currentSuggestionIndex].responsibilities }} />
+                                    <p className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-line">{variants[variantIndex].responsibilities}</p>
                                   </div>
                                 )}
-                                {suggestions[currentSuggestionIndex].requirements && (
+                                {variants[variantIndex].requirements && (
                                   <div>
                                     <h5 className="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wider mb-2">Requirements</h5>
-                                    <div className="text-sm text-gray-700 dark:text-gray-300 prose dark:prose-invert max-w-none prose-sm" dangerouslySetInnerHTML={{ __html: suggestions[currentSuggestionIndex].requirements }} />
+                                    <p className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-line">{variants[variantIndex].requirements}</p>
                                   </div>
                                 )}
                                 <div className="grid grid-cols-2 gap-6 pt-4 border-t border-gray-100 dark:border-gray-700">
                                   <div>
-                                    <h5 className="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wider mb-2">Top Skills</h5>
+                                    <h5 className="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wider mb-2">Required Skills</h5>
                                     <div className="flex flex-wrap gap-2">
-                                      {suggestions[currentSuggestionIndex].skills_required?.map((skill: string, i: number) => (
+                                      {(variants[variantIndex].required_skills || []).map((skill, i) => (
                                         <span key={i} className="px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded text-xs">{skill}</span>
-                                      )) || <span className="text-sm text-gray-500">None</span>}
+                                      ))}
                                     </div>
                                   </div>
                                   <div>
-                                    <h5 className="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wider mb-2">Keywords</h5>
+                                    <h5 className="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wider mb-2">Preferred Skills</h5>
                                     <div className="flex flex-wrap gap-2">
-                                      {suggestions[currentSuggestionIndex].categories_keywords?.map((kw: string, i: number) => (
-                                        <span key={i} className="px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded text-xs">{kw}</span>
-                                      )) || <span className="text-sm text-gray-500">None</span>}
+                                      {(variants[variantIndex].preferred_skills || []).map((skill, i) => (
+                                        <span key={i} className="px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded text-xs">{skill}</span>
+                                      ))}
                                     </div>
                                   </div>
                                 </div>
+                                <div>
+                                  <h5 className="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wider mb-2">Categories</h5>
+                                  <div className="flex flex-wrap gap-2">
+                                    {(variants[variantIndex].categories || []).map((cat, i) => (
+                                      <span key={i} className="px-2 py-1 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 rounded text-xs">{cat}</span>
+                                    ))}
+                                  </div>
+                                </div>
                                 <div className="pt-6 mt-4 flex justify-center border-t border-gray-100 dark:border-gray-700">
-                                  <button onClick={() => applySuggestion(suggestions[currentSuggestionIndex])} className="px-2 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors">
-                                    Use Suggestion
+                                  <button
+                                    type="button"
+                                    onClick={() => applyVariant(variants[variantIndex])}
+                                    className="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors font-medium"
+                                  >
+                                    Use this variant
                                   </button>
                                 </div>
                               </div>
                             </div>
-                          ) : null}
+                          )}
                         </div>
 
-                        {suggestions.length > 1 && (
+                        {/* Footer: currency actions */}
+                        {genPhase === "currency" && (
+                          <div className="p-4 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 flex items-center justify-end gap-3">
+                            <button
+                              type="button"
+                              onClick={() => setShowGenModal(false)}
+                              className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors"
+                            >
+                              Cancel
+                            </button>
+                            <button
+                              type="button"
+                              onClick={runGenerate}
+                              className="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-sm font-semibold transition-colors flex items-center gap-2"
+                            >
+                              <Lightbulb className="h-4 w-4" /> Generate
+                            </button>
+                          </div>
+                        )}
+
+                        {/* Footer: variant carousel */}
+                        {genPhase === "variants" && variants.length > 1 && (
                           <div className="p-4 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 flex items-center justify-between">
                             <button
-                              onClick={() => setCurrentSuggestionIndex(prev => prev - 1)}
-                              disabled={currentSuggestionIndex === 0}
+                              type="button"
+                              onClick={() => setVariantIndex((i) => Math.max(0, i - 1))}
+                              disabled={variantIndex === 0}
                               className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-700 transition-colors"
                             >
                               Previous
                             </button>
                             <span className="text-sm text-gray-600 dark:text-gray-400 font-medium">
-                              Suggestion {currentSuggestionIndex + 1} of {suggestions.length}
+                              Variant {variantIndex + 1} of {variants.length}
                             </span>
                             <button
-                              onClick={() => setCurrentSuggestionIndex(prev => prev + 1)}
-                              disabled={currentSuggestionIndex === suggestions.length - 1}
+                              type="button"
+                              onClick={() => setVariantIndex((i) => Math.min(variants.length - 1, i + 1))}
+                              disabled={variantIndex === variants.length - 1}
                               className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-700 transition-colors"
                             >
                               Next
