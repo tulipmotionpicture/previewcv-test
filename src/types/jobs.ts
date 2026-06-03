@@ -17,6 +17,7 @@ export interface Job {
   salary_min: number | null;
   salary_max: number | null;
   salary_currency: string;
+  salary_type?: "hourly" | "weekly" | "monthly" | "yearly";
   is_remote: boolean;
   posted_date: string;
   categories: string[];

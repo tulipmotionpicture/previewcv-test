@@ -5,6 +5,7 @@ import Link from "next/link";
 import BookmarkButton from "./BookmarkButton";
 import { useToast } from "@/context/ToastContext";
 import { useRouter } from "next/navigation";
+import { formatSalaryRange } from "@/lib/salary";
 
 interface JobListProps {
   jobs: Job[];
@@ -13,12 +14,7 @@ interface JobListProps {
 }
 
 function formatSalary(job: Job) {
-  if (job.salary_min && job.salary_max) {
-    return `${job.salary_currency || "USD"} ${job.salary_min} - ${
-      job.salary_max
-    }`;
-  }
-  return "Competitive Salary";
+  return formatSalaryRange(job);
 }
 
 export default function JobList({ jobs, loading, error }: JobListProps) {
@@ -208,17 +204,7 @@ export default function JobList({ jobs, loading, error }: JobListProps) {
               <div className="flex flex-wrap items-center gap-2 mb-2">
                 <div className="flex items-baseline">
                   <span className="text-lg font-bold text-primary-blue dark:text-blue-400">
-                    {formatSalary(job).split(" ")[0] === "USD"
-                      ? "$"
-                      : formatSalary(job).split(" ")[0]}
-                    {formatSalary(job)
-                      .split(" ")
-                      .slice(1)
-                      .join(" ")
-                      .replace("Competitive Salary", "Competitive")}
-                  </span>
-                  <span className="text-[10px] text-slate-400 font-medium ml-0.5">
-                    /month
+                    {formatSalary(job)}
                   </span>
                 </div>
 

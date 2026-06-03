@@ -8,6 +8,7 @@ import JobDetailsSidebar from "@/components/JobDetailsSidebar";
 import FloatingHeader from "@/components/FloatingHeader";
 import { notFound } from "next/navigation";
 import { api } from "@/lib/api";
+import { formatSalaryRange } from "@/lib/salary";
 import {
   MapPin,
   Briefcase,
@@ -98,14 +99,6 @@ export default async function JobDetailsPage({
     notFound();
   }
 
-  const formatCurrency = (amount: number, currency: string) => {
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: currency,
-      maximumFractionDigits: 0,
-    }).format(amount);
-  };
-
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-950 transition-colors duration-200">
       <FloatingHeader
@@ -172,23 +165,7 @@ export default async function JobDetailsPage({
                   <div className="flex flex-wrap gap-2 mb-4">
                     {(job.salary_min || job.salary_max) && (
                       <div className="inline-flex items-center gap-1.5 font-semibold text-gray-900 dark:text-gray-100">
-                        <span className="text-gray-500">₹</span>
-                        {job.salary_min
-                          ? formatCurrency(
-                            job.salary_min,
-                            job.salary_currency || "USD",
-                          )
-                            .replace("US$", "")
-                            .replace("$", "")
-                          : ""}
-                        {job.salary_max
-                          ? ` - ${formatCurrency(
-                            job.salary_max,
-                            job.salary_currency || "USD",
-                          )
-                            .replace("US$", "")
-                            .replace("$", "")}`
-                          : ""}
+                        {formatSalaryRange(job)}
                       </div>
                     )}
                     <div className="w-px h-6 bg-gray-300 dark:bg-gray-700 mx-2"></div>

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { api, ResumeMetadata } from "@/lib/api";
+import { formatSalaryRange } from "@/lib/salary";
 import { Job, PdfResume, Resume } from "@/types/api";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/context/ToastContext";
@@ -225,13 +226,6 @@ export default function JobDetailsClient({ job, slug }: JobDetailsClientProps) {
       console.log("Parsed resume metadata:", metadata);
     }
     fetchResumes();
-  };
-  const formatCurrency = (amount: number, currency: string) => {
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: currency,
-      maximumFractionDigits: 0,
-    }).format(amount);
   };
 
 
@@ -591,15 +585,7 @@ export default function JobDetailsClient({ job, slug }: JobDetailsClientProps) {
                   </div>
                   <div className="flex items-center gap-1">
                     <span className="font-semibold text-gray-900 dark:text-gray-100">
-                      <span className="text-gray-500 font-normal mr-0.5">
-                        ₹
-                      </span>
-                      {similarJob.salary_min
-                        ? formatCurrency(
-                          similarJob.salary_min,
-                          similarJob.salary_currency || "USD",
-                        ).replace(/[^0-9,]/g, "")
-                        : "N/A"}
+                      {formatSalaryRange(similarJob, { fallback: "N/A" })}
                     </span>
                   </div>
                 </div>

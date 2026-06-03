@@ -15,6 +15,7 @@ import CitySearch from "../location/CitySearch";
 import { JobSearch, SkillSearch, CompanySearch } from "../masters";
 import { JobTitle, Company } from "@/types/masters";
 import { JobContentVariant } from "@/types/api";
+import { getCurrencyOptions } from "@/lib/salary";
 
 const STEPS = [
   "Core Details",
@@ -157,6 +158,9 @@ export default function JobCreationPage({
     }, 2500);
     return () => clearInterval(id);
   }, [showGenModal, genPhase, GEN_MESSAGES.length]);
+
+  // Full ISO 4217 currency list for the currency dropdowns (computed once).
+  const currencyOptions = useMemo(() => getCurrencyOptions(), []);
 
   React.useEffect(() => {
     if (!jobToEdit && recruiter?.company_name && !form.company_name) {
@@ -1189,14 +1193,7 @@ export default function JobCreationPage({
                               <Select
                                 value={genCurrency}
                                 onChange={(e) => setGenCurrency(e.target.value)}
-                                options={[
-                                  { value: "USD", label: "USD" },
-                                  { value: "EUR", label: "EUR" },
-                                  { value: "GBP", label: "GBP" },
-                                  { value: "INR", label: "INR" },
-                                  { value: "CAD", label: "CAD" },
-                                  { value: "AUD", label: "AUD" },
-                                ]}
+                                options={currencyOptions}
                               />
                               <p className="text-xs text-gray-500 mt-3">
                                 We&apos;ll generate 3 content variants tailored to{" "}
@@ -1424,14 +1421,7 @@ export default function JobCreationPage({
                       name="salary_currency"
                       value={form.salary_currency}
                       onChange={handleChange}
-                      options={[
-                        { value: "USD", label: "USD" },
-                        { value: "EUR", label: "EUR" },
-                        { value: "GBP", label: "GBP" },
-                        { value: "INR", label: "INR" },
-                        { value: "CAD", label: "CAD" },
-                        { value: "AUD", label: "AUD" },
-                      ]}
+                      options={currencyOptions}
                     />
                   </div>
                   <div id="field-salary_min">

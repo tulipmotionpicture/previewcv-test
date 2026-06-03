@@ -33,6 +33,7 @@ import {
 } from "lucide-react";
 import { RecruiterProfile, CompanyEvent } from "@/types";
 import { Job } from "@/types/api";
+import { formatSalaryRange } from "@/lib/salary";
 import Link from "next/link";
 
 interface GalleryImage {
@@ -379,11 +380,7 @@ export default function RecruiterProfilePublic({
                             <div className="flex items-center gap-4 text-xs">
                               {job.salary_min && job.salary_max && (
                                 <span className="font-bold text-slate-700">
-                                  ${job.salary_min.toLocaleString()} - $
-                                  {job.salary_max.toLocaleString()}
-                                  {job.salary_currency
-                                    ? ` ${job.salary_currency}`
-                                    : ""}
+                                  {formatSalaryRange(job)}
                                 </span>
                               )}
                               {job.required_skills &&

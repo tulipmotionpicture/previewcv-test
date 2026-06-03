@@ -8,6 +8,7 @@ import {
   Eye,
 } from "lucide-react";
 import { Application } from "../../types/api";
+import { formatSalaryRange } from "@/lib/salary";
 
 interface JobCardProps {
   application: Application;
@@ -44,16 +45,8 @@ const JobCard: React.FC<JobCardProps> = ({ application }) => {
       .join(" ");
   };
 
-  const formatSalary = () => {
-    if (application.salary_min && application.salary_max) {
-      return `${application.salary_currency || "$"}${application.salary_min.toLocaleString()} - ${application.salary_currency || "$"}${application.salary_max.toLocaleString()}`;
-    } else if (application.salary_min) {
-      return `From ${application.salary_currency || "$"}${application.salary_min.toLocaleString()}`;
-    } else if (application.salary_max) {
-      return `Up to ${application.salary_currency || "$"}${application.salary_max.toLocaleString()}`;
-    }
-    return "Salary not specified";
-  };
+  const formatSalary = () =>
+    formatSalaryRange(application, { fallback: "Salary not specified" });
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString("en-US", {
