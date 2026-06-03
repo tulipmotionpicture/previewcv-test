@@ -6,6 +6,8 @@ import BookmarkButton from "./BookmarkButton";
 import { useToast } from "@/context/ToastContext";
 import { useRouter } from "next/navigation";
 import { formatSalaryRange } from "@/lib/salary";
+import Image from "next/image";
+import { Building2 } from "lucide-react";
 
 interface JobListProps {
   jobs: Job[];
@@ -100,15 +102,21 @@ export default function JobList({ jobs, loading, error }: JobListProps) {
                   {/* Logo */}
                   <div className="w-9 h-9 rounded-lg bg-gray-50 dark:bg-gray-800 flex items-center justify-center p-1 border border-gray-100 dark:border-gray-700 shrink-0">
                     {job.company_logo_url ? (
-                      <img
+                      <Image
+                        width={40}
+                        height={40}
                         src={job.company_logo_url}
                         alt={job.company_name}
-                        className="w-full h-full object-contain"
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          e.currentTarget.style.display = "none";
+                          e.currentTarget.nextElementSibling?.classList.remove(
+                            "hidden",
+                          );
+                        }}
                       />
                     ) : (
-                      <span className="text-lg font-bold text-green-600">
-                        {job.company_name?.charAt(0) || "C"}
-                      </span>
+                      <Building2 className="w-8 h-8 text-gray-400" />
                     )}
                   </div>
 

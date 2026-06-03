@@ -407,34 +407,45 @@ export default function JobDetailsClient({ job, slug }: JobDetailsClientProps) {
                 </div>
               ) : (
                 <div className="space-y-2">
-                  <select
-                    value={resumeId || ""}
-                    onChange={(e) => setResumeId(Number(e.target.value))}
-                    className="w-full px-3 py-2.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg outline-none text-sm font-medium cursor-pointer focus:ring-2 focus:ring-blue-500"
-                  >
-                    <option value="" disabled>
-                      Select Resume
-                    </option>
-                    {pdfResumes.length > 0 && (
-                      <optgroup label="Uploaded PDF Resumes">
-                        {pdfResumes.map((r) => (
-                          <option key={`pdf-${r.id}`} value={r.id}>
-                            {r.resume_name}
-                          </option>
-                        ))}
-                      </optgroup>
-                    )}
-                    {builderResumes.length > 0 && (
-                      <optgroup label="Resume Builder CVs">
-                        {builderResumes.map((r) => (
-                          <option key={`builder-${r.id}`} value={r.id}>
-                            {r.name}
-                          </option>
-                        ))}
-                      </optgroup>
-                    )}
-                  </select>
+                  <div className="flex gap-1">
+                    <select
+                      value={resumeId || ""}
+                      onChange={(e) => setResumeId(Number(e.target.value))}
+                      className="w-full px-3 py-2.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg outline-none text-sm font-medium cursor-pointer focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="" disabled>
+                        Select Resume
+                      </option>
+                      {pdfResumes.length > 0 && (
+                        <optgroup label="Uploaded PDF Resumes">
+                          {pdfResumes.map((r) => (
+                            <option key={`pdf-${r.id}`} value={r.id}>
+                              {r.resume_name}
+                            </option>
+                          ))}
+                        </optgroup>
+                      )}
+                      {builderResumes.length > 0 && (
+                        <optgroup label="Resume Builder CVs">
+                          {builderResumes.map((r) => (
+                            <option key={`builder-${r.id}`} value={r.id}>
+                              {r.name}
+                            </option>
+                          ))}
+                        </optgroup>
+                      )}
+                    </select>
 
+                    {resumeId && (
+                      <button
+                        type="button"
+                        onClick={() => setResumeId(null)}
+                        className="p-2 text-sm text-red-600 bg-red-100 dark:text-red-400 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800 cursor-pointer"
+                      >
+                        <X className="w-4 h-4 " />
+                      </button>
+                    )}
+                  </div>
                   {!resumeId && (
                     <div className="pt-1">
                       <ResumeUpload
@@ -465,7 +476,7 @@ export default function JobDetailsClient({ job, slug }: JobDetailsClientProps) {
                 className="flex items-center justify-center gap-1.5 px-3 py-2.5 bg-white hover:bg-gray-50 text-gray-700 border border-gray-200 rounded-lg text-xs font-bold transition-all"
               >
                 <Eye className="w-3.5 h-3.5 text-blue-500" />
-                View Data
+                View CV
               </button>
             </div>
 
@@ -787,15 +798,13 @@ export default function JobDetailsClient({ job, slug }: JobDetailsClientProps) {
       {/* Resume Preview Modal */}
       <div
         id="job-preview-modal"
-        className={`fixed inset-0 bg-black/60 z-[100] backdrop-blur-sm transition-opacity duration-300 ${
-          isModalOpen ? "opacity-100 flex items-center justify-center" : "opacity-0 pointer-events-none"
-        }`}
+        className={`fixed inset-0 bg-black/60 z-[100] backdrop-blur-sm transition-opacity duration-300 ${isModalOpen ? "opacity-100 flex items-center justify-center" : "opacity-0 pointer-events-none"
+          }`}
         onClick={closeModal}
       >
         <div
-          className={`bg-white dark:bg-gray-900 rounded-2xl shadow-2xl max-w-4xl w-full mx-4 overflow-hidden transform transition-all duration-300 ${
-            isModalOpen ? "scale-100 translate-y-0" : "scale-95 translate-y-4"
-          }`}
+          className={`bg-white dark:bg-gray-900 rounded-2xl shadow-2xl max-w-4xl w-full mx-4 overflow-hidden transform transition-all duration-300 ${isModalOpen ? "scale-100 translate-y-0" : "scale-95 translate-y-4"
+            }`}
           onClick={(e) => e.stopPropagation()}
         >
           {/* Modal Header */}
