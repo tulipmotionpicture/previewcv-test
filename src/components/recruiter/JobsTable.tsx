@@ -14,13 +14,12 @@ import {
   MapPin,
   Briefcase,
   Share2,
-  Copy,
   Tags,
 } from "lucide-react";
 import { formatSalaryRange } from "@/lib/salary";
+import ShareJobModal from "./ShareJobModal";
 import config from "@/config";
 import { generateQRCodeDataURL, downloadElementAsImage } from "@/utils/qr";
-import { useToast } from "@/context/ToastContext";
 import { api } from "@/lib/api";
 interface JobsTableProps {
   jobs: Job[];
@@ -166,7 +165,6 @@ export default function JobsTable({
   const [qrJob, setQrJob] = useState<Job | null>(null);
   const [shareJob, setShareJob] = useState<Job | null>(null);
   const [qrDataUrl, setQrDataUrl] = useState<string>("");
-  const toast = useToast();
 
   useEffect(() => setMounted(true), []);
 
@@ -698,77 +696,9 @@ export default function JobsTable({
         )}
 
       {/* Share Job Modal */}
-      {shareJob &&
-        mounted &&
-        createPortal(
-          <div className="fixed inset-0 z-9 flex items-center justify-center p-4 sm:p-6 bg-slate-900/60 backdrop-blur-sm">
-            <div className="w-full max-w-2xl bg-white dark:bg-[#1E1E1E] rounded-2xl shadow-2xl relative flex flex-col max-h-[90vh] animate-in fade-in zoom-in duration-300 overflow-hidden">
-              <div className="flex items-center justify-between p-6 border-b border-gray-100 dark:border-gray-800">
-                <h3 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                  <Share2 className="w-5 h-5 text-blue-600" />
-                  Share Job
-                </h3>
-                <button
-                  onClick={() => setShareJob(null)}
-                  className="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors"
-                >
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
-
-              <div className="p-6 overflow-y-auto custom-scrollbar flex-1 bg-gray-50/50 dark:bg-[#1A1A1A]">
-                <div className="mb-6">
-                  <h4 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">{shareJob.title}</h4>
-                  <div className="flex flex-wrap items-center gap-4 text-sm font-medium text-gray-600 dark:text-gray-400">
-                    <span className="text-primary-blue bg-blue-50 dark:bg-blue-900/30 px-3 py-1 rounded-full">{shareJob.company_name}</span>
-                    <span className="flex items-center gap-1.5"><MapPin className="w-4 h-4" /> {shareJob.is_remote ? "Remote" : shareJob.location || "Location TBA"}</span>
-                    <span className="flex items-center gap-1.5"><Briefcase className="w-4 h-4" /> {shareJob.job_type?.split("_").map((w: string) => w.charAt(0).toUpperCase() + w.slice(1)).join(" ")}</span>
-                  </div>
-                </div>
-
-                <div className="prose prose-sm sm:prose-base dark:prose-invert max-w-none bg-white dark:bg-[#282727] p-6 rounded-xl border border-gray-100 dark:border-gray-800 shadow-sm">
-                  <div
-                    dangerouslySetInnerHTML={{ __html: shareJob.description || "<p>No description provided.</p>" }}
-                    className="[&>p]:mb-4 [&>ul]:list-disc [&>ul]:ml-6 [&>ul]:mb-4 [&>ol]:list-decimal [&>ol]:ml-6 [&>ol]:mb-4 [&>h1]:text-xl [&>h1]:font-bold [&>h1]:mb-3 [&>h2]:text-lg [&>h2]:font-bold [&>h2]:mb-3 [&>h3]:text-base [&>h3]:font-bold [&>h3]:mb-2 text-gray-700 dark:text-gray-300"
-                  />
-                </div>
-              </div>
-
-              <div className="p-6 border-t border-gray-100 dark:border-gray-800 bg-white dark:bg-[#1E1E1E] flex flex-col sm:flex-row gap-4">
-                <button
-                  onClick={() => {
-                    const tempDiv = document.createElement("div");
-                    tempDiv.innerHTML = shareJob.description || "";
-                    const descriptionText = tempDiv.textContent || tempDiv.innerText || "";
-
-                    const url = `${window.location.origin}/job/${shareJob.slug}`;
-                    const content = `${shareJob.title}\n${descriptionText}\n\nApply here: ${url}`;
-
-                    navigator.clipboard.writeText(content);
-                    toast.success("Job content copied to clipboard!");
-                  }}
-                  className="flex flex-1 items-center justify-center gap-2 px-5 py-3.5 bg-white dark:bg-[#282727] text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-gray-700 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800 transition-all font-bold text-sm shadow-sm"
-                >
-                  <Copy className="w-5 h-5" />
-                  <span>Copy Content</span>
-                </button>
-
-                <button
-                  onClick={() => {
-                    const url = `${window.location.origin}/job/${shareJob.slug}`;
-                    const linkedinUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`;
-                    window.open(linkedinUrl, '_blank', 'width=800,height=700,noopener,noreferrer');
-                  }}
-                  className="flex flex-1 items-center justify-center gap-2 px-5 py-3.5 bg-[#0A66C2] text-white rounded-xl hover:bg-[#004182] transition-all font-bold text-sm shadow-sm"
-                >
-                  <Share2 className="w-5 h-5" />
-                  <span>Share on LinkedIn</span>
-                </button>
-              </div>
-            </div>
-          </div>,
-          document.body,
-        )}
+      {shareJob && mounted && (
+        <ShareJobModal job={shareJob} onClose={() => setShareJob(null)} />
+      )}
     </div>
   );
 }
