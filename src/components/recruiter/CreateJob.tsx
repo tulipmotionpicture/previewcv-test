@@ -12,8 +12,8 @@ import RichTextEditor from "../ui/RichTextEditor";
 import CountrySearch from "../location/CountrySearch";
 import StateSearch from "../location/StateSearch";
 import CitySearch from "../location/CitySearch";
-import { JobSearch, SkillSearch, CompanySearch } from "../masters";
-import { JobTitle, Company } from "@/types/masters";
+import { JobSearch, SkillSearch } from "../masters";
+import { JobTitle } from "@/types/masters";
 import { JobContentVariant } from "@/types/api";
 import { getCurrencyOptions } from "@/lib/salary";
 import { recruiterNeedsVerification } from "@/lib/recruiterVerification";
@@ -901,48 +901,17 @@ export default function JobCreationPage({
                     <label className="text-xs uppercase tracking-widest text-gray-600 dark:text-gray-400 font-medium mb-2 block">
                       Company Name *
                     </label>
-                    <CompanySearch
-                      company={companyInput || form.company_name}
-                      onChange={(val: Company | null) => {
-                        if (val) {
-                          if (val.id > 0) {
-                            setForm((prev) => ({ ...prev, company_name: val.name }));
-                            setCompanyInput("");
-                          } else {
-                            setCompanyInput(val.name);
-                            setForm((prev) => ({ ...prev, company_name: val.name }));
-                          }
-                        } else {
-                          setCompanyInput("");
-                          setForm((prev) => ({ ...prev, company_name: "" }));
-                        }
-                      }}
+                    {/* Locked for now — company name always comes from the prefill
+                        (recruiter profile on new jobs, saved value on edit). Selection
+                        will be re-enabled later. */}
+                    <input
+                      type="text"
+                      value={companyInput || form.company_name}
+                      readOnly
+                      disabled
+                      aria-readonly="true"
                       placeholder="e.g., Tech Corp"
-                      renderInput={({
-                        value,
-                        onChange: rOnChange,
-                        onFocus,
-                        onBlur,
-                        onKeyDown,
-                      }) => (
-                        <input
-                          type="text"
-                          value={companyInput || form.company_name}
-                          onChange={(e) => {
-                            rOnChange(e);
-                            setForm((prev) => ({
-                              ...prev,
-                              company_name: e.target.value,
-                            }));
-                          }}
-                          onFocus={onFocus}
-                          onBlur={onBlur}
-                          onKeyDown={onKeyDown}
-                          placeholder="e.g., Tech Corp"
-                          className="w-full px-4 py-2 bg-white dark:bg-[#282727] border border-gray-200 dark:border-gray-700 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all placeholder-gray-400 dark:text-white"
-                          required
-                        />
-                      )}
+                      className="w-full px-4 py-2 bg-gray-100 dark:bg-[#1f1f1f] border border-gray-200 dark:border-gray-700 rounded-lg text-sm outline-none placeholder-gray-400 text-gray-600 dark:text-gray-400 cursor-not-allowed"
                     />
                   </div>
 
