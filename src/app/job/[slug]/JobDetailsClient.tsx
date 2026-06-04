@@ -377,31 +377,103 @@ export default function JobDetailsClient({ job, slug }: JobDetailsClientProps) {
             </div>
 
             <div className="my-2 overflow-hidden rounded-2xl border border-teal-dark/20 bg-teal-50 dark:border-mint/20 dark:bg-mint/5">
-              <div className="flex items-end justify-between p-3">
+              {builderResumes.length > 0 ?
+                (<div className="flex items-end justify-between p-3">
+                  <div className="w-full">
+                    <h3 className="text-xs text-gray-900 dark:text-white font-semibold">
+                      {builderResumes.length} ATS-ready resumes synced
+                    </h3>
 
+                    <p className="text-[10px] text-gray-800 dark:text-gray-400">
+                      Imported directly from LetsMakeCV
+                    </p>
 
-                <div className="w-full">
-                  <h3 className="text-xs text-gray-900 dark:text-white font-semibold">
-                    {builderResumes.length} ATS-ready resumes synced
-                  </h3>
+                    <p className="text-[10px] font-medium text-teal-700 dark:text-mint">
+                      Select a resume to apply instantly
+                    </p>
+                  </div>
+                  <div className="flex items-end">
+                    <img
+                      src="https://letsmakecv.b-cdn.net/assets_letsmakecv/logo.png"
+                      alt="LetsMakeCV"
+                      className="h-10 object-contain"
+                    />
+                  </div>
+                </div>) : (
+                  <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-3 shadow-sm">
+                    <div className="space-y-2">
+                      <div className="flex flex-row">
 
-                  <p className="text-[10px] text-gray-800 dark:text-gray-400">
-                    Imported directly from LetsMakeCV
-                  </p>
+                        {/* Logo */}
+                        <div className="flex items-center">
+                          <img
+                            src="https://letsmakecv.b-cdn.net/assets_letsmakecv/logo.png"
+                            alt="LetsMakeCV"
+                            className="h-19 object-contain"
+                          />
+                        </div>
 
-                  <p className="text-[10px] font-medium text-teal-700 dark:text-mint">
-                    Select a resume to apply instantly
-                  </p>
-                </div>
-                <div className="flex items-end">
-                  <img
-                    src="https://letsmakecv.b-cdn.net/assets_letsmakecv/logo.png"
-                    alt="LetsMakeCV"
-                    className="h-10 object-contain"
-                  />
-                </div>
-              </div>
+                        {/* Title */}
+                        <div>
+                          <h3 className="text-xs font-semibold text-gray-900 dark:text-white">
+                            Create an ATS-Friendly Resume
+                          </h3>
+
+                          <p className="mt-1 text-[10px] leading-relaxed text-gray-600 dark:text-gray-400">
+                            You don't have any resumes yet. Create a professional,
+                            ATS-optimized resume on LetsMakeCV and use it instantly
+                            for all job applications.
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Features */}
+                      <ul className="grid grid-cols-2 gap-x-3 gap-y-2 pt-1">
+                        <li className="flex items-center gap-1.5 text-[10px] font-medium text-gray-700 dark:text-gray-300">
+                          <span className="text-teal-600">✓</span>
+                          ATS Optimized Templates
+                        </li>
+
+                        <li className="flex items-center gap-1.5 text-[10px] font-medium text-gray-700 dark:text-gray-300">
+                          <span className="text-teal-600">✓</span>
+                          Recruiter-Friendly Formats
+                        </li>
+
+                        <li className="flex items-center gap-1.5 text-[10px] font-medium text-gray-700 dark:text-gray-300">
+                          <span className="text-teal-600">✓</span>
+                          One-Click Job Applications
+                        </li>
+
+                        <li className="flex items-center gap-1.5 text-[10px] font-medium text-gray-700 dark:text-gray-300">
+                          <span className="text-teal-600">✓</span>
+                          Resume Stored Forever
+                        </li>
+                      </ul>
+
+                    </div>
+
+                    <div className="mt-2 pt-3 border-t border-gray-200 dark:border-gray-800">
+                      <a
+                        href="https://letsmakecv.com/resume-builder"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center justify-center w-full px-3 py-2 text-xs font-semibold text-white bg-[#0077b5] rounded-lg hover:bg-[#0077b5]/90 transition-colors"
+                      >
+                        Create Free Resume →
+                      </a>
+                    </div>
+
+                    <div className="mt-2 pt-3 border-t border-gray-200 dark:border-gray-800">
+                      <p className="text-center text-xs">Already have a resume? <span className="font-semibold text-[#0077b5]">Upload it</span> below</p>
+                    </div>
+
+                  </div>
+                )
+
+              }
             </div>
+
+
             <div>
               <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5">
                 Resume <span className="text-red-500">*</span>
