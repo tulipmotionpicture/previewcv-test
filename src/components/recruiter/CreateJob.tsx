@@ -38,6 +38,41 @@ const EXPERIENCE_LEVEL_OPTIONS = [
 const experienceLevelLabel = (value: string) =>
   EXPERIENCE_LEVEL_OPTIONS.find((o) => o.value === value)?.label ?? value;
 
+// Guided context questions shown one-at-a-time before AI generation, so the
+// model gets the recruiter's own framing for each section of the job post.
+const CONTEXT_STEPS = [
+  {
+    key: "description",
+    label: "Describe the role",
+    placeholder:
+      "e.g. We're hiring a senior backend engineer to own our payments platform — high ownership, small team, lots of autonomy.",
+    hint: "A few sentences on what this role is really about — the mission, team, and what makes it interesting.",
+  },
+  {
+    key: "responsibilities",
+    label: "Key responsibilities",
+    placeholder:
+      "e.g. Design and ship payment APIs, mentor two junior engineers, own on-call for the billing service.",
+    hint: "What will this person actually do day-to-day? List the things that matter most.",
+  },
+  {
+    key: "requirements",
+    label: "Must-have requirements",
+    placeholder:
+      "e.g. 5+ years in Go or Java, experience with distributed systems, worked on payment or fintech products.",
+    hint: "The non-negotiables — experience, background, or qualifications a candidate must have.",
+  },
+  {
+    key: "skills",
+    label: "Important skills & tools",
+    placeholder:
+      "e.g. Go, PostgreSQL, Kafka, AWS, strong system-design skills, clear written communication.",
+    hint: "Specific technologies, tools, or strengths you want the AI to emphasise.",
+  },
+] as const;
+
+type ContextKey = (typeof CONTEXT_STEPS)[number]["key"];
+
 const Input = (props: React.InputHTMLAttributes<HTMLInputElement>) => (
   <input
     {...props}
@@ -146,7 +181,7 @@ export default function JobCreationPage({
   const [prefSkillInput, setPrefSkillInput] = useState("");
 
   // --- AI content generation (POST /api/v1/recruiters/jobs/generate-content) ---
-  type GenPhase = "currency" | "generating" | "variants" | "error";
+  type GenPhase = "currency" | "context" | "generating" | "variants" | "error";
   const [showGenModal, setShowGenModal] = useState(false);
   const [genPhase, setGenPhase] = useState<GenPhase>("currency");
   const [genCurrency, setGenCurrency] = useState(form.salary_currency || "USD");
@@ -154,6 +189,15 @@ export default function JobCreationPage({
   const [variantIndex, setVariantIndex] = useState(0);
   const [genError, setGenError] = useState("");
   const [genMsgIndex, setGenMsgIndex] = useState(0);
+
+  // Guided context inputs collected between the currency and generating phases.
+  const [ctxStep, setCtxStep] = useState(0);
+  const [genCtx, setGenCtx] = useState<Record<ContextKey, string>>({
+    description: "",
+    responsibilities: "",
+    requirements: "",
+    skills: "",
+  });
 
   const GEN_MESSAGES = [
     "Analyzing the role…",
@@ -321,6 +365,8 @@ export default function JobCreationPage({
     setGenCurrency(form.salary_currency || "USD");
     setGenError("");
     setVariants([]);
+    setCtxStep(0);
+    setGenCtx({ description: "", responsibilities: "", requirements: "", skills: "" });
     setGenPhase("currency");
     setShowGenModal(true);
   };
@@ -339,6 +385,10 @@ export default function JobCreationPage({
         experience_level: form.experience_level,
         is_remote: form.is_remote,
         salary_currency: genCurrency,
+        description_context: genCtx.description.trim(),
+        responsibilities_context: genCtx.responsibilities.trim(),
+        requirements_context: genCtx.requirements.trim(),
+        skills_context: genCtx.skills.trim(),
       });
       const list = res?.variants || [];
       if (!list.length) {
@@ -1159,6 +1209,7 @@ export default function JobCreationPage({
                             </h4>
                             <p className="text-xs text-gray-500 mt-1">
                               {genPhase === "currency" && "Confirm the salary currency, then we'll draft tailored content."}
+                              {genPhase === "context" && "Add a little context so the AI tailors each section to your role."}
                               {genPhase === "generating" && "Generating tailored content from your job details…"}
                               {genPhase === "variants" && "Pick a variant to fill in Step 2 & Step 3."}
                               {genPhase === "error" && "Something went wrong."}
@@ -1188,9 +1239,58 @@ export default function JobCreationPage({
                                 options={currencyOptions}
                               />
                               <p className="text-xs text-gray-500 mt-3">
-                                We&apos;ll generate 3 content variants tailored to{" "}
-                                <span className="font-medium">{form.title || "this role"}</span>. This can take up to ~30 seconds.
+                                Next, you&apos;ll add a little context for{" "}
+                                <span className="font-medium">{form.title || "this role"}</span> so the AI can tailor every section.
                               </p>
+                            </div>
+                          )}
+
+                          {/* Phase: context — guided, one question at a time */}
+                          {genPhase === "context" && (
+                            <div className="p-8 max-w-xl mx-auto">
+                              {/* Progress */}
+                              <div className="flex items-center justify-between mb-4">
+                                <span className="text-xs font-semibold uppercase tracking-widest text-blue-600 dark:text-blue-400">
+                                  Step {ctxStep + 1} of {CONTEXT_STEPS.length}
+                                </span>
+                                <div className="flex gap-1.5">
+                                  {CONTEXT_STEPS.map((s, i) => (
+                                    <span
+                                      key={s.key}
+                                      className={`h-1.5 rounded-full transition-all ${
+                                        i === ctxStep
+                                          ? "w-6 bg-blue-600"
+                                          : genCtx[CONTEXT_STEPS[i].key].trim()
+                                            ? "w-1.5 bg-blue-400"
+                                            : "w-1.5 bg-gray-300 dark:bg-gray-600"
+                                      }`}
+                                    />
+                                  ))}
+                                </div>
+                              </div>
+
+                              <div key={CONTEXT_STEPS[ctxStep].key} className="animate-in fade-in slide-in-from-right-4 duration-200">
+                                <h5 className="text-lg font-semibold text-gray-900 dark:text-white mb-1">
+                                  {CONTEXT_STEPS[ctxStep].label}
+                                </h5>
+                                <p className="text-xs text-gray-500 mb-3">{CONTEXT_STEPS[ctxStep].hint}</p>
+                                <textarea
+                                  autoFocus
+                                  value={genCtx[CONTEXT_STEPS[ctxStep].key]}
+                                  onChange={(e) =>
+                                    setGenCtx((prev) => ({
+                                      ...prev,
+                                      [CONTEXT_STEPS[ctxStep].key]: e.target.value,
+                                    }))
+                                  }
+                                  rows={6}
+                                  placeholder={CONTEXT_STEPS[ctxStep].placeholder}
+                                  className="w-full px-4 py-3 bg-white dark:bg-[#282727] border border-gray-200 dark:border-gray-700 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all placeholder-gray-400 dark:text-white resize-none"
+                                />
+                                <div className="mt-1.5 text-right text-xs text-gray-400">
+                                  {genCtx[CONTEXT_STEPS[ctxStep].key].trim().length} characters
+                                </div>
+                              </div>
                             </div>
                           )}
 
@@ -1222,7 +1322,7 @@ export default function JobCreationPage({
                               <div className="text-red-600 text-sm font-medium max-w-sm">{genError || "Failed to generate content."}</div>
                               <button
                                 type="button"
-                                onClick={() => setGenPhase("currency")}
+                                onClick={() => setGenPhase("context")}
                                 className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-sm font-medium transition-colors"
                               >
                                 Try again
@@ -1312,11 +1412,49 @@ export default function JobCreationPage({
                             </button>
                             <button
                               type="button"
-                              onClick={runGenerate}
+                              onClick={() => {
+                                setForm((p) => ({ ...p, salary_currency: genCurrency }));
+                                setCtxStep(0);
+                                setGenPhase("context");
+                              }}
                               className="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-sm font-semibold transition-colors flex items-center gap-2"
                             >
-                              <Lightbulb className="h-4 w-4" /> Generate
+                              Next
                             </button>
+                          </div>
+                        )}
+
+                        {/* Footer: context actions */}
+                        {genPhase === "context" && (
+                          <div className="p-4 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 flex items-center justify-between gap-3">
+                            <button
+                              type="button"
+                              onClick={() =>
+                                ctxStep === 0 ? setGenPhase("currency") : setCtxStep((s) => s - 1)
+                              }
+                              className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-700 transition-colors"
+                            >
+                              Back
+                            </button>
+                            {ctxStep < CONTEXT_STEPS.length - 1 ? (
+                              <button
+                                type="button"
+                                onClick={() => setCtxStep((s) => s + 1)}
+                                disabled={!genCtx[CONTEXT_STEPS[ctxStep].key].trim()}
+                                className="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-sm font-semibold transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                              >
+                                Next
+                              </button>
+                            ) : (
+                              <button
+                                type="button"
+                                onClick={runGenerate}
+                                disabled={CONTEXT_STEPS.some((s) => !genCtx[s.key].trim())}
+                                className="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-sm font-semibold transition-colors flex items-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed"
+                              >
+                                <Lightbulb className="h-4 w-4" /> Generate
+                              </button>
+                            )}
                           </div>
                         )}
 

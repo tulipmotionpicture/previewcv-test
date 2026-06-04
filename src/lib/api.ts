@@ -1325,6 +1325,10 @@ export class ApiClient {
     experience_level: string;
     is_remote?: boolean;
     salary_currency?: string;
+    description_context?: string;
+    responsibilities_context?: string;
+    requirements_context?: string;
+    skills_context?: string;
   }): Promise<JobContentGenerateResponse> {
     return this.request<JobContentGenerateResponse>(
       "/api/v1/recruiters/jobs/generate-content",
