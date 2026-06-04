@@ -6,6 +6,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { api, ResumeMetadata } from "@/lib/api";
 import { formatSalaryRange } from "@/lib/salary";
+import { candidateNeedsVerification } from "@/lib/candidateVerification";
 import { Job, PdfResume, Resume } from "@/types/api";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/context/ToastContext";
@@ -28,6 +29,7 @@ import {
   UploadCloud,
   Calendar,
   LogIn,
+  Mail,
   MapPin,
   Users,
   Building2,
@@ -42,8 +44,8 @@ interface JobDetailsClientProps {
 }
 
 export default function JobDetailsClient({ job, slug }: JobDetailsClientProps) {
-  const { isAuthenticated } = useAuth();
-  const { success } = useToast();
+  const { isAuthenticated, user } = useAuth();
+  const { success, error: showError } = useToast();
   const router = useRouter();
   const [applying, setApplying] = useState(false);
   const [applySuccess, setApplySuccess] = useState(false);
@@ -177,6 +179,24 @@ export default function JobDetailsClient({ job, slug }: JobDetailsClientProps) {
     }
   };
 
+  const [resendingVerification, setResendingVerification] = useState(false);
+  const handleResendVerification = async () => {
+    if (resendingVerification || !user?.email) return;
+    setResendingVerification(true);
+    try {
+      await api.resendCandidateVerification(user.email);
+      success("Verification email sent. Please check your inbox.");
+    } catch (err: unknown) {
+      showError(
+        err instanceof Error
+          ? err.message
+          : "Could not send the verification email. Please try again.",
+      );
+    } finally {
+      setResendingVerification(false);
+    }
+  };
+
   const handleApply = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -185,11 +205,11 @@ export default function JobDetailsClient({ job, slug }: JobDetailsClientProps) {
       return;
     }
 
-    // TODO(candidate verification): once the backend ships a candidate
-    // resend-verification endpoint, block applying unless the candidate is
-    // verified (require user.is_active === true && user.is_verified === true),
-    // mirroring the recruiter email gate (src/lib/recruiterVerification.ts +
-    // RecruiterVerificationBanner). Show a banner + resend action for candidates.
+    // Backstop: a candidate must be active and verified to apply.
+    if (candidateNeedsVerification(user)) {
+      showError("Please verify your email to apply for jobs.");
+      return;
+    }
 
     if (!resumeId) {
       alert("Please select or upload a resume before applying.");
@@ -612,6 +632,31 @@ export default function JobDetailsClient({ job, slug }: JobDetailsClientProps) {
                   Login to Apply
                 </button>
               </>
+            ) : candidateNeedsVerification(user) ? (
+              <div className="my-2 rounded-xl border border-amber-200 bg-amber-50 p-4 dark:border-amber-700 dark:bg-amber-900/30">
+                <div className="flex items-start gap-2">
+                  <Mail className="w-4 h-4 text-amber-600 dark:text-amber-400 mt-0.5 shrink-0" />
+                  <div className="flex-1">
+                    <p className="text-sm font-semibold text-amber-900 dark:text-amber-100">
+                      Verify your email to apply
+                    </p>
+                    <p className="mt-0.5 text-xs text-amber-800 dark:text-amber-200">
+                      Your account must have a verified, active email before you
+                      can apply for jobs.
+                    </p>
+                    <button
+                      type="button"
+                      onClick={handleResendVerification}
+                      disabled={resendingVerification}
+                      className="mt-2 text-sm font-semibold text-amber-800 underline underline-offset-2 hover:text-amber-900 disabled:cursor-not-allowed disabled:no-underline disabled:opacity-60 dark:text-amber-100 dark:hover:text-white"
+                    >
+                      {resendingVerification
+                        ? "Sending…"
+                        : "Resend verification email"}
+                    </button>
+                  </div>
+                </div>
+              </div>
             ) : (
               <button
                 type="submit"

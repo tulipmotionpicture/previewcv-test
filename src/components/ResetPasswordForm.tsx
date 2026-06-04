@@ -1,15 +1,11 @@
 "use client";
 import { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { Eye, EyeOff, AlertTriangle, ArrowRight } from "lucide-react";
 import { api } from "@/lib/api";
-import Link from "next/link";
+import AuthShell from "@/components/auth/AuthShell";
 
 type Variant = "recruiter" | "candidate";
-
-const LOGIN_HREF: Record<Variant, string> = {
-  recruiter: "/recruiter/login",
-  candidate: "/candidate/login",
-};
 
 function ResetPasswordInner({ variant }: { variant: Variant }) {
   const router = useRouter();
@@ -23,7 +19,8 @@ function ResetPasswordInner({ variant }: { variant: Variant }) {
   const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const loginHref = LOGIN_HREF[variant];
+  const loginHref =
+    variant === "recruiter" ? "/recruiter/login" : "/candidate/login";
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -57,179 +54,98 @@ function ResetPasswordInner({ variant }: { variant: Variant }) {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 p-4">
-      <div className="w-full max-w-md bg-white dark:bg-gray-900 rounded-3xl shadow-xl border border-gray-100 dark:border-gray-800 p-8 relative">
-        <div className="flex items-center justify-between mb-6">
-          <Link
-            href="/"
-            className="inline-flex items-center text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-200 transition-colors"
-            title="Home"
-          >
-            <span className="font-black text-lg">Home</span>
-          </Link>
-          <Link
-            href={loginHref}
-            className="inline-flex items-center px-4 py-2 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-700 transition-colors text-xs shadow-sm"
-          >
-            Back to Login
-          </Link>
+    <AuthShell
+      variant={variant}
+      heading="Set New Password"
+      subheading="Choose a new password for your account."
+    >
+      {success ? (
+        <div className="p-4 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300 rounded-xl border border-green-200 dark:border-green-800 text-center font-medium">
+          Password reset successful! Redirecting to login…
         </div>
-        <h1 className="text-2xl font-black mb-4 text-gray-900 dark:text-gray-100">
-          Set New Password
-        </h1>
-        <p className="mb-6 text-gray-500 dark:text-gray-400 text-sm">
-          Please enter your new password below.
-        </p>
-        {success ? (
-          <div className="mb-4 p-4 bg-green-50 text-green-700 rounded-xl border border-green-100 text-center">
-            Password reset successful! Redirecting to login...
-          </div>
-        ) : (
-          <form className="space-y-6" onSubmit={handleSubmit}>
-            <div>
-              <label className="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-1">
-                New Password
-              </label>
-              <div className="relative">
-                <input
-                  type={showPassword ? "text" : "password"}
-                  name="newPassword"
-                  required
-                  minLength={8}
-                  className="w-full px-6 py-4 pr-12 bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl focus:ring-2 focus:ring-indigo-600 outline-none hover:bg-gray-100 dark:hover:bg-gray-700 transition-all font-medium text-gray-900 dark:text-gray-100 placeholder-gray-300 dark:placeholder-gray-500"
-                  value={newPassword}
-                  onChange={(e) => setNewPassword(e.target.value)}
-                  placeholder="••••••••"
-                  disabled={loading}
-                />
-                <button
-                  type="button"
-                  className="absolute right-4 top-3 text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
-                  tabIndex={-1}
-                  onClick={() => setShowPassword((v) => !v)}
-                  aria-label={showPassword ? "Hide password" : "Show password"}
-                >
-                  {showPassword ? (
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="24"
-                      height="24"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className="lucide lucide-eye-icon lucide-eye"
-                    >
-                      <path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0" />
-                      <circle cx="12" cy="12" r="3" />
-                    </svg>
-                  ) : (
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="24"
-                      height="24"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className="lucide lucide-eye-off-icon lucide-eye-off"
-                    >
-                      <path d="M10.733 5.076a10.744 10.744 0 0 1 11.205 6.575 1 1 0 0 1 0 .696 10.747 10.747 0 0 1-1.444 2.49" />
-                      <path d="M14.084 14.158a3 3 0 0 1-4.242-4.242" />
-                      <path d="M17.479 17.499a10.75 10.75 0 0 1-15.417-5.151 1 1 0 0 1 0-.696 10.75 10.75 0 0 1 4.446-5.143" />
-                      <path d="m2 2 20 20" />
-                    </svg>
-                  )}
-                </button>
-              </div>
-            </div>
-            <div>
-              <label className="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-1">
-                Confirm Password
-              </label>
-              <div className="relative">
-                <input
-                  type={showConfirmPassword ? "text" : "password"}
-                  name="confirmPassword"
-                  required
-                  minLength={8}
-                  className="w-full px-6 py-4 pr-12 bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl focus:ring-2 focus:ring-indigo-600 outline-none hover:bg-gray-100 dark:hover:bg-gray-700 transition-all font-medium text-gray-900 dark:text-gray-100 placeholder-gray-300 dark:placeholder-gray-500"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  placeholder="••••••••"
-                  disabled={loading}
-                />
-                <button
-                  type="button"
-                  className="absolute right-4 top-3 text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
-                  tabIndex={-1}
-                  onClick={() => setShowConfirmPassword((v) => !v)}
-                  aria-label={
-                    showConfirmPassword ? "Hide password" : "Show password"
-                  }
-                >
-                  {showConfirmPassword ? (
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="24"
-                      height="24"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className="lucide lucide-eye-icon lucide-eye"
-                    >
-                      <path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0" />
-                      <circle cx="12" cy="12" r="3" />
-                    </svg>
-                  ) : (
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="24"
-                      height="24"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className="lucide lucide-eye-off-icon lucide-eye-off"
-                    >
-                      <path d="M10.733 5.076a10.744 10.744 0 0 1 11.205 6.575 1 1 0 0 1 0 .696 10.747 10.747 0 0 1-1.444 2.49" />
-                      <path d="M14.084 14.158a3 3 0 0 1-4.242-4.242" />
-                      <path d="M17.479 17.499a10.75 10.75 0 0 1-15.417-5.151 1 1 0 0 1 0-.696 10.75 10.75 0 0 1 4.446-5.143" />
-                      <path d="m2 2 20 20" />
-                    </svg>
-                  )}
-                </button>
-              </div>
-            </div>
-            {error && (
-              <div className="p-3 bg-red-50 text-red-600 rounded-xl border border-red-100 text-sm text-center">
-                {error}
-              </div>
-            )}
-            <button
-              type="submit"
+      ) : (
+        <form className="space-y-6" onSubmit={handleSubmit}>
+          <div className="relative">
+            <label className="block text-sm font-semibold text-gray-900 dark:text-gray-100 mb-2">
+              New Password
+            </label>
+            <input
+              type={showPassword ? "text" : "password"}
+              name="newPassword"
+              required
+              minLength={8}
+              className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-teal-dark dark:focus:ring-mint focus:border-transparent outline-none transition-all text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 pr-12"
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              placeholder="••••••••"
               disabled={loading}
-              className="w-full py-4 bg-indigo-600 text-white font-black rounded-2xl hover:bg-indigo-700 transition-all flex items-center justify-center gap-2 group disabled:opacity-70"
+            />
+            <button
+              type="button"
+              className="absolute right-4 top-[42px] text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
+              tabIndex={-1}
+              onClick={() => setShowPassword((v) => !v)}
+              aria-label={showPassword ? "Hide password" : "Show password"}
             >
-              {loading ? (
-                <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-              ) : (
-                <>Set New Password</>
-              )}
+              {showPassword ? <Eye size={20} /> : <EyeOff size={20} />}
             </button>
-          </form>
-        )}
-      </div>
-    </div>
+          </div>
+
+          <div className="relative">
+            <label className="block text-sm font-semibold text-gray-900 dark:text-gray-100 mb-2">
+              Confirm Password
+            </label>
+            <input
+              type={showConfirmPassword ? "text" : "password"}
+              name="confirmPassword"
+              required
+              minLength={8}
+              className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-teal-dark dark:focus:ring-mint focus:border-transparent outline-none transition-all text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 pr-12"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              placeholder="••••••••"
+              disabled={loading}
+            />
+            <button
+              type="button"
+              className="absolute right-4 top-[42px] text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
+              tabIndex={-1}
+              onClick={() => setShowConfirmPassword((v) => !v)}
+              aria-label={
+                showConfirmPassword ? "Hide password" : "Show password"
+              }
+            >
+              {showConfirmPassword ? <Eye size={20} /> : <EyeOff size={20} />}
+            </button>
+          </div>
+
+          {error && (
+            <div className="p-4 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 text-sm font-semibold rounded-xl border border-red-200 dark:border-red-800 flex items-center gap-3">
+              <AlertTriangle size={20} className="flex-shrink-0" />
+              {error}
+            </div>
+          )}
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full py-3.5 bg-teal-dark hover:bg-teal-dark/90 text-white font-bold rounded-xl transition-all shadow-lg shadow-teal-dark/20 flex items-center justify-center gap-2 group disabled:opacity-70 disabled:cursor-not-allowed"
+          >
+            {loading ? (
+              <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+            ) : (
+              <>
+                Set New Password
+                <ArrowRight
+                  size={18}
+                  className="group-hover:translate-x-1 transition-transform"
+                />
+              </>
+            )}
+          </button>
+        </form>
+      )}
+    </AuthShell>
   );
 }
 
@@ -244,8 +160,8 @@ export default function ResetPasswordForm({ variant }: { variant: Variant }) {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen bg-gray-50 dark:bg-gray-950 flex items-center justify-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-blue"></div>
+        <div className="min-h-screen bg-white dark:bg-gray-950 flex items-center justify-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-dark"></div>
         </div>
       }
     >

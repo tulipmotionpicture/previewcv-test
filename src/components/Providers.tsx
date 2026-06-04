@@ -6,6 +6,7 @@ import { AuthProvider } from '@/context/AuthContext';
 import { RecruiterAuthProvider } from '@/context/RecruiterAuthContext';
 import { ToastProvider } from '@/context/ToastContext';
 import RecruiterVerificationBanner from '@/components/recruiter/RecruiterVerificationBanner';
+import CandidateVerificationBanner from '@/components/candidate/CandidateVerificationBanner';
 
 export function Providers({ children }: { children: React.ReactNode }) {
     return (
@@ -14,6 +15,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
                 <RecruiterAuthProvider>
                     <RecruiterVerificationBanner />
                     <AuthProvider>
+                        <CandidateVerificationBanner />
                         {children}
                     </AuthProvider>
                 </RecruiterAuthProvider>

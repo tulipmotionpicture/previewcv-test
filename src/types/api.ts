@@ -8,6 +8,9 @@ export interface User {
   current_position?: string;
   bio?: string;
   profile_image_url?: string;
+  is_active?: boolean;
+  is_verified?: boolean;
+  is_email_verified?: boolean;
 }
 
 export interface Recruiter {
