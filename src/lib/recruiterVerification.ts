@@ -8,5 +8,6 @@ import type { Recruiter } from "@/types/api";
  */
 export function recruiterNeedsVerification(r?: Recruiter | null): boolean {
   if (!r) return false;
-  return r.is_email_verified === false || r.is_verified === false;
+  //return r.is_email_verified === false || r.is_verified === false;
+  return r.is_email_verified === false;
 }
