@@ -12,7 +12,6 @@ import {
   BadgeCheck,
   ExternalLink,
   Pencil,
-  FileText,
   Mail,
   Link as LinkIcon,
   Copy,
@@ -217,9 +216,6 @@ export default function ShareJobModal({
         <div className="px-6 pb-6 overflow-y-auto custom-scrollbar flex-1 space-y-6">
           {/* Job card */}
           <div className="rounded-2xl border border-gray-100 dark:border-gray-800 bg-gray-50/70 dark:bg-[#1A1A1A] p-4 flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl bg-indigo-50 dark:bg-indigo-900/30 flex items-center justify-center shrink-0">
-              <Briefcase className="w-6 h-6 text-indigo-500" />
-            </div>
             <div className="min-w-0 flex-1">
               <h4 className="text-lg font-bold text-gray-900 dark:text-white truncate">
                 {job.title}
@@ -284,8 +280,7 @@ export default function ShareJobModal({
           {/* Content to share */}
           <div>
             <div className="flex items-center justify-between mb-3">
-              <h5 className="text-base font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                <FileText className="w-4 h-4 text-indigo-500" />
+              <h5 className="text-base font-bold text-gray-900 dark:text-white">
                 Content to Share
               </h5>
               <button
