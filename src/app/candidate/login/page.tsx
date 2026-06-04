@@ -269,7 +269,7 @@ export default function CandidateLogin() {
                 </span>
               </label>
               <Link
-                href="#"
+                href="/candidate/forgot-password"
                 className="text-sm text-teal-dark dark:text-mint font-semibold hover:underline"
               >
                 Forgot Password?

@@ -493,6 +493,31 @@ export class ApiClient {
     );
   }
 
+  // Candidate (user) password reset. Public endpoints; `platform` is omitted —
+  // the backend tracks it from the request origin.
+  async requestPasswordReset(email: string): Promise<{ message?: string }> {
+    return this.request<{ message?: string }>(
+      "/api/v1/auth/password-reset/request",
+      {
+        method: "POST",
+        body: JSON.stringify({ email }),
+      },
+    );
+  }
+
+  async confirmPasswordReset(
+    token: string,
+    new_password: string,
+  ): Promise<{ message?: string }> {
+    return this.request<{ message?: string }>(
+      "/api/v1/auth/password-reset/confirm",
+      {
+        method: "POST",
+        body: JSON.stringify({ token, new_password }),
+      },
+    );
+  }
+
   async getPublicRecruiterProfile(
     username: string,
   ): Promise<RecruiterProfileResponse> {
