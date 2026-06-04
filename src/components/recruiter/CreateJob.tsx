@@ -25,6 +25,19 @@ const STEPS = [
   "Review & Publish",
 ];
 
+const EXPERIENCE_LEVEL_OPTIONS = [
+  { value: "entry", label: "Entry Level (0-1 years)" },
+  { value: "junior", label: "Junior (1-3 years)" },
+  { value: "mid", label: "Mid Level (3-5 years)" },
+  { value: "senior", label: "Senior (5-10 years)" },
+  { value: "lead", label: "Lead (10+ years)" },
+  { value: "director", label: "Director" },
+  { value: "executive", label: "Executive" },
+];
+
+const experienceLevelLabel = (value: string) =>
+  EXPERIENCE_LEVEL_OPTIONS.find((o) => o.value === value)?.label ?? value;
+
 const Input = (props: React.InputHTMLAttributes<HTMLInputElement>) => (
   <input
     {...props}
@@ -617,8 +630,8 @@ export default function JobCreationPage({
           </div>
         )}
         {form.experience_level && (
-          <div className="px-3 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 text-xs font-semibold rounded-full capitalize">
-            {form.experience_level}
+          <div className="px-3 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 text-xs font-semibold rounded-full">
+            {experienceLevelLabel(form.experience_level)}
           </div>
         )}
         {form.is_remote && (
@@ -965,13 +978,7 @@ export default function JobCreationPage({
                       required
                       options={[
                         { value: "", label: "Select Experience Level" },
-                        { value: "entry", label: "Entry Level" },
-                        { value: "junior", label: "Junior" },
-                        { value: "mid", label: "Mid Level" },
-                        { value: "senior", label: "Senior" },
-                        { value: "lead", label: "Lead" },
-                        { value: "director", label: "Director" },
-                        { value: "executive", label: "Executive" },
+                        ...EXPERIENCE_LEVEL_OPTIONS,
                       ]}
                     />
                   </div>
