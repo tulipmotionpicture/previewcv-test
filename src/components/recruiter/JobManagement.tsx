@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Job } from "@/types/api";
-import { Search, Plus } from "lucide-react";
+import { Search, Plus, ChevronDown } from "lucide-react";
 import JobModal from "./JobModal";
 import JobsTable from "./JobsTable";
 
@@ -164,6 +164,40 @@ export default function JobManagement({
     setSearchTimeout(timeout);
   };
 
+  // Today (UTC date) used to cap the date pickers.
+  const today = new Date().toISOString().split("T")[0];
+
+  // Map the tri-state is_active filter to/from a select value.
+  const statusValue =
+    filters.is_active == null ? "all" : filters.is_active ? "active" : "inactive";
+
+  const handleStatusChange = (val: string) => {
+    onFiltersChange({
+      ...filters,
+      is_active: val === "all" ? null : val === "active",
+    });
+  };
+
+  // Count of applied filters — drives the header badge and the Clear button.
+  const activeFilterCount = [
+    !!filters.search_keyword,
+    filters.is_active != null,
+    !!filters.posted_date_from,
+    !!filters.posted_date_to,
+  ].filter(Boolean).length;
+
+  const clearAllFilters = () => {
+    setLocalSearch("");
+    onFiltersChange({
+      is_active: null,
+      posted_date_from: "",
+      posted_date_to: "",
+      application_deadline_from: "",
+      application_deadline_to: "",
+      search_keyword: "",
+    });
+  };
+
   return (
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
       <JobModal
@@ -229,88 +263,107 @@ export default function JobManagement({
         {/* Filters - Takes 1 column */}
 
         <div className="lg:col-span-1">
-          <div className="bg-white dark:bg-[#282727]  rounded-xl border border-[#E1E8F1] dark:border-gray-700  space-y-6">
-            {/* Search by Role */}
+          <div className="bg-white dark:bg-[#282727] rounded-xl border border-[#E1E8F1] dark:border-gray-700 overflow-hidden shadow-sm sticky top-5">
+            {/* Header */}
+            <div className="bg-[#2F4269] px-4 py-3 flex items-center justify-between rounded-t-xl">
+              <h2 className="text-[13px] font-bold text-white uppercase tracking-wider">
+                Filter
+              </h2>
+              {activeFilterCount > 0 && (
+                <span className="inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full bg-white/20 text-white text-[11px] font-semibold">
+                  {activeFilterCount}
+                </span>
+              )}
+            </div>
 
-            <h1 className="bg-[#2F4269]  text-[13px] font-bold text-white dark:text-gray-500 uppercase tracking-wider p-3 rounded-t-xl">
-              Filter
-            </h1>
-            <div className="px-2">
-              <div className="relative">
+            <div className="p-4 space-y-5">
+              {/* Search */}
+              <div>
                 <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
                   Search Jobs
                 </label>
-                <Search className="absolute left-3 translate-y-1/2 w-5 h-5 text-gray-400" />
-                <input
-                  type="text"
-                  value={localSearch}
-                  onChange={(e) => handleSearchChange(e.target.value)}
-                  placeholder="Search by title, location, skills..."
-                  className="w-full pl-10 pr-4 py-3 bg-white dark:bg-gray-800 border border-[#E1E8F1] dark:border-gray-700 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all placeholder-gray-400 dark:text-gray-200"
-                />
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
+                  <input
+                    type="text"
+                    value={localSearch}
+                    onChange={(e) => handleSearchChange(e.target.value)}
+                    placeholder="Search by title, location, skills..."
+                    className="w-full pl-10 pr-4 py-3 bg-white dark:bg-gray-800 border border-[#E1E8F1] dark:border-gray-700 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all placeholder-gray-400 dark:text-gray-200"
+                  />
+                </div>
               </div>
-            </div>
 
-            {/* Date Filters - Functional */}
-            <div className="px-2">
-              <div className="flex items-center justify-between mb-2">
-                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">
+              {/* Status */}
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                  Status
+                </label>
+                <div className="relative">
+                  <select
+                    value={statusValue}
+                    onChange={(e) => handleStatusChange(e.target.value)}
+                    className="w-full appearance-none px-4 py-3 bg-white dark:bg-gray-800 border border-[#E1E8F1] dark:border-gray-700 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none text-gray-700 dark:text-gray-200"
+                  >
+                    <option value="all">All</option>
+                    <option value="active">Active</option>
+                    <option value="inactive">Inactive</option>
+                  </select>
+                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                </div>
+              </div>
+
+              {/* Posted Between */}
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
                   Posted Between
                 </label>
+                <div className="space-y-3">
+                  <div>
+                    <label className="text-xs text-gray-500 mb-1 block">
+                      From
+                    </label>
+                    <input
+                      type="date"
+                      value={filters.posted_date_from || ""}
+                      max={filters.posted_date_to || today}
+                      onChange={(e) =>
+                        onFiltersChange({
+                          ...filters,
+                          posted_date_from: e.target.value,
+                        })
+                      }
+                      className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-[#E1E8F1] dark:border-gray-700 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none dark:text-gray-200"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs text-gray-500 mb-1 block">To</label>
+                    <input
+                      type="date"
+                      value={filters.posted_date_to || ""}
+                      min={filters.posted_date_from || ""}
+                      max={today}
+                      onChange={(e) =>
+                        onFiltersChange({
+                          ...filters,
+                          posted_date_to: e.target.value,
+                        })
+                      }
+                      className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-[#E1E8F1] dark:border-gray-700 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none dark:text-gray-200"
+                    />
+                  </div>
+                </div>
               </div>
 
-              <div className="space-y-3">
-                <div>
-                  <label className="text-xs text-gray-500 mb-1 block">
-                    From
-                  </label>
-                  <input
-                    type="date"
-                    value={filters.posted_date_from || ""}
-                    onChange={(e) =>
-                      onFiltersChange({
-                        ...filters,
-                        posted_date_from: e.target.value,
-                      })
-                    }
-                    className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-[#E1E8F1] dark:border-gray-700 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none dark:text-gray-200"
-                  />
-                </div>
-                <div>
-                  <label className="text-xs text-gray-500 mb-1 block">To</label>
-                  <input
-                    type="date"
-                    value={filters.posted_date_to || ""}
-                    onChange={(e) =>
-                      onFiltersChange({
-                        ...filters,
-                        posted_date_to: e.target.value,
-                      })
-                    }
-                    className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-[#E1E8F1] dark:border-gray-700 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none dark:text-gray-200"
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* Clear Filters Button */}
-            <div className="pt-2">
-              <button
-                onClick={() => {
-                  setLocalSearch("");
-                  onFiltersChange({
-                    is_active: null,
-                    posted_date_from: "",
-                    posted_date_to: "",
-                    application_deadline_from: "",
-                    application_deadline_to: "",
-                    search_keyword: "",
-                  });
-                }}
-                className="w-full px-4 py-3 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-              >
-                Clear Filters
-              </button>
+              {/* Clear Filters — only when something is applied */}
+              {activeFilterCount > 0 && (
+                <button
+                  onClick={clearAllFilters}
+                  className="w-full px-4 py-3 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                >
+                  Clear Filters
+                </button>
+              )}
             </div>
           </div>
         </div>

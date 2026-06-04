@@ -39,6 +39,8 @@ export default function ATSApplications({
 }: ATSApplicationsProps) {
   const { showToast } = useToast();
   const [searchTerm, setSearchTerm] = useState("");
+  const [appliedFrom, setAppliedFrom] = useState("");
+  const [appliedTo, setAppliedTo] = useState("");
   const [downloadingBulk, setDownloadingBulk] = useState(false);
   const [taskId, setTaskId] = useState<string | null>(null);
   const [downloadProgress, setDownloadProgress] = useState<number | null>(null);
@@ -48,16 +50,45 @@ export default function ATSApplications({
     onUpdateStatus(appId, newStatus);
   };
 
-  // Filter applications locally by name if search term exists
+  // Filter applications locally by name/email and applied-date range.
   const filteredApplications = applications.filter((app) => {
-    if (!searchTerm) return true;
-    const name = app.applicant?.full_name || app.candidate_name || "";
-    const email = app.applicant?.email || app.candidate_email || "";
-    const term = searchTerm.toLowerCase();
-    return (
-      name.toLowerCase().includes(term) || email.toLowerCase().includes(term)
-    );
+    if (searchTerm) {
+      const name = app.applicant?.full_name || app.candidate_name || "";
+      const email = app.applicant?.email || app.candidate_email || "";
+      const term = searchTerm.toLowerCase();
+      if (
+        !name.toLowerCase().includes(term) &&
+        !email.toLowerCase().includes(term)
+      ) {
+        return false;
+      }
+    }
+    if (appliedFrom || appliedTo) {
+      const appliedDay = (app.applied_at || app.created_at || "").slice(0, 10);
+      if (!appliedDay) return false;
+      if (appliedFrom && appliedDay < appliedFrom) return false;
+      if (appliedTo && appliedDay > appliedTo) return false;
+    }
+    return true;
   });
+
+  // Today (UTC date) used to cap the date pickers.
+  const today = new Date().toISOString().split("T")[0];
+
+  // Count of applied filters — drives the header badge and Clear button.
+  const activeFilterCount = [
+    !!searchTerm,
+    statusFilter !== "All",
+    !!appliedFrom,
+    !!appliedTo,
+  ].filter(Boolean).length;
+
+  const clearAllFilters = () => {
+    setSearchTerm("");
+    setAppliedFrom("");
+    setAppliedTo("");
+    onStatusFilterChange("All");
+  };
 
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
@@ -361,10 +392,15 @@ export default function ATSApplications({
         <div className="lg:col-span-1">
           <div className="bg-white dark:bg-[#282727] rounded-xl border border-[#E1E8F1] dark:border-gray-700 overflow-hidden shadow-sm sticky top-6">
             {/* Filter Header */}
-            <div className="bg-[#2F4269] px-6 py-4">
+            <div className="bg-[#2F4269] px-6 py-4 flex items-center justify-between">
               <h2 className="text-[13px] font-bold text-white uppercase tracking-wider">
                 Filter
               </h2>
+              {activeFilterCount > 0 && (
+                <span className="inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full bg-white/20 text-white text-[11px] font-semibold">
+                  {activeFilterCount}
+                </span>
+              )}
             </div>
 
             <div className="p-5 space-y-6">
@@ -402,7 +438,10 @@ export default function ATSApplications({
                     <option value="under_review">Under Review</option>
                     <option value="interview_scheduled">Interview</option>
                     <option value="offered">Offered</option>
+                    <option value="accepted">Accepted</option>
                     <option value="rejected">Rejected</option>
+                    <option value="withdrawn">Withdrawn</option>
+                    <option value="declined">Declined</option>
                   </select>
                   <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
                 </div>
@@ -425,28 +464,47 @@ export default function ATSApplications({
                 </div>
               </div>
 
-              {/* Dates | Time (Placeholder Mockup) */}
-              <div className="space-y-2 pt-2 border-t border-gray-100 dark:border-gray-700">
-                <div className="flex items-center gap-1.5 text-sm font-semibold text-gray-700 dark:text-gray-300 mt-4 mb-2">
-                  <span>Dates</span>
-                  <span className="text-gray-300">|</span>
-                  <span>Time</span>
-                </div>
+              {/* Applied Between */}
+              <div className="space-y-2 pt-4 border-t border-gray-100 dark:border-gray-700">
+                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                  Applied Between
+                </label>
                 <div className="grid grid-cols-2 gap-3">
-                  <div className="relative">
+                  <div>
+                    <label className="text-xs text-gray-500 mb-1 block">
+                      From
+                    </label>
                     <input
-                      className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-[#E1E8F1] dark:border-gray-700 rounded-lg text-xs"
                       type="date"
+                      value={appliedFrom}
+                      max={appliedTo || today}
+                      onChange={(e) => setAppliedFrom(e.target.value)}
+                      className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-[#E1E8F1] dark:border-gray-700 rounded-lg text-xs focus:ring-2 focus:ring-blue-500 outline-none dark:text-gray-200"
                     />
                   </div>
-                  <div className="relative">
+                  <div>
+                    <label className="text-xs text-gray-500 mb-1 block">To</label>
                     <input
-                      className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-[#E1E8F1] dark:border-gray-700 rounded-lg text-xs"
-                      type="time"
+                      type="date"
+                      value={appliedTo}
+                      min={appliedFrom || ""}
+                      max={today}
+                      onChange={(e) => setAppliedTo(e.target.value)}
+                      className="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-[#E1E8F1] dark:border-gray-700 rounded-lg text-xs focus:ring-2 focus:ring-blue-500 outline-none dark:text-gray-200"
                     />
                   </div>
                 </div>
               </div>
+
+              {/* Clear Filters — only when something is applied */}
+              {activeFilterCount > 0 && (
+                <button
+                  onClick={clearAllFilters}
+                  className="w-full px-4 py-3 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                >
+                  Clear Filters
+                </button>
+              )}
             </div>
           </div>
         </div>
