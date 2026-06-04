@@ -15,7 +15,10 @@ import {
   Briefcase,
   Share2,
   Copy,
+  Sparkles,
 } from "lucide-react";
+import { formatSalaryRange } from "@/lib/salary";
+import { Tooltip } from "@/components/ui";
 import config from "@/config";
 import { generateQRCodeDataURL, downloadElementAsImage } from "@/utils/qr";
 import { useToast } from "@/context/ToastContext";
@@ -127,6 +130,7 @@ export default function JobsTable({
                   "View Count",
                   "Application",
                   "POSTED",
+                  "SKILLS",
                   "ACTIONS",
                 ].map((heading, index) => (
                   <th
@@ -151,7 +155,11 @@ export default function JobsTable({
                       {job.title}
                     </div>
                     <div className="text-xs text-[#60768D] dark:text-gray-400 mt-1 capitalize">
-                      Engineering {job.job_type.replace(/_/g, " ")}
+                      {job.job_type.replace(/_/g, " ")}
+                      {job.is_remote ? " · Remote" : ""}
+                    </div>
+                    <div className="text-xs font-medium text-gray-700 dark:text-gray-300 mt-0.5">
+                      {formatSalaryRange(job)}
                     </div>
                   </td>
                   {/* Status */}
@@ -181,6 +189,67 @@ export default function JobsTable({
                         job.posted_date || new Date().toISOString(),
                       )}
                     </div>
+                  </td>
+                  {/* Skills */}
+                  <td className="px-4 py-3">
+                    {(() => {
+                      const required = job.required_skills || [];
+                      const preferred = job.preferred_skills || [];
+                      const total = required.length + preferred.length;
+                      if (total === 0) {
+                        return <span className="text-xs text-gray-400">—</span>;
+                      }
+                      const tip = (
+                        <div className="text-left space-y-2 max-h-60 overflow-y-auto">
+                          {required.length > 0 && (
+                            <div>
+                              <div className="text-[10px] uppercase tracking-wider text-gray-300 mb-1">
+                                Required
+                              </div>
+                              <div className="flex flex-wrap gap-1">
+                                {required.map((s, i) => (
+                                  <span
+                                    key={`r-${i}`}
+                                    className="px-1.5 py-0.5 rounded bg-white/15 text-[11px]"
+                                  >
+                                    {s}
+                                  </span>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                          {preferred.length > 0 && (
+                            <div>
+                              <div className="text-[10px] uppercase tracking-wider text-gray-300 mb-1">
+                                Preferred
+                              </div>
+                              <div className="flex flex-wrap gap-1">
+                                {preferred.map((s, i) => (
+                                  <span
+                                    key={`p-${i}`}
+                                    className="px-1.5 py-0.5 rounded bg-white/15 text-[11px]"
+                                  >
+                                    {s}
+                                  </span>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      );
+                      return (
+                        <Tooltip content={tip} position="top">
+                          <button
+                            type="button"
+                            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium bg-[#EEF2F8] text-[#2F4269] dark:bg-gray-800 dark:text-gray-300 hover:bg-[#E1E8F1] dark:hover:bg-gray-700 transition-colors cursor-pointer"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <Sparkles className="w-3.5 h-3.5" />
+                            {total} {total === 1 ? "skill" : "skills"}
+                          </button>
+                        </Tooltip>
+                      );
+                    })()}
                   </td>
                   {/* Actions */}
                   <td className="px-4 py-3 text-right">
