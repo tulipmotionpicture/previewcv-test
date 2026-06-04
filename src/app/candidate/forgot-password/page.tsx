@@ -1,7 +1,8 @@
 "use client";
 import { useState } from "react";
+import { AlertTriangle, ArrowRight } from "lucide-react";
 import { api } from "@/lib/api";
-import Link from "next/link";
+import AuthShell from "@/components/auth/AuthShell";
 
 export default function CandidateForgotPassword() {
   const [email, setEmail] = useState("");
@@ -25,70 +26,60 @@ export default function CandidateForgotPassword() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 p-4">
-      <div className="w-full max-w-md bg-white dark:bg-gray-900 rounded-3xl shadow-xl border border-gray-100 dark:border-gray-800 p-8 relative">
-        <div className="flex items-center justify-between mb-6">
-          <Link
-            href="/"
-            className="inline-flex items-center text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-200 transition-colors"
-            title="Home"
-          >
-            <span className="font-black text-lg">Home</span>
-          </Link>
-          <Link
-            href="/candidate/login"
-            className="inline-flex items-center px-4 py-2 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-700 transition-colors text-xs shadow-sm"
-          >
-            Back to Login
-          </Link>
+    <AuthShell
+      variant="candidate"
+      heading="Forgot Password"
+      subheading="Enter your account email and we'll send you a reset link."
+    >
+      {success ? (
+        <div className="p-4 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300 rounded-xl border border-green-200 dark:border-green-800 text-center font-medium">
+          If an account exists for <span className="font-bold">{email}</span>, a
+          password reset link has been sent.
         </div>
-        <h1 className="text-2xl font-black mb-4 text-gray-900 dark:text-gray-100">
-          Forgot Password
-        </h1>
-        <p className="mb-6 text-gray-500 dark:text-gray-400 text-sm">
-          Enter your account email and we&apos;ll send you a password reset link.
-        </p>
-        {success ? (
-          <div className="mb-4 p-4 bg-green-50 text-green-700 rounded-xl border border-green-100 text-center">
-            If an account exists for <span className="font-bold">{email}</span>,
-            a password reset link has been sent.
-          </div>
-        ) : (
-          <form className="space-y-6" onSubmit={handleSubmit}>
-            <div>
-              <label className="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-1">
-                Email Address
-              </label>
-              <input
-                type="email"
-                name="email"
-                required
-                className="w-full px-6 py-4 bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl focus:ring-2 focus:ring-indigo-600 outline-none hover:bg-gray-100 dark:hover:bg-gray-700 transition-all font-medium text-gray-900 dark:text-gray-100 placeholder-gray-300 dark:placeholder-gray-500"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="you@example.com"
-                disabled={loading}
-              />
-            </div>
-            {error && (
-              <div className="p-3 bg-red-50 text-red-600 rounded-xl border border-red-100 text-sm text-center">
-                {error}
-              </div>
-            )}
-            <button
-              type="submit"
+      ) : (
+        <form className="space-y-6" onSubmit={handleSubmit}>
+          <div>
+            <label className="block text-sm font-semibold text-gray-900 dark:text-gray-100 mb-2">
+              Email Address
+            </label>
+            <input
+              type="email"
+              name="email"
+              required
+              className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-teal-dark dark:focus:ring-mint focus:border-transparent outline-none transition-all text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="you@example.com"
               disabled={loading}
-              className="w-full py-4 bg-indigo-600 text-white font-black rounded-2xl hover:bg-indigo-700 transition-all flex items-center justify-center gap-2 group disabled:opacity-70"
-            >
-              {loading ? (
-                <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-              ) : (
-                <>Send Reset Link</>
-              )}
-            </button>
-          </form>
-        )}
-      </div>
-    </div>
+            />
+          </div>
+
+          {error && (
+            <div className="p-4 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 text-sm font-semibold rounded-xl border border-red-200 dark:border-red-800 flex items-center gap-3">
+              <AlertTriangle size={20} className="flex-shrink-0" />
+              {error}
+            </div>
+          )}
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full py-3.5 bg-teal-dark hover:bg-teal-dark/90 text-white font-bold rounded-xl transition-all shadow-lg shadow-teal-dark/20 flex items-center justify-center gap-2 group disabled:opacity-70 disabled:cursor-not-allowed"
+          >
+            {loading ? (
+              <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+            ) : (
+              <>
+                Send Reset Link
+                <ArrowRight
+                  size={18}
+                  className="group-hover:translate-x-1 transition-transform"
+                />
+              </>
+            )}
+          </button>
+        </form>
+      )}
+    </AuthShell>
   );
 }
