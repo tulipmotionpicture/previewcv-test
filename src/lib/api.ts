@@ -470,6 +470,7 @@ export class ApiClient {
     );
   }
 
+
   async recruiterResetPassword(email: string): Promise<{ email: string }> {
     return this.request<{ email: string }>(
       "/api/v1/recruiters/auth/password-reset/request",
@@ -505,6 +506,20 @@ export class ApiClient {
     );
   }
 
+  async verifyRecrutererification(
+    token: string,
+  ): Promise<{ message?: string }> {
+    return this.request<{ message?: string }>(
+      "/api/v1/recruiters/auth/verify-email",
+      {
+        method: "POST",
+        body: JSON.stringify({ token }),
+      },
+      false,
+      false,
+    );
+  }
+
   async confirmPasswordReset(
     token: string,
     new_password: string,
@@ -529,6 +544,18 @@ export class ApiClient {
         method: "POST",
         body: JSON.stringify({ email }),
       },
+    );
+  }
+
+  async verifyCandidateVerification(token: string): Promise<{ message: string }> {
+    return this.request<{ message: string }>(
+      "/api/v1/auth/verify-email",
+      {
+        method: "POST",
+        body: JSON.stringify({ token }),
+      },
+      false,
+      false,
     );
   }
 
