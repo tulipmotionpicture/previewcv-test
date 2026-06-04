@@ -518,6 +518,20 @@ export class ApiClient {
     );
   }
 
+  // Resend the candidate (user) email-verification message. Public endpoint;
+  // `platform` is omitted (backend tracks it from the request origin).
+  async resendCandidateVerification(
+    email: string,
+  ): Promise<{ message?: string }> {
+    return this.request<{ message?: string }>(
+      "/api/v1/auth/resend-verification",
+      {
+        method: "POST",
+        body: JSON.stringify({ email }),
+      },
+    );
+  }
+
   async getPublicRecruiterProfile(
     username: string,
   ): Promise<RecruiterProfileResponse> {
