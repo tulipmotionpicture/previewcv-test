@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Job } from "@/types/api";
-import { Search, Plus, ChevronDown } from "lucide-react";
+import { Plus, ChevronDown } from "lucide-react";
+import { SearchSuggestInput } from "@/components/ui";
 import JobModal from "./JobModal";
 import JobsTable from "./JobsTable";
 
@@ -198,6 +199,18 @@ export default function JobManagement({
     });
   };
 
+  // Autocomplete suggestions derived from the loaded jobs (titles, locations, skills).
+  const searchSuggestions = useMemo(() => {
+    const set = new Set<string>();
+    jobs.forEach((j) => {
+      if (j.title) set.add(j.title);
+      if (j.location) set.add(j.location);
+      (j.required_skills || []).forEach((s) => s && set.add(s));
+      (j.preferred_skills || []).forEach((s) => s && set.add(s));
+    });
+    return Array.from(set);
+  }, [jobs]);
+
   return (
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
       <JobModal
@@ -263,7 +276,7 @@ export default function JobManagement({
         {/* Filters - Takes 1 column */}
 
         <div className="lg:col-span-1">
-          <div className="bg-white dark:bg-[#282727] rounded-xl border border-[#E1E8F1] dark:border-gray-700 overflow-hidden shadow-sm sticky top-5">
+          <div className="bg-white dark:bg-[#282727] rounded-xl border border-[#E1E8F1] dark:border-gray-700 shadow-sm sticky top-5">
             {/* Header */}
             <div className="bg-[#2F4269] px-4 py-3 flex items-center justify-between rounded-t-xl">
               <h2 className="text-[13px] font-bold text-white uppercase tracking-wider">
@@ -282,16 +295,12 @@ export default function JobManagement({
                 <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
                   Search Jobs
                 </label>
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
-                  <input
-                    type="text"
-                    value={localSearch}
-                    onChange={(e) => handleSearchChange(e.target.value)}
-                    placeholder="Search by title, location, skills..."
-                    className="w-full pl-10 pr-4 py-3 bg-white dark:bg-gray-800 border border-[#E1E8F1] dark:border-gray-700 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all placeholder-gray-400 dark:text-gray-200"
-                  />
-                </div>
+                <SearchSuggestInput
+                  value={localSearch}
+                  onChange={handleSearchChange}
+                  suggestions={searchSuggestions}
+                  placeholder="Search by title, location, skills..."
+                />
               </div>
 
               {/* Status */}

@@ -1,11 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Job, Application } from "@/types/api";
 import { api } from "@/lib/api";
 import { useToast } from "@/context/ToastContext";
+import { SearchSuggestInput } from "@/components/ui";
 import {
-  Search,
   Copy,
   ChevronDown,
   FileText,
@@ -89,6 +89,18 @@ export default function ATSApplications({
     setAppliedTo("");
     onStatusFilterChange("All");
   };
+
+  // Autocomplete suggestions from the loaded applications (candidate names + emails).
+  const nameSuggestions = useMemo(() => {
+    const set = new Set<string>();
+    applications.forEach((a) => {
+      const name = a.applicant?.full_name || a.candidate_name;
+      const email = a.applicant?.email || a.candidate_email;
+      if (name) set.add(name);
+      if (email) set.add(email);
+    });
+    return Array.from(set);
+  }, [applications]);
 
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
@@ -390,9 +402,9 @@ export default function ATSApplications({
 
         {/* RIGHT COLUMN: Filter Section (Sidebar) */}
         <div className="lg:col-span-1">
-          <div className="bg-white dark:bg-[#282727] rounded-xl border border-[#E1E8F1] dark:border-gray-700 overflow-hidden shadow-sm sticky top-6">
+          <div className="bg-white dark:bg-[#282727] rounded-xl border border-[#E1E8F1] dark:border-gray-700 shadow-sm sticky top-6">
             {/* Filter Header */}
-            <div className="bg-[#2F4269] px-6 py-4 flex items-center justify-between">
+            <div className="bg-[#2F4269] px-6 py-4 flex items-center justify-between rounded-t-xl">
               <h2 className="text-[13px] font-bold text-white uppercase tracking-wider">
                 Filter
               </h2>
@@ -452,16 +464,12 @@ export default function ATSApplications({
                 <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">
                   Candidate Name
                 </label>
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                  <input
-                    type="text"
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    placeholder="Search by candidate name"
-                    className="w-full pl-10 pr-4 py-3 bg-white dark:bg-gray-800 border border-[#E1E8F1] dark:border-gray-700 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none placeholder-gray-400 dark:text-gray-200 transition-all"
-                  />
-                </div>
+                <SearchSuggestInput
+                  value={searchTerm}
+                  onChange={setSearchTerm}
+                  suggestions={nameSuggestions}
+                  placeholder="Search by candidate name or email"
+                />
               </div>
 
               {/* Applied Between */}
