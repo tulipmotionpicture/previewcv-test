@@ -41,7 +41,8 @@ function VerifyEmailContent() {
                 );
                 toast.success(response?.message || "Email verified successfully!");
                 setTimeout(() => {
-                    router.push("/recruiter/login");
+                    router.push("/candidate/login");
+
                 }, 3000);
             } catch (e: any) {
                 setStatus("error");
