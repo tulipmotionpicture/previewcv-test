@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { Job } from "@/types/api";
 import {
@@ -15,10 +15,9 @@ import {
   Briefcase,
   Share2,
   Copy,
-  Sparkles,
+  Tags,
 } from "lucide-react";
 import { formatSalaryRange } from "@/lib/salary";
-import { Tooltip } from "@/components/ui";
 import config from "@/config";
 import { generateQRCodeDataURL, downloadElementAsImage } from "@/utils/qr";
 import { useToast } from "@/context/ToastContext";
@@ -32,6 +31,120 @@ interface JobsTableProps {
   onEditJob: (job: Job) => void;
   onDeleteJob: (jobId: number) => void;
   onViewApplications: (jobId: number) => void;
+}
+
+// Backend timestamps come without a timezone suffix (e.g. "2026-06-04T05:11:23.5")
+// and are UTC. JS parses an offset-less date-time as LOCAL, which skews "x ago".
+// Append "Z" when no zone marker is present so it's read as UTC.
+function parseServerDate(dateString?: string | null): Date {
+  if (!dateString) return new Date();
+  const hasZone = /[zZ]$|[+-]\d{2}:?\d{2}$/.test(dateString);
+  return new Date(hasZone ? dateString : `${dateString}Z`);
+}
+
+// Skills count pill + hover-intent popover. Unlike the shared Tooltip, the
+// popover has pointer events and a small close delay, so the user can move into
+// it and scroll long skill lists without it disappearing.
+function SkillsCell({
+  required,
+  preferred,
+}: {
+  required: string[];
+  preferred: string[];
+}) {
+  const total = required.length + preferred.length;
+  const [open, setOpen] = useState(false);
+  const [pos, setPos] = useState<{ top: number; left: number }>({
+    top: 0,
+    left: 0,
+  });
+  const btnRef = useRef<HTMLButtonElement>(null);
+  const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const cancelClose = () => {
+    if (closeTimer.current) clearTimeout(closeTimer.current);
+  };
+  const scheduleClose = () => {
+    cancelClose();
+    closeTimer.current = setTimeout(() => setOpen(false), 150);
+  };
+  const openPopover = () => {
+    cancelClose();
+    const el = btnRef.current;
+    if (!el) return;
+    const r = el.getBoundingClientRect();
+    const width = 256; // w-64
+    const estHeight = 240;
+    let left = r.left + r.width / 2 - width / 2;
+    if (left < 8) left = 8;
+    if (left + width > window.innerWidth - 8) left = window.innerWidth - width - 8;
+    let top = r.bottom + 8;
+    if (top + estHeight > window.innerHeight - 8) {
+      top = r.top - estHeight - 8;
+      if (top < 8) top = 8;
+    }
+    setPos({ top, left });
+    setOpen(true);
+  };
+
+  if (total === 0) return <span className="text-xs text-gray-400">—</span>;
+
+  const Group = ({ title, items }: { title: string; items: string[] }) =>
+    items.length > 0 ? (
+      <div>
+        <div className="text-[10px] uppercase tracking-wider text-gray-400 mb-1">
+          {title}
+        </div>
+        <div className="flex flex-wrap gap-1">
+          {items.map((s, i) => (
+            <span
+              key={`${title}-${i}`}
+              className="px-1.5 py-0.5 rounded bg-white/15 text-[11px]"
+            >
+              {s}
+            </span>
+          ))}
+        </div>
+      </div>
+    ) : null;
+
+  return (
+    <>
+      <button
+        ref={btnRef}
+        type="button"
+        onMouseEnter={openPopover}
+        onMouseLeave={scheduleClose}
+        onFocus={openPopover}
+        onBlur={scheduleClose}
+        onClick={(e) => {
+          e.stopPropagation();
+          if (open) {
+            setOpen(false);
+          } else {
+            openPopover();
+          }
+        }}
+        className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium bg-[#EEF2F8] text-[#2F4269] dark:bg-gray-800 dark:text-gray-300 hover:bg-[#E1E8F1] dark:hover:bg-gray-700 transition-colors cursor-pointer"
+      >
+        <Tags className="w-3.5 h-3.5" />
+        {total} {total === 1 ? "skill" : "skills"}
+      </button>
+      {open &&
+        createPortal(
+          <div
+            style={{ top: pos.top, left: pos.left }}
+            onMouseEnter={cancelClose}
+            onMouseLeave={scheduleClose}
+            className="fixed z-50 w-64 max-h-56 overflow-y-auto rounded-lg bg-gray-900 text-white shadow-xl p-3 space-y-2.5 custom-scrollbar text-left animate-in fade-in zoom-in-95 duration-150"
+          >
+            <Group title="Required" items={required} />
+            <Group title="Preferred" items={preferred} />
+          </div>,
+          document.body,
+        )}
+    </>
+  );
 }
 
 export default function JobsTable({
@@ -100,7 +213,7 @@ export default function JobsTable({
   console.log(shareJob, "share job data")
   // Helper for relative time
   function formatTimeAgo(dateString: string) {
-    const date = new Date(dateString);
+    const date = parseServerDate(dateString);
     const now = new Date();
     const seconds = Math.floor((now.getTime() - date.getTime()) / 1000);
 
@@ -125,20 +238,19 @@ export default function JobsTable({
             <thead className="sticky top-0 z-10">
               <tr className="border-b border-gray-100 dark:border-gray-700">
                 {[
-                  "ROLE",
-                  "STATUS",
-                  "View Count",
-                  "Application",
-                  "POSTED",
-                  "SKILLS",
-                  "ACTIONS",
-                ].map((heading, index) => (
+                  { label: "ROLE", align: "text-left" },
+                  { label: "STATUS", align: "text-left" },
+                  { label: "View Count", align: "text-center" },
+                  { label: "Application", align: "text-center" },
+                  { label: "POSTED", align: "text-left" },
+                  { label: "SKILLS", align: "text-left" },
+                  { label: "ACTIONS", align: "text-right" },
+                ].map(({ label, align }) => (
                   <th
-                    key={heading}
-                    className={`px-4 py-3 text-xs bg-[#2F4269] font-bold text-white dark:text-gray-500 uppercase tracking-wider ${index === 4 ? "text-right" : "text-left"
-                      }`}
+                    key={label}
+                    className={`px-4 py-3 text-xs bg-[#2F4269] font-bold text-white dark:text-gray-500 uppercase tracking-wider ${align}`}
                   >
-                    {heading}
+                    {label}
                   </th>
                 ))}
               </tr>
@@ -192,64 +304,10 @@ export default function JobsTable({
                   </td>
                   {/* Skills */}
                   <td className="px-4 py-3">
-                    {(() => {
-                      const required = job.required_skills || [];
-                      const preferred = job.preferred_skills || [];
-                      const total = required.length + preferred.length;
-                      if (total === 0) {
-                        return <span className="text-xs text-gray-400">—</span>;
-                      }
-                      const tip = (
-                        <div className="text-left space-y-2 max-h-60 overflow-y-auto">
-                          {required.length > 0 && (
-                            <div>
-                              <div className="text-[10px] uppercase tracking-wider text-gray-300 mb-1">
-                                Required
-                              </div>
-                              <div className="flex flex-wrap gap-1">
-                                {required.map((s, i) => (
-                                  <span
-                                    key={`r-${i}`}
-                                    className="px-1.5 py-0.5 rounded bg-white/15 text-[11px]"
-                                  >
-                                    {s}
-                                  </span>
-                                ))}
-                              </div>
-                            </div>
-                          )}
-                          {preferred.length > 0 && (
-                            <div>
-                              <div className="text-[10px] uppercase tracking-wider text-gray-300 mb-1">
-                                Preferred
-                              </div>
-                              <div className="flex flex-wrap gap-1">
-                                {preferred.map((s, i) => (
-                                  <span
-                                    key={`p-${i}`}
-                                    className="px-1.5 py-0.5 rounded bg-white/15 text-[11px]"
-                                  >
-                                    {s}
-                                  </span>
-                                ))}
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      );
-                      return (
-                        <Tooltip content={tip} position="top">
-                          <button
-                            type="button"
-                            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium bg-[#EEF2F8] text-[#2F4269] dark:bg-gray-800 dark:text-gray-300 hover:bg-[#E1E8F1] dark:hover:bg-gray-700 transition-colors cursor-pointer"
-                            onClick={(e) => e.stopPropagation()}
-                          >
-                            <Sparkles className="w-3.5 h-3.5" />
-                            {total} {total === 1 ? "skill" : "skills"}
-                          </button>
-                        </Tooltip>
-                      );
-                    })()}
+                    <SkillsCell
+                      required={job.required_skills || []}
+                      preferred={job.preferred_skills || []}
+                    />
                   </td>
                   {/* Actions */}
                   <td className="px-4 py-3 text-right">
@@ -281,9 +339,11 @@ export default function JobsTable({
                               top = rect.top - menuHeight - 8;
                             }
 
+                            // Menu is position:fixed → use viewport coords directly
+                            // (no scroll offsets, or it drifts when the page scrolls).
                             setMenuPosition({
-                              top: Math.max(8, top + window.scrollY),
-                              left: left + window.scrollX,
+                              top: Math.max(8, top),
+                              left,
                             });
                             setOpenMenuJobId(
                               openMenuJobId === job.id ? null : job.id,
