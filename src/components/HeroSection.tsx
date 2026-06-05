@@ -33,7 +33,6 @@ export default function HeroSection({
   subtitle,
   description = "Stop sending PDF attachments. Create your resume on LetsMakeCV, then share it instantly with recruiters using a live PreviewCV link.",
   searchPlaceholder = "Search by keywords, destinations, company",
-  jobCount = "92,868",
   ctaButtons = {
     primary: { label: "Job Seeker", href: "/candidate" },
     secondary: { label: "Recruiter", href: "/recruiter" },
@@ -72,9 +71,12 @@ export default function HeroSection({
             <div className={showImage ? "order-1" : showJobSearch ? "order-1 lg:order-1" : ""}>
               {showJobSearch ? (
                 <div className="flex flex-col justify-center h-full">
-                  <h2 className="text-lg lg:text-xl font-medium text-gray-900 dark:text-gray-100 mb-1 ml-4 ">
-                    Search through <span className="">{jobCount}</span> Jobs
+                  <h2 className="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2 ml-4">
+                    Find Your Next Opportunity
                   </h2>
+                  <p className="text-sm lg:text-base font-medium text-gray-600 dark:text-gray-400 mb-4 ml-4">
+                    Search jobs from recruiters and employers looking for talented professionals.
+                  </p>
 
                   <form
                     className="flex relative w-full max-w-lg  rounded-full"
