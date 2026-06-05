@@ -382,7 +382,7 @@ export default function JobDetailsClient({ job, slug }: JobDetailsClientProps) {
           </div>
         ) : (
           <form onSubmit={handleApply} className="space-y-4">
-            <div>
+            {/* <div>
               <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5">
                 Cover Letter{" "}
                 <span className="text-gray-400 font-normal">(Optional)</span>
@@ -394,7 +394,7 @@ export default function JobDetailsClient({ job, slug }: JobDetailsClientProps) {
                 value={coverLetter}
                 onChange={(e) => setCoverLetter(e.target.value)}
               />
-            </div>
+            </div> */}
 
             <div className="my-2 overflow-hidden rounded-2xl border border-teal-dark/20 bg-teal-50 dark:border-mint/20 dark:bg-mint/5">
               {builderResumes.length > 0 ?
