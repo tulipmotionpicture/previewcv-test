@@ -201,7 +201,9 @@ export default function JobDetailsClient({ job, slug }: JobDetailsClientProps) {
     e.preventDefault();
 
     if (!isAuthenticated) {
-      router.push(`/candidate/login?redirect=/jobs/${slug}`);
+      router.push(
+        `/candidate/login?redirect=${encodeURIComponent(`/job/${slug}#application-card`)}`,
+      );
       return;
     }
 
@@ -474,7 +476,7 @@ export default function JobDetailsClient({ job, slug }: JobDetailsClientProps) {
 
                     <div className="mt-2 pt-3 border-t border-gray-200 dark:border-gray-800">
                       <a
-                        href="https://letsmakecv.com/resume-builder"
+                        href="https://letsmakecv.com/resume/generator?step=0&templateId=0"
                         target="_blank"
                         rel="noopener noreferrer"
                         className="inline-flex items-center justify-center w-full px-3 py-2 text-xs font-semibold text-white bg-[#0077b5] rounded-lg hover:bg-[#0077b5]/90 transition-colors"
@@ -624,7 +626,9 @@ export default function JobDetailsClient({ job, slug }: JobDetailsClientProps) {
                 </div>
                 <button
                   onClick={() =>
-                    router.push(`/candidate/login?redirect=/job/${slug}`)
+                    router.push(
+                      `/candidate/login?redirect=${encodeURIComponent(`/job/${slug}#application-card`)}`,
+                    )
                   }
                   className="w-full py-3 bg-[#0077b5] hover:bg-[#006097] text-white font-bold rounded-lg transition-all shadow-lg shadow-blue-200 dark:shadow-none flex items-center justify-center gap-2 text-sm"
                 >

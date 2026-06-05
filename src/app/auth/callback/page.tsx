@@ -3,6 +3,7 @@
 import { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { api } from '@/lib/api';
+import { consumePostLoginRedirect } from '@/lib/safeRedirect';
 
 function AuthCallbackContent() {
     const router = useRouter();
@@ -55,8 +56,8 @@ function AuthCallbackContent() {
                     localStorage.setItem('refresh_token', response.refresh_token);
                 }
 
-                // Redirect to dashboard
-                window.location.href = '/candidate/dashboard';
+                // Return the user to where they started (e.g. a job page), else the dashboard.
+                window.location.href = consumePostLoginRedirect();
             } catch (err: any) {
                 // If the first attempt failed and we guessed linkedin, let's try google just in case
                 try {
@@ -73,7 +74,7 @@ function AuthCallbackContent() {
                         if (response.refresh_token) {
                             localStorage.setItem('refresh_token', response.refresh_token);
                         }
-                        window.location.href = '/candidate/dashboard';
+                        window.location.href = consumePostLoginRedirect();
                         return;
                     }
                 } catch (e: any) {

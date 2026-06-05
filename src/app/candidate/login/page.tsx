@@ -1,12 +1,13 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import config from "@/config";
 import { useAuth } from "@/context/AuthContext";
 import { api } from "@/lib/api";
+import { safeInternalPath, setPostLoginRedirect } from "@/lib/safeRedirect";
 import {
   Briefcase,
   Target,
@@ -20,8 +21,9 @@ import {
   CheckCircle2,
 } from "lucide-react";
 
-export default function CandidateLogin() {
+function CandidateLoginContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { login, isAuthenticated, loading: authLoading } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -29,11 +31,16 @@ export default function CandidateLogin() {
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
+  // Where to send the user after login. Defaults to the dashboard; if they were sent here from a
+  // page like /job/{slug}, the `redirect` param brings them back (validated against open-redirects).
+  const redirectParam = searchParams.get("redirect");
+  const redirectTarget = safeInternalPath(redirectParam);
+
   useEffect(() => {
     if (!authLoading && isAuthenticated) {
-      router.push("/candidate/dashboard");
+      router.push(redirectTarget);
     }
-  }, [isAuthenticated, authLoading, router]);
+  }, [isAuthenticated, authLoading, router, redirectTarget]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -42,7 +49,7 @@ export default function CandidateLogin() {
 
     try {
       await login(email, password);
-      router.push("/candidate/dashboard");
+      router.push(redirectTarget);
     } catch (err: unknown) {
       if (err instanceof Error) {
         setError(err.message || "Invalid credentials. Please try again.");
@@ -310,7 +317,10 @@ export default function CandidateLogin() {
             <div className="grid grid-cols-2 gap-3">
               <button
                 type="button"
-                onClick={() => api.candidateSocialLogin("google")}
+                onClick={() => {
+                  setPostLoginRedirect(redirectParam);
+                  api.candidateSocialLogin("google");
+                }}
                 className="flex items-center justify-center px-4 py-2.5 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-900 text-sm font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
               >
                 <svg className="h-5 w-5 mr-2" viewBox="0 0 24 24">
@@ -335,7 +345,10 @@ export default function CandidateLogin() {
               </button>
               <button
                 type="button"
-                onClick={() => api.candidateSocialLogin("linkedin")}
+                onClick={() => {
+                  setPostLoginRedirect(redirectParam);
+                  api.candidateSocialLogin("linkedin");
+                }}
                 className="flex items-center justify-center px-4 py-2.5 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-900 text-sm font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
               >
                 <svg
@@ -362,5 +375,13 @@ export default function CandidateLogin() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function CandidateLogin() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-white dark:bg-gray-950" />}>
+      <CandidateLoginContent />
+    </Suspense>
   );
 }
