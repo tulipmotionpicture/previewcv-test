@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
+import { format, isValid, parse } from 'date-fns';
 import { useResumeParser } from '@/hooks/useResumeParser';
 import {
   Check,
@@ -62,6 +63,32 @@ function isMissing(value: unknown): boolean {
   return PLACEHOLDER_VALUES.has(trimmed.toLowerCase());
 }
 
+/**
+ * Normalize a stored work date into a `<input type="month">` value ("YYYY-MM").
+ * Returns '' for anything that isn't a real month (placeholders, blanks, year-only), so the picker
+ * shows empty and the user must choose — keeping the UI and validation consistent. Emitting
+ * "YYYY-MM" (7 chars) also stays safely within the backend column limit.
+ */
+function toMonthInputValue(value: unknown): string {
+  if (isMissing(value)) return '';
+  const v = String(value).trim();
+  const iso = v.match(/^(\d{4})-(\d{2})/);
+  if (iso) return `${iso[1]}-${iso[2]}`;
+  for (const fmt of ['MMM yyyy', 'MMMM yyyy']) {
+    const d = parse(v, fmt, new Date());
+    if (isValid(d)) return format(d, 'yyyy-MM');
+  }
+  return '';
+}
+
+/** Pretty label for a work date in read mode (e.g. "Jan 2024"); falls back to the raw value. */
+function formatMonthDisplay(value: unknown): string {
+  const iso = toMonthInputValue(value);
+  if (!iso) return isMissing(value) ? '' : String(value);
+  const d = parse(iso, 'yyyy-MM', new Date());
+  return isValid(d) ? format(d, 'MMM yyyy') : iso;
+}
+
 type SelectedIds = {
   work_experiences: Set<string>;
   education: Set<string>;
@@ -109,8 +136,9 @@ function validateData(
     const missing: string[] = [];
     if (isMissing(exp.position)) missing.push('Position');
     if (isMissing(exp.company)) missing.push('Company');
-    if (isMissing(exp.start_date)) missing.push('Start date');
-    if (!exp.is_current && isMissing(exp.end_date)) missing.push('End date');
+    // Work dates must resolve to a real month (the picker emits "YYYY-MM").
+    if (!toMonthInputValue(exp.start_date)) missing.push('Start date');
+    if (!exp.is_current && !toMonthInputValue(exp.end_date)) missing.push('End date');
     if (missing.length) invalidFields.work_experiences[exp._preview] = missing;
   }
 
@@ -178,6 +206,14 @@ export default function ResumeReview({ resumeId, onSaveComplete, portfolioId, pe
     () => (localData ? validateData(localData, selectedIds, updatePortfolioChecked) : EMPTY_VALIDATION),
     [localData, selectedIds, updatePortfolioChecked],
   );
+
+  // Year options for the education year pickers (current year + 10 down to 1960).
+  const yearOptions = useMemo(() => {
+    const currentYear = new Date().getFullYear();
+    const years: string[] = [];
+    for (let y = currentYear + 10; y >= 1960; y--) years.push(String(y));
+    return years;
+  }, []);
 
   // Validate that either resumeId or permanentToken is provided
   useEffect(() => {
@@ -639,19 +675,27 @@ export default function ResumeReview({ resumeId, onSaveComplete, portfolioId, pe
                             />
                           </div>
                           <div className="flex gap-2">
-                            <input
-                              placeholder="Start Date"
-                              value={isMissing(exp.start_date) ? '' : exp.start_date}
-                              onChange={(e) => updateItem('work_experiences', idx, 'start_date', e.target.value)}
-                              className={`w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 rounded-xl text-sm border ${errs?.includes('Start date') ? 'border-red-400' : 'border-transparent'}`}
-                            />
-                            <input
-                              placeholder="End Date"
-                              disabled={exp.is_current}
-                              value={exp.is_current ? 'Present' : (exp.end_date || '')}
-                              onChange={(e) => updateItem('work_experiences', idx, 'end_date', e.target.value)}
-                              className={`w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 rounded-xl text-sm border ${errs?.includes('End date') ? 'border-red-400' : 'border-transparent'}`}
-                            />
+                            <div className="w-full">
+                              <label className="text-[10px] font-bold text-gray-400 uppercase ml-1">Start</label>
+                              <input
+                                type="month"
+                                aria-label="Start month and year"
+                                value={toMonthInputValue(exp.start_date)}
+                                onChange={(e) => updateItem('work_experiences', idx, 'start_date', e.target.value)}
+                                className={`w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 rounded-xl text-sm border text-gray-800 dark:text-gray-200 dark:[color-scheme:dark] ${errs?.includes('Start date') ? 'border-red-400' : 'border-transparent'}`}
+                              />
+                            </div>
+                            <div className="w-full">
+                              <label className="text-[10px] font-bold text-gray-400 uppercase ml-1">End</label>
+                              <input
+                                type="month"
+                                aria-label="End month and year"
+                                disabled={exp.is_current}
+                                value={exp.is_current ? '' : toMonthInputValue(exp.end_date)}
+                                onChange={(e) => updateItem('work_experiences', idx, 'end_date', e.target.value)}
+                                className={`w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 rounded-xl text-sm border text-gray-800 dark:text-gray-200 dark:[color-scheme:dark] disabled:opacity-50 ${errs?.includes('End date') ? 'border-red-400' : 'border-transparent'}`}
+                              />
+                            </div>
                           </div>
                           <div className="flex items-center gap-2 px-2">
                             <input
@@ -668,7 +712,7 @@ export default function ResumeReview({ resumeId, onSaveComplete, portfolioId, pe
                           <h3 className="text-xl font-black text-gray-900 dark:text-gray-100">{exp.position}</h3>
                           <p className="text-primary-blue font-bold mb-2">{exp.company}</p>
                           <div className="flex items-center gap-4 text-xs text-gray-500 font-bold uppercase">
-                            <span className="flex items-center gap-1.5"><Calendar className="w-3 h-3" /> {exp.start_date} — {exp.is_current ? 'Present' : exp.end_date}</span>
+                            <span className="flex items-center gap-1.5"><Calendar className="w-3 h-3" /> {formatMonthDisplay(exp.start_date) || '—'} — {exp.is_current ? 'Present' : (formatMonthDisplay(exp.end_date) || '—')}</span>
                           </div>
                         </div>
                       )}
@@ -779,19 +823,25 @@ export default function ResumeReview({ resumeId, onSaveComplete, portfolioId, pe
                           onChange={(e) => updateItem('education', idx, 'university', e.target.value)}
                         />
                         <div className="flex gap-2">
-                          <input
-                            placeholder="Start Year"
-                            className={`w-full px-3 py-1 bg-gray-50 dark:bg-gray-800 rounded-lg outline-none font-bold text-xs border ${errs?.includes('Start year') ? 'border-red-400' : 'border-transparent'}`}
+                          <select
+                            aria-label="Start year"
+                            className={`w-full px-3 py-1.5 bg-gray-50 dark:bg-gray-800 rounded-lg outline-none font-bold text-xs border cursor-pointer text-gray-800 dark:text-gray-200 ${errs?.includes('Start year') ? 'border-red-400' : 'border-transparent'}`}
                             value={isMissing(edu.start_year) ? '' : edu.start_year}
                             onChange={(e) => updateItem('education', idx, 'start_year', e.target.value)}
-                          />
-                          <input
-                            placeholder="End Year"
+                          >
+                            <option value="">Start Year</option>
+                            {yearOptions.map((y) => <option key={y} value={y}>{y}</option>)}
+                          </select>
+                          <select
+                            aria-label="End year"
                             disabled={edu.is_currently_studying}
-                            className={`w-full px-3 py-1 bg-gray-50 dark:bg-gray-800 rounded-lg outline-none font-bold text-xs border ${errs?.includes('End year') ? 'border-red-400' : 'border-transparent'}`}
-                            value={edu.is_currently_studying ? 'Present' : (edu.end_year || '')}
+                            className={`w-full px-3 py-1.5 bg-gray-50 dark:bg-gray-800 rounded-lg outline-none font-bold text-xs border cursor-pointer disabled:opacity-50 text-gray-800 dark:text-gray-200 ${errs?.includes('End year') ? 'border-red-400' : 'border-transparent'}`}
+                            value={edu.is_currently_studying || isMissing(edu.end_year) ? '' : (edu.end_year || '')}
                             onChange={(e) => updateItem('education', idx, 'end_year', e.target.value)}
-                          />
+                          >
+                            <option value="">{edu.is_currently_studying ? 'Present' : 'End Year'}</option>
+                            {yearOptions.map((y) => <option key={y} value={y}>{y}</option>)}
+                          </select>
                         </div>
                         <div className="flex items-center gap-2 px-2">
                           <input
