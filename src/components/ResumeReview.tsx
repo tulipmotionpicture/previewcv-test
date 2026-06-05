@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useResumeParser } from '@/hooks/useResumeParser';
 import {
   Check,
@@ -37,6 +37,119 @@ interface Props {
   onClose?: () => void;
 }
 
+/**
+ * The AI parse + transform-for-graphql step is unreliable: required fields can come back as null,
+ * blank, or placeholder strings (e.g. work start_date -> "Not specified", language -> null/"None").
+ * Submitting those to save-reviewed-metadata fails on the backend, so we gate the Import button.
+ */
+const PLACEHOLDER_VALUES = new Set([
+  'not specified',
+  'none',
+  'new company',
+  'new position',
+  'new university',
+  'new degree',
+  'new skill',
+  'new language',
+]);
+
+/** A field value is "missing" if it is null/undefined, blank, or a known placeholder literal. */
+function isMissing(value: unknown): boolean {
+  if (value === null || value === undefined) return true;
+  if (typeof value !== 'string') return false; // numeric/enum values (e.g. proficiency) are always set
+  const trimmed = value.trim();
+  if (trimmed === '') return true;
+  return PLACEHOLDER_VALUES.has(trimmed.toLowerCase());
+}
+
+type SelectedIds = {
+  work_experiences: Set<string>;
+  education: Set<string>;
+  skills: Set<string>;
+  languages: Set<string>;
+};
+
+type ValidationResult = {
+  invalidFields: {
+    work_experiences: Record<string, string[]>;
+    education: Record<string, string[]>;
+    skills: Record<string, string[]>;
+    languages: Record<string, string[]>;
+  };
+  personalErrors: string[];
+  invalidCount: number;
+  isValid: boolean;
+};
+
+const EMPTY_VALIDATION: ValidationResult = {
+  invalidFields: { work_experiences: {}, education: {}, skills: {}, languages: {} },
+  personalErrors: [],
+  invalidCount: 0,
+  isValid: true,
+};
+
+/**
+ * Validate only the *selected* items (the ones that will actually be submitted). A bad item can be
+ * resolved either by fixing its fields or by deselecting it.
+ */
+function validateData(
+  data: TransformedMetadata,
+  selected: SelectedIds,
+  checkPortfolio: boolean,
+): ValidationResult {
+  const invalidFields: ValidationResult['invalidFields'] = {
+    work_experiences: {},
+    education: {},
+    skills: {},
+    languages: {},
+  };
+
+  for (const exp of data.work_experiences) {
+    if (!selected.work_experiences.has(exp._preview)) continue;
+    const missing: string[] = [];
+    if (isMissing(exp.position)) missing.push('Position');
+    if (isMissing(exp.company)) missing.push('Company');
+    if (isMissing(exp.start_date)) missing.push('Start date');
+    if (!exp.is_current && isMissing(exp.end_date)) missing.push('End date');
+    if (missing.length) invalidFields.work_experiences[exp._preview] = missing;
+  }
+
+  for (const edu of data.education) {
+    if (!selected.education.has(edu._preview)) continue;
+    const missing: string[] = [];
+    if (isMissing(edu.degree)) missing.push('Degree');
+    if (isMissing(edu.university)) missing.push('University');
+    if (isMissing(edu.start_year)) missing.push('Start year');
+    if (!edu.is_currently_studying && isMissing(edu.end_year)) missing.push('End year');
+    if (missing.length) invalidFields.education[edu._preview] = missing;
+  }
+
+  for (const skill of data.skills) {
+    if (!selected.skills.has(skill._preview)) continue;
+    if (isMissing(skill.skill_name)) invalidFields.skills[skill._preview] = ['Skill name'];
+  }
+
+  for (const lang of data.languages) {
+    if (!selected.languages.has(lang._preview)) continue;
+    if (isMissing(lang.language)) invalidFields.languages[lang._preview] = ['Language'];
+  }
+
+  const personalErrors: string[] = [];
+  if (checkPortfolio && data.personal_details) {
+    if (isMissing(data.personal_details.first_name)) personalErrors.push('First name');
+    if (isMissing(data.personal_details.last_name)) personalErrors.push('Last name');
+  }
+
+  const invalidCount =
+    Object.keys(invalidFields.work_experiences).length +
+    Object.keys(invalidFields.education).length +
+    Object.keys(invalidFields.skills).length +
+    Object.keys(invalidFields.languages).length +
+    (personalErrors.length ? 1 : 0);
+
+  return { invalidFields, personalErrors, invalidCount, isValid: invalidCount === 0 };
+}
+
 export default function ResumeReview({ resumeId, onSaveComplete, portfolioId, permanentToken, onClose }: Props) {
   const [localData, setLocalData] = useState<TransformedMetadata | null>(null);
   const [selectedIds, setSelectedIds] = useState({
@@ -59,6 +172,12 @@ export default function ResumeReview({ resumeId, onSaveComplete, portfolioId, pe
     saving,
     error,
   } = useResumeParser();
+
+  // Gate submission: only selected items with all key fields filled may be imported.
+  const validation = useMemo(
+    () => (localData ? validateData(localData, selectedIds, updatePortfolioChecked) : EMPTY_VALIDATION),
+    [localData, selectedIds, updatePortfolioChecked],
+  );
 
   // Validate that either resumeId or permanentToken is provided
   useEffect(() => {
@@ -180,6 +299,8 @@ export default function ResumeReview({ resumeId, onSaveComplete, portfolioId, pe
 
   const handleSave = async () => {
     if (!localData) return;
+    // Never submit incomplete/placeholder data — the button is also disabled, this is a safety net.
+    if (!validation.isValid) return;
 
     try {
       // Filter only selected items and clean them
@@ -396,7 +517,7 @@ export default function ResumeReview({ resumeId, onSaveComplete, portfolioId, pe
                 type="text"
                 value={localData.personal_details?.first_name || ''}
                 onChange={(e) => updatePersonalInfo('first_name', e.target.value)}
-                className="w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 rounded-xl border border-transparent focus:border-indigo-500 outline-none font-bold text-gray-800 dark:text-gray-200"
+                className={`w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 rounded-xl border focus:border-indigo-500 outline-none font-bold text-gray-800 dark:text-gray-200 ${validation.personalErrors.includes('First name') ? 'border-red-400' : 'border-transparent'}`}
               />
             </div>
             <div>
@@ -405,7 +526,7 @@ export default function ResumeReview({ resumeId, onSaveComplete, portfolioId, pe
                 type="text"
                 value={localData.personal_details?.last_name || ''}
                 onChange={(e) => updatePersonalInfo('last_name', e.target.value)}
-                className="w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 rounded-xl border border-transparent focus:border-indigo-500 outline-none font-bold text-gray-800 dark:text-gray-200"
+                className={`w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 rounded-xl border focus:border-indigo-500 outline-none font-bold text-gray-800 dark:text-gray-200 ${validation.personalErrors.includes('Last name') ? 'border-red-400' : 'border-transparent'}`}
               />
             </div>
           </div>
@@ -476,12 +597,13 @@ export default function ResumeReview({ resumeId, onSaveComplete, portfolioId, pe
           {localData.work_experiences.map((exp, idx) => {
             const isSelected = selectedIds.work_experiences.has(exp._preview);
             const isEditing = editingId === exp._preview;
+            const errs = validation.invalidFields.work_experiences[exp._preview];
 
             return (
               <div
                 key={exp._preview}
                 onClick={(e) => { e.stopPropagation(); toggleSelection('work_experiences', exp._preview); }}
-                className={`group bg-white dark:bg-gray-900 rounded-[2rem] border-2 transition-all duration-500 ${isSelected ? 'border-blue-500 shadow-xl shadow-blue-500/5' : 'border-gray-100 dark:border-gray-800'
+                className={`group bg-white dark:bg-gray-900 rounded-[2rem] border-2 transition-all duration-500 ${errs ? 'border-red-400 shadow-xl shadow-red-500/5' : isSelected ? 'border-blue-500 shadow-xl shadow-blue-500/5' : 'border-gray-100 dark:border-gray-800'
                   }`}
               >
                 <div className="p-6" onClick={(e) => e.stopPropagation()}>
@@ -505,7 +627,7 @@ export default function ResumeReview({ resumeId, onSaveComplete, portfolioId, pe
                             <input
                               value={exp.position}
                               onChange={(e) => updateItem('work_experiences', idx, 'position', e.target.value)}
-                              className="w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 rounded-xl border border-transparent focus:border-blue-500 outline-none font-bold"
+                              className={`w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 rounded-xl border focus:border-blue-500 outline-none font-bold ${errs?.includes('Position') ? 'border-red-400' : 'border-transparent'}`}
                             />
                           </div>
                           <div>
@@ -513,22 +635,22 @@ export default function ResumeReview({ resumeId, onSaveComplete, portfolioId, pe
                             <input
                               value={exp.company}
                               onChange={(e) => updateItem('work_experiences', idx, 'company', e.target.value)}
-                              className="w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 rounded-xl border border-transparent focus:border-blue-500 outline-none font-bold text-primary-blue"
+                              className={`w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 rounded-xl border focus:border-blue-500 outline-none font-bold text-primary-blue ${errs?.includes('Company') ? 'border-red-400' : 'border-transparent'}`}
                             />
                           </div>
                           <div className="flex gap-2">
                             <input
                               placeholder="Start Date"
-                              value={exp.start_date}
+                              value={isMissing(exp.start_date) ? '' : exp.start_date}
                               onChange={(e) => updateItem('work_experiences', idx, 'start_date', e.target.value)}
-                              className="w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 rounded-xl text-sm"
+                              className={`w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 rounded-xl text-sm border ${errs?.includes('Start date') ? 'border-red-400' : 'border-transparent'}`}
                             />
                             <input
                               placeholder="End Date"
                               disabled={exp.is_current}
                               value={exp.is_current ? 'Present' : (exp.end_date || '')}
                               onChange={(e) => updateItem('work_experiences', idx, 'end_date', e.target.value)}
-                              className="w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 rounded-xl text-sm"
+                              className={`w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 rounded-xl text-sm border ${errs?.includes('End date') ? 'border-red-400' : 'border-transparent'}`}
                             />
                           </div>
                           <div className="flex items-center gap-2 px-2">
@@ -548,6 +670,19 @@ export default function ResumeReview({ resumeId, onSaveComplete, portfolioId, pe
                           <div className="flex items-center gap-4 text-xs text-gray-500 font-bold uppercase">
                             <span className="flex items-center gap-1.5"><Calendar className="w-3 h-3" /> {exp.start_date} — {exp.is_current ? 'Present' : exp.end_date}</span>
                           </div>
+                        </div>
+                      )}
+                      {errs && !isEditing && (
+                        <div className="flex items-center justify-between gap-2">
+                          <p className="flex items-center gap-1.5 text-xs font-bold text-red-500">
+                            <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" /> Missing: {errs.join(', ')}
+                          </p>
+                          <button
+                            onClick={(e) => { e.stopPropagation(); setEditingId(exp._preview); }}
+                            className="text-xs font-black text-primary-blue hover:underline whitespace-nowrap"
+                          >
+                            Complete details
+                          </button>
                         </div>
                       )}
                     </div>
@@ -604,6 +739,7 @@ export default function ResumeReview({ resumeId, onSaveComplete, portfolioId, pe
           {localData.education.map((edu, idx) => {
             const isSelected = selectedIds.education.has(edu._preview);
             const isEditing = editingId === edu._preview;
+            const errs = validation.invalidFields.education[edu._preview];
 
             return (
               <div
@@ -612,7 +748,7 @@ export default function ResumeReview({ resumeId, onSaveComplete, portfolioId, pe
                   e.stopPropagation();
                   toggleSelection('education', edu._preview);
                 }}
-                className={`bg-white dark:bg-gray-900 rounded-3xl border-2 p-6 transition-all duration-300 ${isSelected ? 'border-emerald-500 shadow-lg shadow-emerald-500/5' : 'border-gray-100 dark:border-gray-800'
+                className={`bg-white dark:bg-gray-900 rounded-3xl border-2 p-6 transition-all duration-300 ${errs ? 'border-red-400 shadow-lg shadow-red-500/5' : isSelected ? 'border-emerald-500 shadow-lg shadow-emerald-500/5' : 'border-gray-100 dark:border-gray-800'
                   }`}
               >
                 <div className="flex items-start gap-4" onClick={(e) => e.stopPropagation()}>
@@ -632,27 +768,27 @@ export default function ResumeReview({ resumeId, onSaveComplete, portfolioId, pe
                       <div className="space-y-2">
                         <input
                           placeholder="Degree"
-                          className="w-full px-3 py-1 bg-gray-50 dark:bg-gray-800 rounded-lg outline-none font-bold text-sm"
+                          className={`w-full px-3 py-1 bg-gray-50 dark:bg-gray-800 rounded-lg outline-none font-bold text-sm border ${errs?.includes('Degree') ? 'border-red-400' : 'border-transparent'}`}
                           value={edu.degree}
                           onChange={(e) => updateItem('education', idx, 'degree', e.target.value)}
                         />
                         <input
                           placeholder="University"
-                          className="w-full px-3 py-1 bg-gray-50 dark:bg-gray-800 rounded-lg outline-none font-bold text-xs text-emerald-600"
+                          className={`w-full px-3 py-1 bg-gray-50 dark:bg-gray-800 rounded-lg outline-none font-bold text-xs text-emerald-600 border ${errs?.includes('University') ? 'border-red-400' : 'border-transparent'}`}
                           value={edu.university}
                           onChange={(e) => updateItem('education', idx, 'university', e.target.value)}
                         />
                         <div className="flex gap-2">
                           <input
                             placeholder="Start Year"
-                            className="w-full px-3 py-1 bg-gray-50 dark:bg-gray-800 rounded-lg outline-none font-bold text-xs"
-                            value={edu.start_year || ''}
+                            className={`w-full px-3 py-1 bg-gray-50 dark:bg-gray-800 rounded-lg outline-none font-bold text-xs border ${errs?.includes('Start year') ? 'border-red-400' : 'border-transparent'}`}
+                            value={isMissing(edu.start_year) ? '' : edu.start_year}
                             onChange={(e) => updateItem('education', idx, 'start_year', e.target.value)}
                           />
                           <input
                             placeholder="End Year"
                             disabled={edu.is_currently_studying}
-                            className="w-full px-3 py-1 bg-gray-50 dark:bg-gray-800 rounded-lg outline-none font-bold text-xs"
+                            className={`w-full px-3 py-1 bg-gray-50 dark:bg-gray-800 rounded-lg outline-none font-bold text-xs border ${errs?.includes('End year') ? 'border-red-400' : 'border-transparent'}`}
                             value={edu.is_currently_studying ? 'Present' : (edu.end_year || '')}
                             onChange={(e) => updateItem('education', idx, 'end_year', e.target.value)}
                           />
@@ -672,6 +808,19 @@ export default function ResumeReview({ resumeId, onSaveComplete, portfolioId, pe
                         <h3 className="font-black text-gray-900 dark:text-gray-100 truncate">{edu.degree}</h3>
                         <p className="text-emerald-600 font-bold text-xs truncate">{edu.university}</p>
                         <p className="text-[10px] text-gray-400 font-bold mt-1 uppercase">{edu.start_year} — {edu.end_year || 'Present'}</p>
+                      </div>
+                    )}
+                    {errs && !isEditing && (
+                      <div className="mt-2 flex items-center justify-between gap-2">
+                        <p className="flex items-center gap-1 text-[11px] font-bold text-red-500">
+                          <AlertCircle className="w-3 h-3 flex-shrink-0" /> Missing: {errs.join(', ')}
+                        </p>
+                        <button
+                          onClick={(e) => { e.stopPropagation(); setEditingId(edu._preview); }}
+                          className="text-[11px] font-black text-emerald-600 hover:underline whitespace-nowrap"
+                        >
+                          Complete
+                        </button>
                       </div>
                     )}
                   </div>
@@ -728,11 +877,12 @@ export default function ResumeReview({ resumeId, onSaveComplete, portfolioId, pe
             {localData.skills.map((skill, idx) => {
               const isSelected = selectedIds.skills.has(skill._preview);
               const isEditing = editingId === skill._preview;
+              const errs = validation.invalidFields.skills[skill._preview];
 
               return (
                 <div
                   key={skill._preview}
-                  className={`group flex items-center gap-3 p-3 rounded-2xl border-2 transition-all ${isSelected ? 'border-amber-500 bg-amber-50/20' : 'border-gray-50 dark:border-gray-800'
+                  className={`group flex items-center gap-3 p-3 rounded-2xl border-2 transition-all ${errs ? 'border-red-400 bg-red-50/20' : isSelected ? 'border-amber-500 bg-amber-50/20' : 'border-gray-50 dark:border-gray-800'
                     }`}
                   onClick={(e) => e.stopPropagation()}
                 >
@@ -750,7 +900,7 @@ export default function ResumeReview({ resumeId, onSaveComplete, portfolioId, pe
                     {isEditing ? (
                       <div className="space-y-2">
                         <input
-                          className="w-full bg-white dark:bg-gray-800 px-2 py-1 rounded-lg border-none outline-none font-bold text-xs"
+                          className={`w-full bg-white dark:bg-gray-800 px-2 py-1 rounded-lg outline-none font-bold text-xs border ${errs ? 'border-red-400' : 'border-transparent'}`}
                           value={skill.skill_name}
                           onChange={(e) => updateItem('skills', idx, 'skill_name', e.target.value)}
                           placeholder="Skill name"
@@ -772,7 +922,11 @@ export default function ResumeReview({ resumeId, onSaveComplete, portfolioId, pe
                       </div>
                     ) : (
                       <div className="flex items-center justify-between">
-                        <span className="font-bold text-gray-800 dark:text-gray-200 truncate">{skill.skill_name}</span>
+                        {errs ? (
+                          <span className="flex items-center gap-1 text-xs font-bold text-red-500"><AlertCircle className="w-3 h-3" /> Name required</span>
+                        ) : (
+                          <span className="font-bold text-gray-800 dark:text-gray-200 truncate">{skill.skill_name}</span>
+                        )}
                         <span className="text-[10px] font-black text-amber-600">{skill.proficiency_level}/10</span>
                       </div>
                     )}
@@ -826,11 +980,12 @@ export default function ResumeReview({ resumeId, onSaveComplete, portfolioId, pe
             {localData.languages.map((lang, idx) => {
               const isSelected = selectedIds.languages.has(lang._preview);
               const isEditing = editingId === lang._preview;
+              const errs = validation.invalidFields.languages[lang._preview];
 
               return (
                 <div
-                  key={lang._preview}
-                  className={`group flex items-center gap-3 p-3 rounded-2xl border-2 transition-all ${isSelected ? 'border-purple-500 bg-purple-50/20' : 'border-gray-50 dark:border-gray-800'
+                  key={`${lang._preview}-${idx}`}
+                  className={`group flex items-center gap-3 p-3 rounded-2xl border-2 transition-all ${errs ? 'border-red-400 bg-red-50/20' : isSelected ? 'border-purple-500 bg-purple-50/20' : 'border-gray-50 dark:border-gray-800'
                     }`}
                   onClick={(e) => e.stopPropagation()}
                 >
@@ -848,8 +1003,8 @@ export default function ResumeReview({ resumeId, onSaveComplete, portfolioId, pe
                     {isEditing ? (
                       <div className="space-y-2">
                         <input
-                          className="w-full bg-white dark:bg-gray-800 px-2 py-1 rounded-lg border-none outline-none font-bold text-xs"
-                          value={lang.language}
+                          className={`w-full bg-white dark:bg-gray-800 px-2 py-1 rounded-lg outline-none font-bold text-xs border ${errs ? 'border-red-400' : 'border-transparent'}`}
+                          value={lang.language || ''}
                           onChange={(e) => updateItem('languages', idx, 'language', e.target.value)}
                           placeholder="Language"
                         />
@@ -867,7 +1022,11 @@ export default function ResumeReview({ resumeId, onSaveComplete, portfolioId, pe
                       </div>
                     ) : (
                       <div className="flex items-center justify-between">
-                        <span className="font-bold text-gray-800 dark:text-gray-200 truncate">{lang.language}</span>
+                        {errs ? (
+                          <span className="flex items-center gap-1 text-xs font-bold text-red-500"><AlertCircle className="w-3 h-3" /> Language required</span>
+                        ) : (
+                          <span className="font-bold text-gray-800 dark:text-gray-200 truncate">{lang.language}</span>
+                        )}
                         <span className="text-[10px] font-black text-purple-600 uppercase">{lang.proficiency_level}</span>
                       </div>
                     )}
@@ -905,6 +1064,11 @@ export default function ResumeReview({ resumeId, onSaveComplete, portfolioId, pe
           <div className="pl-6 flex flex-col">
             <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 line-clamp-1">Items for Profile</p>
             <p className="text-2xl font-black text-primary-blue leading-tight">0{totalSelectedCount}</p>
+            {totalSelectedCount > 0 && !validation.isValid && (
+              <p className="flex items-center gap-1 text-[11px] font-bold text-red-500 mt-0.5">
+                <AlertCircle className="w-3 h-3" /> {validation.invalidCount} item{validation.invalidCount > 1 ? 's' : ''} need details
+              </p>
+            )}
           </div>
 
           <button
@@ -912,7 +1076,7 @@ export default function ResumeReview({ resumeId, onSaveComplete, portfolioId, pe
               e.stopPropagation();
               handleSave();
             }}
-            disabled={totalSelectedCount === 0 || saving}
+            disabled={totalSelectedCount === 0 || saving || !validation.isValid}
             className="flex items-center gap-3 bg-gradient-to-br from-primary-blue to-indigo-600 text-white font-black py-4 px-10 rounded-3xl shadow-xl shadow-primary-blue/20 hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-50 disabled:grayscale group"
           >
             {saving ? (
