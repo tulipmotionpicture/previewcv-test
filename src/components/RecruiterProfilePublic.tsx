@@ -79,6 +79,21 @@ export default function RecruiterProfilePublic({
     }
   }, [profile?.gallery?.images, isFullScreenGallery]);
 
+  // Deep-link support: arriving with a tab hash (e.g. "#positions" from the home-page employer
+  // cards) opens that tab and scrolls it into view.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const hash = window.location.hash.replace("#", "");
+    if (["about", "positions", "events"].includes(hash)) {
+      setActiveTab(hash);
+      requestAnimationFrame(() => {
+        document
+          .getElementById("recruiter-tabs")
+          ?.scrollIntoView({ behavior: "smooth", block: "start" });
+      });
+    }
+  }, []);
+
   if (!profile) {
     return <div className="text-center py-12">No profile data available</div>;
   }
@@ -260,7 +275,7 @@ export default function RecruiterProfilePublic({
         {/* Header Card */}
 
         {/* Navigation Tabs */}
-        <div className="flex border-b border-slate-200 mb-8 overflow-x-auto scrollbar-hide">
+        <div id="recruiter-tabs" className="flex border-b border-slate-200 mb-8 overflow-x-auto scrollbar-hide">
           {tabs.map((tab) => (
             <button
               key={tab.id}

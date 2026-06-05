@@ -263,7 +263,7 @@ export default function Home() {
                         className="px-2 w-[120px] md:w-[160px] lg:w-[200px] h-full flex-shrink-0"
                       >
                         <div className="bg-white p-2 md:p-4 border border-gray-200 rounded-lg flex items-center justify-center hover:shadow-md transition-shadow h-full w-full">
-                          <Link href={`/recruiter/${employer.recruiter_slug}`}>
+                          <Link href={`/recruiter/${employer.recruiter_slug}#positions`}>
                             <Image
                               src={
                                 employer.company_logo_url || "/logos/logo-1.png"
@@ -303,7 +303,7 @@ export default function Home() {
                         >
                           <div className="bg-white p-2 md:p-4 border border-gray-200 rounded-lg flex items-center justify-center hover:shadow-md transition-shadow h-full w-full">
                             <Link
-                              href={`/recruiter/${employer.recruiter_slug}`}
+                              href={`/recruiter/${employer.recruiter_slug}#positions`}
                             >
                               <Image
                                 src={
