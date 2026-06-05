@@ -30,6 +30,7 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import { api } from "@/lib/api";
 import { Recruiter } from "@/types/api";
+import { useRecruiterAuth } from "@/context/RecruiterAuthContext";
 
 interface GalleryImage {
   id: string;
@@ -213,8 +214,12 @@ export default function App({ jobs, events }: RecruiterProfileContentProps) {
     type: "Webinar",
   });
 
-  const isProfileLocked =
-    profile.kyc_status?.trim().toLowerCase() === "approved";
+  const { updateProfile } = useRecruiterAuth();
+
+  // The profile is editable again (it was previously locked once KYC was approved).
+  // Saving edits triggers backend re-verification (is_verified -> false) before the recruiter
+  // can post jobs again. Username, email, and display name stay read-only in the form below.
+  const isProfileLocked = false;
 
   // Fetch profile data on component mount
   useEffect(() => {
@@ -256,24 +261,18 @@ export default function App({ jobs, events }: RecruiterProfileContentProps) {
   }, []);
 
   const handleSave = async () => {
-    if (isProfileLocked) {
-      setErrorMessage("This profile is locked after KYC approval.");
-      setShowError(true);
-      return;
-    }
-
     try {
       setIsSaving(true);
       setShowError(false);
 
       const recruiterData = profileDataToRecruiter(profile);
 
-      const response = await api.updateRecruiterProfile(recruiterData);
+      // Save via the auth context so the global recruiter state refreshes immediately
+      // (e.g. is_verified flips to false), which drives the job-posting re-verification gate.
+      await updateProfile(recruiterData);
 
-      if (response && response.id) {
-        setShowSuccess(true);
-        setTimeout(() => setShowSuccess(false), 3000);
-      }
+      setShowSuccess(true);
+      setTimeout(() => setShowSuccess(false), 3000);
     } catch (error) {
       console.error("Failed to save profile:", error);
       const message =
@@ -854,6 +853,10 @@ export default function App({ jobs, events }: RecruiterProfileContentProps) {
                 </div>
 
                 <div className="pt-6 space-y-3">
+                  <p className="text-xs text-amber-700 dark:text-amber-400">
+                    Note: Saving profile changes will require your account to be
+                    re-verified before you can post jobs again.
+                  </p>
                   <button
                     onClick={handleSave}
                     disabled={isSaving || isLoading || isProfileLocked}

@@ -40,7 +40,10 @@ import type {
   JobManagementTab,
 } from "@/components/recruiter";
 import { ArrowRight, Clock, Shield, Search, Bell, Plus, Mail } from "lucide-react";
-import { recruiterNeedsVerification } from "@/lib/recruiterVerification";
+import {
+  recruiterNeedsVerification,
+  recruiterNeedsRevalidation,
+} from "@/lib/recruiterVerification";
 import { Button } from "@/components/ui";
 
 interface JobFilters {
@@ -346,6 +349,15 @@ function RecruiterDashboardInner() {
     // JobManagement → JobModal quick-create path, which routes through here).
     if (recruiterNeedsVerification(recruiter)) {
       toast.error("Please verify your email before posting a job.");
+      return;
+    }
+
+    // Backstop: profile edits put the account into re-verification (is_verified=false) and/or
+    // KYC may not permit posting (can_post_jobs=false). Block until revalidated via support.
+    if (recruiterNeedsRevalidation(recruiter, kycStatus?.can_post_jobs)) {
+      toast.error(
+        "Your profile is pending re-verification. Please contact support to revalidate your updates.",
+      );
       return;
     }
 
@@ -763,6 +775,18 @@ function RecruiterDashboardInner() {
                   ? "Sending…"
                   : "Resend verification email"}
               </button>
+            </div>
+          ) : recruiterNeedsRevalidation(recruiter, kycStatus?.can_post_jobs) ? (
+            <div className="rounded-xl border border-amber-200 bg-amber-50 p-8 text-center dark:border-amber-700 dark:bg-amber-900/30">
+              <Shield className="mx-auto mb-3 h-8 w-8 text-amber-600 dark:text-amber-400" />
+              <h3 className="mb-1 text-base font-semibold text-amber-900 dark:text-amber-100">
+                Profile pending re-verification
+              </h3>
+              <p className="mx-auto max-w-md text-sm text-amber-800 dark:text-amber-200">
+                Your account is under re-verification after recent profile
+                changes, so job posting is paused. Please contact support to
+                revalidate your updates.
+              </p>
             </div>
           ) : (
             <JobCreationPage

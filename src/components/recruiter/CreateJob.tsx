@@ -16,7 +16,10 @@ import { JobSearch, SkillSearch } from "../masters";
 import { JobTitle } from "@/types/masters";
 import { JobContentVariant } from "@/types/api";
 import { getCurrencyOptions } from "@/lib/salary";
-import { recruiterNeedsVerification } from "@/lib/recruiterVerification";
+import {
+  recruiterNeedsVerification,
+  recruiterNeedsRevalidation,
+} from "@/lib/recruiterVerification";
 
 const STEPS = [
   "Core Details",
@@ -566,6 +569,14 @@ export default function JobCreationPage({
     // Backstop: an unverified recruiter cannot post jobs.
     if (recruiterNeedsVerification(recruiter)) {
       showToast("Please verify your email before posting a job.", "error");
+      return;
+    }
+    // Backstop: profile edits put the account into re-verification (is_verified=false).
+    if (recruiterNeedsRevalidation(recruiter)) {
+      showToast(
+        "Your profile is pending re-verification. Please contact support to revalidate your updates.",
+        "error",
+      );
       return;
     }
     // Re-validate every data step before sending; jump to the first failing
