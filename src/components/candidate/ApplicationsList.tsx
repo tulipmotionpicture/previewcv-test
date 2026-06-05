@@ -43,7 +43,7 @@ export default function ApplicationsList({
 
   if (applications.length === 0) {
     return (
-      <div className="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-800 p-12 text-center">
+      <div className="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-800 p-6 md:p-12 text-center">
         <div className="inline-flex items-center justify-center w-16 h-16 rounded-lg bg-gray-100 dark:bg-gray-800 mb-4">
           <FileText className="w-8 h-8 text-gray-400 dark:text-gray-500" />
         </div>

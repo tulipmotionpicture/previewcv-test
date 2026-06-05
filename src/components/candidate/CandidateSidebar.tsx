@@ -66,6 +66,7 @@ export default function CandidateSidebar({
       variant="dark"
       userName={user?.full_name}
       showChevron={false}
+      mobileDrawer
     />
   );
 }

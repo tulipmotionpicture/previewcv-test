@@ -1,7 +1,8 @@
 "use client";
 
 import Image from "next/image";
-import { ChevronRight, User, LogOut } from "lucide-react";
+import { ChevronRight, User, LogOut, Menu, X } from "lucide-react";
+import { useState } from "react";
 import config from "@/config";
 import Link from "next/link";
 
@@ -22,6 +23,8 @@ interface DashboardSidebarProps<T extends string> {
     showChevron?: boolean;
     userSubtitle?: string;
     userAvatarUrl?: string;
+    /** Enable a mobile hamburger + slide-in drawer (off by default). */
+    mobileDrawer?: boolean;
 }
 
 export default function DashboardSidebar<T extends string>({
@@ -35,8 +38,15 @@ export default function DashboardSidebar<T extends string>({
     showChevron = false,
     userSubtitle = "Candidate",
     userAvatarUrl,
+    mobileDrawer = false,
 }: DashboardSidebarProps<T>) {
     const isDark = variant === "dark";
+    const [open, setOpen] = useState(false);
+
+    const handleTabChange = (tab: T) => {
+        onTabChange(tab);
+        setOpen(false);
+    };
 
     const renderNavItems = (items: NavItem<T>[]) => (
         items.map((item) => {
@@ -44,7 +54,7 @@ export default function DashboardSidebar<T extends string>({
             return (
                 <button
                     key={item.key}
-                    onClick={() => onTabChange(item.key)}
+                    onClick={() => handleTabChange(item.key)}
                     className={`w-full text-left px-4 py-3 rounded-md transition-all duration-150 text-xs flex items-center ${showChevron ? "justify-between" : "gap-3"
                         } group cursor-pointer ${isActive
                             ? "bg-primary-blue text-white"
@@ -75,16 +85,40 @@ export default function DashboardSidebar<T extends string>({
         })
     );
 
+    const themeClasses = isDark
+        ? "bg-white dark:bg-[#121111] text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-800"
+        : "bg-[#2F4269] dark:bg-[#121111] border-r border-gray-200 dark:border-gray-800";
+
+    const asideClasses = mobileDrawer
+        ? `fixed md:sticky top-0 left-0 z-50 md:z-30 h-screen w-64 md:w-56 p-4 flex flex-col transition-transform duration-200 md:translate-x-0 ${open ? "translate-x-0 shadow-2xl" : "-translate-x-full"} ${themeClasses}`
+        : `w-56 min-h-screen p-4 sticky top-0 h-screen flex flex-col transition-colors duration-200 ${themeClasses}`;
+
     return (
-        <aside
-            className={`w-56 min-h-screen p-4 sticky top-0 h-screen flex flex-col transition-colors duration-200 ${isDark
-                ? "bg-white dark:bg-[#121111] text-gray-900 dark:text-white border-r border-gray-200 dark:border-gray-800"
-                : "bg-[#2F4269] dark:bg-[#121111] border-r border-gray-200 dark:border-gray-800"
-                }`}
-        >
+        <>
+            {/* Mobile hamburger (only when drawer enabled) */}
+            {mobileDrawer && (
+                <button
+                    type="button"
+                    onClick={() => setOpen(true)}
+                    aria-label="Open menu"
+                    className="md:hidden fixed top-3 left-3 z-30 p-2 rounded-lg bg-[#2F4269] dark:bg-[#1E293B] text-white shadow-lg"
+                >
+                    <Menu className="w-5 h-5" />
+                </button>
+            )}
+
+            {/* Mobile overlay */}
+            {mobileDrawer && open && (
+                <div
+                    className="md:hidden fixed inset-0 bg-black/50 z-40"
+                    onClick={() => setOpen(false)}
+                />
+            )}
+
+            <aside className={asideClasses}>
             {/* Logo Section - Flat Design */}
-            <div className="mb-4 flex items-center justify-center pb-4 border-b border-gray-200 dark:border-gray-800">
-                <Link href="/" className="cursor-pointer">
+            <div className="mb-4 flex items-center justify-between gap-2 pb-4 border-b border-gray-200 dark:border-gray-800">
+                <Link href="/" className="cursor-pointer mx-auto md:mx-0">
                     <Image
                         src={config.app.logoUrl}
                         alt={config.app.name}
@@ -93,6 +127,16 @@ export default function DashboardSidebar<T extends string>({
                         className="object-contain"
                     />
                 </Link>
+                {mobileDrawer && (
+                    <button
+                        type="button"
+                        onClick={() => setOpen(false)}
+                        aria-label="Close menu"
+                        className="md:hidden p-1.5 rounded-md text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800"
+                    >
+                        <X className="w-5 h-5" />
+                    </button>
+                )}
             </div>
 
             {/* Navigation - Flat Design */}
@@ -155,6 +199,7 @@ export default function DashboardSidebar<T extends string>({
                     </div>
                 )}
             </div>
-        </aside>
+            </aside>
+        </>
     );
 }

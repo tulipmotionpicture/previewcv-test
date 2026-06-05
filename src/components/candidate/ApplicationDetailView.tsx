@@ -77,7 +77,7 @@ const ApplicationDetailView: React.FC<ApplicationDetailViewProps> = ({
     const themeColors = getThemeColors();
 
     return (
-        <div className="flex-1 h-full overflow-y-auto p-5 bg-white dark:bg-gray-900 scroll-smooth">
+        <div className="flex-1 h-full overflow-y-auto p-4 md:p-5 bg-white dark:bg-gray-900 scroll-smooth">
             {/* Header Section */}
             <div className="flex justify-between items-start mb-2 pb-5 border-b border-gray-100 dark:border-gray-800">
                 <div className="flex-1 pr-6">
@@ -187,7 +187,7 @@ const ApplicationDetailView: React.FC<ApplicationDetailViewProps> = ({
                         <h3 className="text-sm font-bold text-gray-900 dark:text-white">Activity Stats</h3>
                     </div>
 
-                    <div className="flex items-center gap-8">
+                    <div className="flex items-center gap-4 md:gap-8">
                         <div>
                             <span className="text-xl font-bold text-gray-900 dark:text-white block tracking-tight">{totalApplications}</span>
                             <span className="text-xs text-gray-500 dark:text-gray-400 font-medium">Total Applicants</span>

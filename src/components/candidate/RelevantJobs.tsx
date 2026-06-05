@@ -122,7 +122,7 @@ export default function RelevantJobs({
       {/* Scrollable Jobs Container */}
       <div
         ref={scrollRef}
-        className="max-h-[750px] overflow-y-auto space-y-1 p-1"
+        className="max-h-[420px] md:max-h-[750px] overflow-y-auto space-y-1 p-1"
         style={{ scrollbarWidth: "thin" }}
       >
         {jobs.map((job) => (

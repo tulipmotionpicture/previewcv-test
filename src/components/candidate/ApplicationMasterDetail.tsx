@@ -30,6 +30,8 @@ const ApplicationMasterDetail: React.FC<ApplicationMasterDetailProps> = ({
     const [filter, setFilter] = useState("All");
     const [searchQuery, setSearchQuery] = useState("");
     const [similarJobs, setSimilarJobs] = useState<Job[]>([]);
+    // On mobile we show either the list or the detail (master-detail toggle).
+    const [mobileView, setMobileView] = useState<"list" | "detail">("list");
 
     // Set initial selected application
     useEffect(() => {
@@ -85,9 +87,9 @@ const ApplicationMasterDetail: React.FC<ApplicationMasterDetailProps> = ({
     }
 
     return (
-        <div className="flex sticky top-5 h-[calc(100vh-100px)] bg-white dark:bg-gray-900 border border-slate-200 dark:border-gray-800 rounded-2xl overflow-hidden shadow-sm">
+        <div className="flex flex-col md:flex-row md:sticky md:top-5 h-[calc(100vh-150px)] md:h-[calc(100vh-100px)] bg-white dark:bg-gray-900 border border-slate-200 dark:border-gray-800 rounded-2xl overflow-hidden shadow-sm">
             {/* Sidebar List */}
-            <div className="w-1/3 min-w-[320px] border-r border-slate-200 dark:border-gray-800 flex flex-col bg-white dark:bg-gray-900">
+            <div className={`${mobileView === "detail" ? "hidden" : "flex"} md:flex w-full md:w-1/3 md:min-w-[320px] border-r border-slate-200 dark:border-gray-800 flex-col bg-white dark:bg-gray-900`}>
                 {/* Filters & Search */}
                 <div className="p-4 border-b border-slate-100 dark:border-gray-800 space-y-3">
                     <div className="flex gap-2 overflow-x-auto pb-1 no-scrollbar">
@@ -146,7 +148,10 @@ const ApplicationMasterDetail: React.FC<ApplicationMasterDetailProps> = ({
                             key={app.id}
                             application={app}
                             isSelected={app.id === selectedApplicationId}
-                            onClick={() => setSelectedApplicationId(app.id)}
+                            onClick={() => {
+                                setSelectedApplicationId(app.id);
+                                setMobileView("detail");
+                            }}
                         />
                     ))}
                     {filteredApplications.length === 0 && (
@@ -182,7 +187,15 @@ const ApplicationMasterDetail: React.FC<ApplicationMasterDetailProps> = ({
             </div>
 
             {/* Detail View */}
-            <div className="flex-1 bg-white dark:bg-gray-900 h-full overflow-hidden flex flex-col">
+            <div className={`${mobileView === "list" ? "hidden" : "flex"} md:flex flex-1 w-full bg-white dark:bg-gray-900 h-full overflow-hidden flex-col`}>
+                {/* Mobile back-to-list */}
+                <button
+                    type="button"
+                    onClick={() => setMobileView("list")}
+                    className="md:hidden flex items-center gap-1 px-4 py-3 text-sm font-medium text-primary-blue dark:text-blue-400 border-b border-slate-100 dark:border-gray-800"
+                >
+                    <ChevronLeft className="w-4 h-4" /> Back to applications
+                </button>
                 {selectedApplication ? (
                     <ApplicationDetailView
                         application={selectedApplication}

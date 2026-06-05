@@ -180,7 +180,7 @@ export default function CandidateProfile() {
                 <p className="text-slate-500 text-sm mt-1">Manage your personal information and security settings.</p>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-[320px_1fr] gap-8">
+            <div className="grid grid-cols-1 lg:grid-cols-[320px_1fr] gap-4 lg:gap-8">
 
                 {/* Left Column: Profile Card */}
                 <div className="space-y-6">

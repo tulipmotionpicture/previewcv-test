@@ -266,7 +266,7 @@ function CandidateDashboardContent() {
       />
 
       {/* Main Content */}
-      <main className="flex-1 p-5 max-w-7xl mx-auto overflow-x-hidden">
+      <main className="flex-1 w-full min-w-0 p-4 pt-16 md:p-5 max-w-7xl mx-auto overflow-x-hidden">
         {/* Applications Tab */}
         {activeTab === "overview" && (
           <div className="animate-in fade-in duration-200">
@@ -657,9 +657,9 @@ function CandidateDashboardContent() {
 
         {/* Resumes Tab */}
         {activeTab === "resumes" && (
-          <div className="animate-in fade-in duration-200 flex gap-2">
+          <div className="animate-in fade-in duration-200 flex flex-col lg:flex-row gap-3">
             {/* Resume Lists - Flat Design Cards */}
-            <div className="flex flex-col w-2/3 space-y-4">
+            <div className="flex flex-col w-full lg:w-2/3 space-y-4">
               {/* PDF Resumes */}
               <div
                 className={`bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-800 overflow-hidden flex flex-col ${pdfResumesCollapsed ? "" : ""
@@ -986,7 +986,7 @@ function CandidateDashboardContent() {
             </div>
 
             {/* Upload Section - Flat Design */}
-            <div className="bg-white dark:bg-gray-900 p-6 rounded-lg border border-gray-200 dark:border-gray-800 h-fit">
+            <div className="bg-white dark:bg-gray-900 p-4 md:p-6 rounded-lg border border-gray-200 dark:border-gray-800 h-fit w-full lg:flex-1">
               <h3 className="font-bold text-lg text-[#0C4A6E] dark:text-gray-100 mb-4 flex items-center gap-2">
                 <FileText className="w-5 h-5 text-[#0369A1]" />
                 Upload New PDF Resume
