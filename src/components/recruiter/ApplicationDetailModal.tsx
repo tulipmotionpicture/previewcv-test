@@ -76,6 +76,7 @@ export default function ApplicationDetailModal({
         link.download =
           applicationDetail.resume?.name ||
           applicationDetail.uploaded_resume?.name ||
+          applicationDetail.uploaded_resume?.resume_name ||
           "resume.pdf";
         document.body.appendChild(link);
         link.click();
@@ -140,7 +141,11 @@ export default function ApplicationDetailModal({
       footer={
         <div className="flex items-center gap-4 justify-end">
           <p className="text-sm text-gray-500 dark:text-gray-400">
-            Resume : {applicationDetail?.resume?.name || "N/A"}
+            Resume :{" "}
+            {applicationDetail?.resume?.name ||
+              applicationDetail?.uploaded_resume?.name ||
+              applicationDetail?.uploaded_resume?.resume_name ||
+              "N/A"}
           </p>
           <button
             onClick={handleViewResume}

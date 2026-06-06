@@ -192,6 +192,7 @@ export interface ScoreBreakdown {
 export interface ApplicationUploadedResume {
   id: number;
   name?: string;
+  resume_name?: string;
   pdf_url?: string | null;
   created_at?: string;
 }
