@@ -175,8 +175,18 @@ export interface ApplicationResumeDetail {
 export interface ApplicationResume {
   id: number;
   name: string;
+  current_title?: string | null;
   pdf_url?: string | null;
   created_at?: string;
+}
+
+export interface ScoreBreakdown {
+  skills_match: number;
+  experience_match: number;
+  location_match: number;
+  job_type_match: number;
+  category_match: number;
+  salary_match: number;
 }
 
 export interface ApplicationUploadedResume {
@@ -238,6 +248,20 @@ export interface Application {
   recruiter_message?: string | null;
   recruiter_message_at?: string | null;
   interview?: any | null;
+  // Relevance scoring (returned by /jobs/posting/{job_id}/applications). All optional so other
+  // endpoints that omit them still type-check.
+  relevance_score?: number;
+  relevance_tier?: string; // "excellent" | "good" | "fair" | "weak" | ...
+  score_breakdown?: ScoreBreakdown;
+  matched_required_skills?: string[];
+  missing_required_skills?: string[];
+  matched_preferred_skills?: string[];
+  missing_preferred_skills?: string[];
+  top_skills?: string[];
+  years_experience?: number;
+  highlights?: string[];
+  ai_insight?: string | null;
+  insufficient_data?: boolean;
 }
 
 export interface JobApplicationsResponse {
@@ -246,6 +270,16 @@ export interface JobApplicationsResponse {
   job_title: string;
   total_applications: number;
   applications: Application[];
+  sort?: string;
+  min_score?: number;
+  pagination?: {
+    page: number;
+    limit: number;
+    total: number;
+    total_pages: number;
+    has_next: boolean;
+    has_prev: boolean;
+  };
 }
 
 export interface MyApplicationsResponse {
