@@ -638,6 +638,8 @@ export class ApiClient {
   async getJobApplications(
     jobId: number,
     statusFilter?: string,
+    page?: number,
+    limit?: number,
   ): Promise<JobApplicationsResponse> {
     const params = new URLSearchParams();
     if (statusFilter && statusFilter !== "All") {
@@ -646,6 +648,8 @@ export class ApiClient {
         statusFilter.toLowerCase().replace(" ", "_"),
       );
     }
+    if (page) params.append("page", String(page));
+    if (limit) params.append("limit", String(limit));
     const queryString = params.toString();
     const endpoint = `/api/v1/recruiters/jobs/posting/${jobId}/applications${queryString ? `?${queryString}` : ""
       }`;

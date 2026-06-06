@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Job, Application } from "@/types/api";
 import { api } from "@/lib/api";
 import { useToast } from "@/context/ToastContext";
@@ -19,6 +19,11 @@ import {
   ArrowUp,
   ArrowDown,
   Clock,
+  Users,
+  MapPin,
+  Award,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 
 interface ATSApplicationsProps {
@@ -232,6 +237,26 @@ function SkillChip({
   );
 }
 
+function formatJobType(t?: string): string {
+  if (!t) return "";
+  return t.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
+function DetailChip({
+  icon: Icon,
+  label,
+}: {
+  icon: any;
+  label: string;
+}) {
+  return (
+    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-[11px] font-medium text-gray-600 dark:text-gray-300">
+      <Icon className="w-3 h-3 text-gray-400" />
+      {label}
+    </span>
+  );
+}
+
 export default function ATSApplications({
   jobs,
   applications,
@@ -243,7 +268,6 @@ export default function ATSApplications({
   onViewDetails,
   onUpdateStatus,
 }: ATSApplicationsProps) {
-  void jobs;
   void onJobSelect;
   const { showToast } = useToast();
   const [searchTerm, setSearchTerm] = useState("");
@@ -261,9 +285,16 @@ export default function ATSApplications({
   const [tierFilter, setTierFilter] = useState<string>("all");
   const [minScore, setMinScore] = useState<number>(0);
   const [resumeLoadingId, setResumeLoadingId] = useState<number | null>(null);
+  const [page, setPage] = useState(1);
+  const PAGE_SIZE = 6;
 
   void taskId;
   void downloadUrl;
+
+  const selectedJob = useMemo(
+    () => jobs.find((j) => j.id === selectedJobId) || null,
+    [jobs, selectedJobId],
+  );
 
   const handleStatusUpdate = (appId: number, newStatus: string) => {
     onUpdateStatus(appId, newStatus);
@@ -315,6 +346,35 @@ export default function ATSApplications({
     });
     return arr;
   }, [filteredApplications, sortBy, scoreDir]);
+
+  // Client-side display pagination over the fully-loaded, sorted set.
+  const totalPages = Math.max(
+    1,
+    Math.ceil(sortedApplications.length / PAGE_SIZE),
+  );
+  const currentPage = Math.min(page, totalPages);
+  const pagedApplications = useMemo(
+    () =>
+      sortedApplications.slice(
+        (currentPage - 1) * PAGE_SIZE,
+        currentPage * PAGE_SIZE,
+      ),
+    [sortedApplications, currentPage],
+  );
+
+  // Whenever the result set or ordering changes, jump back to the first page.
+  useEffect(() => {
+    setPage(1);
+  }, [
+    searchTerm,
+    appliedFrom,
+    appliedTo,
+    tierFilter,
+    minScore,
+    statusFilter,
+    sortBy,
+    scoreDir,
+  ]);
 
   // Today (UTC date) used to cap the date pickers.
   const today = new Date().toISOString().split("T")[0];
@@ -383,8 +443,8 @@ export default function ATSApplications({
     return Array.from(set);
   }, [applications]);
 
-  const getStatusColor = (status: string) => {
-    switch (status.toLowerCase()) {
+  const getStatusColor = (status?: string) => {
+    switch ((status || "").toLowerCase()) {
       case "active":
       case "applied":
         return "bg-[#E6F4EA] text-[#1E7F3A] dark:bg-green-900/30 dark:text-green-400";
@@ -523,7 +583,59 @@ export default function ATSApplications({
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
         {/* LEFT COLUMN: Candidate Table (Main) */}
         <div className="lg:col-span-3">
-          <div className="bg-white dark:bg-[#282727] rounded-xl border border-[#E1E8F1] dark:border-gray-700 overflow-hidden shadow-sm h-[640px] flex flex-col">
+          <div className="bg-white dark:bg-[#282727] rounded-xl border border-[#E1E8F1] dark:border-gray-700 overflow-hidden shadow-sm flex flex-col">
+            {/* Job summary header */}
+            <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-700 bg-gray-50/70 dark:bg-gray-800/40">
+              {selectedJob ? (
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <h2 className="text-base sm:text-lg font-bold text-gray-900 dark:text-gray-100 truncate">
+                      {selectedJob.title}
+                    </h2>
+                    <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
+                      <DetailChip
+                        icon={Users}
+                        label={`${applications.length} candidate${applications.length === 1 ? "" : "s"}`}
+                      />
+                      {(selectedJob.is_remote || selectedJob.location) && (
+                        <DetailChip
+                          icon={MapPin}
+                          label={
+                            selectedJob.is_remote
+                              ? "Remote"
+                              : selectedJob.location
+                          }
+                        />
+                      )}
+                      {selectedJob.job_type && (
+                        <DetailChip
+                          icon={Briefcase}
+                          label={formatJobType(selectedJob.job_type)}
+                        />
+                      )}
+                      {selectedJob.experience_level && (
+                        <DetailChip
+                          icon={Award}
+                          label={`${formatJobType(selectedJob.experience_level)} level`}
+                        />
+                      )}
+                    </div>
+                  </div>
+                  {selectedJob.status && (
+                    <span
+                      className={`flex-shrink-0 inline-flex items-center px-2.5 py-1 rounded-md text-[11px] font-semibold capitalize ${getStatusColor(selectedJob.status)}`}
+                    >
+                      {selectedJob.status}
+                    </span>
+                  )}
+                </div>
+              ) : (
+                <h2 className="text-base sm:text-lg font-bold text-gray-900 dark:text-gray-100">
+                  Applications
+                </h2>
+              )}
+            </div>
+
             {/* Toolbar: tier quick-filter + sort */}
             <div className="px-4 py-3 flex flex-wrap items-center justify-between gap-3 border-b border-gray-100 dark:border-gray-700">
               <div className="flex items-center gap-1.5 flex-wrap">
@@ -564,8 +676,8 @@ export default function ATSApplications({
               </div>
             </div>
 
-            {/* Table Header */}
-            <div className="bg-[#2F4269] px-4 py-3 grid grid-cols-12 gap-3 items-center sticky top-0 z-10">
+            {/* Table Header (desktop only — rows become cards on mobile) */}
+            <div className="bg-[#2F4269] px-4 py-3 hidden lg:grid grid-cols-12 gap-3 items-center sticky top-0 z-10">
               <button
                 onClick={handleScoreHeaderSort}
                 className="col-span-2 flex items-center gap-1 text-xs font-bold text-white uppercase tracking-wider hover:text-blue-200 transition-colors"
@@ -590,14 +702,14 @@ export default function ATSApplications({
               </div>
             </div>
 
-            {/* Table Body */}
-            <div className="divide-y divide-gray-100 dark:divide-gray-700 overflow-y-auto flex-1 custom-scrollbar">
+            {/* Table Body — grows with content; pagination keeps a page within the viewport */}
+            <div className="divide-y divide-gray-100 dark:divide-gray-700">
               {loadingApps ? (
                 <div className="p-10 text-center text-gray-500">
                   Loading applications...
                 </div>
               ) : sortedApplications.length > 0 ? (
-                sortedApplications.map((app) => {
+                pagedApplications.map((app) => {
                   const score = app.relevance_score ?? 0;
                   const tier = tierMeta(app.relevance_tier, score);
                   const matchedReq = app.matched_required_skills ?? [];
@@ -615,10 +727,10 @@ export default function ATSApplications({
                         onClick={() =>
                           setExpandedId(expanded ? null : app.id)
                         }
-                        className="px-4 py-3 grid grid-cols-12 gap-3 items-center hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors cursor-pointer"
+                        className="px-4 py-3 flex flex-col gap-2 lg:grid lg:grid-cols-12 lg:gap-3 lg:items-center hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors cursor-pointer"
                       >
                         {/* Score */}
-                        <div className="col-span-2 flex items-center gap-2">
+                        <div className="lg:col-span-2 flex items-center gap-2">
                           {app.insufficient_data ? (
                             <span className="text-[10px] font-semibold px-2 py-1 rounded-md bg-gray-100 dark:bg-gray-800 text-gray-500">
                               Limited data
@@ -636,7 +748,7 @@ export default function ATSApplications({
                         </div>
 
                         {/* Candidate */}
-                        <div className="col-span-4 min-w-0">
+                        <div className="lg:col-span-4 min-w-0">
                           <div className="font-bold text-gray-900 dark:text-gray-100 text-[15px] truncate">
                             {app.applicant?.full_name ||
                               app.candidate_name ||
@@ -666,15 +778,16 @@ export default function ATSApplications({
                                 "—"}
                             </span>
                             {app.resume?.current_title && (
-                              <span className="truncate">
-                                · {app.resume.current_title}
+                              <span className="flex items-center gap-1 truncate">
+                                <span className="w-1 h-1 rounded-full bg-gray-300 flex-shrink-0" />
+                                {app.resume.current_title}
                               </span>
                             )}
                           </div>
                         </div>
 
                         {/* Match summary */}
-                        <div className="col-span-3 min-w-0">
+                        <div className="lg:col-span-3 min-w-0">
                           <div className="flex items-center gap-3 text-[11px] font-semibold text-gray-600 dark:text-gray-300">
                             {totalReq > 0 && (
                               <span className="inline-flex items-center gap-1">
@@ -708,7 +821,7 @@ export default function ATSApplications({
 
                         {/* Actions */}
                         <div
-                          className="col-span-3 flex items-center justify-end gap-1.5"
+                          className="lg:col-span-3 flex items-center justify-between lg:justify-end gap-1.5 flex-wrap"
                           onClick={(e) => e.stopPropagation()}
                         >
                           <div className="relative">
@@ -873,6 +986,40 @@ export default function ATSApplications({
                 </div>
               )}
             </div>
+
+            {/* Pagination footer */}
+            {!loadingApps && sortedApplications.length > 0 && (
+              <div className="px-4 py-3 border-t border-gray-100 dark:border-gray-700 flex items-center justify-between gap-2">
+                <span className="text-[11px] text-gray-500">
+                  Showing {(currentPage - 1) * PAGE_SIZE + 1}–
+                  {Math.min(currentPage * PAGE_SIZE, sortedApplications.length)}{" "}
+                  of {sortedApplications.length}
+                </span>
+                <div className="flex items-center gap-1">
+                  <button
+                    onClick={() => setPage((p) => Math.max(1, p - 1))}
+                    disabled={currentPage <= 1}
+                    className="p-1.5 rounded-lg border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 disabled:opacity-40 hover:bg-gray-100 dark:hover:bg-gray-700"
+                    title="Previous page"
+                  >
+                    <ChevronLeft className="w-4 h-4" />
+                  </button>
+                  <span className="text-[11px] font-semibold text-gray-700 dark:text-gray-200 px-2">
+                    {currentPage} / {totalPages}
+                  </span>
+                  <button
+                    onClick={() =>
+                      setPage((p) => Math.min(totalPages, p + 1))
+                    }
+                    disabled={currentPage >= totalPages}
+                    className="p-1.5 rounded-lg border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 disabled:opacity-40 hover:bg-gray-100 dark:hover:bg-gray-700"
+                    title="Next page"
+                  >
+                    <ChevronRight className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 

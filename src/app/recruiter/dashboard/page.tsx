@@ -310,13 +310,26 @@ function RecruiterDashboardInner() {
     setLoadingApps(true);
     setApplications([]);
     try {
-      const response: JobApplicationsResponse = await api.getJobApplications(
-        jobId,
-        status,
-      );
-      if (response.success && response.applications) {
-        setApplications(response.applications);
+      // The endpoint is paginated. Pull every page so the client-side sort/filter
+      // controls operate over the full candidate set (relevance ranking is global).
+      const all: Application[] = [];
+      const limit = 100;
+      let page = 1;
+      const MAX_PAGES = 25; // safety cap (≈2500 applicants)
+      while (page <= MAX_PAGES) {
+        const response: JobApplicationsResponse = await api.getJobApplications(
+          jobId,
+          status,
+          page,
+          limit,
+        );
+        if (response.success && response.applications) {
+          all.push(...response.applications);
+        }
+        if (!response.pagination?.has_next) break;
+        page += 1;
       }
+      setApplications(all);
     } catch (error) {
       console.error("Failed to fetch applications:", error);
     } finally {
