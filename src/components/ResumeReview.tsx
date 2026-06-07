@@ -157,12 +157,15 @@ type SelectedIds = {
   languages: Set<string>;
 };
 
+// Per-item errors: `fields` drives the red input rings; `messages` are human-readable lines.
+type ItemErrors = { fields: string[]; messages: string[] };
+
 type ValidationResult = {
   invalidFields: {
-    work_experiences: Record<string, string[]>;
-    education: Record<string, string[]>;
-    skills: Record<string, string[]>;
-    languages: Record<string, string[]>;
+    work_experiences: Record<string, ItemErrors>;
+    education: Record<string, ItemErrors>;
+    skills: Record<string, ItemErrors>;
+    languages: Record<string, ItemErrors>;
   };
   personalErrors: string[];
   invalidCount: number;
@@ -192,35 +195,73 @@ function validateData(
     languages: {},
   };
 
+  // "Now" reference for future-date checks. Month strings ("YYYY-MM") and 4-digit years both
+  // compare correctly as numbers/lexicographically.
+  const now = new Date();
+  const currentMonth = format(now, 'yyyy-MM');
+  const currentYear = now.getFullYear();
+
   for (const exp of data.work_experiences) {
     if (!selected.work_experiences.has(exp._preview)) continue;
-    const missing: string[] = [];
-    if (isMissing(exp.position)) missing.push('Position');
-    if (isMissing(exp.company)) missing.push('Company');
-    // Work dates must resolve to a real month (the picker emits "YYYY-MM").
-    if (!toMonthInputValue(exp.start_date)) missing.push('Start date');
-    if (!exp.is_current && !toMonthInputValue(exp.end_date)) missing.push('End date');
-    if (missing.length) invalidFields.work_experiences[exp._preview] = missing;
+    const fields: string[] = [];
+    const messages: string[] = [];
+    const add = (f: string | string[], m: string) => {
+      (Array.isArray(f) ? f : [f]).forEach((x) => fields.push(x));
+      messages.push(m);
+    };
+    if (isMissing(exp.position)) add('Position', 'Position is required');
+    if (isMissing(exp.company)) add('Company', 'Company is required');
+
+    // Work dates must resolve to a real month (the picker emits "YYYY-MM"), can't be in the
+    // future, and start must not be after end.
+    const startIso = toMonthInputValue(exp.start_date);
+    const endIso = toMonthInputValue(exp.end_date);
+    if (!startIso) add('Start date', 'Start date is required');
+    else if (startIso > currentMonth) add('Start date', "Start date can't be in the future");
+    if (!exp.is_current) {
+      if (!endIso) add('End date', 'End date is required');
+      else if (endIso > currentMonth) add('End date', "End date can't be in the future");
+      if (startIso && endIso && startIso > endIso)
+        add(['Start date', 'End date'], 'Start date must be before end date');
+    }
+    if (fields.length) invalidFields.work_experiences[exp._preview] = { fields, messages };
   }
 
   for (const edu of data.education) {
     if (!selected.education.has(edu._preview)) continue;
-    const missing: string[] = [];
-    if (isMissing(edu.degree)) missing.push('Degree');
-    if (isMissing(edu.university)) missing.push('University');
-    if (isMissing(edu.start_year)) missing.push('Start year');
-    if (!edu.is_currently_studying && isMissing(edu.end_year)) missing.push('End year');
-    if (missing.length) invalidFields.education[edu._preview] = missing;
+    const fields: string[] = [];
+    const messages: string[] = [];
+    const add = (f: string | string[], m: string) => {
+      (Array.isArray(f) ? f : [f]).forEach((x) => fields.push(x));
+      messages.push(m);
+    };
+    if (isMissing(edu.degree)) add('Degree', 'Degree is required');
+    if (isMissing(edu.university)) add('University', 'Institution is required');
+
+    // Start year can't be in the future. End/graduation year MAY be in the future. When the user
+    // is currently studying, there is no end year (Present), so skip end checks entirely.
+    const sY = isMissing(edu.start_year) ? null : Number(edu.start_year);
+    const eY = isMissing(edu.end_year) ? null : Number(edu.end_year);
+    if (sY === null || Number.isNaN(sY)) add('Start year', 'Start year is required');
+    else if (sY > currentYear) add('Start year', "Start year can't be in the future");
+    if (!edu.is_currently_studying) {
+      if (eY === null || Number.isNaN(eY)) add('End year', 'End year is required');
+      if (sY !== null && eY !== null && !Number.isNaN(sY) && !Number.isNaN(eY) && sY > eY)
+        add(['Start year', 'End year'], 'Start year must be before end year');
+    }
+    if (fields.length) invalidFields.education[edu._preview] = { fields, messages };
   }
 
   for (const skill of data.skills) {
     if (!selected.skills.has(skill._preview)) continue;
-    if (isMissing(skill.skill_name)) invalidFields.skills[skill._preview] = ['Skill name'];
+    if (isMissing(skill.skill_name))
+      invalidFields.skills[skill._preview] = { fields: ['Skill name'], messages: ['Skill name is required'] };
   }
 
   for (const lang of data.languages) {
     if (!selected.languages.has(lang._preview)) continue;
-    if (isMissing(lang.language)) invalidFields.languages[lang._preview] = ['Language'];
+    if (isMissing(lang.language))
+      invalidFields.languages[lang._preview] = { fields: ['Language'], messages: ['Language is required'] };
   }
 
   const personalErrors: string[] = [];
@@ -867,7 +908,7 @@ export default function ResumeReview({ resumeId, onSaveComplete, portfolioId, pe
                             <input
                               value={exp.position}
                               onChange={(e) => updateItem('work_experiences', idx, 'position', e.target.value)}
-                              className={`w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 rounded-xl border focus:border-blue-500 outline-none font-bold ${errs?.includes('Position') ? 'border-red-400' : 'border-transparent'}`}
+                              className={`w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 rounded-xl border focus:border-blue-500 outline-none font-bold ${errs?.fields.includes('Position') ? 'border-red-400' : 'border-transparent'}`}
                             />
                           </div>
                           <div>
@@ -875,7 +916,7 @@ export default function ResumeReview({ resumeId, onSaveComplete, portfolioId, pe
                             <input
                               value={exp.company}
                               onChange={(e) => updateItem('work_experiences', idx, 'company', e.target.value)}
-                              className={`w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 rounded-xl border focus:border-blue-500 outline-none font-bold text-primary-blue ${errs?.includes('Company') ? 'border-red-400' : 'border-transparent'}`}
+                              className={`w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 rounded-xl border focus:border-blue-500 outline-none font-bold text-primary-blue ${errs?.fields.includes('Company') ? 'border-red-400' : 'border-transparent'}`}
                             />
                           </div>
                           <div>
@@ -884,7 +925,7 @@ export default function ResumeReview({ resumeId, onSaveComplete, portfolioId, pe
                               ariaLabel="Start"
                               value={toMonthInputValue(exp.start_date)}
                               years={yearOptions}
-                              invalid={errs?.includes('Start date')}
+                              invalid={errs?.fields.includes('Start date')}
                               onChange={(v) => updateItem('work_experiences', idx, 'start_date', v)}
                             />
                           </div>
@@ -895,7 +936,7 @@ export default function ResumeReview({ resumeId, onSaveComplete, portfolioId, pe
                               value={exp.is_current ? '' : toMonthInputValue(exp.end_date)}
                               years={yearOptions}
                               disabled={exp.is_current}
-                              invalid={errs?.includes('End date')}
+                              invalid={errs?.fields.includes('End date')}
                               onChange={(v) => updateItem('work_experiences', idx, 'end_date', v)}
                             />
                           </div>
@@ -952,7 +993,7 @@ export default function ResumeReview({ resumeId, onSaveComplete, portfolioId, pe
                       {errs && !isEditing && (
                         <div className="flex items-center justify-between gap-2">
                           <p className="flex items-center gap-1.5 text-xs font-bold text-red-500">
-                            <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" /> Missing: {errs.join(', ')}
+                            <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" /> {errs.messages.join(', ')}
                           </p>
                           <button type="button"
                             onClick={(e) => { e.stopPropagation(); setEditingId(exp._preview); }}
@@ -1045,13 +1086,13 @@ export default function ResumeReview({ resumeId, onSaveComplete, portfolioId, pe
                       <div className="space-y-2">
                         <input
                           placeholder="Degree"
-                          className={`w-full px-3 py-1 bg-gray-50 dark:bg-gray-800 rounded-lg outline-none font-bold text-sm border ${errs?.includes('Degree') ? 'border-red-400' : 'border-transparent'}`}
+                          className={`w-full px-3 py-1 bg-gray-50 dark:bg-gray-800 rounded-lg outline-none font-bold text-sm border ${errs?.fields.includes('Degree') ? 'border-red-400' : 'border-transparent'}`}
                           value={edu.degree}
                           onChange={(e) => updateItem('education', idx, 'degree', e.target.value)}
                         />
                         <input
                           placeholder="University"
-                          className={`w-full px-3 py-1 bg-gray-50 dark:bg-gray-800 rounded-lg outline-none font-bold text-xs text-emerald-600 border ${errs?.includes('University') ? 'border-red-400' : 'border-transparent'}`}
+                          className={`w-full px-3 py-1 bg-gray-50 dark:bg-gray-800 rounded-lg outline-none font-bold text-xs text-emerald-600 border ${errs?.fields.includes('University') ? 'border-red-400' : 'border-transparent'}`}
                           value={edu.university}
                           onChange={(e) => updateItem('education', idx, 'university', e.target.value)}
                         />
@@ -1064,7 +1105,7 @@ export default function ResumeReview({ resumeId, onSaveComplete, portfolioId, pe
                         <div className="flex gap-2">
                           <select
                             aria-label="Start year"
-                            className={`w-full px-3 py-1.5 bg-gray-50 dark:bg-gray-800 rounded-lg outline-none font-bold text-xs border cursor-pointer text-gray-800 dark:text-gray-200 ${errs?.includes('Start year') ? 'border-red-400' : 'border-transparent'}`}
+                            className={`w-full px-3 py-1.5 bg-gray-50 dark:bg-gray-800 rounded-lg outline-none font-bold text-xs border cursor-pointer text-gray-800 dark:text-gray-200 ${errs?.fields.includes('Start year') ? 'border-red-400' : 'border-transparent'}`}
                             value={isMissing(edu.start_year) ? '' : edu.start_year}
                             onChange={(e) => updateItem('education', idx, 'start_year', e.target.value)}
                           >
@@ -1074,7 +1115,7 @@ export default function ResumeReview({ resumeId, onSaveComplete, portfolioId, pe
                           <select
                             aria-label="End year"
                             disabled={edu.is_currently_studying}
-                            className={`w-full px-3 py-1.5 bg-gray-50 dark:bg-gray-800 rounded-lg outline-none font-bold text-xs border cursor-pointer disabled:opacity-50 text-gray-800 dark:text-gray-200 ${errs?.includes('End year') ? 'border-red-400' : 'border-transparent'}`}
+                            className={`w-full px-3 py-1.5 bg-gray-50 dark:bg-gray-800 rounded-lg outline-none font-bold text-xs border cursor-pointer disabled:opacity-50 text-gray-800 dark:text-gray-200 ${errs?.fields.includes('End year') ? 'border-red-400' : 'border-transparent'}`}
                             value={edu.is_currently_studying || isMissing(edu.end_year) ? '' : (edu.end_year || '')}
                             onChange={(e) => updateItem('education', idx, 'end_year', e.target.value)}
                           >
@@ -1130,7 +1171,7 @@ export default function ResumeReview({ resumeId, onSaveComplete, portfolioId, pe
                     {errs && !isEditing && (
                       <div className="mt-2 flex items-center justify-between gap-2">
                         <p className="flex items-center gap-1 text-[11px] font-bold text-red-500">
-                          <AlertCircle className="w-3 h-3 flex-shrink-0" /> Missing: {errs.join(', ')}
+                          <AlertCircle className="w-3 h-3 flex-shrink-0" /> {errs.messages.join(', ')}
                         </p>
                         <button type="button"
                           onClick={(e) => { e.stopPropagation(); setEditingId(edu._preview); }}
