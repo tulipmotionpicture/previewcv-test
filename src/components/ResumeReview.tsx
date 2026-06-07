@@ -93,6 +93,63 @@ function formatMonthDisplay(value: unknown): string {
   return isValid(d) ? format(d, 'MMM yyyy') : iso;
 }
 
+const MONTHS: [string, string][] = [
+  ['01', 'Jan'], ['02', 'Feb'], ['03', 'Mar'], ['04', 'Apr'],
+  ['05', 'May'], ['06', 'Jun'], ['07', 'Jul'], ['08', 'Aug'],
+  ['09', 'Sep'], ['10', 'Oct'], ['11', 'Nov'], ['12', 'Dec'],
+];
+
+/**
+ * Month + Year dropdowns producing a "YYYY-MM" value. Used instead of a native <input type="month">
+ * because that control's year navigation is awkward/missing in some browsers. Picking one half
+ * defaults the other sensibly so the value is always a valid month.
+ */
+function MonthYearPicker({
+  value,
+  years,
+  disabled,
+  invalid,
+  ariaLabel,
+  onChange,
+}: {
+  value: string;
+  years: string[];
+  disabled?: boolean;
+  invalid?: boolean;
+  ariaLabel: string;
+  onChange: (v: string) => void;
+}) {
+  const m = value.match(/^(\d{4})-(\d{2})/);
+  const yy = m ? m[1] : '';
+  const mm = m ? m[2] : '';
+  const fallbackYear = years[10] || years[0] || '2024';
+  const base = `w-1/2 px-2 py-1.5 bg-gray-50 dark:bg-gray-800 rounded-xl text-sm border cursor-pointer text-gray-800 dark:text-gray-200 outline-none disabled:opacity-50 ${invalid ? 'border-red-400' : 'border-transparent'}`;
+  return (
+    <div className="flex gap-2">
+      <select
+        aria-label={`${ariaLabel} month`}
+        disabled={disabled}
+        value={mm}
+        onChange={(e) => onChange(e.target.value ? `${yy || fallbackYear}-${e.target.value}` : '')}
+        className={base}
+      >
+        <option value="">Month</option>
+        {MONTHS.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
+      </select>
+      <select
+        aria-label={`${ariaLabel} year`}
+        disabled={disabled}
+        value={yy}
+        onChange={(e) => onChange(e.target.value ? `${e.target.value}-${mm || '01'}` : '')}
+        className={base}
+      >
+        <option value="">Year</option>
+        {years.map((y) => <option key={y} value={y}>{y}</option>)}
+      </select>
+    </div>
+  );
+}
+
 type SelectedIds = {
   work_experiences: Set<string>;
   education: Set<string>;
@@ -534,7 +591,7 @@ export default function ResumeReview({ resumeId, onSaveComplete, portfolioId, pe
         <h3 className="text-xl font-bold text-red-600">Error Loading Resume</h3>
         <p className="text-gray-600 mt-2">{loadError}</p>
         {onClose && (
-          <button
+          <button type="button"
             onClick={onClose}
             className="mt-4 px-6 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg font-bold"
           >
@@ -593,7 +650,7 @@ export default function ResumeReview({ resumeId, onSaveComplete, portfolioId, pe
         </div>
 
         <div className="flex flex-col sm:flex-row gap-4">
-          <button
+          <button type="button"
             onClick={(e) => {
               e.stopPropagation();
               fetchLinkedEntities();
@@ -607,7 +664,7 @@ export default function ResumeReview({ resumeId, onSaveComplete, portfolioId, pe
             View Saved Data
           </button>
 
-          <button
+          <button type="button"
             onClick={(e) => {
               e.stopPropagation();
               setSaveSuccess(false);
@@ -672,7 +729,7 @@ export default function ResumeReview({ resumeId, onSaveComplete, portfolioId, pe
                   : `${completeness.missing.length} detail${completeness.missing.length === 1 ? '' : 's'} could be added to strengthen this profile.`}
               </p>
               {completeness.missing.length > 0 && (
-                <button
+                <button type="button"
                   onClick={() => setShowMissing((v) => !v)}
                   className="flex items-center gap-1 text-[11px] font-bold text-primary-blue hover:underline whitespace-nowrap"
                 >
@@ -765,7 +822,7 @@ export default function ResumeReview({ resumeId, onSaveComplete, portfolioId, pe
             </div>
             <h2 className="text-xl font-black text-gray-900 dark:text-gray-100 uppercase tracking-tight">Work Experience</h2>
           </div>
-          <button
+          <button type="button"
             onClick={(e) => {
               e.stopPropagation();
               addItem('work_experiences');
@@ -791,7 +848,7 @@ export default function ResumeReview({ resumeId, onSaveComplete, portfolioId, pe
               >
                 <div className="p-4" onClick={(e) => e.stopPropagation()}>
                   <div className="flex items-start gap-4">
-                    <button
+                    <button type="button"
                       onClick={(e) => {
                         e.stopPropagation();
                         toggleSelection('work_experiences', exp._preview);
@@ -821,28 +878,26 @@ export default function ResumeReview({ resumeId, onSaveComplete, portfolioId, pe
                               className={`w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 rounded-xl border focus:border-blue-500 outline-none font-bold text-primary-blue ${errs?.includes('Company') ? 'border-red-400' : 'border-transparent'}`}
                             />
                           </div>
-                          <div className="flex gap-2">
-                            <div className="w-full">
-                              <label className="text-[10px] font-bold text-gray-400 uppercase ml-1">Start</label>
-                              <input
-                                type="month"
-                                aria-label="Start month and year"
-                                value={toMonthInputValue(exp.start_date)}
-                                onChange={(e) => updateItem('work_experiences', idx, 'start_date', e.target.value)}
-                                className={`w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 rounded-xl text-sm border text-gray-800 dark:text-gray-200 dark:[color-scheme:dark] ${errs?.includes('Start date') ? 'border-red-400' : 'border-transparent'}`}
-                              />
-                            </div>
-                            <div className="w-full">
-                              <label className="text-[10px] font-bold text-gray-400 uppercase ml-1">End</label>
-                              <input
-                                type="month"
-                                aria-label="End month and year"
-                                disabled={exp.is_current}
-                                value={exp.is_current ? '' : toMonthInputValue(exp.end_date)}
-                                onChange={(e) => updateItem('work_experiences', idx, 'end_date', e.target.value)}
-                                className={`w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 rounded-xl text-sm border text-gray-800 dark:text-gray-200 dark:[color-scheme:dark] disabled:opacity-50 ${errs?.includes('End date') ? 'border-red-400' : 'border-transparent'}`}
-                              />
-                            </div>
+                          <div>
+                            <label className="text-[10px] font-bold text-gray-400 uppercase ml-1">Start</label>
+                            <MonthYearPicker
+                              ariaLabel="Start"
+                              value={toMonthInputValue(exp.start_date)}
+                              years={yearOptions}
+                              invalid={errs?.includes('Start date')}
+                              onChange={(v) => updateItem('work_experiences', idx, 'start_date', v)}
+                            />
+                          </div>
+                          <div>
+                            <label className="text-[10px] font-bold text-gray-400 uppercase ml-1">End</label>
+                            <MonthYearPicker
+                              ariaLabel="End"
+                              value={exp.is_current ? '' : toMonthInputValue(exp.end_date)}
+                              years={yearOptions}
+                              disabled={exp.is_current}
+                              invalid={errs?.includes('End date')}
+                              onChange={(v) => updateItem('work_experiences', idx, 'end_date', v)}
+                            />
                           </div>
                           <div className="flex items-center gap-2 px-2 sm:col-span-2">
                             <input
@@ -899,7 +954,7 @@ export default function ResumeReview({ resumeId, onSaveComplete, portfolioId, pe
                           <p className="flex items-center gap-1.5 text-xs font-bold text-red-500">
                             <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" /> Missing: {errs.join(', ')}
                           </p>
-                          <button
+                          <button type="button"
                             onClick={(e) => { e.stopPropagation(); setEditingId(exp._preview); }}
                             className="text-xs font-black text-primary-blue hover:underline whitespace-nowrap"
                           >
@@ -910,7 +965,7 @@ export default function ResumeReview({ resumeId, onSaveComplete, portfolioId, pe
                     </div>
 
                     <div className="flex flex-col gap-2">
-                      <button
+                      <button type="button"
                         onClick={(e) => {
                           e.stopPropagation();
                           setEditingId(isEditing ? null : exp._preview);
@@ -919,7 +974,7 @@ export default function ResumeReview({ resumeId, onSaveComplete, portfolioId, pe
                       >
                         {isEditing ? <Check className="w-5 h-5" /> : <Pencil className="w-5 h-5" />}
                       </button>
-                      <button
+                      <button type="button"
                         onClick={(e) => {
                           e.stopPropagation();
                           removeItem('work_experiences', idx);
@@ -946,7 +1001,7 @@ export default function ResumeReview({ resumeId, onSaveComplete, portfolioId, pe
             </div>
             <h2 className="text-xl font-black text-gray-900 dark:text-gray-100 uppercase tracking-tight">Education</h2>
           </div>
-          <button
+          <button type="button"
             onClick={(e) => {
               e.stopPropagation();
               addItem('education');
@@ -974,7 +1029,7 @@ export default function ResumeReview({ resumeId, onSaveComplete, portfolioId, pe
                   }`}
               >
                 <div className="flex items-start gap-4" onClick={(e) => e.stopPropagation()}>
-                  <button
+                  <button type="button"
                     onClick={(e) => {
                       e.stopPropagation();
                       toggleSelection('education', edu._preview);
@@ -1077,7 +1132,7 @@ export default function ResumeReview({ resumeId, onSaveComplete, portfolioId, pe
                         <p className="flex items-center gap-1 text-[11px] font-bold text-red-500">
                           <AlertCircle className="w-3 h-3 flex-shrink-0" /> Missing: {errs.join(', ')}
                         </p>
-                        <button
+                        <button type="button"
                           onClick={(e) => { e.stopPropagation(); setEditingId(edu._preview); }}
                           className="text-[11px] font-black text-emerald-600 hover:underline whitespace-nowrap"
                         >
@@ -1088,7 +1143,7 @@ export default function ResumeReview({ resumeId, onSaveComplete, portfolioId, pe
                   </div>
 
                   <div className="flex flex-col gap-1">
-                    <button
+                    <button type="button"
                       onClick={(e) => {
                         e.stopPropagation();
                         setEditingId(isEditing ? null : edu._preview);
@@ -1097,7 +1152,7 @@ export default function ResumeReview({ resumeId, onSaveComplete, portfolioId, pe
                     >
                       {isEditing ? <Check className="w-4 h-4" /> : <Pencil className="w-4 h-4" />}
                     </button>
-                    <button
+                    <button type="button"
                       onClick={(e) => {
                         e.stopPropagation();
                         removeItem('education', idx);
@@ -1124,7 +1179,7 @@ export default function ResumeReview({ resumeId, onSaveComplete, portfolioId, pe
               </div>
               <h2 className="text-xl font-black text-gray-900 dark:text-gray-100 uppercase tracking-tight">Skills</h2>
             </div>
-            <button
+            <button type="button"
               onClick={(e) => {
                 e.stopPropagation();
                 addItem('skills');
@@ -1148,7 +1203,7 @@ export default function ResumeReview({ resumeId, onSaveComplete, portfolioId, pe
                     }`}
                   onClick={(e) => e.stopPropagation()}
                 >
-                  <button
+                  <button type="button"
                     onClick={(e) => {
                       e.stopPropagation();
                       toggleSelection('skills', skill._preview);
@@ -1194,7 +1249,7 @@ export default function ResumeReview({ resumeId, onSaveComplete, portfolioId, pe
                     )}
                   </div>
                   <div className="flex gap-1">
-                    <button
+                    <button type="button"
                       onClick={(e) => {
                         e.stopPropagation();
                         setEditingId(isEditing ? null : skill._preview);
@@ -1203,7 +1258,7 @@ export default function ResumeReview({ resumeId, onSaveComplete, portfolioId, pe
                     >
                       <Pencil className="w-3.5 h-3.5" />
                     </button>
-                    <button
+                    <button type="button"
                       onClick={(e) => {
                         e.stopPropagation();
                         removeItem('skills', idx);
@@ -1227,7 +1282,7 @@ export default function ResumeReview({ resumeId, onSaveComplete, portfolioId, pe
               </div>
               <h2 className="text-xl font-black text-gray-900 dark:text-gray-100 uppercase tracking-tight">Languages</h2>
             </div>
-            <button
+            <button type="button"
               onClick={(e) => {
                 e.stopPropagation();
                 addItem('languages');
@@ -1251,7 +1306,7 @@ export default function ResumeReview({ resumeId, onSaveComplete, portfolioId, pe
                     }`}
                   onClick={(e) => e.stopPropagation()}
                 >
-                  <button
+                  <button type="button"
                     onClick={(e) => {
                       e.stopPropagation();
                       toggleSelection('languages', lang._preview);
@@ -1320,7 +1375,7 @@ export default function ResumeReview({ resumeId, onSaveComplete, portfolioId, pe
                     )}
                   </div>
                   <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <button
+                    <button type="button"
                       onClick={(e) => {
                         e.stopPropagation();
                         setEditingId(isEditing ? null : lang._preview);
@@ -1329,7 +1384,7 @@ export default function ResumeReview({ resumeId, onSaveComplete, portfolioId, pe
                     >
                       <Pencil className="w-3.5 h-3.5" />
                     </button>
-                    <button
+                    <button type="button"
                       onClick={(e) => {
                         e.stopPropagation();
                         removeItem('languages', idx);
@@ -1364,7 +1419,7 @@ export default function ResumeReview({ resumeId, onSaveComplete, portfolioId, pe
             )}
           </div>
 
-          <button
+          <button type="button"
             onClick={(e) => {
               e.stopPropagation();
               handleSave();
