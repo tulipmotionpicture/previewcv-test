@@ -177,6 +177,7 @@ export default function ResumeUpload({ onUploadSuccess, existingResumeId, varian
                 </h2>
               </div>
               <button
+                type="button"
                 onClick={handleCancel}
                 className="p-2 hover:bg-gray-200 dark:hover:bg-gray-800 rounded-lg transition-colors duration-150 group cursor-pointer"
               >

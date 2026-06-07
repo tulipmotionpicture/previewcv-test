@@ -687,7 +687,7 @@ export default function ResumeReview({ resumeId, onSaveComplete, portfolioId, pe
   }
 
   return (
-    <div className="max-w-4xl mx-auto px-3 sm:px-0 space-y-6 pb-28">
+    <div className="max-w-4xl mx-auto px-3 sm:px-0 space-y-6 pb-28 overflow-x-clip">
       {/* Header Info */}
 
 
@@ -815,21 +815,21 @@ export default function ResumeReview({ resumeId, onSaveComplete, portfolioId, pe
 
       {/* Work Experience Section */}
       <section>
-        <div className="flex items-center justify-between mb-6 px-4">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center">
-              <Briefcase className="w-5 h-5 text-primary-blue dark:text-blue-400" />
+        <div className="flex items-center justify-between gap-2 mb-3 px-1">
+          <div className="flex items-center gap-2 min-w-0">
+            <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center flex-shrink-0">
+              <Briefcase className="w-4 h-4 text-primary-blue dark:text-blue-400" />
             </div>
-            <h2 className="text-xl font-black text-gray-900 dark:text-gray-100 uppercase tracking-tight">Work Experience</h2>
+            <h2 className="text-base sm:text-xl font-black text-gray-900 dark:text-gray-100 uppercase tracking-tight truncate">Work Experience</h2>
           </div>
           <button type="button"
             onClick={(e) => {
               e.stopPropagation();
               addItem('work_experiences');
             }}
-            className="flex items-center gap-2 bg-primary-blue hover:bg-blue-700 text-white px-4 py-2 rounded-xl text-sm font-black transition-all shadow-lg active:scale-95"
+            className="flex items-center gap-1.5 bg-primary-blue hover:bg-blue-700 text-white px-3 py-2 rounded-xl text-xs sm:text-sm font-black transition-all shadow-lg active:scale-95 flex-shrink-0"
           >
-            <Plus className="w-4 h-4" /> Add Experience
+            <Plus className="w-4 h-4" /> <span className="hidden sm:inline">Add Experience</span>
           </button>
         </div>
 
@@ -994,21 +994,21 @@ export default function ResumeReview({ resumeId, onSaveComplete, portfolioId, pe
 
       {/* Education Section */}
       <section>
-        <div className="flex items-center justify-between mb-6 px-4">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-emerald-100 dark:bg-emerald-900/30 rounded-xl flex items-center justify-center">
-              <GraduationCap className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+        <div className="flex items-center justify-between gap-2 mb-3 px-1">
+          <div className="flex items-center gap-2 min-w-0">
+            <div className="w-8 h-8 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg flex items-center justify-center flex-shrink-0">
+              <GraduationCap className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
             </div>
-            <h2 className="text-xl font-black text-gray-900 dark:text-gray-100 uppercase tracking-tight">Education</h2>
+            <h2 className="text-base sm:text-xl font-black text-gray-900 dark:text-gray-100 uppercase tracking-tight truncate">Education</h2>
           </div>
           <button type="button"
             onClick={(e) => {
               e.stopPropagation();
               addItem('education');
             }}
-            className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-xl text-sm font-black transition-all shadow-lg"
+            className="flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-2 rounded-xl text-xs sm:text-sm font-black transition-all shadow-lg flex-shrink-0"
           >
-            <Plus className="w-4 h-4" /> Add Education
+            <Plus className="w-4 h-4" /> <span className="hidden sm:inline">Add Education</span>
           </button>
         </div>
 
@@ -1173,18 +1173,18 @@ export default function ResumeReview({ resumeId, onSaveComplete, portfolioId, pe
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <section>
           <div className="flex items-center justify-between mb-3 px-1">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-amber-100 dark:bg-amber-900/30 rounded-xl flex items-center justify-center">
-                <Wrench className="w-5 h-5 text-amber-600 dark:text-amber-400" />
+            <div className="flex items-center gap-2 min-w-0">
+              <div className="w-8 h-8 bg-amber-100 dark:bg-amber-900/30 rounded-lg flex items-center justify-center flex-shrink-0">
+                <Wrench className="w-4 h-4 text-amber-600 dark:text-amber-400" />
               </div>
-              <h2 className="text-xl font-black text-gray-900 dark:text-gray-100 uppercase tracking-tight">Skills</h2>
+              <h2 className="text-base sm:text-xl font-black text-gray-900 dark:text-gray-100 uppercase tracking-tight truncate">Skills</h2>
             </div>
             <button type="button"
               onClick={(e) => {
                 e.stopPropagation();
                 addItem('skills');
               }}
-              className="p-2 bg-amber-100 text-amber-600 rounded-xl hover:bg-amber-600 hover:text-white transition-all"
+              className="p-2 bg-amber-100 text-amber-600 rounded-xl hover:bg-amber-600 hover:text-white transition-all flex-shrink-0"
             >
               <Plus className="w-4 h-4" />
             </button>
@@ -1276,18 +1276,18 @@ export default function ResumeReview({ resumeId, onSaveComplete, portfolioId, pe
 
         <section>
           <div className="flex items-center justify-between mb-3 px-1">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-purple-100 dark:bg-purple-900/30 rounded-xl flex items-center justify-center">
-                <LanguagesIcon className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+            <div className="flex items-center gap-2 min-w-0">
+              <div className="w-8 h-8 bg-purple-100 dark:bg-purple-900/30 rounded-lg flex items-center justify-center flex-shrink-0">
+                <LanguagesIcon className="w-4 h-4 text-purple-600 dark:text-purple-400" />
               </div>
-              <h2 className="text-xl font-black text-gray-900 dark:text-gray-100 uppercase tracking-tight">Languages</h2>
+              <h2 className="text-base sm:text-xl font-black text-gray-900 dark:text-gray-100 uppercase tracking-tight truncate">Languages</h2>
             </div>
             <button type="button"
               onClick={(e) => {
                 e.stopPropagation();
                 addItem('languages');
               }}
-              className="p-2 bg-purple-100 text-purple-600 rounded-xl hover:bg-purple-600 hover:text-white transition-all"
+              className="p-2 bg-purple-100 text-purple-600 rounded-xl hover:bg-purple-600 hover:text-white transition-all flex-shrink-0"
             >
               <Plus className="w-4 h-4" />
             </button>
