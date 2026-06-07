@@ -19,7 +19,11 @@ import {
   Calendar,
   Mail,
   Phone,
-  Pencil
+  Pencil,
+  CheckCircle2,
+  ChevronDown,
+  ChevronUp,
+  Gauge,
 } from 'lucide-react';
 import type {
   TransformedMetadata,
@@ -178,6 +182,90 @@ function validateData(
   return { invalidFields, personalErrors, invalidCount, isValid: invalidCount === 0 };
 }
 
+type Completeness = {
+  percent: number;
+  filled: number;
+  total: number;
+  missing: string[];
+};
+
+/**
+ * Profile completeness across all reviewable data points (not just required fields).
+ * Encourages the user to fill optional details before importing. Returns the % filled plus a
+ * human-readable list of what's still empty.
+ */
+function computeCompleteness(data: TransformedMetadata): Completeness {
+  let filled = 0;
+  let total = 0;
+  const missing: string[] = [];
+  const check = (ok: boolean, label: string) => {
+    total += 1;
+    if (ok) filled += 1;
+    else missing.push(label);
+  };
+  const has = (v: unknown) => !isMissing(v);
+
+  const pd = data.personal_details;
+  if (pd) {
+    check(has(pd.first_name), 'First name');
+    check(has(pd.last_name), 'Last name');
+    check(has(pd.email), 'Email');
+    check(has(pd.phone), 'Phone');
+    check(has(pd.current_title), 'Current title');
+    check(has(pd.city) || has(pd.country), 'Location');
+    check(has(pd.profile_description), 'Profile summary');
+  }
+
+  data.work_experiences.forEach((e, i) => {
+    const n = `Experience ${i + 1}`;
+    check(has(e.position), `${n}: role`);
+    check(has(e.company), `${n}: company`);
+    check(!!toMonthInputValue(e.start_date), `${n}: start date`);
+    check(e.is_current || !!toMonthInputValue(e.end_date), `${n}: end date`);
+    check(has(e.city) || has(e.country), `${n}: location`);
+    check(has(e.description), `${n}: description`);
+  });
+
+  data.education.forEach((e, i) => {
+    const n = `Education ${i + 1}`;
+    check(has(e.degree), `${n}: degree`);
+    check(has(e.university), `${n}: institution`);
+    check(has(e.start_year), `${n}: start year`);
+    check(e.is_currently_studying || has(e.end_year), `${n}: end year`);
+    check(has(e.field_of_study), `${n}: field of study`);
+  });
+
+  data.skills.forEach((s, i) =>
+    check(has(s.skill_name), `Skill ${i + 1}: name`),
+  );
+  data.languages.forEach((l, i) =>
+    check(has(l.language), `Language ${i + 1}: name`),
+  );
+
+  const percent = total === 0 ? 100 : Math.round((filled / total) * 100);
+  return { percent, filled, total, missing };
+}
+
+function completenessColors(pct: number) {
+  if (pct >= 80)
+    return {
+      text: 'text-emerald-600 dark:text-emerald-400',
+      bar: 'bg-emerald-500',
+      bg: 'bg-emerald-100 dark:bg-emerald-900/30',
+    };
+  if (pct >= 50)
+    return {
+      text: 'text-blue-600 dark:text-blue-400',
+      bar: 'bg-blue-500',
+      bg: 'bg-blue-100 dark:bg-blue-900/30',
+    };
+  return {
+    text: 'text-amber-600 dark:text-amber-400',
+    bar: 'bg-amber-500',
+    bg: 'bg-amber-100 dark:bg-amber-900/30',
+  };
+}
+
 export default function ResumeReview({ resumeId, onSaveComplete, portfolioId, permanentToken, onClose }: Props) {
   const [localData, setLocalData] = useState<TransformedMetadata | null>(null);
   const [selectedIds, setSelectedIds] = useState({
@@ -206,6 +294,13 @@ export default function ResumeReview({ resumeId, onSaveComplete, portfolioId, pe
     () => (localData ? validateData(localData, selectedIds, updatePortfolioChecked) : EMPTY_VALIDATION),
     [localData, selectedIds, updatePortfolioChecked],
   );
+
+  // Profile completeness — encourages filling optional details before import.
+  const completeness = useMemo(
+    () => (localData ? computeCompleteness(localData) : null),
+    [localData],
+  );
+  const [showMissing, setShowMissing] = useState(false);
 
   // Year options for the education year pickers (current year + 10 down to 1960).
   const yearOptions = useMemo(() => {
@@ -337,6 +432,13 @@ export default function ResumeReview({ resumeId, onSaveComplete, portfolioId, pe
     if (!localData) return;
     // Never submit incomplete/placeholder data — the button is also disabled, this is a safety net.
     if (!validation.isValid) return;
+    // Require at least one selected item from every non-empty section (safety net for the gate).
+    const sectionMissing = (
+      ['work_experiences', 'education', 'skills', 'languages'] as const
+    ).some(
+      (k) => (localData[k] as unknown[]).length > 0 && selectedIds[k].size === 0,
+    );
+    if (sectionMissing) return;
 
     try {
       // Filter only selected items and clean them
@@ -460,6 +562,20 @@ export default function ResumeReview({ resumeId, onSaveComplete, portfolioId, pe
     selectedIds.skills.size +
     selectedIds.languages.size;
 
+  // Require at least one selected item from every section that actually has data, so the user
+  // consciously reviews and includes each part of their profile before importing. Empty sections
+  // (nothing parsed) are skipped — they can't be required.
+  const SECTION_LABELS: { key: keyof typeof selectedIds; label: string }[] = [
+    { key: 'work_experiences', label: 'Work Experience' },
+    { key: 'education', label: 'Education' },
+    { key: 'skills', label: 'Skills' },
+    { key: 'languages', label: 'Languages' },
+  ];
+  const missingSections = SECTION_LABELS.filter(
+    (s) => (localData[s.key] as unknown[]).length > 0 && selectedIds[s.key].size === 0,
+  ).map((s) => s.label);
+  const sectionsCovered = missingSections.length === 0;
+
   // Show success screen after save
   if (saveSuccess && !showLinkedData) {
     return (
@@ -514,7 +630,7 @@ export default function ResumeReview({ resumeId, onSaveComplete, portfolioId, pe
   }
 
   return (
-    <div className="max-w-4xl mx-auto space-y-12 pb-32">
+    <div className="max-w-4xl mx-auto px-3 sm:px-0 space-y-6 pb-28">
       {/* Header Info */}
 
 
@@ -525,17 +641,74 @@ export default function ResumeReview({ resumeId, onSaveComplete, portfolioId, pe
         </div>
       )}
 
-      {/* Personal Profile Section */}
-      <section className="bg-white dark:bg-gray-900 rounded-3xl border border-gray-100 dark:border-gray-800 shadow-sm overflow-hidden">
-        <div className="p-8 border-b border-gray-50 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/30 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-indigo-100 dark:bg-indigo-900/30 rounded-xl flex items-center justify-center">
-              <UserIcon className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+      {/* Profile completeness meter */}
+      {completeness && completeness.total > 0 && (() => {
+        const c = completenessColors(completeness.percent);
+        return (
+          <section className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm p-4 sm:p-5">
+            <div className="flex items-center gap-3">
+              <div className={`w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 ${c.bg}`}>
+                {completeness.percent === 100 ? (
+                  <CheckCircle2 className={`w-5 h-5 ${c.text}`} />
+                ) : (
+                  <Gauge className={`w-5 h-5 ${c.text}`} />
+                )}
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center justify-between gap-2">
+                  <h3 className="text-sm font-black text-gray-900 dark:text-gray-100 uppercase tracking-tight">Profile Completeness</h3>
+                  <span className={`text-base font-black ${c.text}`}>{completeness.percent}%</span>
+                </div>
+                <div className="h-2 w-full bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden mt-1.5">
+                  <div className={`h-full rounded-full transition-all duration-700 ease-out ${c.bar}`} style={{ width: `${completeness.percent}%` }} />
+                </div>
+              </div>
             </div>
-            <h2 className="text-xl font-black text-gray-900 dark:text-gray-100 uppercase tracking-tight">Personal Details</h2>
+
+            <div className="mt-2 flex items-center justify-between gap-2 sm:pl-12">
+              <p className="text-[11px] text-gray-500 dark:text-gray-400">
+                {completeness.percent === 100
+                  ? 'Great — every detail is filled in.'
+                  : `${completeness.missing.length} detail${completeness.missing.length === 1 ? '' : 's'} could be added to strengthen this profile.`}
+              </p>
+              {completeness.missing.length > 0 && (
+                <button
+                  onClick={() => setShowMissing((v) => !v)}
+                  className="flex items-center gap-1 text-[11px] font-bold text-primary-blue hover:underline whitespace-nowrap"
+                >
+                  {showMissing ? 'Hide' : 'View missing'}
+                  {showMissing ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+                </button>
+              )}
+            </div>
+
+            {showMissing && completeness.missing.length > 0 && (
+              <div className="mt-2 sm:pl-12 flex flex-wrap gap-1.5 animate-in fade-in slide-in-from-top-1 duration-200">
+                {completeness.missing.map((m) => (
+                  <span
+                    key={m}
+                    className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-300 text-[10px] font-semibold"
+                  >
+                    <AlertCircle className="w-3 h-3 flex-shrink-0" /> {m}
+                  </span>
+                ))}
+              </div>
+            )}
+          </section>
+        );
+      })()}
+
+      {/* Personal Profile Section */}
+      <section className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm overflow-hidden">
+        <div className="p-4 sm:p-5 border-b border-gray-50 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/30 flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div className="w-8 h-8 bg-indigo-100 dark:bg-indigo-900/30 rounded-lg flex items-center justify-center flex-shrink-0">
+              <UserIcon className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+            </div>
+            <h2 className="text-base font-black text-gray-900 dark:text-gray-100 uppercase tracking-tight truncate">Personal Details</h2>
           </div>
-          <label className="flex items-center gap-3 cursor-pointer select-none">
-            <span className="text-xs font-bold text-gray-500 dark:text-gray-400">Update Portfolio?</span>
+          <label className="flex items-center gap-2 cursor-pointer select-none flex-shrink-0">
+            <span className="text-[11px] font-bold text-gray-500 dark:text-gray-400 hidden sm:inline">Update Portfolio?</span>
             <div
               onClick={() => setUpdatePortfolioChecked(!updatePortfolioChecked)}
               className={`w-10 h-5 rounded-full p-1 transition-colors ${updatePortfolioChecked ? 'bg-indigo-600' : 'bg-gray-300 dark:bg-gray-700'}`}
@@ -545,66 +718,40 @@ export default function ResumeReview({ resumeId, onSaveComplete, portfolioId, pe
           </label>
         </div>
 
-        <div className="p-8 grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="space-y-4">
-            <div>
-              <label className="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1 ml-1">First Name</label>
+        <div className="p-4 sm:p-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+          {([
+            { key: 'first_name', label: 'First Name', err: 'First name' },
+            { key: 'last_name', label: 'Last Name', err: 'Last name' },
+            { key: 'email', label: 'Email', type: 'email' },
+            { key: 'phone', label: 'Phone' },
+            { key: 'phone_code', label: 'Phone Code' },
+            { key: 'country_code', label: 'Country Code' },
+            { key: 'current_title', label: 'Current Title' },
+            { key: 'city', label: 'City' },
+            { key: 'state', label: 'State' },
+            { key: 'country', label: 'Country' },
+            { key: 'postal_zip_code', label: 'Postal / Zip' },
+            { key: 'street_number', label: 'Street No.' },
+            { key: 'address', label: 'Address', span: true },
+          ] as { key: keyof PersonalDetails; label: string; type?: string; err?: string; span?: boolean }[]).map((f) => (
+            <div key={f.key} className={f.span ? 'sm:col-span-2 lg:col-span-3' : ''}>
+              <label className="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1 ml-1">{f.label}</label>
               <input
-                type="text"
-                value={localData.personal_details?.first_name || ''}
-                onChange={(e) => updatePersonalInfo('first_name', e.target.value)}
-                className={`w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 rounded-xl border focus:border-indigo-500 outline-none font-bold text-gray-800 dark:text-gray-200 ${validation.personalErrors.includes('First name') ? 'border-red-400' : 'border-transparent'}`}
+                type={f.type || 'text'}
+                value={((localData.personal_details as unknown as Record<string, unknown>)?.[f.key] as string) || ''}
+                onChange={(e) => updatePersonalInfo(f.key, e.target.value)}
+                className={`w-full px-3 py-1.5 bg-gray-50 dark:bg-gray-800 rounded-lg border focus:border-indigo-500 outline-none text-sm font-semibold text-gray-800 dark:text-gray-200 ${f.err && validation.personalErrors.includes(f.err) ? 'border-red-400' : 'border-transparent'}`}
               />
             </div>
-            <div>
-              <label className="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1 ml-1">Last Name</label>
-              <input
-                type="text"
-                value={localData.personal_details?.last_name || ''}
-                onChange={(e) => updatePersonalInfo('last_name', e.target.value)}
-                className={`w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 rounded-xl border focus:border-indigo-500 outline-none font-bold text-gray-800 dark:text-gray-200 ${validation.personalErrors.includes('Last name') ? 'border-red-400' : 'border-transparent'}`}
-              />
-            </div>
-          </div>
-          <div className="space-y-4">
-            <div>
-              <label className="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1 ml-1">Current Title</label>
-              <div className="relative">
-                <Briefcase className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                <input
-                  type="text"
-                  value={localData.personal_details?.current_title || ''}
-                  onChange={(e) => updatePersonalInfo('current_title', e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 bg-gray-50 dark:bg-gray-800 rounded-xl border border-transparent focus:border-indigo-500 outline-none font-bold text-gray-800 dark:text-gray-200 text-sm"
-                />
-              </div>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1 ml-1">City</label>
-                <div className="relative">
-                  <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                  <input
-                    type="text"
-                    value={localData.personal_details?.city || ''}
-                    onChange={(e) => updatePersonalInfo('city', e.target.value)}
-                    className="w-full pl-10 pr-4 py-2 bg-gray-50 dark:bg-gray-800 rounded-xl border border-transparent focus:border-indigo-500 outline-none font-bold text-gray-800 dark:text-gray-200 text-sm"
-                  />
-                </div>
-              </div>
-              <div>
-                <label className="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1 ml-1">Phone</label>
-                <div className="relative">
-                  <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                  <input
-                    type="text"
-                    value={localData.personal_details?.phone || ''}
-                    onChange={(e) => updatePersonalInfo('phone', e.target.value)}
-                    className="w-full pl-10 pr-4 py-2 bg-gray-50 dark:bg-gray-800 rounded-xl border border-transparent focus:border-indigo-500 outline-none font-bold text-gray-800 dark:text-gray-200 text-sm"
-                  />
-                </div>
-              </div>
-            </div>
+          ))}
+          <div className="sm:col-span-2 lg:col-span-3">
+            <label className="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1 ml-1">Profile Description</label>
+            <textarea
+              rows={3}
+              value={localData.personal_details?.profile_description || ''}
+              onChange={(e) => updatePersonalInfo('profile_description', e.target.value)}
+              className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-800 rounded-lg border border-transparent focus:border-indigo-500 outline-none text-sm font-medium text-gray-800 dark:text-gray-200 resize-y"
+            />
           </div>
         </div>
       </section>
@@ -629,7 +776,7 @@ export default function ResumeReview({ resumeId, onSaveComplete, portfolioId, pe
           </button>
         </div>
 
-        <div className="space-y-6">
+        <div className="space-y-4">
           {localData.work_experiences.map((exp, idx) => {
             const isSelected = selectedIds.work_experiences.has(exp._preview);
             const isEditing = editingId === exp._preview;
@@ -639,10 +786,10 @@ export default function ResumeReview({ resumeId, onSaveComplete, portfolioId, pe
               <div
                 key={exp._preview}
                 onClick={(e) => { e.stopPropagation(); toggleSelection('work_experiences', exp._preview); }}
-                className={`group bg-white dark:bg-gray-900 rounded-[2rem] border-2 transition-all duration-500 ${errs ? 'border-red-400 shadow-xl shadow-red-500/5' : isSelected ? 'border-blue-500 shadow-xl shadow-blue-500/5' : 'border-gray-100 dark:border-gray-800'
+                className={`group bg-white dark:bg-gray-900 rounded-2xl border-2 transition-all duration-300 ${errs ? 'border-red-400 shadow-lg shadow-red-500/5' : isSelected ? 'border-blue-500 shadow-lg shadow-blue-500/5' : 'border-gray-100 dark:border-gray-800'
                   }`}
               >
-                <div className="p-6" onClick={(e) => e.stopPropagation()}>
+                <div className="p-4" onClick={(e) => e.stopPropagation()}>
                   <div className="flex items-start gap-4">
                     <button
                       onClick={(e) => {
@@ -657,7 +804,7 @@ export default function ResumeReview({ resumeId, onSaveComplete, portfolioId, pe
 
                     <div className="flex-1 space-y-4 min-w-0">
                       {isEditing ? (
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 animate-in fade-in slide-in-from-top-2">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 animate-in fade-in slide-in-from-top-2">
                           <div>
                             <label className="text-[10px] font-bold text-gray-400 uppercase ml-1">Position</label>
                             <input
@@ -697,7 +844,7 @@ export default function ResumeReview({ resumeId, onSaveComplete, portfolioId, pe
                               />
                             </div>
                           </div>
-                          <div className="flex items-center gap-2 px-2">
+                          <div className="flex items-center gap-2 px-2 sm:col-span-2">
                             <input
                               type="checkbox"
                               checked={exp.is_current}
@@ -706,14 +853,45 @@ export default function ResumeReview({ resumeId, onSaveComplete, portfolioId, pe
                             />
                             <span className="text-xs font-bold text-gray-500">I currently work here</span>
                           </div>
+                          <div>
+                            <label className="text-[10px] font-bold text-gray-400 uppercase ml-1">City</label>
+                            <input
+                              value={exp.city || ''}
+                              onChange={(e) => updateItem('work_experiences', idx, 'city', e.target.value)}
+                              className="w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 rounded-xl border border-transparent focus:border-blue-500 outline-none text-sm font-semibold"
+                            />
+                          </div>
+                          <div>
+                            <label className="text-[10px] font-bold text-gray-400 uppercase ml-1">Country</label>
+                            <input
+                              value={exp.country || ''}
+                              onChange={(e) => updateItem('work_experiences', idx, 'country', e.target.value)}
+                              className="w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 rounded-xl border border-transparent focus:border-blue-500 outline-none text-sm font-semibold"
+                            />
+                          </div>
+                          <div className="sm:col-span-2">
+                            <label className="text-[10px] font-bold text-gray-400 uppercase ml-1">Description</label>
+                            <textarea
+                              rows={3}
+                              value={exp.description || ''}
+                              onChange={(e) => updateItem('work_experiences', idx, 'description', e.target.value)}
+                              className="w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 rounded-xl border border-transparent focus:border-blue-500 outline-none text-sm font-medium resize-y"
+                            />
+                          </div>
                         </div>
                       ) : (
                         <div>
-                          <h3 className="text-xl font-black text-gray-900 dark:text-gray-100">{exp.position}</h3>
-                          <p className="text-primary-blue font-bold mb-2">{exp.company}</p>
-                          <div className="flex items-center gap-4 text-xs text-gray-500 font-bold uppercase">
+                          <h3 className="text-base font-black text-gray-900 dark:text-gray-100">{exp.position}</h3>
+                          <p className="text-primary-blue font-bold text-sm mb-2">{exp.company}</p>
+                          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-gray-500 font-bold uppercase">
                             <span className="flex items-center gap-1.5"><Calendar className="w-3 h-3" /> {formatMonthDisplay(exp.start_date) || '—'} — {exp.is_current ? 'Present' : (formatMonthDisplay(exp.end_date) || '—')}</span>
+                            {(exp.city || exp.country) && (
+                              <span className="flex items-center gap-1.5 normal-case"><MapPin className="w-3 h-3" /> {[exp.city, exp.country].filter(Boolean).join(', ')}</span>
+                            )}
                           </div>
+                          {exp.description && (
+                            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1.5 line-clamp-2 normal-case font-medium">{exp.description}</p>
+                          )}
                         </div>
                       )}
                       {errs && !isEditing && (
@@ -779,7 +957,7 @@ export default function ResumeReview({ resumeId, onSaveComplete, portfolioId, pe
           </button>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {localData.education.map((edu, idx) => {
             const isSelected = selectedIds.education.has(edu._preview);
             const isEditing = editingId === edu._preview;
@@ -792,7 +970,7 @@ export default function ResumeReview({ resumeId, onSaveComplete, portfolioId, pe
                   e.stopPropagation();
                   toggleSelection('education', edu._preview);
                 }}
-                className={`bg-white dark:bg-gray-900 rounded-3xl border-2 p-6 transition-all duration-300 ${errs ? 'border-red-400 shadow-lg shadow-red-500/5' : isSelected ? 'border-emerald-500 shadow-lg shadow-emerald-500/5' : 'border-gray-100 dark:border-gray-800'
+                className={`bg-white dark:bg-gray-900 rounded-2xl border-2 p-4 transition-all duration-300 ${errs ? 'border-red-400 shadow-lg shadow-red-500/5' : isSelected ? 'border-emerald-500 shadow-lg shadow-emerald-500/5' : 'border-gray-100 dark:border-gray-800'
                   }`}
               >
                 <div className="flex items-start gap-4" onClick={(e) => e.stopPropagation()}>
@@ -822,6 +1000,12 @@ export default function ResumeReview({ resumeId, onSaveComplete, portfolioId, pe
                           value={edu.university}
                           onChange={(e) => updateItem('education', idx, 'university', e.target.value)}
                         />
+                        <input
+                          placeholder="Field of Study"
+                          className="w-full px-3 py-1 bg-gray-50 dark:bg-gray-800 rounded-lg outline-none font-semibold text-xs border border-transparent focus:border-emerald-500"
+                          value={edu.field_of_study || ''}
+                          onChange={(e) => updateItem('education', idx, 'field_of_study', e.target.value)}
+                        />
                         <div className="flex gap-2">
                           <select
                             aria-label="Start year"
@@ -843,6 +1027,26 @@ export default function ResumeReview({ resumeId, onSaveComplete, portfolioId, pe
                             {yearOptions.map((y) => <option key={y} value={y}>{y}</option>)}
                           </select>
                         </div>
+                        <div className="flex gap-2">
+                          <input
+                            placeholder="City"
+                            className="w-full px-3 py-1 bg-gray-50 dark:bg-gray-800 rounded-lg outline-none font-semibold text-xs border border-transparent focus:border-emerald-500"
+                            value={edu.city || ''}
+                            onChange={(e) => updateItem('education', idx, 'city', e.target.value)}
+                          />
+                          <input
+                            placeholder="Country"
+                            className="w-full px-3 py-1 bg-gray-50 dark:bg-gray-800 rounded-lg outline-none font-semibold text-xs border border-transparent focus:border-emerald-500"
+                            value={edu.country || ''}
+                            onChange={(e) => updateItem('education', idx, 'country', e.target.value)}
+                          />
+                        </div>
+                        <input
+                          placeholder="GPA / Grade"
+                          className="w-full px-3 py-1 bg-gray-50 dark:bg-gray-800 rounded-lg outline-none font-semibold text-xs border border-transparent focus:border-emerald-500"
+                          value={edu.gpa || ''}
+                          onChange={(e) => updateItem('education', idx, 'gpa', e.target.value)}
+                        />
                         <div className="flex items-center gap-2 px-2">
                           <input
                             type="checkbox"
@@ -857,7 +1061,15 @@ export default function ResumeReview({ resumeId, onSaveComplete, portfolioId, pe
                       <div>
                         <h3 className="font-black text-gray-900 dark:text-gray-100 truncate">{edu.degree}</h3>
                         <p className="text-emerald-600 font-bold text-xs truncate">{edu.university}</p>
-                        <p className="text-[10px] text-gray-400 font-bold mt-1 uppercase">{edu.start_year} — {edu.end_year || 'Present'}</p>
+                        {(edu.field_of_study || edu.gpa) && (
+                          <p className="text-[10px] text-gray-500 dark:text-gray-400 font-semibold mt-0.5 truncate">
+                            {[edu.field_of_study, edu.gpa ? `GPA: ${edu.gpa}` : null].filter(Boolean).join('  ·  ')}
+                          </p>
+                        )}
+                        <p className="text-[10px] text-gray-400 font-bold mt-1 uppercase">
+                          {edu.start_year} — {edu.end_year || 'Present'}
+                          {(edu.city || edu.country) ? `  ·  ${[edu.city, edu.country].filter(Boolean).join(', ')}` : ''}
+                        </p>
                       </div>
                     )}
                     {errs && !isEditing && (
@@ -903,9 +1115,9 @@ export default function ResumeReview({ resumeId, onSaveComplete, portfolioId, pe
       </section>
 
       {/* Skills and Languages Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <section>
-          <div className="flex items-center justify-between mb-6 px-4">
+          <div className="flex items-center justify-between mb-3 px-1">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-amber-100 dark:bg-amber-900/30 rounded-xl flex items-center justify-center">
                 <Wrench className="w-5 h-5 text-amber-600 dark:text-amber-400" />
@@ -1008,7 +1220,7 @@ export default function ResumeReview({ resumeId, onSaveComplete, portfolioId, pe
         </section>
 
         <section>
-          <div className="flex items-center justify-between mb-6 px-4">
+          <div className="flex items-center justify-between mb-3 px-1">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-purple-100 dark:bg-purple-900/30 rounded-xl flex items-center justify-center">
                 <LanguagesIcon className="w-5 h-5 text-purple-600 dark:text-purple-400" />
@@ -1069,15 +1281,41 @@ export default function ResumeReview({ resumeId, onSaveComplete, portfolioId, pe
                           <option value="expert">Expert</option>
                           <option value="native">Native</option>
                         </select>
+                        <div className="flex items-center gap-3 px-1 pt-0.5">
+                          {([
+                            { key: 'can_read', label: 'Read' },
+                            { key: 'can_write', label: 'Write' },
+                            { key: 'can_speak', label: 'Speak' },
+                          ] as { key: 'can_read' | 'can_write' | 'can_speak'; label: string }[]).map((c) => (
+                            <label key={c.key} className="flex items-center gap-1 cursor-pointer">
+                              <input
+                                type="checkbox"
+                                checked={!!lang[c.key]}
+                                onChange={(e) => updateItem('languages', idx, c.key, e.target.checked)}
+                                className="w-3 h-3 text-purple-600"
+                              />
+                              <span className="text-[10px] font-bold text-gray-500">{c.label}</span>
+                            </label>
+                          ))}
+                        </div>
                       </div>
                     ) : (
-                      <div className="flex items-center justify-between">
-                        {errs ? (
-                          <span className="flex items-center gap-1 text-xs font-bold text-red-500"><AlertCircle className="w-3 h-3" /> Language required</span>
-                        ) : (
-                          <span className="font-bold text-gray-800 dark:text-gray-200 truncate">{lang.language}</span>
+                      <div>
+                        <div className="flex items-center justify-between">
+                          {errs ? (
+                            <span className="flex items-center gap-1 text-xs font-bold text-red-500"><AlertCircle className="w-3 h-3" /> Language required</span>
+                          ) : (
+                            <span className="font-bold text-gray-800 dark:text-gray-200 truncate">{lang.language}</span>
+                          )}
+                          <span className="text-[10px] font-black text-purple-600 uppercase">{lang.proficiency_level}</span>
+                        </div>
+                        {(lang.can_read || lang.can_write || lang.can_speak) && (
+                          <div className="flex gap-1 mt-1">
+                            {lang.can_read && <span className="px-1.5 py-0.5 rounded bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-300 text-[9px] font-bold">Read</span>}
+                            {lang.can_write && <span className="px-1.5 py-0.5 rounded bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-300 text-[9px] font-bold">Write</span>}
+                            {lang.can_speak && <span className="px-1.5 py-0.5 rounded bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-300 text-[9px] font-bold">Speak</span>}
+                          </div>
                         )}
-                        <span className="text-[10px] font-black text-purple-600 uppercase">{lang.proficiency_level}</span>
                       </div>
                     )}
                   </div>
@@ -1109,14 +1347,19 @@ export default function ResumeReview({ resumeId, onSaveComplete, portfolioId, pe
       </div>
 
       {/* Sticky Action Footer */}
-      <div className="sticky bottom-0 left-0 right-0 z-50 mt-12 -mx-8 pb-8 px-8 bg-gradient-to-t from-white dark:from-gray-950 via-white/90 dark:via-gray-950/90 to-transparent pointer-events-none">
-        <div className="bg-white/90 dark:bg-gray-900/90 backdrop-blur-xl border border-gray-200/50 dark:border-gray-800/50 p-4 rounded-[2.5rem] shadow-2xl flex items-center justify-between max-w-2xl mx-auto pointer-events-auto">
-          <div className="pl-6 flex flex-col">
+      <div className="sticky bottom-0 left-0 right-0 z-50 mt-8 -mx-3 sm:-mx-8 pb-4 sm:pb-6 px-3 sm:px-8 bg-gradient-to-t from-white dark:from-gray-950 via-white/90 dark:via-gray-950/90 to-transparent pointer-events-none">
+        <div className="bg-white/90 dark:bg-gray-900/90 backdrop-blur-xl border border-gray-200/50 dark:border-gray-800/50 p-3 sm:p-4 rounded-2xl shadow-2xl flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 max-w-2xl mx-auto pointer-events-auto">
+          <div className="pl-2 sm:pl-6 flex flex-col">
             <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 line-clamp-1">Items for Profile</p>
-            <p className="text-2xl font-black text-primary-blue leading-tight">0{totalSelectedCount}</p>
+            <p className="text-xl font-black text-primary-blue leading-tight">0{totalSelectedCount}</p>
             {totalSelectedCount > 0 && !validation.isValid && (
               <p className="flex items-center gap-1 text-[11px] font-bold text-red-500 mt-0.5">
                 <AlertCircle className="w-3 h-3" /> {validation.invalidCount} item{validation.invalidCount > 1 ? 's' : ''} need details
+              </p>
+            )}
+            {!sectionsCovered && (
+              <p className="flex items-center gap-1 text-[11px] font-bold text-amber-600 dark:text-amber-400 mt-0.5">
+                <AlertCircle className="w-3 h-3 flex-shrink-0" /> Select at least one: {missingSections.join(', ')}
               </p>
             )}
           </div>
@@ -1126,8 +1369,8 @@ export default function ResumeReview({ resumeId, onSaveComplete, portfolioId, pe
               e.stopPropagation();
               handleSave();
             }}
-            disabled={totalSelectedCount === 0 || saving || !validation.isValid}
-            className="flex items-center gap-3 bg-gradient-to-br from-primary-blue to-indigo-600 text-white font-black py-4 px-10 rounded-3xl shadow-xl shadow-primary-blue/20 hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-50 disabled:grayscale group"
+            disabled={totalSelectedCount === 0 || saving || !validation.isValid || !sectionsCovered}
+            className="flex items-center justify-center gap-3 w-full sm:w-auto bg-gradient-to-br from-primary-blue to-indigo-600 text-white font-black py-3 px-8 rounded-2xl shadow-xl shadow-primary-blue/20 hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-50 disabled:grayscale group"
           >
             {saving ? (
               <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white" />
