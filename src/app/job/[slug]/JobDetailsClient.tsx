@@ -31,6 +31,7 @@ import {
   LogIn,
   Mail,
   MapPin,
+  AlertCircle,
   Users,
   Building2,
   Share2,
@@ -56,6 +57,11 @@ export default function JobDetailsClient({ job, slug }: JobDetailsClientProps) {
 
   // Resume selection state
   const [resumeId, setResumeId] = useState<number | null>(null);
+  const [applyError, setApplyError] = useState<
+    { kind: "pdf" | "generic"; message: string } | null
+  >(null);
+  // Where to send candidates to generate/download a CV PDF.
+  const LETSMAKECV_URL = "https://letsmakecv.com";
   const [pdfResumes, setPdfResumes] = useState<PdfResume[]>([]);
   const [builderResumes, setBuilderResumes] = useState<Resume[]>([]);
   const [loadingResumes, setLoadingResumes] = useState(false);
@@ -213,8 +219,13 @@ export default function JobDetailsClient({ job, slug }: JobDetailsClientProps) {
       return;
     }
 
+    setApplyError(null);
+
     if (!resumeId) {
-      alert("Please select or upload a resume before applying.");
+      setApplyError({
+        kind: "generic",
+        message: "Please select or upload a CV before applying.",
+      });
       return;
     }
 
@@ -237,10 +248,13 @@ export default function JobDetailsClient({ job, slug }: JobDetailsClientProps) {
       setApplySuccess(true);
       window.scrollTo({ top: 0, behavior: "smooth" });
     } catch (err: unknown) {
-      if (err instanceof Error) {
-        alert(err.message);
+      const e = err as { status?: number; message?: string };
+      const msg = e?.message || "Failed to apply. Please try again.";
+      // The backend rejects builder CVs that have no generated PDF — guide the user to LetsMakeCV.
+      if (e?.status === 400 && /generate your resume pdf/i.test(msg)) {
+        setApplyError({ kind: "pdf", message: msg });
       } else {
-        alert("Failed to apply");
+        setApplyError({ kind: "generic", message: msg });
       }
     } finally {
       setApplying(false);
@@ -510,7 +524,10 @@ export default function JobDetailsClient({ job, slug }: JobDetailsClientProps) {
                   <div className="flex gap-1">
                     <select
                       value={resumeId || ""}
-                      onChange={(e) => setResumeId(Number(e.target.value))}
+                      onChange={(e) => {
+                        setResumeId(Number(e.target.value));
+                        setApplyError(null);
+                      }}
                       className="w-full px-3 py-2.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg outline-none text-sm font-medium cursor-pointer focus:ring-2 focus:ring-blue-500"
                     >
                       <option value="" disabled>
@@ -662,20 +679,62 @@ export default function JobDetailsClient({ job, slug }: JobDetailsClientProps) {
                 </div>
               </div>
             ) : (
-              <button
-                type="submit"
-                disabled={applying || !resumeId}
-                className="w-full py-3 bg-[#0077b5] hover:bg-[#006097] text-white font-bold rounded-lg transition-all shadow-lg shadow-blue-200 dark:shadow-none flex items-center justify-center gap-2 disabled:opacity-70 disabled:grayscale text-sm"
-              >
-                {applying ? (
-                  <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent" />
-                ) : (
-                  <>
-                    Submit Application
-                    <span className="text-lg">→</span>
-                  </>
+              <>
+                {applyError?.kind === "pdf" && (
+                  <div className="mb-3 rounded-xl border border-amber-200 bg-amber-50 p-4 dark:border-amber-700 dark:bg-amber-900/30">
+                    <div className="flex items-start gap-2">
+                      <AlertCircle className="w-4 h-4 text-amber-600 dark:text-amber-400 mt-0.5 shrink-0" />
+                      <div className="flex-1">
+                        <p className="text-sm font-semibold text-amber-900 dark:text-amber-100">
+                          Your CV doesn&apos;t have a generated PDF yet
+                        </p>
+                        <p className="mt-0.5 text-xs text-amber-800 dark:text-amber-200">
+                          Open this CV in LetsMakeCV, generate/download its PDF,
+                          then come back here and apply.
+                        </p>
+                        <a
+                          href={LETSMAKECV_URL}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="mt-2 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold transition-colors"
+                        >
+                          Open LetsMakeCV
+                        </a>
+                      </div>
+                    </div>
+                  </div>
                 )}
-              </button>
+                {applyError?.kind === "generic" && (
+                  <div className="mb-3 rounded-xl border border-red-200 bg-red-50 p-4 dark:border-red-800 dark:bg-red-900/20 flex items-start gap-2">
+                    <AlertCircle className="w-4 h-4 text-red-600 dark:text-red-400 mt-0.5 shrink-0" />
+                    <p className="flex-1 text-sm font-medium text-red-700 dark:text-red-300">
+                      {applyError.message}
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => setApplyError(null)}
+                      className="text-red-400 hover:text-red-600 dark:hover:text-red-300 shrink-0"
+                      aria-label="Dismiss"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                )}
+                <button
+                  type="submit"
+                  disabled={applying || !resumeId}
+                  className="w-full py-3 bg-[#0077b5] hover:bg-[#006097] text-white font-bold rounded-lg transition-all shadow-lg shadow-blue-200 dark:shadow-none flex items-center justify-center gap-2 disabled:opacity-70 disabled:grayscale text-sm"
+                >
+                  {applying ? (
+                    <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent" />
+                  ) : (
+                    <>
+                      Submit Application
+                      <span className="text-lg">→</span>
+                    </>
+                  )}
+                </button>
+              </>
             )}
           </form>
         )}

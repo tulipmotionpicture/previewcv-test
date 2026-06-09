@@ -102,6 +102,7 @@ interface JobManagementProps {
   onEditJob: (job: Job) => void;
   onDeleteJob: (jobId: number) => void;
   onViewApplications: (jobId: number) => void;
+  onToggleActive?: (jobId: number, activate: boolean) => void;
   onCreateNewJob?: () => void;
 }
 
@@ -121,6 +122,7 @@ export default function JobManagement({
   onEditJob,
   onDeleteJob,
   onViewApplications,
+  onToggleActive,
   activeView,
   onViewChange,
   onCreateNewJob,
@@ -270,6 +272,7 @@ export default function JobManagement({
             onEditJob={onEditJob}
             onDeleteJob={onDeleteJob}
             onViewApplications={onViewApplications}
+            onToggleActive={onToggleActive}
           />
         </div>
 

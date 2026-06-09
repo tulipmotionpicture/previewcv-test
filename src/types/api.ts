@@ -273,6 +273,13 @@ export interface JobApplicationsResponse {
   applications: Application[];
   sort?: string;
   min_score?: number;
+  // Plan-cap metadata (drive the "upgrade to see more" UI). Paid/unlimited: is_capped=false,
+  // locked_applicants=0, applicants_per_job=null.
+  total_applicants?: number;
+  accessible_applicants?: number;
+  locked_applicants?: number;
+  applicants_per_job?: number | null;
+  is_capped?: boolean;
   pagination?: {
     page: number;
     limit: number;
@@ -979,14 +986,21 @@ export interface BucketActivityLog {
 // Bulk Download Types
 export interface BulkDownloadTaskResponse {
   task_id: string;
-  status: "pending" | "processing" | "completed" | "failed";
+  status: "pending" | "processing" | "completed" | "success" | "failed" | "failure";
   message: string;
+  resume_count?: number;
+  skipped_count?: number;
+  skipped_applicants?: string[];
 }
 
 export interface TaskStatusResponse {
   task_id: string;
-  status: "pending" | "processing" | "completed" | "failed";
+  task_type?: string;
+  status: "pending" | "processing" | "completed" | "success" | "failed" | "failure";
   progress?: number;
+  // New: signed download URL is returned at the top level when the ZIP is ready.
+  file_url?: string;
+  file_expires_at?: string;
   result?: {
     download_url?: string;
     total_resumes?: number;
@@ -994,8 +1008,8 @@ export interface TaskStatusResponse {
     expires_at?: string;
   };
   error?: string;
-  created_at: string;
-  updated_at: string;
+  created_at?: string;
+  updated_at?: string;
 }
 
 // ============================================================================

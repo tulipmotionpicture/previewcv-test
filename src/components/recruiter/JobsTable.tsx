@@ -30,6 +30,7 @@ interface JobsTableProps {
   onEditJob: (job: Job) => void;
   onDeleteJob: (jobId: number) => void;
   onViewApplications: (jobId: number) => void;
+  onToggleActive?: (jobId: number, activate: boolean) => void;
 }
 
 // Backend timestamps come without a timezone suffix (e.g. "2026-06-04T05:11:23.5")
@@ -155,6 +156,7 @@ export default function JobsTable({
   onEditJob,
   onDeleteJob,
   onViewApplications,
+  onToggleActive,
 }: JobsTableProps) {
   const [openMenuJobId, setOpenMenuJobId] = useState<number | null>(null);
   const [menuPosition, setMenuPosition] = useState<{
@@ -426,11 +428,19 @@ export default function JobsTable({
                                   </button>
                                   <button
                                     onClick={() => {
-                                      onDeleteJob(job.id);
+                                      if (onToggleActive) {
+                                        onToggleActive(job.id, !job.is_active);
+                                      } else {
+                                        onDeleteJob(job.id);
+                                      }
                                       setOpenMenuJobId(null);
                                       setMenuPosition(null);
                                     }}
-                                    className="flex items-center gap-2 w-full px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+                                    className={`flex items-center gap-2 w-full px-4 py-2.5 text-sm transition-colors ${
+                                      job.is_active
+                                        ? "text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
+                                        : "text-[#1E7F3A] dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20"
+                                    }`}
                                   >
                                     <svg
                                       className="w-4 h-4"
@@ -442,10 +452,14 @@ export default function JobsTable({
                                         strokeLinecap="round"
                                         strokeLinejoin="round"
                                         strokeWidth={2}
-                                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                                        d={
+                                          job.is_active
+                                            ? "M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"
+                                            : "M5 13l4 4L19 7"
+                                        }
                                       />
                                     </svg>
-                                    Deactivate Job
+                                    {job.is_active ? "Deactivate Job" : "Activate Job"}
                                   </button>
                                   <button
                                     onClick={() => {

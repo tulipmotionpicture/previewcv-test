@@ -622,6 +622,31 @@ export class ApiClient {
     );
   }
 
+  // Activate (publish) a job posting. Replaces the old `is_active: true` PUT.
+  // Throws on 403 when over the plan's concurrent-active limit, or when not admin-approved.
+  async activateJob(
+    jobId: number,
+  ): Promise<{ success: boolean; message: string; job_id: number; status: string; is_active: boolean }> {
+    return this.request(
+      `/api/v1/recruiters/jobs/posting/${jobId}/activate`,
+      { method: "POST" },
+      true,
+      true,
+    );
+  }
+
+  // Deactivate a job posting. Replaces the old `is_active: false` PUT.
+  async deactivateJob(
+    jobId: number,
+  ): Promise<{ success: boolean; message: string; job_id: number; status: string; is_active: boolean }> {
+    return this.request(
+      `/api/v1/recruiters/jobs/posting/${jobId}/deactivate`,
+      { method: "POST" },
+      true,
+      true,
+    );
+  }
+
   async deleteJobPosting(
     jobId: number,
   ): Promise<{ success: boolean; message: string }> {

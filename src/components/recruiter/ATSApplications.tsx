@@ -12,6 +12,7 @@ import {
   FileText,
   Eye,
   Download,
+  Lock,
   Sparkles,
   CheckCircle2,
   XCircle,
@@ -26,16 +27,26 @@ import {
   ChevronRight,
 } from "lucide-react";
 
+export interface ApplicationsMeta {
+  total_applicants?: number;
+  accessible_applicants?: number;
+  locked_applicants?: number;
+  applicants_per_job?: number | null;
+  is_capped?: boolean;
+}
+
 interface ATSApplicationsProps {
   jobs: Job[];
   applications: Application[];
   selectedJobId: number | null;
   statusFilter: string;
   loadingApps: boolean;
+  meta?: ApplicationsMeta | null;
   onJobSelect: (jobId: number) => void;
   onStatusFilterChange: (status: string) => void;
   onViewDetails: (app: Application) => void;
   onUpdateStatus: (appId: number, newStatus: string) => void;
+  onUpgrade?: () => void;
 }
 
 type SortKey = "relevance" | "newest" | "experience";
@@ -242,6 +253,21 @@ function formatJobType(t?: string): string {
   return t.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
+/**
+ * Trigger a file download via a programmatic anchor click. Used instead of `window.open` because
+ * the bulk-ZIP URL becomes available inside an async poll callback (no user gesture), which browsers
+ * block as a popup. An anchor click is not popup-blocked.
+ */
+function triggerBrowserDownload(url: string, filename?: string) {
+  const a = document.createElement("a");
+  a.href = url;
+  if (filename) a.download = filename;
+  a.rel = "noopener";
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+}
+
 function DetailChip({
   icon: Icon,
   label,
@@ -263,10 +289,12 @@ export default function ATSApplications({
   selectedJobId,
   statusFilter,
   loadingApps,
+  meta,
   onJobSelect,
   onStatusFilterChange,
   onViewDetails,
   onUpdateStatus,
+  onUpgrade,
 }: ATSApplicationsProps) {
   void onJobSelect;
   const { showToast } = useToast();
@@ -479,6 +507,12 @@ export default function ATSApplications({
     try {
       const response = await api.prepareBulkDownload(selectedJobId);
       setTaskId(response.task_id);
+      if (response.skipped_count && response.skipped_count > 0) {
+        showToast(
+          `${response.skipped_count} applicant(s) skipped — no downloadable CV.`,
+          "info",
+        );
+      }
 
       const pollInterval = setInterval(async () => {
         try {
@@ -499,10 +533,14 @@ export default function ATSApplications({
 
             if (downloadUrlCandidate) {
               setDownloadUrl(downloadUrlCandidate);
-              window.open(downloadUrlCandidate, "_blank");
-              const count = status.result?.total_resumes || 0;
+              // Anchor click (not window.open) — runs in an async callback, so a popup would be blocked.
+              triggerBrowserDownload(downloadUrlCandidate);
+              const count =
+                status.result?.total_resumes ?? response.resume_count ?? 0;
               showToast(
-                `Successfully prepared ${count} resumes for download!`,
+                count
+                  ? `Downloading ${count} CVs…`
+                  : "Your CVs are downloading…",
                 "success",
               );
             } else {
@@ -511,7 +549,7 @@ export default function ATSApplications({
                 "error",
               );
             }
-          } else if (String(status.status) === "failed") {
+          } else if (["failed", "failure"].includes(String(status.status))) {
             clearInterval(pollInterval);
             setDownloadingBulk(false);
             setDownloadProgress(null);
@@ -573,12 +611,40 @@ export default function ATSApplications({
             ) : (
               <>
                 <Download className="w-5 h-5" />
-                Download All Resumes
+                Download All CVs
               </>
             )}
           </button>
         )}
       </div>
+
+      {/* Plan-cap banner — shown when the recruiter's plan limits visible applicants */}
+      {meta?.is_capped && (meta.locked_applicants ?? 0) > 0 && (
+        <div className="mb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-xl border border-amber-200 bg-amber-50 dark:border-amber-700 dark:bg-amber-900/30 p-4">
+          <div className="flex items-start gap-3">
+            <Lock className="w-5 h-5 text-amber-600 dark:text-amber-400 mt-0.5 flex-shrink-0" />
+            <div>
+              <p className="text-sm font-semibold text-amber-900 dark:text-amber-100">
+                Showing {meta.accessible_applicants ?? applications.length} of{" "}
+                {meta.total_applicants ?? applications.length} applicants
+              </p>
+              <p className="text-xs text-amber-800 dark:text-amber-200 mt-0.5">
+                {meta.locked_applicants} more {meta.locked_applicants === 1 ? "applicant is" : "applicants are"} locked on your current plan
+                {meta.applicants_per_job ? ` (${meta.applicants_per_job} per job)` : ""}. Upgrade to reveal them all.
+              </p>
+            </div>
+          </div>
+          {onUpgrade && (
+            <button
+              type="button"
+              onClick={onUpgrade}
+              className="flex-shrink-0 px-4 py-2 rounded-lg bg-amber-600 hover:bg-amber-700 text-white text-sm font-semibold transition-colors"
+            >
+              Upgrade plan
+            </button>
+          )}
+        </div>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
         {/* LEFT COLUMN: Candidate Table (Main) */}

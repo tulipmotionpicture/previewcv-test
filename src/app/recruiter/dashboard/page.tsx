@@ -34,6 +34,7 @@ import {
   BucketsPage,
 } from "@/components/recruiter";
 import JobsTable from "@/components/recruiter/JobsTable";
+import type { ApplicationsMeta } from "@/components/recruiter/ATSApplications";
 import type {
   DashboardTab,
   JobFormState,
@@ -88,6 +89,8 @@ function RecruiterDashboardInner() {
   const [totalJobs, setTotalJobs] = useState(0);
   const jobsPerPage = 15;
   const [applications, setApplications] = useState<Application[]>([]);
+  const [applicationsMeta, setApplicationsMeta] =
+    useState<ApplicationsMeta | null>(null);
   const [dashboardStats, setDashboardStats] =
     useState<RecruiterDashboardAnalytics | null>(null);
 
@@ -309,9 +312,10 @@ function RecruiterDashboardInner() {
   const fetchApplications = async (jobId: number, status?: string) => {
     setLoadingApps(true);
     setApplications([]);
+    setApplicationsMeta(null);
     try {
-      // The endpoint is paginated. Pull every page so the client-side sort/filter
-      // controls operate over the full candidate set (relevance ranking is global).
+      // The endpoint is paginated. Pull every accessible page so the client-side sort/filter
+      // controls operate over the full (plan-limited) candidate set.
       const all: Application[] = [];
       const limit = 100;
       let page = 1;
@@ -325,6 +329,16 @@ function RecruiterDashboardInner() {
         );
         if (response.success && response.applications) {
           all.push(...response.applications);
+        }
+        // Capture the plan-cap metadata from the first page (drives the upgrade banner).
+        if (page === 1) {
+          setApplicationsMeta({
+            total_applicants: response.total_applicants,
+            accessible_applicants: response.accessible_applicants,
+            locked_applicants: response.locked_applicants,
+            applicants_per_job: response.applicants_per_job,
+            is_capped: response.is_capped,
+          });
         }
         if (!response.pagination?.has_next) break;
         page += 1;
@@ -471,6 +485,27 @@ function RecruiterDashboardInner() {
     }
   };
 
+  // Activate/deactivate a job via the dedicated endpoints (replaces the is_active PUT).
+  // Surfaces the backend 403 limit / not-approved messages clearly.
+  const handleToggleJobActive = async (jobId: number, activate: boolean) => {
+    try {
+      if (activate) await api.activateJob(jobId);
+      else await api.deactivateJob(jobId);
+      await fetchJobs();
+      toast.success(activate ? "Job activated and published" : "Job deactivated");
+    } catch (error: unknown) {
+      const err = error as { status?: number; message?: string };
+      if (err?.status === 403) {
+        toast.error(
+          err.message ||
+            "Active job limit reached for your plan. Deactivate another job or upgrade your plan.",
+        );
+      } else {
+        toast.error(err?.message || "Failed to update job status");
+      }
+    }
+  };
+
   const handleUpdateStatus = async (appId: number, newStatus: string) => {
     try {
       await api.updateApplicationStatus(appId, newStatus);
@@ -613,6 +648,7 @@ function RecruiterDashboardInner() {
                       onEditJob={handleEditJob}
                       onDeleteJob={(jobId) => setDeleteJobId(jobId)}
                       onViewApplications={handleViewApplications}
+                      onToggleActive={handleToggleJobActive}
                     />
                   </div>
 
@@ -716,6 +752,7 @@ function RecruiterDashboardInner() {
             onEditJob={handleEditJob}
             onDeleteJob={(jobId) => setDeleteJobId(jobId)}
             onViewApplications={handleViewApplications}
+            onToggleActive={handleToggleJobActive}
             onCreateNewJob={() => setActiveTab("createJob")}
           />
         )}
@@ -727,10 +764,12 @@ function RecruiterDashboardInner() {
             selectedJobId={selectedJobId}
             statusFilter={statusFilter}
             loadingApps={loadingApps}
+            meta={applicationsMeta}
             onJobSelect={setSelectedJobId}
             onStatusFilterChange={setStatusFilter}
             onViewDetails={handleViewApplicationDetail}
             onUpdateStatus={handleUpdateStatus}
+            onUpgrade={() => setActiveTab("pricing")}
           />
         )}
 
