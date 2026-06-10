@@ -792,7 +792,7 @@ function RecruiterDashboardInner() {
         {activeTab === "kyc" && <KYCVerification />}
 
         {activeTab === "cvSearch" && kycStatus?.kyc_status === "approved" && (
-          <CVSearchPage />
+          <CVSearchPage onBuyCredits={() => setActiveTab("subscriptions")} />
         )}
 
         {activeTab === "buckets" && kycStatus?.kyc_status === "approved" && (
