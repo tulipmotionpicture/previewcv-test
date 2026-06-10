@@ -10,6 +10,7 @@ import {
   ApplicationDetailResponse,
   KycStatus,
   RecruiterDashboardAnalytics,
+  SubscriptionDashboard as SubscriptionDashboardType,
 } from "@/types/api";
 import { useRecruiterAuth } from "@/context/RecruiterAuthContext";
 import { useToast } from "@/context/ToastContext";
@@ -40,7 +41,7 @@ import type {
   JobFormState,
   JobManagementTab,
 } from "@/components/recruiter";
-import { ArrowRight, Clock, Shield, Search, Bell, Plus, Mail } from "lucide-react";
+import { ArrowRight, Clock, Shield, Search, Bell, Plus, Mail, Briefcase } from "lucide-react";
 import {
   recruiterNeedsVerification,
   recruiterNeedsRevalidation,
@@ -83,6 +84,8 @@ function RecruiterDashboardInner() {
   const toast = useToast();
   const [activeTab, setActiveTab] = useState<DashboardTab>("stats");
   const [kycStatus, setKycStatus] = useState<KycStatus | null>(null);
+  const [jobSubscription, setJobSubscription] =
+    useState<SubscriptionDashboardType | null>(null);
   const [jobs, setJobs] = useState<Job[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -135,6 +138,17 @@ function RecruiterDashboardInner() {
   }, [isAuthenticated, authLoading, router]);
 
   // Fetch KYC status on mount
+  // Job-plan usage (slots remaining) — used to proactively gate job creation. Best-effort:
+  // if this fails, the form still works and the backend 403 is the backstop.
+  const refreshJobSubscription = useCallback(async () => {
+    try {
+      const data = await api.getSubscriptionDashboard();
+      setJobSubscription(data);
+    } catch (error) {
+      console.debug("Failed to load job subscription:", error);
+    }
+  }, []);
+
   useEffect(() => {
     const fetchKycStatus = async () => {
       try {
@@ -146,6 +160,9 @@ function RecruiterDashboardInner() {
           setActiveTab("kyc");
           return;
         }
+
+        // KYC approved — load job-plan usage for the create-job gate.
+        refreshJobSubscription();
 
         // KYC approved — honor ?tab=… deep link (e.g. after Paddle redirect).
         const requested = searchParams?.get("tab");
@@ -174,7 +191,7 @@ function RecruiterDashboardInner() {
     if (isAuthenticated) {
       fetchKycStatus();
     }
-  }, [isAuthenticated, searchParams]);
+  }, [isAuthenticated, searchParams, refreshJobSubscription]);
 
   useEffect(() => {
     if (activeTab === "ats" || selectedJobId) {
@@ -492,6 +509,7 @@ function RecruiterDashboardInner() {
       if (activate) await api.activateJob(jobId);
       else await api.deactivateJob(jobId);
       await fetchJobs();
+      refreshJobSubscription();
       toast.success(activate ? "Job activated and published" : "Job deactivated");
     } catch (error: unknown) {
       const err = error as { status?: number; message?: string };
@@ -568,6 +586,17 @@ function RecruiterDashboardInner() {
       setLoadingApplicationDetail(false);
     }
   };
+
+  // Proactively block job creation when the plan's active-job slots are exhausted.
+  // Only blocks when we have a loaded subscription that says so — otherwise let the form
+  // through and rely on the backend 403 (avoids false-blocking on missing/partial data).
+  const jobSub = jobSubscription?.job_subscription;
+  const jobLimitReached =
+    !!jobSubscription &&
+    !!jobSub &&
+    (jobSub.can_post_jobs === false ||
+      (jobSub.plan_config?.job_post_limit != null &&
+        (jobSub.jobs_remaining ?? 1) <= 0));
 
   return (
     <div className="min-h-screen flex transition-colors duration-300 bg-[#F9FAFC] dark:bg-[#121111]">
@@ -840,12 +869,48 @@ function RecruiterDashboardInner() {
                 revalidate your updates.
               </p>
             </div>
+          ) : jobLimitReached ? (
+            <div className="rounded-xl border border-amber-200 bg-amber-50 p-8 text-center dark:border-amber-700 dark:bg-amber-900/30">
+              <Briefcase className="mx-auto mb-3 h-8 w-8 text-amber-600 dark:text-amber-400" />
+              <h3 className="mb-1 text-base font-semibold text-amber-900 dark:text-amber-100">
+                You&apos;ve reached your job posting limit
+              </h3>
+              <p className="mx-auto mb-4 max-w-md text-sm text-amber-800 dark:text-amber-200">
+                Your{" "}
+                {jobSub?.plan_config?.name
+                  ? `${jobSub.plan_config.name} plan`
+                  : "current plan"}{" "}
+                allows{" "}
+                {jobSub?.plan_config?.job_post_limit ?? "a limited number of"}{" "}
+                active job{jobSub?.plan_config?.job_post_limit === 1 ? "" : "s"}, and you
+                have {jobSub?.jobs_remaining ?? 0} slot
+                {(jobSub?.jobs_remaining ?? 0) === 1 ? "" : "s"} remaining.
+                Deactivate an existing job to free a slot, or upgrade your plan to post more.
+              </p>
+              <div className="flex flex-wrap items-center justify-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setActiveTab("jobs")}
+                  className="rounded-md border border-amber-300 bg-white px-4 py-2 text-sm font-semibold text-amber-800 transition-colors hover:bg-amber-100 dark:border-amber-700 dark:bg-transparent dark:text-amber-100"
+                >
+                  Manage jobs
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveTab("pricing")}
+                  className="rounded-md bg-amber-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-amber-700"
+                >
+                  Upgrade plan
+                </button>
+              </div>
+            </div>
           ) : (
             <JobCreationPage
               onNavigateToPricing={() => setActiveTab("createJob")}
               onSuccess={() => {
                 setActiveTab("jobs");
                 fetchJobs();
+                refreshJobSubscription();
               }}
             />
           ))}
