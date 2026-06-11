@@ -1,13 +1,13 @@
-"use client";
-
-import { useEffect, useState } from "react";
-import { useParams } from "next/navigation";
+import { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
+import { notFound } from "next/navigation";
 import { api } from "@/lib/api";
+import config from "@/config";
 import { BlogPost } from "@/types";
 import FloatingHeader from "@/components/FloatingHeader";
-import Footer from "@/components/Footer";
+import { buildBlogPostingJsonLd } from "@/lib/blogPostingSchema";
+import BlogPostInteractions from "./BlogPostInteractions";
 import {
   Calendar,
   Clock,
@@ -15,157 +15,105 @@ import {
   User,
   Tag,
   ArrowLeft,
-  Share2,
-  Loader2,
   Sparkles,
 } from "lucide-react";
 
-export default function BlogDetailPage() {
-  const params = useParams();
-  const slug = params?.slug as string;
+const HEADER_LINKS = [
+  { label: "Home", href: "/" },
+  { label: "Jobs", href: "/jobs" },
+  { label: "Blog", href: "/blog" },
+];
+const HEADER_CTA = {
+  label: "Get Started",
+  href: "/candidate/signup",
+  variant: "primary" as const,
+};
 
-  const [post, setPost] = useState<BlogPost | null>(null);
-  const [relatedPosts, setRelatedPosts] = useState<BlogPost[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+async function getBlogPost(slug: string): Promise<BlogPost | null> {
+  try {
+    return await api.getBlogPostBySlug(slug);
+  } catch {
+    return null;
+  }
+}
 
-  useEffect(() => {
-    const fetchBlogPost = async () => {
-      if (!slug) {
-        setError("Invalid blog post URL");
-        setLoading(false);
-        return;
-      }
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
+  const { slug } = await params;
+  const post = await getBlogPost(slug);
 
-      setLoading(true);
-      setError(null);
-
-      try {
-        console.log("Fetching blog post for slug:", slug);
-        // Fetch blog post details
-        const postResponse = await api.getBlogPostBySlug(slug);
-        console.log("Blog post response:", postResponse);
-        console.log("Post title:", postResponse?.title);
-        setPost(postResponse);
-
-        // Record view
-        try {
-          await api.recordBlogPostView(slug);
-        } catch (viewErr) {
-          console.error("Failed to record view:", viewErr);
-          // Don't fail the whole page load for view tracking
-        }
-
-        // Fetch related posts
-        try {
-          const relatedResponse = await api.getRelatedBlogPosts(slug, 4);
-          setRelatedPosts(relatedResponse.posts || []);
-        } catch (relatedErr) {
-          console.error("Failed to load related posts:", relatedErr);
-          setRelatedPosts([]); // Ensure it's always an array
-        }
-      } catch (err) {
-        console.error("Failed to load blog post:", err);
-        setError(
-          err instanceof Error
-            ? err.message
-            : "Failed to load blog post. Please try again later.",
-        );
-      } finally {
-        setLoading(false);
-      }
+  if (!post) {
+    return {
+      title: "Article Not Found | PreviewCV",
+      description: "The article you are looking for could not be found.",
     };
+  }
 
-    fetchBlogPost();
-  }, [slug]);
+  const title = post.seo_title || `${post.title} | PreviewCV Blog`;
+  const description = post.seo_description || post.excerpt;
+  const canonical = config.app.siteUrl
+    ? `${config.app.siteUrl}/blog/${post.slug}`
+    : undefined;
+  const image = post.featured_image || config.app.logoUrl;
 
-  const handleShare = async () => {
-    if (navigator.share && post) {
-      try {
-        await navigator.share({
-          title: post.title,
-          text: post.excerpt,
-          url: window.location.href,
-        });
-      } catch (err) {
-        console.error("Share failed:", err);
-      }
-    } else {
-      // Fallback: Copy to clipboard
-      navigator.clipboard.writeText(window.location.href);
-      alert("Link copied to clipboard!");
-    }
+  return {
+    title,
+    description,
+    keywords: post.seo_keywords || undefined,
+    alternates: canonical ? { canonical } : undefined,
+    openGraph: {
+      title,
+      description,
+      type: "article",
+      url: canonical,
+      publishedTime: post.published_at,
+      authors: post.author?.full_name ? [post.author.full_name] : undefined,
+      images: image ? [{ url: image, alt: post.title }] : undefined,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: image ? [image] : undefined,
+    },
   };
+}
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-white dark:bg-gray-950">
-        <FloatingHeader
-          links={[
-            { label: "Home", href: "/" },
-            { label: "Jobs", href: "/jobs" },
-            { label: "Blog", href: "/blog" },
-          ]}
-          cta={{
-            label: "Get Started",
-            href: "/candidate/signup",
-            variant: "primary",
-          }}
-        />
-        <div className="flex items-center justify-center min-h-[60vh]">
-          <Loader2 className="w-8 h-8 animate-spin text-primary-blue" />
-        </div>
-        <Footer />
-      </div>
-    );
+export default async function BlogDetailPage({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}) {
+  const { slug } = await params;
+  const post = await getBlogPost(slug);
+
+  if (!post) {
+    notFound();
   }
 
-  if (error || !post) {
-    return (
-      <div className="min-h-screen bg-white dark:bg-gray-950">
-        <FloatingHeader
-          links={[
-            { label: "Home", href: "/" },
-            { label: "Jobs", href: "/jobs" },
-            { label: "Blog", href: "/blog" },
-          ]}
-          cta={{
-            label: "Get Started",
-            href: "/candidate/signup",
-            variant: "primary",
-          }}
-        />
-        <div className="max-w-4xl mx-auto px-4 py-16 text-center">
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
-            {error || "Blog post not found"}
-          </h1>
-          <Link
-            href="/blog"
-            className="inline-flex items-center gap-2 text-primary-blue hover:text-blue-700"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            Back to Blog
-          </Link>
-        </div>
-        <Footer />
-      </div>
-    );
+  let relatedPosts: BlogPost[] = [];
+  try {
+    const related = await api.getRelatedBlogPosts(slug, 4);
+    relatedPosts = related.posts || [];
+  } catch {
+    relatedPosts = [];
   }
+
+  const canonical = config.app.siteUrl
+    ? `${config.app.siteUrl}/blog/${post.slug}`
+    : `/blog/${post.slug}`;
+  const jsonLd = buildBlogPostingJsonLd(post, canonical);
 
   return (
     <div className="min-h-screen bg-white dark:bg-gray-950">
-      <FloatingHeader
-        links={[
-          { label: "Home", href: "/" },
-          { label: "Jobs", href: "/jobs" },
-          { label: "Blog", href: "/blog" },
-        ]}
-        cta={{
-          label: "Get Started",
-          href: "/candidate/signup",
-          variant: "primary",
-        }}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
+      <FloatingHeader links={HEADER_LINKS} cta={HEADER_CTA} />
 
       {/* Blog Content */}
       <article className="max-w-4xl mx-auto px-4 py-12">
@@ -179,14 +127,16 @@ export default function BlogDetailPage() {
         </Link>
 
         {/* Category */}
-        <div className="mb-4">
-          <Link
-            href={`/blog/category/${post.category.slug}`}
-            className="inline-block px-3 py-1 text-xs font-semibold text-primary-blue bg-blue-50 dark:bg-blue-900/20 rounded-full hover:bg-blue-100 dark:hover:bg-blue-900/30"
-          >
-            {post.category.name}
-          </Link>
-        </div>
+        {post.category?.slug && (
+          <div className="mb-4">
+            <Link
+              href={`/blog/category/${post.category.slug}`}
+              className="inline-block px-3 py-1 text-xs font-semibold text-primary-blue bg-blue-50 dark:bg-blue-900/20 rounded-full hover:bg-blue-100 dark:hover:bg-blue-900/30"
+            >
+              {post.category.name}
+            </Link>
+          </div>
+        )}
 
         {/* Title */}
         <h1 className="text-3xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-6 leading-tight">
@@ -197,7 +147,7 @@ export default function BlogDetailPage() {
         <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600 dark:text-gray-400 mb-8 pb-8 border-b border-gray-200 dark:border-gray-800">
           <div className="flex items-center gap-2">
             <User className="w-4 h-4" />
-            <span className="font-medium">{post.author.full_name}</span>
+            <span className="font-medium">{post.author?.full_name}</span>
           </div>
           <div className="flex items-center gap-2">
             <Calendar className="w-4 h-4" />
@@ -217,16 +167,14 @@ export default function BlogDetailPage() {
             <Eye className="w-4 h-4" />
             <span>{post.view_count} views</span>
           </div>
-          <button
-            onClick={handleShare}
-            className="ml-auto flex items-center gap-2 text-primary-blue hover:text-blue-700"
-          >
-            <Share2 className="w-4 h-4" />
-            Share
-          </button>
+          <BlogPostInteractions
+            slug={post.slug}
+            title={post.title}
+            excerpt={post.excerpt}
+          />
         </div>
 
-        {/* Featured Image
+        {/* Featured Image */}
         {post.featured_image && (
           <div className="relative w-full h-[400px] rounded-2xl overflow-hidden mb-12">
             <Image
@@ -237,7 +185,7 @@ export default function BlogDetailPage() {
               priority
             />
           </div>
-        )} */}
+        )}
 
         {/* Content */}
         <div
@@ -246,13 +194,13 @@ export default function BlogDetailPage() {
         />
 
         {/* Tags */}
-        {post.tags.length > 0 && (
+        {post.tags?.length > 0 && (
           <div className="flex flex-wrap items-center gap-2 py-8 border-t border-gray-200 dark:border-gray-800">
             <Tag className="w-4 h-4 text-gray-600 dark:text-gray-400" />
             {post.tags.map((tag) => (
               <Link
                 key={tag.id}
-                href={`/blog?tag=${tag.slug}`}
+                href={`/blog/tag/${tag.slug}`}
                 className="px-3 py-1 text-sm text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700"
               >
                 {tag.name}
@@ -264,7 +212,7 @@ export default function BlogDetailPage() {
         {/* Author Bio */}
         <div className="bg-gray-50 dark:bg-gray-900 rounded-2xl p-6 mt-12">
           <div className="flex items-start gap-4">
-            {post.author.avatar ? (
+            {post.author?.avatar ? (
               <Image
                 src={post.author.avatar}
                 alt={post.author.full_name}
@@ -279,10 +227,10 @@ export default function BlogDetailPage() {
             )}
             <div>
               <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
-                {post.author.full_name}
+                {post.author?.full_name}
               </h3>
               <p className="text-gray-600 dark:text-gray-400">
-                {post.author.bio || `Written by ${post.author.full_name}`}
+                {post.author?.bio || `Written by ${post.author?.full_name}`}
               </p>
             </div>
           </div>
@@ -290,7 +238,7 @@ export default function BlogDetailPage() {
       </article>
 
       {/* Related Posts */}
-      {Array.isArray(relatedPosts) && relatedPosts.length > 0 && (
+      {relatedPosts.length > 0 && (
         <section className="bg-gray-50 dark:bg-black py-16">
           <div className="max-w-7xl mx-auto px-4">
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-8">
