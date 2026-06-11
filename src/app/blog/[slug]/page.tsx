@@ -60,7 +60,7 @@ export async function generateMetadata({
   const image = post.featured_image || config.app.logoUrl;
 
   return {
-    title,
+    title: { absolute: title },
     description,
     keywords: post.seo_keywords || undefined,
     alternates: canonical ? { canonical } : undefined,
@@ -115,8 +115,8 @@ export default async function BlogDetailPage({
       />
       <FloatingHeader links={HEADER_LINKS} cta={HEADER_CTA} />
 
-      {/* Blog Content */}
-      <article className="max-w-4xl mx-auto px-4 py-12">
+      {/* Blog Content — pt-24 clears the fixed FloatingHeader so "Back to Blog" isn't hidden */}
+      <article className="max-w-4xl mx-auto px-4 pt-24 pb-12">
         {/* Back Button */}
         <Link
           href="/blog"

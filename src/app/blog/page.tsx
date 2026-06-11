@@ -3,7 +3,7 @@ import config from "@/config";
 import BlogListing from "./BlogListing";
 
 export const metadata: Metadata = {
-  title: "Career Insights & Resources | PreviewCV Blog",
+  title: { absolute: "Career Insights & Resources | PreviewCV Blog" },
   description:
     "Expert advice, tips, and insights to help you succeed in your career — resume writing, job search, interviews, and more.",
   alternates: config.app.siteUrl

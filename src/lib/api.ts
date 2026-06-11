@@ -47,6 +47,7 @@ import {
   BlogPostsResponse,
   BlogPostDetailResponse,
   BlogCategoriesResponse,
+  BlogCategory,
   BlogSearchResponse,
 } from "@/types";
 import type {
@@ -2057,13 +2058,19 @@ export class ApiClient {
    * Get all blog categories
    */
   async getBlogCategories(): Promise<BlogCategoriesResponse> {
-    return this.request<BlogCategoriesResponse>(
+    // The public endpoint returns a bare array; normalize to the documented
+    // { categories, total } shape so all callers can rely on `.categories`.
+    const res = await this.request<unknown>(
       `/api/public/blog/categories`,
       { method: "GET" },
       false,
       false,
       this.blogBaseUrl,
     );
+    const categories: BlogCategory[] = Array.isArray(res)
+      ? (res as BlogCategory[])
+      : ((res as { categories?: BlogCategory[] })?.categories ?? []);
+    return { categories, total: categories.length };
   }
 
   /**

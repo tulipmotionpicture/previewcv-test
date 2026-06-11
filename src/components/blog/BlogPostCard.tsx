@@ -27,18 +27,16 @@ export default function BlogPostCard({ post }: { post: BlogPost }) {
             <Sparkles className="w-12 h-12 text-gray-400" />
           </div>
         )}
-        {/* Category Badge */}
-        {post.category?.name && (
-          <div className="absolute top-3 left-3">
-            <span className="px-3 py-1 text-xs font-semibold text-white bg-primary-blue rounded-full">
-              {post.category.name}
-            </span>
-          </div>
-        )}
       </div>
 
       {/* Content */}
       <div className="p-6">
+        {/* Category Badge — placed above the title so it never covers the image */}
+        {post.category?.name && (
+          <span className="inline-block mb-3 px-3 py-1 text-xs font-semibold text-primary-blue bg-blue-50 dark:bg-blue-900/20 rounded-full">
+            {post.category.name}
+          </span>
+        )}
         <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-3 line-clamp-2 group-hover:text-primary-blue dark:group-hover:text-blue-400 transition-colors">
           {post.title}
         </h3>

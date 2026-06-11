@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, Suspense } from "react";
+import { useEffect, useState, useRef, useCallback, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { api } from "@/lib/api";
 import { BlogPost, BlogCategory } from "@/types";
@@ -44,6 +44,34 @@ function BlogListingContent() {
   const [isSearching, setIsSearching] = useState(false);
 
   const POSTS_PER_PAGE = 12;
+
+  // Horizontal scroll arrows for the category tabs (shown only when there's overflow).
+  const tabsRef = useRef<HTMLDivElement>(null);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(false);
+
+  const updateScrollArrows = useCallback(() => {
+    const el = tabsRef.current;
+    if (!el) return;
+    setCanScrollLeft(el.scrollLeft > 1);
+    setCanScrollRight(el.scrollLeft + el.clientWidth < el.scrollWidth - 1);
+  }, []);
+
+  useEffect(() => {
+    updateScrollArrows();
+    const el = tabsRef.current;
+    if (!el) return;
+    el.addEventListener("scroll", updateScrollArrows, { passive: true });
+    window.addEventListener("resize", updateScrollArrows);
+    return () => {
+      el.removeEventListener("scroll", updateScrollArrows);
+      window.removeEventListener("resize", updateScrollArrows);
+    };
+  }, [updateScrollArrows, categories]);
+
+  const scrollTabs = (direction: number) => {
+    tabsRef.current?.scrollBy({ left: direction * 240, behavior: "smooth" });
+  };
 
   // Fetch categories
   useEffect(() => {
@@ -168,10 +196,23 @@ function BlogListingContent() {
       {/* Categories */}
       <section className="border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950">
         <div className="max-w-7xl mx-auto px-4 py-6">
-          <div className="flex gap-2 overflow-x-auto pb-2 no-scrollbar">
-            <button
-              onClick={() => handleCategoryChange(null)}
-              className={`px-4 py-2 rounded-lg font-medium whitespace-nowrap transition-colors ${
+          <div className="relative">
+            {canScrollLeft && (
+              <button
+                onClick={() => scrollTabs(-1)}
+                aria-label="Scroll categories left"
+                className="absolute left-0 top-1/2 -translate-y-1/2 z-10 p-1.5 rounded-full bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 shadow-md hover:bg-gray-50 dark:hover:bg-gray-800"
+              >
+                <ChevronLeft className="w-5 h-5 text-gray-700 dark:text-gray-300" />
+              </button>
+            )}
+            <div
+              ref={tabsRef}
+              className="flex gap-2 overflow-x-auto pb-2 no-scrollbar"
+            >
+              <button
+                onClick={() => handleCategoryChange(null)}
+              className={`px-4 py-2 rounded-lg font-medium whitespace-nowrap flex-shrink-0 transition-colors ${
                 !selectedCategory
                   ? "bg-primary-blue text-white"
                   : "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700"
@@ -179,21 +220,31 @@ function BlogListingContent() {
             >
               All Articles
             </button>
-            {categories &&
-              categories.length > 0 &&
-              categories.map((category) => (
+            {categories
+              .filter((category) => (category.post_count ?? 0) > 0)
+              .map((category) => (
                 <button
                   key={category.id}
                   onClick={() => handleCategoryChange(category.slug)}
-                  className={`px-4 py-2 rounded-lg font-medium whitespace-nowrap transition-colors ${
+                  className={`px-4 py-2 rounded-lg font-medium whitespace-nowrap flex-shrink-0 transition-colors ${
                     selectedCategory === category.slug
                       ? "bg-primary-blue text-white"
                       : "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700"
                   }`}
                 >
-                  {category.name} ({category.post_count})
+                  {category.name}
                 </button>
               ))}
+            </div>
+            {canScrollRight && (
+              <button
+                onClick={() => scrollTabs(1)}
+                aria-label="Scroll categories right"
+                className="absolute right-0 top-1/2 -translate-y-1/2 z-10 p-1.5 rounded-full bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 shadow-md hover:bg-gray-50 dark:hover:bg-gray-800"
+              >
+                <ChevronRight className="w-5 h-5 text-gray-700 dark:text-gray-300" />
+              </button>
+            )}
           </div>
         </div>
       </section>

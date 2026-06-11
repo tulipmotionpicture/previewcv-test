@@ -3,6 +3,13 @@ import { ArrowLeft, Sparkles } from "lucide-react";
 import { BlogPost } from "@/types";
 import FloatingHeader from "@/components/FloatingHeader";
 import BlogPostCard from "@/components/blog/BlogPostCard";
+import BlogPagination from "@/components/blog/BlogPagination";
+
+interface Pagination {
+  page: number;
+  totalPages: number;
+  basePath: string;
+}
 
 const HEADER_LINKS = [
   { label: "Home", href: "/" },
@@ -24,11 +31,13 @@ export default function BlogCollection({
   title,
   description,
   posts,
+  pagination,
 }: {
   eyebrow: string;
   title: string;
   description?: string | null;
   posts: BlogPost[];
+  pagination?: Pagination;
 }) {
   return (
     <div className="min-h-screen bg-white dark:bg-gray-950">
@@ -72,11 +81,20 @@ export default function BlogCollection({
               </p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {posts.map((post) => (
-                <BlogPostCard key={post.id} post={post} />
-              ))}
-            </div>
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {posts.map((post) => (
+                  <BlogPostCard key={post.id} post={post} />
+                ))}
+              </div>
+              {pagination && (
+                <BlogPagination
+                  page={pagination.page}
+                  totalPages={pagination.totalPages}
+                  basePath={pagination.basePath}
+                />
+              )}
+            </>
           )}
         </div>
       </section>
