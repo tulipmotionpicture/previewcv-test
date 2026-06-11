@@ -25,12 +25,7 @@ export default function robots(): MetadataRoute.Robots {
         "/api/",
       ],
     },
-    sitemap: base
-      ? [
-          `${base}/sitemap.xml`,
-          `${base}/jobs/sitemap.xml`,
-          `${base}/blog/sitemap.xml`,
-        ]
-      : undefined,
+    // The master index references the static, job-shard, and blog-shard sitemaps.
+    sitemap: base ? `${base}/sitemap-index.xml` : undefined,
   };
 }
