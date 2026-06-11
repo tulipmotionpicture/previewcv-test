@@ -12,11 +12,26 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "PreviewCV - Resume Viewer",
-  description: "Secure PDF resume viewer for shared resume links",
+  metadataBase: config.app.siteUrl
+    ? new URL(config.app.siteUrl)
+    : undefined,
+  title: {
+    default: "PreviewCV — Find Jobs, Hire Talent & Share Your Resume",
+    template: "%s | PreviewCV",
+  },
+  description:
+    "PreviewCV is a job board and resume-sharing platform. Browse jobs from top employers, share an always-up-to-date resume link, and connect candidates with recruiters.",
   icons: {
     icon: config.app.favIcon || "/favicon.ico",
     apple: config.app.favIcon || "/favicon.ico",
+  },
+  openGraph: {
+    siteName: "PreviewCV",
+    type: "website",
+    url: config.app.siteUrl || undefined,
+  },
+  twitter: {
+    card: "summary_large_image",
   },
 };
 

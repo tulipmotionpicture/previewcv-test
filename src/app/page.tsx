@@ -1,14 +1,10 @@
-"use client";
-
 import Image from "next/image";
 import Link from "next/link";
+import { Metadata } from "next";
 import config from "@/config";
 import FloatingHeader from "@/components/FloatingHeader";
 import HeroSection from "@/components/HeroSection";
 import FAQSection from "@/components/shared/FAQSection";
-import { useEffect, useState } from "react";
-import { CardsSummaryResponse } from "@/types/jobs";
-import { BlogPostsResponse } from "@/types";
 import { api } from "@/lib/api";
 import {
   CheckCircle2,
@@ -23,127 +19,57 @@ import {
   Zap,
   Star,
   Quote,
-  ArrowRight,
-  PlusCircle,
-  MinusCircle,
   ScanEye,
   Sparkles,
   Eye,
 } from "lucide-react";
 
-const LockClosedIcon = () => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    fill="none"
-    viewBox="0 0 24 24"
-    strokeWidth={2}
-    stroke="currentColor"
-    className="w-6 h-6"
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z"
-    />
-  </svg>
-);
+// Revalidate the prerendered homepage hourly so its featured content (top employers,
+// latest articles) stays fresh without a redeploy.
+export const revalidate = 3600;
 
-const LightningBoltIcon = () => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    fill="none"
-    viewBox="0 0 24 24"
-    strokeWidth={2}
-    stroke="currentColor"
-    className="w-6 h-6"
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="m3.75 13.5 10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75Z"
-    />
-  </svg>
-);
+export const metadata: Metadata = {
+  title: {
+    absolute: "PreviewCV — Find Jobs, Hire Talent & Share Your Resume",
+  },
+  description:
+    "Browse jobs from top employers, explore roles by city and category, read career advice, and share an always-up-to-date resume link — all on PreviewCV.",
+  alternates: config.app.siteUrl ? { canonical: config.app.siteUrl } : undefined,
+  openGraph: {
+    title: "PreviewCV — Find Jobs, Hire Talent & Share Your Resume",
+    description:
+      "Browse jobs from top employers, explore roles by city and category, and share an always-up-to-date resume link.",
+    type: "website",
+    url: config.app.siteUrl || undefined,
+  },
+};
 
-const TargetIcon = () => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    fill="none"
-    viewBox="0 0 24 24"
-    strokeWidth={2}
-    stroke="currentColor"
-    className="w-6 h-6"
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0-18 0M12 12m-6 0a6 6 0 1 0 12 0a6 6 0 1 0-12 0M12 12m-3 0a3 3 0 1 0 6 0a3 3 0 1 0-6 0"
-    />
-  </svg>
-);
+// Featured homepage content (job-cards summary, top employers, latest articles) is fetched
+// on the server so it's present in the initial HTML for SEO. Sources are independent, so a
+// single failing API never blanks the page.
+async function getHomeData() {
+  const [cards, employers, blog] = await Promise.allSettled([
+    api.getCardsSummary(),
+    api.getTopEmployers(),
+    api.getBlogPosts({
+      limit: 8,
+      sort_by: "published_at",
+      sort_order: "desc",
+    }),
+  ]);
 
-export default function Home() {
-  const [openIndex, setOpenIndex] = useState<number | null>(0);
-  const [cardsData, setCardsData] = useState<CardsSummaryResponse | null>(null);
-  const [cardsLoading, setCardsLoading] = useState(true);
-  const [blogPosts, setBlogPosts] = useState<BlogPostsResponse | null>(null);
-  const [blogLoading, setBlogLoading] = useState(true);
-  const [partners, setPartners] = useState<any[]>([]);
-  const [partnersLoading, setPartnersLoading] = useState(true);
+  return {
+    cardsData: cards.status === "fulfilled" ? cards.value : null,
+    partners:
+      employers.status === "fulfilled"
+        ? employers.value.top_employers || []
+        : [],
+    blogPosts: blog.status === "fulfilled" ? blog.value : null,
+  };
+}
 
-  // Fetch job cards data
-  useEffect(() => {
-    const fetchCards = async () => {
-      setCardsLoading(true);
-      try {
-        const response = await api.getCardsSummary();
-        setCardsData(response);
-      } catch (err) {
-        console.error("Failed to load job cards:", err);
-      } finally {
-        setCardsLoading(false);
-      }
-    };
-    fetchCards();
-  }, []);
-
-  // Fetch top hiring partners
-  useEffect(() => {
-    async function loadPartners() {
-      try {
-        const response = await api.getTopEmployers();
-        setPartners(response.top_employers || []);
-      } catch (error) {
-        console.error("Failed to load top hiring partners:", error);
-      } finally {
-        setPartnersLoading(false);
-      }
-    }
-
-    loadPartners();
-  }, []);
-
-  // Fetch blog posts data
-  useEffect(() => {
-    const fetchBlogPosts = async () => {
-      setBlogLoading(true);
-      try {
-        const response = await api.getBlogPosts({
-          limit: 8,
-          sort_by: "published_at",
-          sort_order: "desc",
-        });
-        setBlogPosts(response);
-      } catch (err) {
-        console.error("Failed to load blog posts:", err);
-      } finally {
-        setBlogLoading(false);
-      }
-    };
-    fetchBlogPosts();
-  }, []);
-
-  console.log(cardsData);
+export default async function Home() {
+  const { cardsData, partners, blogPosts } = await getHomeData();
 
   return (
     <div className="min-h-screen bg-white dark:bg-gray-950 dark:text-gray-100 transition-colors duration-300">
@@ -245,19 +171,10 @@ export default function Home() {
                     : "justify-center relative w-full"
                 }`}
               >
-                {partnersLoading
-                  ? [...Array(12)].map((_, i) => (
-                      <div
-                        key={`fallback-1-${i}`}
-                        className="px-2 w-[120px] md:w-[160px] lg:w-[200px] h-full flex-shrink-0"
-                      >
-                        <div className="bg-gray-100 dark:bg-gray-800 p-2 md:p-4 border border-gray-200 dark:border-gray-700 rounded-lg flex items-center justify-center h-full w-full animate-pulse"></div>
-                      </div>
-                    ))
-                  : (partners.length >= 5
-                      ? [...partners, ...partners]
-                      : partners
-                    ).map((employer, i) => (
+                {(partners.length >= 5
+                  ? [...partners, ...partners]
+                  : partners
+                ).map((employer, i) => (
                       <div
                         key={`row1-${i}`}
                         className="px-2 w-[120px] md:w-[160px] lg:w-[200px] h-full flex-shrink-0"
@@ -284,19 +201,10 @@ export default function Home() {
             {partners.length >= 5 && (
               <div className="relative w-full overflow-hidden h-16 md:h-20">
                 <div className="absolute top-0 left-0 h-full flex animate-scroll-right w-max">
-                  {partnersLoading
-                    ? [...Array(12)].map((_, i) => (
-                        <div
-                          key={`fallback-2-${i}`}
-                          className="px-2 w-[120px] md:w-[160px] lg:w-[200px] h-full flex-shrink-0"
-                        >
-                          <div className="bg-gray-100 dark:bg-gray-800 p-2 md:p-4 border border-gray-200 dark:border-gray-700 rounded-lg flex items-center justify-center h-full w-full animate-pulse"></div>
-                        </div>
-                      ))
-                    : [
-                        ...[...partners].reverse(),
-                        ...[...partners].reverse(),
-                      ].map((employer, i) => (
+                  {[
+                    ...[...partners].reverse(),
+                    ...[...partners].reverse(),
+                  ].map((employer, i) => (
                         <div
                           key={`row2-${i}`}
                           className="px-2 w-[120px] md:w-[160px] lg:w-[200px] h-full flex-shrink-0"
@@ -334,31 +242,14 @@ export default function Home() {
               All Articles
             </h2>
             <Link
-              href="/blogs"
+              href="/blog"
               className="text-blue-500 hover:text-primary-blue text-sm font-medium"
             >
               View All
             </Link>
           </div>
 
-          {blogLoading ? (
-            <div className="grid grid-flow-col auto-cols-[280px] lg:auto-cols-[320px] gap-6 overflow-x-auto pb-6 no-scrollbar">
-              {[1, 2, 3, 4].map((i) => (
-                <div
-                  key={i}
-                  className="bg-white dark:bg-gray-900 rounded-2xl p-3 border border-gray-100 dark:border-gray-800 animate-pulse"
-                >
-                  <div className="relative h-40 w-full rounded-xl bg-gray-100 dark:bg-gray-800 mb-4" />
-                  <div className="h-4 bg-gray-100 dark:bg-gray-800 rounded mb-2" />
-                  <div className="h-3 bg-gray-100 dark:bg-gray-800 rounded mb-3" />
-                  <div className="flex justify-between">
-                    <div className="h-3 bg-gray-100 dark:bg-gray-800 rounded w-20" />
-                    <div className="h-3 bg-gray-100 dark:bg-gray-800 rounded w-20" />
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : blogPosts && blogPosts.posts.length > 0 ? (
+          {blogPosts && blogPosts.posts.length > 0 ? (
             <div className="grid grid-flow-col auto-cols-[280px] lg:auto-cols-[320px] gap-6 overflow-x-auto pb-6 no-scrollbar">
               {blogPosts.posts.map((post) => (
                 <Link

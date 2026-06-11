@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState, useCallback, Suspense } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import JobsLayout from "@/components/JobsLayout";
 import JobsFilters from "@/components/JobsFilters";
@@ -11,13 +11,24 @@ import { api } from "@/lib/api";
 import { Job } from "@/types/api";
 import { useInfiniteScroll } from "@/hooks/useInfiniteScroll";
 
-function JobsPageContent() {
+interface JobsContentProps {
+  initialJobs: Job[];
+  initialTotal: number;
+  initialKeyword: string;
+  initialCountry: string;
+}
+
+export default function JobsContent({
+  initialJobs,
+  initialTotal,
+  initialKeyword,
+  initialCountry,
+}: JobsContentProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const initialKeyword = searchParams.get("keyword") || "";
-  const initialCountry = searchParams.get("country") || "";
-  const [jobs, setJobs] = useState<Job[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [jobs, setJobs] = useState<Job[]>(initialJobs);
+  // Initial jobs come from the server, so there is no first-paint loading state.
+  const [loading, setLoading] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState("");
   // Store selected filters as a dynamic object
@@ -31,8 +42,8 @@ function JobsPageContent() {
 
   // Pagination state
   const [offset, setOffset] = useState(0);
-  const [hasMore, setHasMore] = useState(true);
-  const [total, setTotal] = useState(0);
+  const [hasMore, setHasMore] = useState(initialJobs.length < initialTotal);
+  const [total, setTotal] = useState(initialTotal);
   const limit = 10;
 
   // Mobile filter visibility state
@@ -63,7 +74,6 @@ function JobsPageContent() {
       }));
     }
     setFiltersInitialized(true);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialKeyword, initialCountry]);
 
   // Helper to build params from selectedFilters
@@ -143,9 +153,15 @@ function JobsPageContent() {
     [selectedFilters, buildJobFilterParams],
   );
 
-  // Initial load and filter change
+  // Skip the first run — the server already fetched the initial jobs for the current
+  // filters. Refetch only when the user changes filters afterwards.
+  const initialFetchSkipped = useRef(false);
   useEffect(() => {
     if (!filtersInitialized) return;
+    if (!initialFetchSkipped.current) {
+      initialFetchSkipped.current = true;
+      return;
+    }
     setOffset(0);
     setHasMore(true);
     fetchJobs(0, false);
@@ -555,22 +571,5 @@ function JobsPageContent() {
         )}
       </div>
     </div>
-  );
-}
-
-export default function JobsPage() {
-  return (
-    <Suspense
-      fallback={
-        <div className="min-h-screen flex items-center justify-center">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-blue mx-auto mb-4"></div>
-            <p className="text-gray-600 dark:text-gray-400">Loading jobs...</p>
-          </div>
-        </div>
-      }
-    >
-      <JobsPageContent />
-    </Suspense>
   );
 }
