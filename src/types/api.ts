@@ -80,6 +80,14 @@ export interface Resume {
   access_count?: number;
 }
 
+export type JobStatus =
+  | "pending_approval"
+  | "approved"
+  | "rejected"
+  | "published"
+  | "deactivated"
+  | "expired";
+
 export interface Job {
   id: number;
   slug: string;
@@ -107,10 +115,15 @@ export interface Job {
   posted_date: string;
   application_count: number;
   view_count: number;
-  status: "active" | "closed" | "draft";
+  status: JobStatus;
   created_at: string;
   is_active: boolean;
   updated_at: string;
+  // Lifecycle fields (public detail endpoints): drive the candidate apply UI off these.
+  is_expired?: boolean;
+  accepting_applications?: boolean;
+  expires_at?: string;
+  application_deadline?: string | null;
   // Extended fields for UI
   recruiter_username?: string;
   recruiter_profile_url?: string;

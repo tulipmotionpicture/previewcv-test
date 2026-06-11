@@ -21,6 +21,46 @@ import ShareJobModal from "./ShareJobModal";
 import config from "@/config";
 import { generateQRCodeDataURL, downloadElementAsImage } from "@/utils/qr";
 import { api } from "@/lib/api";
+
+// Effective status, falling back to is_active for legacy payloads without `status`.
+function effectiveJobStatus(job: Job): string {
+  return job.status || (job.is_active ? "published" : "deactivated");
+}
+
+// Badge label + classes for each of the 6 job statuses.
+function jobStatusMeta(job: Job): { label: string; cls: string } {
+  switch (effectiveJobStatus(job)) {
+    case "published":
+      return { label: "Published", cls: "bg-[#E6F4EA] text-[#1E7F3A] dark:bg-green-900/30 dark:text-green-400" };
+    case "approved":
+      return { label: "Approved", cls: "bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400" };
+    case "pending_approval":
+      return { label: "Pending approval", cls: "bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400" };
+    case "rejected":
+      return { label: "Rejected", cls: "bg-red-50 text-red-600 dark:bg-red-900/20 dark:text-red-400" };
+    case "expired":
+      return { label: "Expired", cls: "bg-orange-50 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400" };
+    default:
+      return { label: "Deactivated", cls: "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400" };
+  }
+}
+
+// Whole days until a date (negative if past). null if absent/unparseable.
+function daysUntil(iso?: string): number | null {
+  if (!iso) return null;
+  const t = new Date(iso).getTime();
+  if (Number.isNaN(t)) return null;
+  return Math.ceil((t - Date.now()) / 86400000);
+}
+
+// Which activate/deactivate action applies. null = no action (pending_approval/rejected need admin approval).
+function jobToggleAction(job: Job): { label: string; activate: boolean } | null {
+  const s = effectiveJobStatus(job);
+  if (s === "published") return { label: "Deactivate Job", activate: false };
+  if (s === "expired") return { label: "Activate (renew)", activate: true };
+  if (s === "approved" || s === "deactivated") return { label: "Activate Job", activate: true };
+  return null;
+}
 interface JobsTableProps {
   jobs: Job[];
   loadingJobs: boolean;
@@ -277,13 +317,22 @@ export default function JobsTable({
                   {/* Status */}
                   <td className="px-4 py-3">
                     <span
-                      className={`inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium ${job.is_active
-                        ? "bg-[#E6F4EA] text-[#1E7F3A] dark:bg-green-900/30 dark:text-green-400"
-                        : "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400"
-                        }`}
+                      className={`inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium ${jobStatusMeta(job).cls}`}
                     >
-                      {job.is_active ? "Active" : "Inactive"}
+                      {jobStatusMeta(job).label}
                     </span>
+                    {effectiveJobStatus(job) === "published" &&
+                      (() => {
+                        const d = daysUntil(job.expires_at);
+                        if (d == null || d < 0) return null;
+                        return (
+                          <p className="text-[10px] text-gray-400 mt-0.5">
+                            {d === 0
+                              ? "Expires today"
+                              : `Expires in ${d} day${d === 1 ? "" : "s"}`}
+                          </p>
+                        );
+                      })()}
                   </td>
                   {/* View Count */}
                   <td className="px-4 py-3 text-sm text-gray-600 dark:text-gray-300 font-medium text-center">
@@ -426,41 +475,47 @@ export default function JobsTable({
                                     </svg>
                                     View Applications
                                   </button>
-                                  <button
-                                    onClick={() => {
-                                      if (onToggleActive) {
-                                        onToggleActive(job.id, !job.is_active);
-                                      } else {
-                                        onDeleteJob(job.id);
-                                      }
-                                      setOpenMenuJobId(null);
-                                      setMenuPosition(null);
-                                    }}
-                                    className={`flex items-center gap-2 w-full px-4 py-2.5 text-sm transition-colors ${
-                                      job.is_active
-                                        ? "text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
-                                        : "text-[#1E7F3A] dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20"
-                                    }`}
-                                  >
-                                    <svg
-                                      className="w-4 h-4"
-                                      fill="none"
-                                      viewBox="0 0 24 24"
-                                      stroke="currentColor"
-                                    >
-                                      <path
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        strokeWidth={2}
-                                        d={
-                                          job.is_active
-                                            ? "M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"
-                                            : "M5 13l4 4L19 7"
-                                        }
-                                      />
-                                    </svg>
-                                    {job.is_active ? "Deactivate Job" : "Activate Job"}
-                                  </button>
+                                  {(() => {
+                                    const ta = jobToggleAction(job);
+                                    if (!ta) return null;
+                                    return (
+                                      <button
+                                        onClick={() => {
+                                          if (onToggleActive) {
+                                            onToggleActive(job.id, ta.activate);
+                                          } else {
+                                            onDeleteJob(job.id);
+                                          }
+                                          setOpenMenuJobId(null);
+                                          setMenuPosition(null);
+                                        }}
+                                        className={`flex items-center gap-2 w-full px-4 py-2.5 text-sm transition-colors ${
+                                          ta.activate
+                                            ? "text-[#1E7F3A] dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20"
+                                            : "text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
+                                        }`}
+                                      >
+                                        <svg
+                                          className="w-4 h-4"
+                                          fill="none"
+                                          viewBox="0 0 24 24"
+                                          stroke="currentColor"
+                                        >
+                                          <path
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            strokeWidth={2}
+                                            d={
+                                              ta.activate
+                                                ? "M5 13l4 4L19 7"
+                                                : "M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"
+                                            }
+                                          />
+                                        </svg>
+                                        {ta.label}
+                                      </button>
+                                    );
+                                  })()}
                                   <button
                                     onClick={() => {
                                       setQrJob(job);

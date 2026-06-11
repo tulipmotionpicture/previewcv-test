@@ -50,6 +50,7 @@ import { Button } from "@/components/ui";
 
 interface JobFilters {
   is_active?: boolean | null;
+  status?: string;
   posted_date_from?: string;
   posted_date_to?: string;
   application_deadline_from?: string;
@@ -223,6 +224,9 @@ function RecruiterDashboardInner() {
           currentFilters.is_active !== null
         ) {
           params.append("is_active", currentFilters.is_active.toString());
+        }
+        if (currentFilters.status) {
+          params.append("status", currentFilters.status);
         }
         if (currentFilters.posted_date_from) {
           params.append("posted_date_from", currentFilters.posted_date_from);

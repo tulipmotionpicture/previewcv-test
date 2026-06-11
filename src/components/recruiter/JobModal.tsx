@@ -77,7 +77,7 @@ export default function JobModal({
           salary_currency: job.salary_currency || "USD",
           salary_type: job.salary_type || "yearly",
           is_remote: job.is_remote || false,
-          is_active: job.status === "active",
+          is_active: job.is_active ?? job.status === "published",
           required_skills: job.required_skills?.join(", ") || "",
           preferred_skills: job.preferred_skills?.join(", ") || "",
           categories: job.categories?.join(", ") || "",

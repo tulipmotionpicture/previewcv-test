@@ -60,6 +60,8 @@ export default function JobDetailsClient({ job, slug }: JobDetailsClientProps) {
   const [applyError, setApplyError] = useState<
     { kind: "pdf" | "generic"; message: string } | null
   >(null);
+  // Set when the backend reports the job stopped accepting applications (deadline passed) mid-session.
+  const [applicationsClosed, setApplicationsClosed] = useState(false);
   // Where to send candidates to generate/download a CV PDF.
   const LETSMAKECV_URL = "https://letsmakecv.com";
   const [pdfResumes, setPdfResumes] = useState<PdfResume[]>([]);
@@ -250,9 +252,20 @@ export default function JobDetailsClient({ job, slug }: JobDetailsClientProps) {
     } catch (err: unknown) {
       const e = err as { status?: number; message?: string };
       const msg = e?.message || "Failed to apply. Please try again.";
-      // The backend rejects builder CVs that have no generated PDF — guide the user to LetsMakeCV.
-      if (e?.status === 400 && /generate your resume pdf/i.test(msg)) {
+      if (e?.status === 400 && /applications?.*closed/i.test(msg)) {
+        // Deadline passed mid-session — flip to the read-only "closed" notice.
+        setApplicationsClosed(true);
+      } else if (e?.status === 400 && /generate your resume pdf/i.test(msg)) {
+        // Builder CV has no generated PDF — guide the user to LetsMakeCV.
         setApplyError({ kind: "pdf", message: msg });
+      } else if (e?.status === 404 && /resume not found/i.test(msg)) {
+        // Stale resume reference — refresh the picker so it self-heals.
+        setResumeId(null);
+        fetchResumes();
+        setApplyError({
+          kind: "generic",
+          message: "That CV is no longer available. Please pick another and try again.",
+        });
       } else {
         setApplyError({ kind: "generic", message: msg });
       }
@@ -307,6 +320,14 @@ export default function JobDetailsClient({ job, slug }: JobDetailsClientProps) {
     }
   };
 
+  // Apply availability — driven by the backend `accepting_applications` flag (undefined → treat as open
+  // for legacy/list payloads). Also flips closed if a mid-session apply hits the deadline.
+  const notAccepting = job.accepting_applications === false || applicationsClosed;
+  const closedMessage = job.is_expired
+    ? "This job posting has expired and is no longer accepting applications."
+    : job.status === "deactivated"
+      ? "This job is no longer active."
+      : "Applications for this job have closed.";
 
   return (
     <div className="space-y-8 pt-10">
@@ -394,6 +415,18 @@ export default function JobDetailsClient({ job, slug }: JobDetailsClientProps) {
             <p className="font-bold mb-1 text-sm">Success!</p>
             <p className="text-xs opacity-90">
               Your application has been received.
+            </p>
+          </div>
+        ) : notAccepting ? (
+          <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-center dark:border-amber-700 dark:bg-amber-900/30">
+            <div className="mx-auto mb-2 flex h-10 w-10 items-center justify-center rounded-full border border-amber-200 bg-white dark:border-amber-700 dark:bg-amber-800/20">
+              <AlertCircle className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+            </div>
+            <p className="mb-1 text-sm font-bold text-amber-900 dark:text-amber-100">
+              Not accepting applications
+            </p>
+            <p className="text-xs text-amber-800 dark:text-amber-200">
+              {closedMessage}
             </p>
           </div>
         ) : (

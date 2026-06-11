@@ -399,7 +399,7 @@ export default function SubscriptionDashboard({
                     {dashboard?.job_subscription?.jobs_remaining ?? 0}
                   </p>
                   <p className="text-xs text-gray-500 dark:text-gray-400">
-                    Job Posts Left
+                    Active Job Slots Left
                   </p>
                 </div>
               </div>
@@ -465,7 +465,7 @@ export default function SubscriptionDashboard({
                     Job Posting Subscription
                   </h2>
                   <p className="text-sm text-gray-500 dark:text-gray-400">
-                    Manage your job posting limits
+                    Active job slots (concurrent listings)
                   </p>
                 </div>
               </div>
@@ -476,38 +476,40 @@ export default function SubscriptionDashboard({
             <div className="p-5 pt-0">
               {dashboard?.job_subscription ? (
                 <div className="space-y-5">
-                  {/* Usage */}
-                  <div>
-                    <div className="flex justify-between mb-1 text-sm">
-                      <span className="text-gray-600 dark:text-gray-400">
-                        Job Posts Used
-                      </span>
-                      <span className="font-medium text-gray-900 dark:text-white">
-                        {dashboard.job_subscription.jobs_posted_this_period} /{" "}
-                        {dashboard.job_subscription.plan_config
-                          ?.job_post_limit ?? "∞"}
-                      </span>
-                    </div>
+                  {/* Usage — active (concurrent) listings against the plan limit */}
+                  {(() => {
+                    const limit =
+                      dashboard.job_subscription.plan_config?.job_post_limit;
+                    const remaining = dashboard.job_subscription.jobs_remaining;
+                    // New semantics: "used" = currently-active listings = limit − remaining.
+                    const active =
+                      limit != null && remaining != null
+                        ? Math.max(0, limit - remaining)
+                        : dashboard.job_subscription.jobs_posted_this_period;
+                    return (
+                      <div>
+                        <div className="flex justify-between mb-1 text-sm">
+                          <span className="text-gray-600 dark:text-gray-400">
+                            Active Jobs
+                          </span>
+                          <span className="font-medium text-gray-900 dark:text-white">
+                            {active} / {limit ?? "∞"}
+                          </span>
+                        </div>
 
-                    <div className="w-full h-2 bg-gray-100 dark:bg-gray-700 rounded-full">
-                      <div
-                        className="h-2 bg-primary-blue rounded-full"
-                        style={{
-                          width: dashboard.job_subscription.plan_config
-                            ?.job_post_limit
-                            ? `${Math.min(
-                              (dashboard.job_subscription
-                                .jobs_posted_this_period /
-                                dashboard.job_subscription.plan_config
-                                  .job_post_limit) *
-                              100,
-                              100,
-                            )}%`
-                            : "100%",
-                        }}
-                      />
-                    </div>
-                  </div>
+                        <div className="w-full h-2 bg-gray-100 dark:bg-gray-700 rounded-full">
+                          <div
+                            className="h-2 bg-primary-blue rounded-full"
+                            style={{
+                              width: limit
+                                ? `${Math.min((active / limit) * 100, 100)}%`
+                                : "100%",
+                            }}
+                          />
+                        </div>
+                      </div>
+                    );
+                  })()}
 
                   {/* Meta Info */}
                   <div className="grid grid-cols-2 gap-4 text-sm">

@@ -73,6 +73,7 @@ export const JOB_FORM_INITIAL: JobFormState = {
 
 export interface JobFilters {
   is_active?: boolean | null;
+  status?: string;
   posted_date_from?: string;
   posted_date_to?: string;
   application_deadline_from?: string;
@@ -170,14 +171,15 @@ export default function JobManagement({
   // Today (UTC date) used to cap the date pickers.
   const today = new Date().toISOString().split("T")[0];
 
-  // Map the tri-state is_active filter to/from a select value.
-  const statusValue =
-    filters.is_active == null ? "all" : filters.is_active ? "active" : "inactive";
+  // Server-side job status filter (my-postings supports a `status` query param).
+  const statusValue = filters.status || "all";
 
   const handleStatusChange = (val: string) => {
     onFiltersChange({
       ...filters,
-      is_active: val === "all" ? null : val === "active",
+      status: val === "all" ? undefined : val,
+      // Drop the legacy is_active filter so the two don't conflict.
+      is_active: null,
     });
   };
 
@@ -318,8 +320,12 @@ export default function JobManagement({
                     className="w-full appearance-none px-4 py-3 bg-white dark:bg-gray-800 border border-[#E1E8F1] dark:border-gray-700 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none text-gray-700 dark:text-gray-200"
                   >
                     <option value="all">All</option>
-                    <option value="active">Active</option>
-                    <option value="inactive">Inactive</option>
+                    <option value="published">Published</option>
+                    <option value="approved">Approved</option>
+                    <option value="pending_approval">Pending approval</option>
+                    <option value="expired">Expired</option>
+                    <option value="deactivated">Deactivated</option>
+                    <option value="rejected">Rejected</option>
                   </select>
                   <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
                 </div>
