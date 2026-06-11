@@ -25,6 +25,12 @@ export default function robots(): MetadataRoute.Robots {
         "/api/",
       ],
     },
-    sitemap: base ? `${base}/sitemap.xml` : undefined,
+    sitemap: base
+      ? [
+          `${base}/sitemap.xml`,
+          `${base}/jobs/sitemap.xml`,
+          `${base}/blog/sitemap.xml`,
+        ]
+      : undefined,
   };
 }
