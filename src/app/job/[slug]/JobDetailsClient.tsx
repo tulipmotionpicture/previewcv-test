@@ -44,6 +44,17 @@ interface JobDetailsClientProps {
   slug: string;
 }
 
+// Job descriptions are stored as HTML — strip tags + collapse whitespace for a plain-text preview.
+function stripHtml(html?: string): string {
+  if (!html) return "";
+  return html
+    .replace(/<[^>]*>/g, " ")
+    .replace(/&nbsp;/g, " ")
+    .replace(/&amp;/g, "&")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 export default function JobDetailsClient({ job, slug }: JobDetailsClientProps) {
   const { isAuthenticated, user } = useAuth();
   const { success, error: showError } = useToast();
@@ -835,10 +846,11 @@ export default function JobDetailsClient({ job, slug }: JobDetailsClientProps) {
                   </span>
                 </div>
 
-                <div className="text-xs text-gray-500 font-medium mb-3 line-clamp-2">
-                  Build cloud-native applications with{" "}
-                  <span className="font-bold text-gray-900 italic">AWS</span>
-                </div>
+                {stripHtml(similarJob.description) && (
+                  <div className="text-xs text-gray-500 dark:text-gray-400 font-medium mb-3 line-clamp-2">
+                    {stripHtml(similarJob.description)}
+                  </div>
+                )}
 
                 <div className="flex flex-wrap gap-1.5 mb-4">
                   {similarJob.required_skills?.slice(0, 3).map((skill, idx) => (
