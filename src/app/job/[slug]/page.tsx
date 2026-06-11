@@ -9,6 +9,7 @@ import FloatingHeader from "@/components/FloatingHeader";
 import { notFound } from "next/navigation";
 import { api } from "@/lib/api";
 import { formatSalaryRange } from "@/lib/salary";
+import { buildJobPostingJsonLd } from "@/lib/jobPostingSchema";
 import {
   MapPin,
   Briefcase,
@@ -99,8 +100,18 @@ export default async function JobDetailsPage({
     notFound();
   }
 
+  // Google for Jobs structured data (invisible). Returns null for closed/expired jobs so
+  // they drop out of the Jobs experience while the page stays viewable.
+  const jobPostingJsonLd = buildJobPostingJsonLd(job, companyData);
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-950 transition-colors duration-200">
+      {jobPostingJsonLd && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jobPostingJsonLd) }}
+        />
+      )}
       <FloatingHeader
         links={[{ label: "Candidate Login", href: "/candidate/login" }]}
         cta={{

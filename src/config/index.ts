@@ -23,6 +23,7 @@ interface Config {
     nodeEnv: string;
     logoUrl: string;
     favIcon: string;
+    siteUrl: string;
   };
 }
 
@@ -50,6 +51,9 @@ const config: Config = {
     nodeEnv: process.env.NODE_ENV || "development",
     logoUrl: process.env.NEXT_PUBLIC_LOGO_URL || "",
     favIcon: process.env.NEXT_FAVICON || "",
+    // Public, absolute base URL of this site (e.g. https://previewcv.com). Used for the
+    // sitemap and any absolute canonical URLs. No trailing slash.
+    siteUrl: (process.env.NEXT_PUBLIC_SITE_URL || "").replace(/\/$/, ""),
   },
 };
 
