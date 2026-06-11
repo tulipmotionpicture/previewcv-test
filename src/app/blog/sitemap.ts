@@ -27,8 +27,10 @@ export default async function sitemap({
 }): Promise<MetadataRoute.Sitemap> {
   const base = config.app.siteUrl;
   if (!base) return [];
+  // Next passes `id` as a string; coerce so numeric/strict-equality logic works.
+  const shardId = Number(id);
   try {
-    return await getBlogShardEntries(base, id);
+    return await getBlogShardEntries(base, shardId);
   } catch (error) {
     console.error(`Failed to build blog sitemap shard ${id}`, error);
     return [];

@@ -31,10 +31,12 @@ export default async function sitemap({
 }): Promise<MetadataRoute.Sitemap> {
   const base = config.app.siteUrl;
   if (!base) return [];
+  // Next passes `id` as a string; coerce so the shard offset math is numeric.
+  const shardId = Number(id);
   try {
-    return await getJobShardEntries(base, id);
+    return await getJobShardEntries(base, shardId);
   } catch (error) {
-    console.error(`Failed to build jobs sitemap shard ${id}`, error);
+    console.error(`Failed to build jobs sitemap shard ${shardId}`, error);
     return [];
   }
 }

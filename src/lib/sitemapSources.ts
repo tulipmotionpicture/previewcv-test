@@ -1,7 +1,7 @@
 import type { MetadataRoute } from "next";
 import { api } from "@/lib/api";
 import { Job } from "@/types/api";
-import { BlogPost } from "@/types";
+import { BlogPost, BlogCategory } from "@/types";
 import { isJobClosed } from "@/lib/jobPostingSchema";
 
 // Sitemap source builders, sharded so the site scales past Google's hard 50,000-URL / 50MB
@@ -12,10 +12,12 @@ import { isJobClosed } from "@/lib/jobPostingSchema";
 
 // URLs per child sitemap. 45k leaves headroom under the 50k hard cap for safety.
 export const SHARD_SIZE = 45000;
-// Page size requested from the paginated list APIs (proven value used elsewhere).
-const API_PAGE = 100;
-// Pages of API_PAGE that make up one shard (45000 / 100 = 450; integer by construction).
-const PAGES_PER_SHARD = SHARD_SIZE / API_PAGE;
+// Page sizes requested from the paginated list APIs. The jobs API accepts up to 100; the
+// blog API caps `limit` at 50 (returns HTTP 422 above that), so they must differ.
+const JOB_API_PAGE = 100;
+const BLOG_API_PAGE = 50;
+// Pages that make up one blog shard (45000 / 50 = 900; integer by construction).
+const BLOG_PAGES_PER_SHARD = SHARD_SIZE / BLOG_API_PAGE;
 
 export const STATIC_PUBLIC_PATHS = [
   "/",
@@ -55,7 +57,7 @@ export async function getJobShardEntries(
   let offset = start;
   while (offset < end) {
     const res = await api.getJobs(
-      new URLSearchParams({ limit: String(API_PAGE), offset: String(offset) }),
+      new URLSearchParams({ limit: String(JOB_API_PAGE), offset: String(offset) }),
     );
     const items: Job[] = res.items || res.jobs || res.data || [];
     if (items.length === 0) break;
@@ -86,7 +88,7 @@ export async function getRecruiterEntries(
   let offset = 0;
   while (offset < total || offset === 0) {
     const res = await api.getJobs(
-      new URLSearchParams({ limit: String(API_PAGE), offset: String(offset) }),
+      new URLSearchParams({ limit: String(JOB_API_PAGE), offset: String(offset) }),
     );
     const items: Job[] = res.items || res.jobs || res.data || [];
     if (items.length === 0) break;
@@ -117,9 +119,13 @@ export async function blogCategoryEntries(
   base: string,
 ): Promise<MetadataRoute.Sitemap> {
   try {
-    const res = await api.getBlogCategories();
-    return (res.categories || [])
-      .filter((c) => c.slug)
+    // The categories endpoint returns a bare array; tolerate a { categories } wrapper too.
+    const res = (await api.getBlogCategories()) as unknown;
+    const list: BlogCategory[] = Array.isArray(res)
+      ? (res as BlogCategory[])
+      : ((res as { categories?: BlogCategory[] })?.categories ?? []);
+    return list
+      .filter((c) => c.slug && (c.post_count ?? 0) > 0) // skip empty (thin) category pages
       .map((c) => ({ url: `${base}/blog/category/${c.slug}` }));
   } catch {
     return [];
@@ -139,13 +145,13 @@ export async function getBlogShardEntries(
     entries.push(...(await blogCategoryEntries(base)));
   }
 
-  const firstPage = shardId * PAGES_PER_SHARD + 1;
-  const lastPage = (shardId + 1) * PAGES_PER_SHARD;
+  const firstPage = shardId * BLOG_PAGES_PER_SHARD + 1;
+  const lastPage = (shardId + 1) * BLOG_PAGES_PER_SHARD;
 
   for (let page = firstPage; page <= lastPage; page++) {
     const res = await api.getBlogPosts({
       page,
-      limit: API_PAGE,
+      limit: BLOG_API_PAGE,
       sort_by: "published_at",
       sort_order: "desc",
     });
