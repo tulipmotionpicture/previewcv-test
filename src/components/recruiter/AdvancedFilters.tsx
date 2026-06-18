@@ -88,6 +88,22 @@ export default function AdvancedFilters({
     };
     const removeDegree = (d: string) => setFilters((prev: any) => ({ ...prev, degrees: prev.degrees.filter((de: string) => de !== d) }));
 
+    const addUniversity = () => {
+        if (universityInput.trim() && !filters.universities.includes(universityInput.trim())) {
+            setFilters((prev: any) => ({ ...prev, universities: [...prev.universities, universityInput.trim()] }));
+            setUniversityInput("");
+        }
+    };
+    const removeUniversity = (u: string) => setFilters((prev: any) => ({ ...prev, universities: prev.universities.filter((un: string) => un !== u) }));
+
+    const addCertification = () => {
+        if (certificationInput.trim() && !filters.certifications.includes(certificationInput.trim())) {
+            setFilters((prev: any) => ({ ...prev, certifications: [...prev.certifications, certificationInput.trim()] }));
+            setCertificationInput("");
+        }
+    };
+    const removeCertification = (c: string) => setFilters((prev: any) => ({ ...prev, certifications: prev.certifications.filter((ce: string) => ce !== c) }));
+
     const addFieldOfStudy = () => {
         if (fieldOfStudyInput.trim() && !filters.fields_of_study.includes(fieldOfStudyInput.trim())) {
             setFilters((prev: any) => ({ ...prev, fields_of_study: [...prev.fields_of_study, fieldOfStudyInput.trim()] }));
@@ -353,6 +369,34 @@ export default function AdvancedFilters({
                                     {filters.fields_of_study.map((f: string) => (
                                         <span key={f} className="inline-flex items-center gap-1 px-3 py-1 bg-indigo-100 dark:bg-indigo-900 text-indigo-800 dark:text-indigo-200 rounded-full text-sm">
                                             {f}<button onClick={() => removeFieldOfStudy(f)} className="hover:text-indigo-600"><X className="h-3 w-3" /></button>
+                                        </span>
+                                    ))}
+                                </div>
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Universities</label>
+                                <div className="flex gap-2 mb-2 items-center">
+                                    <input type="text" value={universityInput} onChange={(e) => setUniversityInput(e.target.value)} onKeyDown={(e) => e.key === "Enter" && addUniversity()} placeholder="Add university" className={inputClassName} />
+                                    <button onClick={addUniversity} className={buttonClassName}><Plus className="w-5 h-5" /></button>
+                                </div>
+                                <div className="flex flex-wrap gap-2">
+                                    {filters.universities.map((u: string) => (
+                                        <span key={u} className="inline-flex items-center gap-1 px-3 py-1 bg-teal-100 dark:bg-teal-900 text-teal-800 dark:text-teal-200 rounded-full text-sm">
+                                            {u}<button onClick={() => removeUniversity(u)} className="hover:text-teal-600"><X className="h-3 w-3" /></button>
+                                        </span>
+                                    ))}
+                                </div>
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Certifications</label>
+                                <div className="flex gap-2 mb-2 items-center">
+                                    <input type="text" value={certificationInput} onChange={(e) => setCertificationInput(e.target.value)} onKeyDown={(e) => e.key === "Enter" && addCertification()} placeholder="Add certification" className={inputClassName} />
+                                    <button onClick={addCertification} className={buttonClassName}><Plus className="w-5 h-5" /></button>
+                                </div>
+                                <div className="flex flex-wrap gap-2">
+                                    {filters.certifications.map((c: string) => (
+                                        <span key={c} className="inline-flex items-center gap-1 px-3 py-1 bg-rose-100 dark:bg-rose-900 text-rose-800 dark:text-rose-200 rounded-full text-sm">
+                                            {c}<button onClick={() => removeCertification(c)} className="hover:text-rose-600"><X className="h-3 w-3" /></button>
                                         </span>
                                     ))}
                                 </div>

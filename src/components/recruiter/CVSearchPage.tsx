@@ -441,13 +441,14 @@ export default function CVSearchPage({ onBuyCredits }: CVSearchPageProps = {}) {
           activeFilters.companies.length > 0
             ? activeFilters.companies
             : undefined,
-        excluded_companies:
+        exclude_companies:
           activeFilters.excluded_companies.length > 0
             ? activeFilters.excluded_companies
             : undefined,
         min_experience_years: activeFilters.min_experience_years,
         max_experience_years: activeFilters.max_experience_years,
         industry: activeFilters.industry || undefined,
+        education_level: activeFilters.education_level || undefined,
         country: activeFilters.country || undefined,
         state: activeFilters.state || undefined,
         city: activeFilters.city || undefined,
