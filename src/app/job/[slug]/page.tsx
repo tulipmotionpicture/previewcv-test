@@ -148,9 +148,13 @@ export default async function JobDetailsPage({
                     {job.title}
                   </h1>
                   <p className="text-base text-gray-600 dark:text-gray-400 font-medium mb-3">
-                    <Link href={job.recruiter_profile_url || ""}>
-                      {job.company_name}
-                    </Link>
+                    {job.is_confidential || !job.recruiter_profile_url ? (
+                      <span>{job.company_name}</span>
+                    ) : (
+                      <Link href={job.recruiter_profile_url}>
+                        {job.company_name}
+                      </Link>
+                    )}
                   </p>
 
                   <div className="flex flex-wrap items-center gap-3 text-sm text-gray-600 dark:text-gray-400 mb-4">
@@ -281,7 +285,8 @@ export default async function JobDetailsPage({
               </div>
             </div>
 
-            {/* About the Company Card */}
+            {/* About the Company Card — hidden for confidential jobs */}
+            {!job.is_confidential && (
             <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg overflow-hidden">
               <div className="bg-[#0077b5] p-2">
                 <h3 className="text-md font-bold text-white">
@@ -376,6 +381,7 @@ export default async function JobDetailsPage({
                   )}
               </div>
             </div>
+            )}
           </div>
 
           {/* Right Sidebar - Application */}

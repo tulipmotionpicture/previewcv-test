@@ -127,12 +127,16 @@ export default function JobList({ jobs, loading, error }: JobListProps) {
                     </h3>
                     <p className="text-[11px] font-medium text-gray-500 dark:text-gray-400 truncate">
                       <span className="text-gray-900 dark:text-gray-300 font-semibold hover:text-primary-blue transition-colors">
-                        <Link
-                          href={job.recruiter_profile_url || ""}
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          {job.company_name}
-                        </Link>
+                        {job.is_confidential || !job.recruiter_profile_url ? (
+                          <span>{job.company_name}</span>
+                        ) : (
+                          <Link
+                            href={job.recruiter_profile_url}
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            {job.company_name}
+                          </Link>
+                        )}
                       </span>
                       {job.location && (
                         <span className="text-gray-400 ml-1 truncate">

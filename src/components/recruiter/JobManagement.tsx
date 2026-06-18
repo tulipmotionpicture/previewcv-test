@@ -41,6 +41,7 @@ export type JobFormState = {
   salary_currency: string;
   salary_type: "hourly" | "weekly" | "monthly" | "yearly";
   is_remote: boolean;
+  is_confidential: boolean;
   is_active: boolean;
   required_skills: string;
   preferred_skills: string;
@@ -65,6 +66,7 @@ export const JOB_FORM_INITIAL: JobFormState = {
   salary_currency: "USD",
   salary_type: "yearly",
   is_remote: false,
+  is_confidential: false,
   is_active: true,
   required_skills: "",
   preferred_skills: "",

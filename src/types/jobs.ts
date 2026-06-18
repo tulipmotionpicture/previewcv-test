@@ -19,6 +19,7 @@ export interface Job {
   salary_currency: string;
   salary_type?: "hourly" | "weekly" | "monthly" | "yearly";
   is_remote: boolean;
+  is_confidential?: boolean;
   posted_date: string;
   categories: string[];
   required_skills: string[];

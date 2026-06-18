@@ -156,6 +156,7 @@ export default function JobCreationPage({
         job_type: jobToEdit.job_type || "full_time",
         experience_level: jobToEdit.experience_level || "entry",
         is_remote: jobToEdit.is_remote || false,
+        is_confidential: jobToEdit.is_confidential || false,
         salary_min: jobToEdit.salary_min ? String(jobToEdit.salary_min) : "",
         salary_max: jobToEdit.salary_max ? String(jobToEdit.salary_max) : "",
         salary_currency: jobToEdit.salary_currency || "USD",
@@ -631,6 +632,7 @@ export default function JobCreationPage({
         salary_currency: form.salary_currency,
         salary_type: form.salary_type,
         is_remote: form.is_remote,
+        is_confidential: form.is_confidential,
         is_active: form.is_active,
         required_skills: requiredSkillsArray,
         preferred_skills: preferredSkillsArray,
@@ -1143,6 +1145,36 @@ export default function JobCreationPage({
                     This position is remote-friendly
                   </span>
                 </label>
+
+                {/* Confidential Posting Checkbox */}
+                <div className="rounded-lg border border-amber-200 dark:border-amber-800/50 bg-amber-50/60 dark:bg-amber-900/10 p-3">
+                  <label className="flex items-start gap-3 cursor-pointer group">
+                    <div className="relative flex items-center mt-0.5">
+                      <input
+                        type="checkbox"
+                        name="is_confidential"
+                        checked={form.is_confidential}
+                        onChange={handleChange}
+                        className="peer h-5 w-5 cursor-pointer appearance-none rounded border border-gray-300 shadow-sm checked:border-amber-500 checked:bg-amber-500 focus:ring-2 focus:ring-amber-500/20 transition-all dark:border-gray-600 dark:bg-gray-700"
+                      />
+                      <svg
+                        className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-3.5 h-3.5 opacity-0 peer-checked:opacity-100 text-white transition-opacity"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        strokeWidth="3"
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                      </svg>
+                    </div>
+                    <span className="text-sm text-gray-700 dark:text-gray-300">
+                      <span className="font-semibold text-gray-900 dark:text-white">Post as confidential</span>
+                      <br />
+                      Your company name and logo will be hidden from candidates — the listing
+                      shows &ldquo;Confidential&rdquo; and won&rsquo;t link back to your profile.
+                    </span>
+                  </label>
+                </div>
               </div>
             )}
 
