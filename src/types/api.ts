@@ -578,6 +578,9 @@ export interface JobSubscription {
   jobs_remaining?: number;
   can_post_jobs?: boolean;
   days_until_renewal?: number;
+  // Admin-granted trial fields
+  is_trial?: boolean;
+  trial_ends_at?: string | null;
 }
 
 export interface CvSubscription {
@@ -606,6 +609,9 @@ export interface CvSubscription {
   pack_type?: "free" | "one_time" | null;
   pack_expires_at?: string | null;
   credits_purchased?: number | null;
+  // Admin-granted trial fields
+  is_trial?: boolean;
+  trial_ends_at?: string | null;
 }
 
 export interface SubscriptionDashboard {

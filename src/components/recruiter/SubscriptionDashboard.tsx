@@ -469,8 +469,15 @@ export default function SubscriptionDashboard({
                   </p>
                 </div>
               </div>
-              {dashboard?.job_subscription &&
-                getStatusBadge(dashboard.job_subscription.status)}
+              <div className="flex items-center gap-2">
+                {dashboard?.job_subscription?.is_trial && (
+                  <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-medium bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-700">
+                    Trial
+                  </span>
+                )}
+                {dashboard?.job_subscription &&
+                  getStatusBadge(dashboard.job_subscription.status)}
+              </div>
             </div>
 
             <div className="p-5 pt-0">
@@ -521,11 +528,15 @@ export default function SubscriptionDashboard({
                     </div>
                     <div>
                       <p className="text-gray-500 dark:text-gray-400">
-                        Renews On
+                        {dashboard.job_subscription.is_trial
+                          ? "Trial Ends"
+                          : "Renews On"}
                       </p>
                       <p className="font-semibold text-gray-900 dark:text-white">
                         {new Date(
-                          dashboard.job_subscription.current_period_end,
+                          (dashboard.job_subscription.is_trial &&
+                            dashboard.job_subscription.trial_ends_at) ||
+                            dashboard.job_subscription.current_period_end,
                         ).toLocaleDateString()}
                       </p>
                     </div>
@@ -600,8 +611,15 @@ export default function SubscriptionDashboard({
                   </p>
                 </div>
               </div>
-              {dashboard?.cv_subscription &&
-                getStatusBadge(dashboard.cv_subscription.status)}
+              <div className="flex items-center gap-2">
+                {dashboard?.cv_subscription?.is_trial && (
+                  <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-medium bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-700">
+                    Trial
+                  </span>
+                )}
+                {dashboard?.cv_subscription &&
+                  getStatusBadge(dashboard.cv_subscription.status)}
+              </div>
             </div>
 
             <div className="p-5 pt-0">
