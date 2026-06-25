@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, Suspense } from 'react';
+import { useEffect, useState, useRef, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { api } from '@/lib/api';
 import { consumePostLoginRedirect } from '@/lib/safeRedirect';
@@ -9,13 +9,16 @@ function AuthCallbackContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const [error, setError] = useState<string | null>(null);
-    const [isProcessing, setIsProcessing] = useState(false);
+    // The OAuth `code` is single-use. Guard so the exchange runs exactly once per
+    // mount (re-render / back-button / StrictMode) — a second exchange of the same
+    // code returns 400 from the backend and intermittently breaks login.
+    const hasProcessed = useRef(false);
 
     useEffect(() => {
-        const handleCallback = async () => {
-            if (isProcessing) return;
-            setIsProcessing(true);
+        if (hasProcessed.current) return;
+        hasProcessed.current = true;
 
+        const handleCallback = async () => {
             const code = searchParams.get('code');
             const state = searchParams.get('state');
             const errorParam = searchParams.get('error');
@@ -32,19 +35,30 @@ function AuthCallbackContent() {
                 return;
             }
 
+            // Determine the provider deterministically: prefer the one stored when the
+            // user initiated sign-in, then fall back to URL hints. We must NOT retry the
+            // exchange with a different provider — the code is single-use, so a retry
+            // would hit a consumed code and 400.
+            const stored =
+                typeof window !== "undefined"
+                    ? sessionStorage.getItem("oauth_provider")
+                    : null;
+            const iss = searchParams.get('iss');
+            const scope = searchParams.get('scope');
+            let provider: "google" | "linkedin";
+            if (stored === "google" || stored === "linkedin") {
+                provider = stored;
+            } else if ((iss && iss.includes('google')) || (scope && scope.includes('google'))) {
+                provider = "google";
+            } else {
+                provider = "linkedin";
+            }
+
             try {
-                // Determine provider based on search params
-                // Google usually sends 'iss' or 'scope' with googleapis
-                const iss = searchParams.get('iss');
-                const scope = searchParams.get('scope');
-
-                let provider: "google" | "linkedin" = "linkedin";
-                if ((iss && iss.includes('google')) || (scope && scope.includes('google'))) {
-                    provider = "google";
-                }
-
-                // Exchange code for tokens
+                // Exchange code for tokens (exactly once)
                 const response = await api.exchangeSocialAuthCode(provider, code, state || '');
+
+                sessionStorage.removeItem("oauth_provider");
 
                 // Clear any existing recruiter tokens to prevent role confusion
                 localStorage.removeItem('recruiter_access_token');
@@ -59,35 +73,14 @@ function AuthCallbackContent() {
                 // Return the user to where they started (e.g. a job page), else the dashboard.
                 window.location.href = consumePostLoginRedirect();
             } catch (err: any) {
-                // If the first attempt failed and we guessed linkedin, let's try google just in case
-                try {
-                    const iss = searchParams.get('iss');
-                    const scope = searchParams.get('scope');
-                    const isDefinitelyGoogle = (iss && iss.includes('google')) || (scope && scope.includes('google'));
-
-                    if (!isDefinitelyGoogle) {
-                        const alternativeProvider = "google";
-                        const response = await api.exchangeSocialAuthCode(alternativeProvider, code, state || '');
-                        localStorage.removeItem('recruiter_access_token');
-                        localStorage.removeItem('recruiter_refresh_token');
-                        localStorage.setItem('access_token', response.access_token);
-                        if (response.refresh_token) {
-                            localStorage.setItem('refresh_token', response.refresh_token);
-                        }
-                        window.location.href = consumePostLoginRedirect();
-                        return;
-                    }
-                } catch (e: any) {
-                    // Ignore and show original error
-                }
-
                 setError(err.message || 'Failed to authenticate');
                 setTimeout(() => router.push('/candidate/login'), 3000);
             }
         };
 
         handleCallback();
-    }, [searchParams, router]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     if (error) {
         return (

@@ -351,6 +351,11 @@ export class ApiClient {
         endpoint,
       );
       if (response && response.auth_url) {
+        // Remember which provider we initiated so the callback exchanges the
+        // single-use code with the correct provider exactly once (no same-code retry).
+        if (typeof window !== "undefined") {
+          sessionStorage.setItem("oauth_provider", provider);
+        }
         window.location.href = response.auth_url;
       }
     } catch (error) {
