@@ -11,7 +11,7 @@ Deploys this Next.js 15 app to **Cloudflare Workers** via the **OpenNext** adapt
 
 ---
 
-## 1. Files added
+## 1. Files added are
 | File | Purpose |
 |---|---|
 | `open-next.config.ts` | OpenNext config; KV-backed ISR/incremental cache |
