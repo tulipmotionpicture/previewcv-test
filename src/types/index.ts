@@ -233,12 +233,19 @@ export interface BlogTag {
   slug: string;
 }
 
+export interface TableOfContentsItem {
+  id: string;
+  text: string;
+  level: number;
+}
+
 export interface BlogPost {
   id: number;
   title: string;
   slug: string;
   excerpt: string;
   content?: string;
+  table_of_contents?: TableOfContentsItem[];
   featured_image: string | null;
   author: BlogAuthor;
   category: BlogCategory;

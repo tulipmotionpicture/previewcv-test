@@ -8,6 +8,7 @@ import { BlogPost } from "@/types";
 import FloatingHeader from "@/components/FloatingHeader";
 import { buildBlogPostingJsonLd } from "@/lib/blogPostingSchema";
 import BlogPostInteractions from "./BlogPostInteractions";
+import TableOfContents from "@/components/blog/TableOfContents";
 import {
   Calendar,
   Clock,
@@ -116,7 +117,7 @@ export default async function BlogDetailPage({
       <FloatingHeader links={HEADER_LINKS} cta={HEADER_CTA} />
 
       {/* Blog Content — pt-24 clears the fixed FloatingHeader so "Back to Blog" isn't hidden */}
-      <article className="max-w-4xl mx-auto px-4 pt-24 pb-12">
+      <article className="max-w-7xl mx-auto px-4 pt-24 pb-12">
         {/* Back Button */}
         <Link
           href="/blog"
@@ -126,7 +127,17 @@ export default async function BlogDetailPage({
           Back to Blog
         </Link>
 
-        {/* Category */}
+        <div className="grid lg:grid-cols-4 gap-8">
+          {/* Table of Contents — left sidebar */}
+          <aside className="lg:col-span-1">
+            {post.table_of_contents && post.table_of_contents.length > 0 && (
+              <TableOfContents items={post.table_of_contents} />
+            )}
+          </aside>
+
+          {/* Article column */}
+          <div className="lg:col-span-3">
+            {/* Category */}
         {post.category?.slug && (
           <div className="mb-4">
             <Link
@@ -233,6 +244,8 @@ export default async function BlogDetailPage({
                 {post.author?.bio || `Written by ${post.author?.full_name}`}
               </p>
             </div>
+          </div>
+        </div>
           </div>
         </div>
       </article>
