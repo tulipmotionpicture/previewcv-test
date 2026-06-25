@@ -45,7 +45,7 @@ export default function SSOHandoffPage() {
     }
 
     const ctrl = new AbortController();
-    const timeoutId = window.setTimeout(() => ctrl.abort(), 8000);
+    const timeoutId = window.setTimeout(() => ctrl.abort(), 4000);
 
     (async () => {
       try {

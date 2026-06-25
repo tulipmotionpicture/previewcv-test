@@ -52,12 +52,7 @@ export default function SSOReceivePage() {
     // Set the loop guard so we don't immediately retry SSO on next page.
     // (The bootstrap hook's hasFreshAnonCheck() reads this with a TTL.)
     if (url.searchParams.get("sso") === "anon") {
-      try {
-        window.sessionStorage.setItem(
-          "sso_checked",
-          JSON.stringify({ at: Date.now() }),
-        );
-      } catch { /* ignore */ }
+      markChecked();
       finish(returnTo);
       return;
     }
@@ -73,7 +68,7 @@ export default function SSOReceivePage() {
     }
 
     const ctrl = new AbortController();
-    const timeoutId = window.setTimeout(() => ctrl.abort(), 8000);
+    const timeoutId = window.setTimeout(() => ctrl.abort(), 4000);
 
     (async () => {
       try {
@@ -85,8 +80,10 @@ export default function SSOReceivePage() {
         });
 
         if (!res.ok) {
-          // Exchange failed (stale ticket, network blip, etc.). Don't
-          // permanently block SSO — let the user retry on next visit.
+          // Exchange failed (stale ticket, CORS, network blip). Set the loop
+          // guard so the bootstrap doesn't immediately bounce back to the peer
+          // handoff and ping-pong forever; the guard's TTL still allows a retry.
+          markChecked();
           finish(returnTo);
           return;
         }
@@ -104,10 +101,14 @@ export default function SSOReceivePage() {
           // Successful exchange — clear any leftover anon-bounce flag so
           // subsequent /sso/receive direct visits don't get confused.
           window.sessionStorage.removeItem("sso_checked");
+          window.sessionStorage.removeItem("sso_attempts");
         } catch { /* private mode */ }
 
         finish(returnTo);
       } catch {
+        // Network / CORS / timeout. Same as the !res.ok case — guard against an
+        // infinite handoff<->receive loop; retry is still allowed after the TTL.
+        markChecked();
         finish(returnTo);
       } finally {
         window.clearTimeout(timeoutId);
@@ -136,6 +137,20 @@ function getReturnTo(): string {
   } catch {
     return "/";
   }
+}
+
+/**
+ * Set the SSO loop guard (matches the bootstrap hook's hasFreshAnonCheck()).
+ * Called on every non-success terminal outcome so a failed or empty SSO check
+ * can't make the bootstrap immediately re-bounce to the peer in a loop.
+ */
+function markChecked() {
+  try {
+    window.sessionStorage.setItem(
+      "sso_checked",
+      JSON.stringify({ at: Date.now() }),
+    );
+  } catch { /* ignore (private mode / storage disabled) */ }
 }
 
 function finish(returnTo: string) {

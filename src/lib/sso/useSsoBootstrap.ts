@@ -38,6 +38,11 @@ import {
  */
 const SSO_CHECK_TTL_MS = 5 * 60 * 1000; // 5 minutes
 
+// Backstop against an infinite handoff<->receive loop: bound how many times the
+// bootstrap may redirect within a short window before giving up for the TTL.
+const SSO_MAX_REDIRECTS = 2;
+const SSO_REDIRECT_WINDOW_MS = 30 * 1000;
+
 function hasFreshAnonCheck(): boolean {
   try {
     const raw = window.sessionStorage.getItem("sso_checked");
@@ -52,6 +57,32 @@ function hasFreshAnonCheck(): boolean {
     const parsed = JSON.parse(raw) as { at?: number };
     if (!parsed?.at) return false;
     return Date.now() - parsed.at < SSO_CHECK_TTL_MS;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Count consecutive SSO redirects within a short window. Returns true once we've
+ * bounced more than SSO_MAX_REDIRECTS times — used to stop a handoff<->receive
+ * ping-pong when, e.g., the ticket exchange keeps failing. Increments on call.
+ */
+function tooManyRedirects(): boolean {
+  try {
+    const now = Date.now();
+    let n = 0;
+    let at = now;
+    const raw = window.sessionStorage.getItem("sso_attempts");
+    if (raw) {
+      const parsed = JSON.parse(raw) as { n?: number; at?: number };
+      if (parsed?.at && now - parsed.at < SSO_REDIRECT_WINDOW_MS) {
+        n = parsed.n || 0;
+        at = parsed.at;
+      }
+    }
+    n += 1;
+    window.sessionStorage.setItem("sso_attempts", JSON.stringify({ n, at }));
+    return n > SSO_MAX_REDIRECTS;
   } catch {
     return false;
   }
@@ -108,6 +139,18 @@ export function useSsoBootstrap(_opts: { onLoggedIn?: (user: unknown) => void } 
         window.location.pathname + window.location.search + window.location.hash;
       window.sessionStorage.setItem("sso_return_to", target);
     } catch { /* ignore */ }
+
+    if (tooManyRedirects()) {
+      // Bounced too many times without resolving — stop the loop and leave the
+      // user anonymous for the TTL instead of ping-ponging between the domains.
+      try {
+        window.sessionStorage.setItem(
+          "sso_checked",
+          JSON.stringify({ at: Date.now() }),
+        );
+      } catch { /* ignore */ }
+      return;
+    }
 
     const ret = `${here}/sso/receive`;
     window.location.replace(
