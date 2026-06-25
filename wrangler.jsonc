@@ -1,0 +1,25 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "previewcv",
+  "main": ".open-next/worker.js",
+  "compatibility_date": "2025-06-05",
+  "compatibility_flags": ["nodejs_compat"],
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS"
+  },
+  // ISR/incremental cache — dedicated namespace for previewcv ONLY (do not reuse
+  // letsmakecv's namespace; cache keys collide on shared paths like /sso).
+  // Created with: npx wrangler kv namespace create NEXT_INC_CACHE_KV
+  "kv_namespaces": [
+    {
+      "binding": "NEXT_INC_CACHE_KV",
+      "id": "acca016d90fc4b569ce7b112b3dc6bd6"
+    }
+  ]
+  // NEXT_PUBLIC_* -> Workers Builds "Build variables" (inlined at build time).
+  // Server-side runtime config (used by /api/resume route handlers) must be set as
+  // Worker runtime Variables/Secrets — see docs/cloudflare-deployment.md:
+  //   plain vars : API_BASE_URL, NEXT_FAVICON, RATE_LIMIT_REQUESTS_PER_HOUR, RATE_LIMIT_WINDOW_MS
+  //   secrets    : RECAPTCHA_SECRET_KEY, SHARED_LINK_API_TOKEN
+}
