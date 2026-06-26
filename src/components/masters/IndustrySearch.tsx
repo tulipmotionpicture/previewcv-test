@@ -38,6 +38,18 @@ function IndustrySearch({
     const [activeIndex, setActiveIndex] = useState(-1);
     const listItemsRef = useRef<(HTMLLIElement | null)[]>([]);
     const containerRef = useRef<HTMLDivElement>(null);
+    // Refs so the delayed blur handler reads the LATEST values, not the stale closure
+    // captured when blur fired. Clicking a suggestion blurs the input first, so without
+    // these the revert logic would run with the old typed text and wipe the selection.
+    const searchRef = useRef(search);
+    const industryRef = useRef(industry);
+    const justSelectedRef = useRef(false);
+    useEffect(() => {
+        searchRef.current = search;
+    }, [search]);
+    useEffect(() => {
+        industryRef.current = industry;
+    }, [industry]);
 
     // Sync local state with prop changes
     useEffect(() => {
@@ -101,6 +113,7 @@ function IndustrySearch({
     }, []);
 
     const handleSelect = (selectedIndustry: Industry) => {
+        justSelectedRef.current = true;
         setSearch(selectedIndustry.name);
         onChange(selectedIndustry);
         setIsFocused(false);
@@ -110,16 +123,22 @@ function IndustrySearch({
         setTimeout(() => {
             setIsFocused(false);
             if (!enforceSelection) return;
-            // Enforce selection: if the text isn't an exact known industry, revert to
-            // the last committed value so free text can't be saved.
-            const typed = search.trim().toLowerCase();
+            // A suggestion was just clicked — keep that selection, don't revert.
+            if (justSelectedRef.current) {
+                justSelectedRef.current = false;
+                return;
+            }
+            // Read the LATEST values via refs (not the stale blur-time closure).
+            const typed = searchRef.current.trim().toLowerCase();
+            const committed = industryRef.current;
             const exact = industries.find((i) => i.name.toLowerCase() === typed);
             if (exact) {
                 setSearch(exact.name);
                 onChange(exact);
             } else {
-                setSearch(industry || "");
-                if (!industry) onChange(null);
+                // Not a known industry — revert to the last committed value (no free text).
+                setSearch(committed || "");
+                if (!committed) onChange(null);
             }
         }, 150);
     };
