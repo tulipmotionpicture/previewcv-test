@@ -31,6 +31,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { api } from "@/lib/api";
 import { Recruiter } from "@/types/api";
 import { useRecruiterAuth } from "@/context/RecruiterAuthContext";
+import { IndustrySearch } from "@/components/masters";
 
 interface GalleryImage {
   id: string;
@@ -585,25 +586,36 @@ export default function App({ jobs, events }: RecruiterProfileContentProps) {
                             <label className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider flex items-center gap-2">
                               <Briefcase className="w-3.5 h-3.5" /> Industry
                             </label>
-                            <select
-                              value={profile.industry}
-                              disabled={isProfileLocked}
-                              onChange={(e) =>
+                            <IndustrySearch
+                              industry={profile.industry}
+                              enforceSelection
+                              onChange={(ind) =>
                                 setProfile({
                                   ...profile,
-                                  industry: e.target.value,
+                                  industry: ind?.name || "",
                                 })
                               }
-                              className="w-full bg-slate-50 dark:bg-[#1a1a1a] border border-slate-200 dark:border-gray-600 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all dark:text-white"
-                            >
-                              <option value="">Select Industry</option>
-                              <option>IT</option>
-                              <option>Finance</option>
-                              <option>Healthcare</option>
-                              <option>Retail</option>
-                              <option>Manufacturing</option>
-                              <option>Other</option>
-                            </select>
+                              placeholder="Search industry..."
+                              renderInput={({
+                                value,
+                                onChange,
+                                onFocus,
+                                onBlur,
+                                onKeyDown,
+                              }) => (
+                                <input
+                                  type="text"
+                                  value={value}
+                                  onChange={onChange}
+                                  onFocus={onFocus}
+                                  onBlur={onBlur}
+                                  onKeyDown={onKeyDown}
+                                  disabled={isProfileLocked}
+                                  placeholder="Search industry..."
+                                  className="w-full bg-slate-50 dark:bg-[#1a1a1a] border border-slate-200 dark:border-gray-600 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all dark:text-white"
+                                />
+                              )}
+                            />
                           </div>
                           <div className="space-y-2">
                             <label className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider flex items-center gap-2">

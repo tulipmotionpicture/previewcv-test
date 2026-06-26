@@ -10,6 +10,8 @@ interface IndustrySearchProps {
     placeholder?: string;
     label?: string;
     error?: string;
+    /** When true, only a value picked from the list is accepted — no free text. */
+    enforceSelection?: boolean;
     renderInput?: (props: {
         value: string;
         onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
@@ -25,6 +27,7 @@ function IndustrySearch({
     placeholder = "Select Industry...",
     label,
     error,
+    enforceSelection = false,
     renderInput,
 }: IndustrySearchProps) {
     const [search, setSearch] = useState(industry || "");
@@ -106,6 +109,18 @@ function IndustrySearch({
     const handleInputBlur = () => {
         setTimeout(() => {
             setIsFocused(false);
+            if (!enforceSelection) return;
+            // Enforce selection: if the text isn't an exact known industry, revert to
+            // the last committed value so free text can't be saved.
+            const typed = search.trim().toLowerCase();
+            const exact = industries.find((i) => i.name.toLowerCase() === typed);
+            if (exact) {
+                setSearch(exact.name);
+                onChange(exact);
+            } else {
+                setSearch(industry || "");
+                if (!industry) onChange(null);
+            }
         }, 150);
     };
 
@@ -115,18 +130,24 @@ function IndustrySearch({
 
         if (!newValue) {
             onChange(null);
-        } else {
-            // If user types something that's not selected from list, we can pass it as a custom value
-            // or we might want to enforce selection. 
-            // For now, mirroring CitySearch behavior which allows typing
-            onChange({
-                id: 0,
-                name: newValue,
-                category: "",
-                description: "",
-                isActive: true,
-            });
+            return;
         }
+
+        if (enforceSelection) {
+            // No free text: typing only filters the list. A value is committed only
+            // when the user picks a suggestion (handleSelect) or types an exact match
+            // (resolved on blur). Don't propagate the raw text as a value.
+            return;
+        }
+
+        // Legacy free-text behavior (recruiter search filters): pass typed value through.
+        onChange({
+            id: 0,
+            name: newValue,
+            category: "",
+            description: "",
+            isActive: true,
+        });
     };
 
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {

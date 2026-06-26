@@ -7,6 +7,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRecruiterAuth } from "@/context/RecruiterAuthContext";
 import { api } from "@/lib/api";
+import { IndustrySearch } from "@/components/masters";
 import { Honeypot } from "@/lib/anti-bot/honeypot";
 import { useFormLoadedAt } from "@/lib/anti-bot/useFormLoadedAt";
 import { useRecaptcha } from "@/lib/anti-bot/useRecaptcha";
@@ -714,13 +715,35 @@ export default function RecruiterSignup() {
                       <label className="block text-sm font-semibold text-gray-900 dark:text-gray-100 mb-2">
                         Industry
                       </label>
-                      <input
-                        type="text"
-                        name="industry"
-                        className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-teal-dark dark:focus:ring-mint focus:border-transparent outline-none transition-all text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
-                        value={formData.industry}
-                        onChange={handleChange}
-                        placeholder="Technology, Finance, etc."
+                      <IndustrySearch
+                        industry={formData.industry}
+                        enforceSelection
+                        onChange={(ind) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            industry: ind?.name || "",
+                          }))
+                        }
+                        placeholder="Search industry..."
+                        renderInput={({
+                          value,
+                          onChange,
+                          onFocus,
+                          onBlur,
+                          onKeyDown,
+                        }) => (
+                          <input
+                            type="text"
+                            name="industry"
+                            value={value}
+                            onChange={onChange}
+                            onFocus={onFocus}
+                            onBlur={onBlur}
+                            onKeyDown={onKeyDown}
+                            placeholder="Search industry..."
+                            className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-teal-dark dark:focus:ring-mint focus:border-transparent outline-none transition-all text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
+                          />
+                        )}
                       />
                     </div>
                   </div>
