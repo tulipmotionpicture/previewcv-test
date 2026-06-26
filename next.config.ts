@@ -3,10 +3,13 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   // Configure external image domains
   images: {
-    // Cache optimized images so the Worker doesn't re-optimize on every request
-    // (/_next/image was emitting no cache-control). Source images are content-keyed
-    // by URL, so a long TTL is safe.
-    minimumCacheTTL: 2678400, // 31 days
+    // On Cloudflare Workers the /_next/image optimizer runs per-request and its
+    // responses are NOT edge-cached (verified: no cf-cache-status, ~0.5-3s each),
+    // so the homepage's many images load slowly. Serve images unoptimized instead:
+    // local /public files go through the edge-cached ASSETS binding and remote images
+    // load straight from BunnyCDN — both fast + cached, no Worker hop.
+    unoptimized: true,
+    minimumCacheTTL: 2678400, // (moot while unoptimized; harmless)
     remotePatterns: [
       {
         protocol: "https",
