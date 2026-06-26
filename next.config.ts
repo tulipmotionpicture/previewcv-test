@@ -3,6 +3,10 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   // Configure external image domains
   images: {
+    // Cache optimized images so the Worker doesn't re-optimize on every request
+    // (/_next/image was emitting no cache-control). Source images are content-keyed
+    // by URL, so a long TTL is safe.
+    minimumCacheTTL: 2678400, // 31 days
     remotePatterns: [
       {
         protocol: "https",
