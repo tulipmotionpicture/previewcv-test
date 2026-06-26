@@ -794,6 +794,7 @@ export default function RecruiterSignup() {
                   </label>
                   <CountrySearch
                     country={formData.country}
+                    enforceSelection
                     renderInput={({
                       value,
                       onChange,

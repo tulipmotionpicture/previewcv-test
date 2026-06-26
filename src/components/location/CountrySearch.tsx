@@ -10,6 +10,8 @@ interface CountrySearchProps {
     placeholder?: string;
     label?: string;
     error?: string;
+    /** When true, only a value picked from the list is accepted — no free text. */
+    enforceSelection?: boolean;
     renderInput?: (props: {
         value: string;
         onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
@@ -25,6 +27,7 @@ function CountrySearch({
     placeholder = "Enter Country...",
     label,
     error,
+    enforceSelection = false,
     renderInput,
 }: CountrySearchProps) {
     const [search, setSearch] = useState(country || "");
@@ -34,6 +37,18 @@ function CountrySearch({
     const [activeIndex, setActiveIndex] = useState(-1);
     const listItemsRef = useRef<(HTMLLIElement | null)[]>([]);
     const containerRef = useRef<HTMLDivElement>(null);
+    // Refs so the delayed blur handler reads the LATEST values, not the stale closure
+    // captured when blur fired — clicking a suggestion blurs first, so without these the
+    // revert would run on the old typed text and wipe the selection.
+    const searchRef = useRef(search);
+    const countryRef = useRef(country);
+    const justSelectedRef = useRef(false);
+    useEffect(() => {
+        searchRef.current = search;
+    }, [search]);
+    useEffect(() => {
+        countryRef.current = country;
+    }, [country]);
 
     // Sync local state with prop changes
     useEffect(() => {
@@ -85,6 +100,7 @@ function CountrySearch({
     }, []);
 
     const handleSelect = (selectedCountry: Country) => {
+        justSelectedRef.current = true;
         setSearch(selectedCountry.name);
         onChange(selectedCountry);
         setIsFocused(false);
@@ -93,6 +109,24 @@ function CountrySearch({
     const handleInputBlur = () => {
         setTimeout(() => {
             setIsFocused(false);
+            if (!enforceSelection) return;
+            // A suggestion was just clicked — keep that selection, don't revert.
+            if (justSelectedRef.current) {
+                justSelectedRef.current = false;
+                return;
+            }
+            // Read the LATEST values via refs (not the stale blur-time closure).
+            const typed = searchRef.current.trim().toLowerCase();
+            const committed = countryRef.current;
+            const exact = allCountries.find((c) => c.name.toLowerCase() === typed);
+            if (exact) {
+                setSearch(exact.name);
+                onChange(exact);
+            } else {
+                // Not a known country — revert to the last committed value (no free text).
+                setSearch(committed || "");
+                if (!committed) onChange(null);
+            }
         }, 150);
     };
 
@@ -102,16 +136,23 @@ function CountrySearch({
 
         if (!newValue) {
             onChange(null);
-        } else {
-            // Propagate custom value immediately to support free text search
-            onChange({
-                id: 0,
-                name: newValue,
-                code: "",
-                phoneCode: "",
-                isActive: true,
-            });
+            return;
         }
+
+        if (enforceSelection) {
+            // No free text: typing only filters. A value is committed when the user
+            // picks a suggestion (or types an exact match, resolved on blur).
+            return;
+        }
+
+        // Legacy free-text behavior: propagate the typed value.
+        onChange({
+            id: 0,
+            name: newValue,
+            code: "",
+            phoneCode: "",
+            isActive: true,
+        });
     };
 
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
