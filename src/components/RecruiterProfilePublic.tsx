@@ -342,9 +342,14 @@ export default function RecruiterProfilePublic({
                   <div className="w-1.5 h-6 bg-blue-600 rounded-full" />
                   Open Positions
                 </h2>
-                {profile.recent_jobs && profile.recent_jobs.length > 0 ? (
+                {/* Confidential jobs are excluded — showing them here would reveal the
+                    company and defeat the point of a confidential posting. */}
+                {profile.recent_jobs &&
+                profile.recent_jobs.some((job) => !job.is_confidential) ? (
                   <div className="space-y-4">
-                    {profile.recent_jobs.map((job) => (
+                    {profile.recent_jobs
+                      .filter((job) => !job.is_confidential)
+                      .map((job) => (
                       <article
                         key={job.id}
                         className="group p-6 rounded-2xl border border-slate-100 hover:border-blue-200 hover:bg-blue-50/30 transition-all cursor-pointer"
