@@ -4,6 +4,7 @@ import Link from "next/link";
 import config from "@/config";
 import { Job } from "@/types/api";
 import JobDetailsClient from "./JobDetailsClient";
+import JobViewCount from "./JobViewCount";
 import JobDetailsSidebar from "@/components/JobDetailsSidebar";
 import FloatingHeader from "@/components/FloatingHeader";
 import { notFound } from "next/navigation";
@@ -26,10 +27,11 @@ import {
 
 // Server-side data fetching function for individual job details
 // ISR: cache the render in KV + revalidate every 60s. Shorter window since jobs
-// change and the view_count lives here. fetchCache makes the fetches cacheable
-// (no-store by default in Next 15) so crawler/prefetch hits serve from cache instead
-// of re-rendering — which also curbs the view_count inflation.
-export const revalidate = 60;
+// changes. The view_count is now rendered client-side (JobViewCount), so a long
+// interval is fine: the cached content rarely changes and fewer regenerations means
+// fewer slow on-demand renders. fetchCache makes the fetches cacheable (no-store by
+// default in Next 15) so the page is served from KV instead of SSR-ing each request.
+export const revalidate = 600;
 export const fetchCache = "default-cache";
 // Defining generateStaticParams (even empty) puts this dynamic route into ISR mode:
 // unknown slugs render on-demand and are then cached in KV (dynamicParams defaults to
@@ -226,7 +228,8 @@ export default async function JobDetailsPage({
                     <div className="w-px h-3 bg-gray-300 dark:bg-gray-700"></div>
                     <div className="flex items-center gap-1.5">
                       <Eye className="w-3.5 h-3.5" />
-                      {job.view_count} views
+                      {/* Live, client-side count (decoupled from the ISR cache) */}
+                      <JobViewCount jobId={job.id} initial={job.view_count} />
                     </div>
                   </div>
                 </div>
