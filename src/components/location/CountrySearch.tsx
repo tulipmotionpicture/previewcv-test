@@ -259,7 +259,10 @@ function CountrySearch({
                                 <div className="text-xs text-gray-500 mt-0.5 flex items-center gap-2">
                                     <span>Code: {countryItem.code}</span>
                                     {countryItem.phoneCode && (
-                                        <span>• Phone: +{countryItem.phoneCode}</span>
+                                        <span>
+                                            • Phone: +
+                                            {String(countryItem.phoneCode).replace(/^\+/, "")}
+                                        </span>
                                     )}
                                 </div>
                             </li>
