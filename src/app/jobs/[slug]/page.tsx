@@ -5,6 +5,18 @@ import { api } from "@/lib/api";
 import type { SEOJobsResponse } from "@/types/jobs";
 import SEOJobsListWithLayout from "@/components/jobs/SEOJobsListWithLayout";
 
+// ISR: cache the render in KV + revalidate every 5 min. fetchCache makes the
+// server-side data fetches cacheable (they default to no-store in Next 15) so the
+// page is served from cache instead of re-rendering (SSR) on every request.
+export const revalidate = 300;
+export const fetchCache = "default-cache";
+// Defining generateStaticParams (even empty) puts this dynamic route into ISR mode:
+// unknown slugs render on-demand and are then cached in KV (dynamicParams defaults to
+// true), instead of SSR-ing on every request.
+export async function generateStaticParams() {
+  return [];
+}
+
 // Server-side data fetching function for SEO-based job listings
 // Uses /api/v1/jobs/by-slug/{path} endpoint for patterns like:
 // - "jobs-in-bangalore"

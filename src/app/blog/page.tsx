@@ -2,6 +2,12 @@ import { Metadata } from "next";
 import config from "@/config";
 import BlogListing from "./BlogListing";
 
+// ISR: cache the render in KV + revalidate every 5 min. fetchCache makes the
+// server-side data fetches cacheable (they default to no-store in Next 15) so the
+// page is served from cache instead of re-rendering (SSR) on every request.
+export const revalidate = 300;
+export const fetchCache = "default-cache";
+
 export const metadata: Metadata = {
   title: { absolute: "Career Insights & Resources | PreviewCV Blog" },
   description:

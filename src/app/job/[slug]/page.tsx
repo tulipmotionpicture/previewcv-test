@@ -25,6 +25,19 @@ import {
 } from "lucide-react";
 
 // Server-side data fetching function for individual job details
+// ISR: cache the render in KV + revalidate every 60s. Shorter window since jobs
+// change and the view_count lives here. fetchCache makes the fetches cacheable
+// (no-store by default in Next 15) so crawler/prefetch hits serve from cache instead
+// of re-rendering — which also curbs the view_count inflation.
+export const revalidate = 60;
+export const fetchCache = "default-cache";
+// Defining generateStaticParams (even empty) puts this dynamic route into ISR mode:
+// unknown slugs render on-demand and are then cached in KV (dynamicParams defaults to
+// true), instead of SSR-ing on every request.
+export async function generateStaticParams() {
+  return [];
+}
+
 async function getJobBySlug(slug: string): Promise<Job | null> {
   try {
     const response = await api.getJobBySlug(slug);
