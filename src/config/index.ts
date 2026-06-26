@@ -50,7 +50,11 @@ const config: Config = {
     name: process.env.NEXT_PUBLIC_APP_NAME || "PreviewCV",
     nodeEnv: process.env.NODE_ENV || "development",
     logoUrl: process.env.NEXT_PUBLIC_LOGO_URL || "",
-    favIcon: process.env.NEXT_FAVICON || "",
+    // Prefer NEXT_PUBLIC_FAVICON: NEXT_PUBLIC_* is inlined at build, so the favicon
+    // is present everywhere (build + runtime, static + dynamic). NEXT_FAVICON is a
+    // non-public var that only exists at runtime where the Worker env provides it,
+    // so it silently resolves empty in the root-layout metadata. Keep it as a fallback.
+    favIcon: (process.env.NEXT_PUBLIC_FAVICON || process.env.NEXT_FAVICON || "").trim(),
     // Public, absolute base URL of this site (e.g. https://previewcv.com). Used for the
     // sitemap and any absolute canonical URLs. No trailing slash.
     siteUrl: (process.env.NEXT_PUBLIC_SITE_URL || "").replace(/\/$/, ""),
