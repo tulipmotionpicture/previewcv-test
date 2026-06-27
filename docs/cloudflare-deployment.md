@@ -42,6 +42,15 @@ Unlike a purely static frontend, previewcv's `api/resume/[token]` route handlers
 | **Runtime variables** (plaintext) | Worker → Settings → Variables and Secrets | `API_BASE_URL`, `NEXT_FAVICON`, `RATE_LIMIT_REQUESTS_PER_HOUR`, `RATE_LIMIT_WINDOW_MS` |
 | **Runtime secrets** | Worker → Settings → Variables and Secrets (Secret) | `RECAPTCHA_SECRET_KEY`, `SHARED_LINK_API_TOKEN` |
 
+> ⚠️ These are **runtime** variables (read at request time by the `api/resume` route), **not**
+> "Build variables". A Build variable only exists during `next build` and never reaches the deployed
+> Worker, so it cannot supply `API_BASE_URL`.
+>
+> ⚠️ `wrangler deploy` deletes all plaintext vars before applying config unless `keep_vars: true` is
+> set in `wrangler.jsonc` (it is). That is why a dashboard-only `API_BASE_URL` got wiped on deploy
+> and `/api/resume` fell back to `http://localhost:8000` → `PARSE_ERROR`. Secrets are never deleted,
+> which is why `SHARED_LINK_API_TOKEN` survived. With `keep_vars: true`, dashboard-set vars persist.
+
 Locally, all runtime vars/secrets go in `.dev.vars`. `NEXT_PUBLIC_*` come from `.env.local`.
 
 ## 4. Local testing

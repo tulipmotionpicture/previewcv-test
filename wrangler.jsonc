@@ -16,10 +16,17 @@
       "binding": "NEXT_INC_CACHE_KV",
       "id": "acca016d90fc4b569ce7b112b3dc6bd6"
     }
-  ]
-  // NEXT_PUBLIC_* -> Workers Builds "Build variables" (inlined at build time).
-  // Server-side runtime config (used by /api/resume route handlers) must be set as
-  // Worker runtime Variables/Secrets — see docs/cloudflare-deployment.md:
+  ],
+  // Keep dashboard-managed runtime vars across deploys. Without this, `wrangler deploy`
+  // defaults to deleting ALL plaintext vars before applying the ones in this config — so
+  // any var set only in the dashboard is wiped on every deploy. That is what broke
+  // /api/resume: API_BASE_URL (dashboard-only) was dropped, config fell back to
+  // http://localhost:8000, and the upstream fetch returned Cloudflare's plaintext
+  // "error code: 1003" -> JSON.parse failed -> PARSE_ERROR. Secrets are never deleted.
+  "keep_vars": true
+  // NEXT_PUBLIC_* -> Workers Builds "Build variables" (inlined at build time, build only).
+  // Server-side RUNTIME vars (read at request time by api/resume) -> Worker → Settings →
+  // Variables and Secrets, NOT "Build variables":
   //   plain vars : API_BASE_URL, NEXT_FAVICON, RATE_LIMIT_REQUESTS_PER_HOUR, RATE_LIMIT_WINDOW_MS
   //   secrets    : RECAPTCHA_SECRET_KEY, SHARED_LINK_API_TOKEN
 }
