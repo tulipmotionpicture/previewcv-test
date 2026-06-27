@@ -10,15 +10,24 @@ import {
   ChevronLeft,
   ChevronRight,
   Lock,
+  Mail,
+  Phone,
+  MapPin,
+  CalendarClock,
+  User,
+  CheckCircle2,
 } from "lucide-react";
-import { CVUnlockResponse } from "@/types/api";
-import { useEffect, useState } from "react";
+import { CVUnlockResponse, IntroUnlockResponse } from "@/types/api";
+import { useEffect, useState, type ReactNode } from "react";
 import MaximizableModal from "@/components/common/MaximizableModal";
 
 interface ResumeDetailModalProps {
   isOpen: boolean;
   onClose: () => void;
   resumeData: CVUnlockResponse | null;
+  // Intro (No-CV) candidate support.
+  isIntro?: boolean;
+  introData?: IntroUnlockResponse | null;
   onDownloadPDF: () => Promise<void>;
   // Navigation props
   onNavigateNext?: () => void;
@@ -44,6 +53,8 @@ export default function ResumeDetailModal({
   isOpen,
   onClose,
   resumeData,
+  isIntro = false,
+  introData = null,
   onDownloadPDF,
   onNavigateNext,
   onNavigatePrevious,
@@ -160,10 +171,12 @@ export default function ResumeDetailModal({
               <Lock className="w-10 h-10 text-amber-600 dark:text-amber-400" />
             </div>
             <h4 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
-              This Resume is Locked
+              {isIntro ? "This Profile is Locked" : "This Resume is Locked"}
             </h4>
             <p className="text-gray-600 dark:text-gray-400 mb-6">
-              Unlock this resume to view full details and download the PDF.
+              {isIntro
+                ? "This is a No-CV onboarding candidate. Unlock to reveal their full contact details (1 credit, 90 days access)."
+                : "Unlock this resume to view full details and download the PDF."}
             </p>
             <button
               onClick={onUnlock}
@@ -182,11 +195,160 @@ export default function ResumeDetailModal({
               ) : (
                 <>
                   <Unlock className="w-5 h-5" />
-                  Unlock Resume
+                  {isIntro ? "Unlock Profile" : "Unlock Resume"}
                 </>
               )}
             </button>
           </div>
+        </div>
+      </MaximizableModal>
+    );
+  }
+
+  // Intro (No-CV) unlocked view — flat contact panel, no PDF/resume sections.
+  if (isIntro) {
+    if (!introData) return null;
+
+    const phone = [introData.phone_country_code, introData.phone_number]
+      .filter(Boolean)
+      .join(" ");
+    const contactRows: Array<{
+      icon: ReactNode;
+      label: string;
+      value?: string | null;
+    }> = [
+      { icon: <Mail className="w-4 h-4" />, label: "Email", value: introData.email },
+      { icon: <Phone className="w-4 h-4" />, label: "Phone", value: phone || null },
+      { icon: <MapPin className="w-4 h-4" />, label: "Location", value: introData.full_address },
+      {
+        icon: <CalendarClock className="w-4 h-4" />,
+        label: "Notice Period",
+        value: introData.notice_period,
+      },
+      {
+        icon: <User className="w-4 h-4" />,
+        label: "Gender",
+        value: introData.gender,
+      },
+    ];
+
+    return (
+      <MaximizableModal
+        isOpen={isOpen}
+        onClose={onClose}
+        isMaximized={isMaximized}
+        setIsMaximized={setIsMaximized}
+        maxWidthClass="max-w-2xl"
+        title={
+          <span>
+            Candidate Profile - {introData.full_name || "Intro Candidate"}
+          </span>
+        }
+        headerIcon={<User className="w-5 h-5" />}
+        footer={
+          <div className="flex items-center justify-between gap-3 w-full">
+            {/* Navigation arrows */}
+            <div className="flex items-center gap-2">
+              {(hasPrevious || hasNext) && (
+                <>
+                  <button
+                    onClick={onNavigatePrevious}
+                    disabled={!hasPrevious || isNavigating}
+                    className="px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors disabled:opacity-30 disabled:cursor-not-allowed flex items-center gap-1"
+                  >
+                    <ChevronLeft className="w-4 h-4" />
+                    Previous
+                  </button>
+                  {currentIndex !== undefined && totalCount !== undefined && (
+                    <span className="text-sm text-gray-600 dark:text-gray-400 px-2">
+                      {currentIndex + 1} / {totalCount}
+                    </span>
+                  )}
+                  <button
+                    onClick={onNavigateNext}
+                    disabled={!hasNext || isNavigating}
+                    className="px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors disabled:opacity-30 disabled:cursor-not-allowed flex items-center gap-1"
+                  >
+                    Next
+                    <ChevronRight className="w-4 h-4" />
+                  </button>
+                </>
+              )}
+            </div>
+            <button
+              onClick={onClose}
+              className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+            >
+              Close
+            </button>
+          </div>
+        }
+      >
+        <div className="space-y-6">
+          {/* Identity header */}
+          <div className="flex items-start gap-4">
+            <div className="w-14 h-14 rounded-full bg-primary-blue/10 dark:bg-blue-900/30 flex items-center justify-center shrink-0">
+              <User className="w-7 h-7 text-primary-blue dark:text-blue-300" />
+            </div>
+            <div className="min-w-0">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 truncate">
+                {introData.full_name || "Intro Candidate"}
+              </h3>
+              {introData.professional_title && (
+                <p className="text-sm text-primary-blue dark:text-blue-400 truncate">
+                  {introData.professional_title}
+                </p>
+              )}
+              <div className="flex flex-wrap items-center gap-2 mt-1.5">
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-50 text-amber-700 border border-amber-200 dark:bg-amber-900/30 dark:text-amber-300 dark:border-amber-900/50">
+                  No CV
+                </span>
+                {introData.open_to_work && (
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-300 dark:border-emerald-900/50">
+                    <CheckCircle2 className="w-3 h-3" />
+                    Open to work
+                  </span>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Contact details */}
+          <div className="rounded-xl border border-gray-200 dark:border-gray-700 divide-y divide-gray-100 dark:divide-gray-700/60">
+            {contactRows
+              .filter((row) => row.value)
+              .map((row) => (
+                <div
+                  key={row.label}
+                  className="flex items-start gap-3 px-4 py-3 text-sm"
+                >
+                  <span className="text-gray-400 dark:text-gray-500 mt-0.5 shrink-0">
+                    {row.icon}
+                  </span>
+                  <div className="min-w-0">
+                    <p className="text-[11px] uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                      {row.label}
+                    </p>
+                    <p className="text-gray-900 dark:text-gray-100 break-words">
+                      {row.value}
+                    </p>
+                  </div>
+                </div>
+              ))}
+          </div>
+
+          {/* Access window */}
+          {introData.unlocked_until && (
+            <p className="text-xs text-gray-500 dark:text-gray-400">
+              Access valid until{" "}
+              {new Date(introData.unlocked_until).toLocaleDateString()}.
+            </p>
+          )}
+
+          <p className="text-xs text-gray-400 dark:text-gray-500 italic">
+            This candidate has not created a CV yet, so there is no resume to
+            download.
+          </p>
         </div>
       </MaximizableModal>
     );

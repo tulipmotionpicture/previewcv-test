@@ -7,6 +7,7 @@ import {
   CVSearchResult,
   CVSearchResponse,
   CVUnlockResponse,
+  IntroUnlockResponse,
   CVCreditsStatus,
   BucketWithStats,
   BucketListResponse,
@@ -42,6 +43,8 @@ import {
   Star,
   Edit2,
   Coins,
+  FileX,
+  CalendarClock,
 } from "lucide-react";
 import ResumeDetailModal from "./ResumeDetailModal";
 import { CountrySearch, StateSearch, CitySearch } from "@/components/location";
@@ -119,13 +122,15 @@ export default function CVSearchPage({ onBuyCredits }: CVSearchPageProps = {}) {
     null,
   );
   const [loading, setLoading] = useState(false);
-  const [unlockedResumes, setUnlockedResumes] = useState<Set<number>>(
+  // Identity sets are keyed by a stable string (`resume:{id}` or `intro:{id}`)
+  // because intro (No-CV) candidates have a null resume_id.
+  const [unlockedResumes, setUnlockedResumes] = useState<Set<string>>(
     new Set(),
   );
-  const [selectedResumes, setSelectedResumes] = useState<Set<number>>(
+  const [selectedResumes, setSelectedResumes] = useState<Set<string>>(
     new Set(),
   );
-  const [unlockingIds, setUnlockingIds] = useState<Set<number>>(new Set());
+  const [unlockingIds, setUnlockingIds] = useState<Set<string>>(new Set());
 
   // Bucket states
   const [buckets, setBuckets] = useState<BucketWithStats[]>([]);
@@ -156,7 +161,11 @@ export default function CVSearchPage({ onBuyCredits }: CVSearchPageProps = {}) {
   const [showResumeModal, setShowResumeModal] = useState(false);
   const [resumeDetailData, setResumeDetailData] =
     useState<CVUnlockResponse | null>(null);
-  const [loadingResumeDetail, setLoadingResumeDetail] = useState<Set<number>>(
+  // Intro (No-CV) candidate detail shown in the same modal (intro mode).
+  const [introDetailData, setIntroDetailData] =
+    useState<IntroUnlockResponse | null>(null);
+  const [currentResumeIsIntro, setCurrentResumeIsIntro] = useState(false);
+  const [loadingResumeDetail, setLoadingResumeDetail] = useState<Set<string>>(
     new Set(),
   );
 
@@ -165,6 +174,15 @@ export default function CVSearchPage({ onBuyCredits }: CVSearchPageProps = {}) {
   const [currentResumeIsLocked, setCurrentResumeIsLocked] = useState(false);
   const [isNavigating, setIsNavigating] = useState(false);
   const [lockedResumeInfo, setLockedResumeInfo] = useState<any>(null);
+
+  // Stable identity keys. Intro candidates have a null resume_id, so we key
+  // them by intro_cv_info_id instead.
+  const rowKey = (result: CVSearchResult): string =>
+    result.is_intro_only && result.intro_cv_info_id != null
+      ? `intro:${result.intro_cv_info_id}`
+      : `resume:${result.resume_id}`;
+  const resumeKey = (resumeId: number): string => `resume:${resumeId}`;
+  const introKey = (introId: number): string => `intro:${introId}`;
 
   // Fetch credits status and buckets
   useEffect(() => {
@@ -445,8 +463,17 @@ export default function CVSearchPage({ onBuyCredits }: CVSearchPageProps = {}) {
           activeFilters.excluded_companies.length > 0
             ? activeFilters.excluded_companies
             : undefined,
-        min_experience_years: activeFilters.min_experience_years,
-        max_experience_years: activeFilters.max_experience_years,
+        // Only send the experience range when the recruiter actually narrows
+        // it. Sending the default full range (0–50) counts as a resume-only
+        // filter on the backend and excludes intro (No-CV) candidates.
+        min_experience_years:
+          activeFilters.min_experience_years > 0
+            ? activeFilters.min_experience_years
+            : undefined,
+        max_experience_years:
+          activeFilters.max_experience_years < 50
+            ? activeFilters.max_experience_years
+            : undefined,
         industry: activeFilters.industry || undefined,
         education_level: activeFilters.education_level || undefined,
         country: activeFilters.country || undefined,
@@ -506,10 +533,10 @@ export default function CVSearchPage({ onBuyCredits }: CVSearchPageProps = {}) {
       if (index !== -1) setCurrentResumeIndex(index);
     }
 
-    setUnlockingIds((prev) => new Set([...prev, resumeId]));
+    setUnlockingIds((prev) => new Set([...prev, resumeKey(resumeId)]));
     try {
       const response = await api.unlockCVProfile(resumeId, "search");
-      setUnlockedResumes((prev) => new Set([...prev, resumeId]));
+      setUnlockedResumes((prev) => new Set([...prev, resumeKey(resumeId)]));
 
       // Refresh credits
       const status = await api.getCVCreditsStatus();
@@ -517,6 +544,8 @@ export default function CVSearchPage({ onBuyCredits }: CVSearchPageProps = {}) {
 
       // Show resume details in modal
       setResumeDetailData(response);
+      setIntroDetailData(null);
+      setCurrentResumeIsIntro(false);
       setShowResumeModal(true);
       setCurrentResumeIsLocked(false);
       setLockedResumeInfo(null);
@@ -531,29 +560,129 @@ export default function CVSearchPage({ onBuyCredits }: CVSearchPageProps = {}) {
     } finally {
       setUnlockingIds((prev) => {
         const newSet = new Set(prev);
-        newSet.delete(resumeId);
+        newSet.delete(resumeKey(resumeId));
         return newSet;
       });
     }
   };
 
-  // Bulk unlock
+  // Unlock an intro (No-CV) candidate via the dedicated endpoint.
+  const handleUnlockIntro = async (result: CVSearchResult) => {
+    const introId = result.intro_cv_info_id;
+    if (introId == null) return;
+    const key = introKey(introId);
+
+    if (searchResults?.results) {
+      const index = searchResults.results.findIndex(
+        (r) => rowKey(r) === rowKey(result),
+      );
+      if (index !== -1) setCurrentResumeIndex(index);
+    }
+
+    setUnlockingIds((prev) => new Set([...prev, key]));
+    try {
+      const response = await api.unlockIntroProfile(introId, "search");
+      setUnlockedResumes((prev) => new Set([...prev, key]));
+
+      // Refresh credits
+      const status = await api.getCVCreditsStatus();
+      setCreditsStatus(status);
+
+      // Show intro details in the modal (intro mode)
+      setIntroDetailData(response);
+      setResumeDetailData(null);
+      setCurrentResumeIsIntro(true);
+      setShowResumeModal(true);
+      setCurrentResumeIsLocked(false);
+      setLockedResumeInfo(null);
+
+      showToast(
+        response.message || "Intro profile unlocked successfully!",
+        "success",
+      );
+    } catch (error: any) {
+      console.error("Failed to unlock intro profile:", error);
+      showToast(
+        error?.message || "Failed to unlock intro profile. Please try again.",
+        "error",
+      );
+    } finally {
+      setUnlockingIds((prev) => {
+        const newSet = new Set(prev);
+        newSet.delete(key);
+        return newSet;
+      });
+    }
+  };
+
+  // View an already-unlocked intro candidate. unlock-intro is idempotent and
+  // free within the access window, so we re-call it to fetch the full info.
+  const handleViewIntro = async (result: CVSearchResult) => {
+    const introId = result.intro_cv_info_id;
+    if (introId == null) return;
+    const key = introKey(introId);
+
+    if (searchResults?.results) {
+      const index = searchResults.results.findIndex(
+        (r) => rowKey(r) === rowKey(result),
+      );
+      if (index !== -1) setCurrentResumeIndex(index);
+    }
+
+    setLoadingResumeDetail((prev) => new Set([...prev, key]));
+    try {
+      const response = await api.unlockIntroProfile(introId, "search");
+      setIntroDetailData(response);
+      setResumeDetailData(null);
+      setCurrentResumeIsIntro(true);
+      setShowResumeModal(true);
+      setCurrentResumeIsLocked(false);
+      setLockedResumeInfo(null);
+    } catch (error) {
+      console.error("Failed to load intro profile:", error);
+      showToast("Failed to load intro profile details.", "error");
+    } finally {
+      setLoadingResumeDetail((prev) => {
+        const newSet = new Set(prev);
+        newSet.delete(key);
+        return newSet;
+      });
+    }
+  };
+
+  // Bulk unlock. Intro (No-CV) candidates have no resume_id and no bulk
+  // endpoint, so they are skipped here and must be unlocked individually.
   const handleBulkUnlock = async () => {
     if (selectedResumes.size === 0) {
       showToast("Please select resumes to unlock", "error");
       return;
     }
 
+    const selectedRows = (searchResults?.results || []).filter((r) =>
+      selectedResumes.has(rowKey(r)),
+    );
+    const resumeIds = selectedRows
+      .filter((r) => !r.is_intro_only && r.resume_id != null)
+      .map((r) => r.resume_id as number);
+    const introSkipped = selectedRows.filter((r) => r.is_intro_only).length;
+
+    if (resumeIds.length === 0) {
+      showToast(
+        introSkipped > 0
+          ? "No-CV candidates can't be bulk-unlocked. Unlock them individually."
+          : "Please select resumes to unlock",
+        "error",
+      );
+      return;
+    }
+
     setLoading(true);
     try {
-      const response = await api.bulkUnlockCVProfiles(
-        Array.from(selectedResumes),
-        "search",
-      );
+      const response = await api.bulkUnlockCVProfiles(resumeIds, "search");
 
       // Mark as unlocked
-      selectedResumes.forEach((id) => {
-        setUnlockedResumes((prev) => new Set([...prev, id]));
+      resumeIds.forEach((id) => {
+        setUnlockedResumes((prev) => new Set([...prev, resumeKey(id)]));
       });
       setSelectedResumes(new Set());
 
@@ -561,10 +690,11 @@ export default function CVSearchPage({ onBuyCredits }: CVSearchPageProps = {}) {
       const status = await api.getCVCreditsStatus();
       setCreditsStatus(status);
 
-      showToast(
-        `${response.unlocked_count} resumes unlocked successfully!`,
-        "success",
-      );
+      let message = `${response.unlocked_count} resumes unlocked successfully!`;
+      if (introSkipped > 0) {
+        message += ` ${introSkipped} No-CV candidate${introSkipped > 1 ? "s" : ""} skipped — unlock individually.`;
+      }
+      showToast(message, "success");
     } catch (error: any) {
       console.error("Failed to bulk unlock:", error);
       showToast(error?.message || "Failed to unlock resumes.", "error");
@@ -581,11 +711,13 @@ export default function CVSearchPage({ onBuyCredits }: CVSearchPageProps = {}) {
       if (index !== -1) setCurrentResumeIndex(index);
     }
 
-    setLoadingResumeDetail((prev) => new Set([...prev, resumeId]));
+    setLoadingResumeDetail((prev) => new Set([...prev, resumeKey(resumeId)]));
     try {
       // Call unlock API to get resume data (already unlocked, so just retrieves data)
       const response = await api.unlockCVProfile(resumeId, "search");
       setResumeDetailData(response);
+      setIntroDetailData(null);
+      setCurrentResumeIsIntro(false);
       setShowResumeModal(true);
       setCurrentResumeIsLocked(false);
       setLockedResumeInfo(null);
@@ -595,7 +727,7 @@ export default function CVSearchPage({ onBuyCredits }: CVSearchPageProps = {}) {
     } finally {
       setLoadingResumeDetail((prev) => {
         const newSet = new Set(prev);
-        newSet.delete(resumeId);
+        newSet.delete(resumeKey(resumeId));
         return newSet;
       });
     }
@@ -619,13 +751,13 @@ export default function CVSearchPage({ onBuyCredits }: CVSearchPageProps = {}) {
     }
   };
 
-  const toggleSelectResume = (resumeId: number) => {
+  const toggleSelectResume = (key: string) => {
     setSelectedResumes((prev) => {
       const newSet = new Set(prev);
-      if (newSet.has(resumeId)) {
-        newSet.delete(resumeId);
+      if (newSet.has(key)) {
+        newSet.delete(key);
       } else {
-        newSet.add(resumeId);
+        newSet.add(key);
       }
       return newSet;
     });
@@ -915,16 +1047,36 @@ export default function CVSearchPage({ onBuyCredits }: CVSearchPageProps = {}) {
       return;
     }
 
+    // Buckets are resume-based; intro (No-CV) candidates have no resume_id.
+    const selectedRows = (searchResults?.results || []).filter((r) =>
+      selectedResumes.has(rowKey(r)),
+    );
+    const resumeIds = selectedRows
+      .filter((r) => !r.is_intro_only && r.resume_id != null)
+      .map((r) => r.resume_id as number);
+    const introSkipped = selectedRows.filter((r) => r.is_intro_only).length;
+
+    if (resumeIds.length === 0) {
+      showToast(
+        introSkipped > 0
+          ? "No-CV candidates can't be added to buckets."
+          : "Please select resumes to add",
+        "error",
+      );
+      return;
+    }
+
     setAddingToBucket(true);
     try {
       const response = await api.addResumesToBucket(selectedBucketId, {
-        resume_ids: Array.from(selectedResumes),
+        resume_ids: resumeIds,
       });
 
-      showToast(
-        `${response.data.added_count} resumes added to bucket successfully!`,
-        "success",
-      );
+      let message = `${response.data.added_count} resumes added to bucket successfully!`;
+      if (introSkipped > 0) {
+        message += ` ${introSkipped} No-CV candidate${introSkipped > 1 ? "s" : ""} skipped.`;
+      }
+      showToast(message, "success");
       setShowBucketModal(false);
       setSelectedResumes(new Set());
 
@@ -948,22 +1100,7 @@ export default function CVSearchPage({ onBuyCredits }: CVSearchPageProps = {}) {
 
       setIsNavigating(true);
       setCurrentResumeIndex(nextIndex);
-
-      const isUnlocked =
-        unlockedResumes.has(nextResume.resume_id) || nextResume.is_unlocked;
-
-      if (isUnlocked) {
-        await handleDownloadResume(nextResume.resume_id);
-      } else {
-        setCurrentResumeIsLocked(true);
-        setLockedResumeInfo({
-          name: nextResume.resume_name || "Untitled Resume",
-          resume_id: nextResume.resume_id,
-          created_at: nextResume.created_at,
-          updated_at: nextResume.updated_at,
-        });
-        setResumeDetailData(null);
-      }
+      await navigateToResult(nextResume);
       setIsNavigating(false);
     }
   };
@@ -977,27 +1114,59 @@ export default function CVSearchPage({ onBuyCredits }: CVSearchPageProps = {}) {
 
       setIsNavigating(true);
       setCurrentResumeIndex(prevIndex);
-
-      const isUnlocked =
-        unlockedResumes.has(prevResume.resume_id) || prevResume.is_unlocked;
-
-      if (isUnlocked) {
-        await handleDownloadResume(prevResume.resume_id);
-      } else {
-        setCurrentResumeIsLocked(true);
-        setLockedResumeInfo({
-          name: prevResume.resume_name || "Untitled Resume",
-          resume_id: prevResume.resume_id,
-          created_at: prevResume.created_at,
-          updated_at: prevResume.updated_at,
-        });
-        setResumeDetailData(null);
-      }
+      await navigateToResult(prevResume);
       setIsNavigating(false);
     }
   };
 
+  // Open the modal for a given result, handling both resume and intro rows
+  // in either locked or unlocked state.
+  const navigateToResult = async (result: CVSearchResult) => {
+    const isUnlocked =
+      unlockedResumes.has(rowKey(result)) || result.is_unlocked;
+
+    if (result.is_intro_only) {
+      if (isUnlocked) {
+        await handleViewIntro(result);
+      } else {
+        setCurrentResumeIsIntro(true);
+        setCurrentResumeIsLocked(true);
+        setLockedResumeInfo({
+          name: result.full_name || result.resume_name || "Intro Candidate",
+          intro_cv_info_id: result.intro_cv_info_id,
+          is_intro: true,
+          created_at: result.created_at,
+          updated_at: result.updated_at,
+        });
+        setResumeDetailData(null);
+        setIntroDetailData(null);
+      }
+      return;
+    }
+
+    setCurrentResumeIsIntro(false);
+    if (isUnlocked && result.resume_id != null) {
+      await handleDownloadResume(result.resume_id);
+    } else {
+      setCurrentResumeIsLocked(true);
+      setLockedResumeInfo({
+        name: result.resume_name || "Untitled Resume",
+        resume_id: result.resume_id,
+        created_at: result.created_at,
+        updated_at: result.updated_at,
+      });
+      setResumeDetailData(null);
+    }
+  };
+
   const handleUnlockFromModal = async () => {
+    if (lockedResumeInfo?.is_intro && lockedResumeInfo?.intro_cv_info_id != null) {
+      const result = searchResults?.results.find(
+        (r) => r.intro_cv_info_id === lockedResumeInfo.intro_cv_info_id,
+      );
+      if (result) await handleUnlockIntro(result);
+      return;
+    }
     if (!lockedResumeInfo?.resume_id) return;
     await handleUnlockResume(lockedResumeInfo.resume_id);
   };
@@ -1232,9 +1401,9 @@ export default function CVSearchPage({ onBuyCredits }: CVSearchPageProps = {}) {
                   <input
                     type="number"
                     min="0"
-                    value={filters.min_experience_years}
+                    value={filters.min_experience_years || ""}
                     onChange={(e) => setFilters({ ...filters, min_experience_years: parseInt(e.target.value) || 0 })}
-                    placeholder="0"
+                    placeholder="Min"
                     className="w-full h-[42px] px-3 py-2 text-center bg-white dark:bg-gray-900 border border-[#E1E8F1] dark:border-gray-700 rounded-md text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
                   />
                 </div>
@@ -1242,9 +1411,9 @@ export default function CVSearchPage({ onBuyCredits }: CVSearchPageProps = {}) {
                   <input
                     type="number"
                     min="0"
-                    value={filters.max_experience_years}
+                    value={filters.max_experience_years === 50 ? "" : filters.max_experience_years}
                     onChange={(e) => setFilters({ ...filters, max_experience_years: parseInt(e.target.value) || 50 })}
-                    placeholder="2"
+                    placeholder="Max"
                     className="w-full h-[42px] px-3 py-2 text-center bg-white dark:bg-gray-900 border border-[#E1E8F1] dark:border-gray-700 rounded-md text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
                   />
                 </div>
@@ -1284,6 +1453,34 @@ export default function CVSearchPage({ onBuyCredits }: CVSearchPageProps = {}) {
             </div>
           </div>
         )}
+
+        {/* Quick toggle: surfaces open-to-work candidates (incl. No-CV intro profiles) */}
+        <div className="flex items-center gap-2 mt-3">
+          <button
+            type="button"
+            onClick={() => {
+              const next = !filters.open_to_work_only;
+              setFilters((prev) => ({ ...prev, open_to_work_only: next, page: 1 }));
+              handleSearch({ open_to_work_only: next, page: 1 });
+            }}
+            aria-pressed={filters.open_to_work_only}
+            className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors ${
+              filters.open_to_work_only
+                ? "bg-emerald-600 border-emerald-600 text-white shadow-sm"
+                : "bg-white dark:bg-gray-900 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:border-emerald-500"
+            }`}
+          >
+            <span
+              className={`w-1.5 h-1.5 rounded-full ${
+                filters.open_to_work_only ? "bg-white" : "bg-emerald-500"
+              }`}
+            />
+            Open to work only
+          </button>
+          <span className="text-[11px] text-gray-500 dark:text-gray-400">
+            Includes “No CV” onboarding candidates
+          </span>
+        </div>
 
         <div className="flex justify-center mt-3">
           <button
@@ -2103,9 +2300,14 @@ export default function CVSearchPage({ onBuyCredits }: CVSearchPageProps = {}) {
         searchResults && (
           <div className="space-y-4">
             <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-4">
-              {searchResults.results.map((result) => (
+              {searchResults.results.map((result) => {
+                const key = rowKey(result);
+                const isIntro = !!result.is_intro_only;
+                const isUnlocked =
+                  result.is_unlocked || unlockedResumes.has(key);
+                return (
                 <div
-                  key={result.resume_id}
+                  key={key}
                   className="group relative rounded-xl border border-gray-200 dark:border-gray-700
                  bg-white dark:bg-[#282727]
                  p-4 shadow-sm
@@ -2115,7 +2317,7 @@ export default function CVSearchPage({ onBuyCredits }: CVSearchPageProps = {}) {
                 >
                   {/* Card Header */}
                   <div className="flex items-start justify-between gap-3 mb-3">
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-3 min-w-0">
                       <div className="min-w-0">
                         <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100 leading-tight truncate">
                           {result.full_name}
@@ -2123,6 +2325,14 @@ export default function CVSearchPage({ onBuyCredits }: CVSearchPageProps = {}) {
                         <p className="text-xs font-medium text-primary-blue dark:text-blue-400 truncate">
                           {result.professional_title}
                         </p>
+                        {isIntro && (
+                          <span className="inline-flex items-center gap-1 mt-1 px-2 py-0.5 rounded-full text-[10px] font-semibold
+                           bg-amber-50 text-amber-700 border border-amber-200
+                           dark:bg-amber-900/30 dark:text-amber-300 dark:border-amber-900/50">
+                            <FileX className="w-3 h-3" />
+                            No CV
+                          </span>
+                        )}
                       </div>
                     </div>
 
@@ -2130,8 +2340,8 @@ export default function CVSearchPage({ onBuyCredits }: CVSearchPageProps = {}) {
                     <label className="flex items-center gap-1.5 text-[10px] text-gray-500 cursor-pointer shrink-0">
                       <input
                         type="checkbox"
-                        checked={selectedResumes.has(result.resume_id)}
-                        onChange={() => toggleSelectResume(result.resume_id)}
+                        checked={selectedResumes.has(key)}
+                        onChange={() => toggleSelectResume(key)}
                         className="w-3.5 h-3.5 rounded border-gray-300"
                       />
                       Select
@@ -2144,24 +2354,34 @@ export default function CVSearchPage({ onBuyCredits }: CVSearchPageProps = {}) {
                       <MapPin className="w-3.5 h-3.5 text-gray-400 shrink-0" />
                       <span className="truncate">{result.location}</span>
                     </div>
-                    <div className="flex items-center gap-1.5 truncate">
-                      <Briefcase className="w-3.5 h-3.5 text-gray-400 shrink-0" />
-                      <span className="truncate">{result.experience_years} yrs</span>
-                    </div>
-                    <div className="flex items-center gap-1.5 truncate">
-                      <GraduationCap className="w-3.5 h-3.5 text-gray-400 shrink-0" />
-                      <span className="truncate">{result.highest_education}</span>
-                    </div>
+                    {result.experience_years != null && (
+                      <div className="flex items-center gap-1.5 truncate">
+                        <Briefcase className="w-3.5 h-3.5 text-gray-400 shrink-0" />
+                        <span className="truncate">{result.experience_years} yrs</span>
+                      </div>
+                    )}
+                    {result.highest_education && (
+                      <div className="flex items-center gap-1.5 truncate">
+                        <GraduationCap className="w-3.5 h-3.5 text-gray-400 shrink-0" />
+                        <span className="truncate">{result.highest_education}</span>
+                      </div>
+                    )}
                     {result.current_company && (
                       <div className="flex items-center gap-1.5 col-span-2 truncate">
                         <Award className="w-3.5 h-3.5 text-gray-400 shrink-0" />
                         <span className="truncate">{result.current_company}</span>
                       </div>
                     )}
+                    {result.notice_period && (
+                      <div className="flex items-center gap-1.5 col-span-2 truncate">
+                        <CalendarClock className="w-3.5 h-3.5 text-gray-400 shrink-0" />
+                        <span className="truncate">{result.notice_period}</span>
+                      </div>
+                    )}
                   </div>
 
                   {/* Skills */}
-                  {result.skills?.length > 0 && (
+                  {result.skills && result.skills.length > 0 && (
                     <div className="mb-4">
                       <p className="text-[10px] font-semibold tracking-wide text-gray-500 dark:text-gray-400 uppercase mb-1.5">
                         Skills
@@ -2190,30 +2410,48 @@ export default function CVSearchPage({ onBuyCredits }: CVSearchPageProps = {}) {
                     </div>
                   )}
 
+                  {/* Intro candidates have no resume-derived skills/experience */}
+                  {isIntro && (
+                    <div className="mb-4">
+                      <p className="text-[10px] text-gray-400 dark:text-gray-500 italic">
+                        Onboarding profile — unlock to reveal full contact details.
+                      </p>
+                    </div>
+                  )}
+
                   {/* Actions */}
                   <div className="mt-auto">
-                    {result.is_unlocked ||
-                      unlockedResumes.has(result.resume_id) ? (
+                    {isUnlocked ? (
                       <button
-                        onClick={() => handleDownloadResume(result.resume_id)}
-                        disabled={loadingResumeDetail.has(result.resume_id)}
+                        onClick={() =>
+                          isIntro
+                            ? handleViewIntro(result)
+                            : result.resume_id != null &&
+                              handleDownloadResume(result.resume_id)
+                        }
+                        disabled={loadingResumeDetail.has(key)}
                         className="w-full px-3 py-1.5 rounded-lg text-xs font-semibold
                        bg-emerald-600 hover:bg-emerald-700
                        text-white shadow-sm transition flex items-center justify-center gap-1.5
                        disabled:opacity-50"
                       >
-                        {loadingResumeDetail.has(result.resume_id) ? (
+                        {loadingResumeDetail.has(key) ? (
                           <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
                         ) : (
                           <Eye className="w-3.5 h-3.5" />
                         )}
-                        View CV
+                        {isIntro ? "View Profile" : "View CV"}
                       </button>
                     ) : (
                       <button
-                        onClick={() => handleUnlockResume(result.resume_id)}
+                        onClick={() =>
+                          isIntro
+                            ? handleUnlockIntro(result)
+                            : result.resume_id != null &&
+                              handleUnlockResume(result.resume_id)
+                        }
                         disabled={
-                          unlockingIds.has(result.resume_id) ||
+                          unlockingIds.has(key) ||
                           !creditsStatus ||
                           creditsStatus.credits_remaining < 1
                         }
@@ -2223,17 +2461,18 @@ export default function CVSearchPage({ onBuyCredits }: CVSearchPageProps = {}) {
                        text-white shadow-sm transition
                        disabled:opacity-50 flex items-center justify-center gap-1.5"
                       >
-                        {unlockingIds.has(result.resume_id) ? (
+                        {unlockingIds.has(key) ? (
                           <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
                         ) : (
                           <Unlock className="w-3.5 h-3.5" />
                         )}
-                        Unlock (1)
+                        {isIntro ? "Unlock Profile (1)" : "Unlock (1)"}
                       </button>
                     )}
                   </div>
                 </div>
-              ))}
+                );
+              })}
             </div>
 
             {/* Pagination */}
@@ -2745,8 +2984,12 @@ export default function CVSearchPage({ onBuyCredits }: CVSearchPageProps = {}) {
         onClose={() => {
           setShowResumeModal(false);
           setResumeDetailData(null);
+          setIntroDetailData(null);
+          setCurrentResumeIsIntro(false);
         }}
         resumeData={resumeDetailData}
+        introData={introDetailData}
+        isIntro={currentResumeIsIntro}
         onDownloadPDF={handleDownloadPDF}
         onNavigateNext={handleNavigateNext}
         onNavigatePrevious={handleNavigatePrevious}
@@ -2762,9 +3005,9 @@ export default function CVSearchPage({ onBuyCredits }: CVSearchPageProps = {}) {
         isLocked={currentResumeIsLocked}
         onUnlock={handleUnlockFromModal}
         unlocking={
-          searchResults?.results
+          searchResults?.results?.[currentResumeIndex]
             ? unlockingIds.has(
-              searchResults.results[currentResumeIndex]?.resume_id,
+              rowKey(searchResults.results[currentResumeIndex]),
             )
             : false
         }

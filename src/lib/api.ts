@@ -2262,6 +2262,20 @@ export class ApiClient {
     );
   }
 
+  // Unlock an intro (No-CV) candidate. Uses intro_cv_info_id (NOT resume_id)
+  // and returns a flat contact/profile payload — there is no PDF/resume data.
+  async unlockIntroProfile(
+    introCvInfoId: number,
+    source: string = "search",
+  ): Promise<IntroUnlockResponse> {
+    return this.request<IntroUnlockResponse>(
+      `/api/v1/recruiter/cv-search/unlock-intro/${introCvInfoId}?source=${source}`,
+      { method: "POST" },
+      true,
+      true,
+    );
+  }
+
   async bulkUnlockCVProfiles(
     resumeIds: number[],
     source: string = "search",
@@ -2716,6 +2730,7 @@ export const api = new ApiClient();
 import type {
   CVSearchResponse,
   CVUnlockResponse,
+  IntroUnlockResponse,
   CVBulkUnlockResponse,
   UnlockedProfilesResponse,
   AccessLogsResponse,

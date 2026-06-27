@@ -764,21 +764,28 @@ export interface RecruiterDashboardAnalytics {
 
 // CV Search Types
 export interface CVSearchResult {
-  resume_id: number;
+  // Nullable for intro-only ("No CV") candidates, who have no resume.
+  resume_id: number | null;
   resume_name: string;
   professional_title: string;
   user_id: number;
   is_unlocked: boolean;
   unlocked_until?: string;
+  // Intro (No-CV) candidate flags.
+  is_intro_only?: boolean;
+  // Use this to unlock an intro candidate (POST /unlock-intro/{id}). Null for normal resumes.
+  intro_cv_info_id?: number | null;
+  notice_period?: string | null;
   full_name: string;
   profile_image_url?: string;
   location: string;
-  skills: string[];
-  experience_years: number;
+  // Resume-derived fields are null for intro-only candidates.
+  skills: string[] | null;
+  experience_years: number | null;
   current_company?: string;
-  highest_education: string;
-  languages: string[];
-  certifications_count: number;
+  highest_education: string | null;
+  languages: string[] | null;
+  certifications_count: number | null;
   profile_summary?: string;
   user_other_resumes?: Array<{
     resume_id: number;
@@ -857,6 +864,34 @@ export interface CVUnlockResponse {
     github?: string;
     website?: string;
   };
+  unlocked_at: string;
+  unlocked_until: string;
+}
+
+// Returned when unlocking an intro (No-CV) candidate. Flat contact/profile
+// fields — there is no PDF or parsed resume data for an intro candidate.
+export interface IntroUnlockResponse {
+  success: boolean;
+  message: string;
+  credits_remaining: number;
+  intro_cv_info_id: number;
+  user_id: number;
+  professional_title?: string | null;
+  full_name?: string | null;
+  first_name?: string | null;
+  last_name?: string | null;
+  email?: string | null;
+  phone_country_code?: string | null;
+  phone_number?: string | null;
+  gender?: string | null;
+  country?: string | null;
+  state?: string | null;
+  city?: string | null;
+  street_number?: string | null;
+  postal_zip_code?: string | null;
+  full_address?: string | null;
+  open_to_work?: boolean | null;
+  notice_period?: string | null;
   unlocked_at: string;
   unlocked_until: string;
 }
