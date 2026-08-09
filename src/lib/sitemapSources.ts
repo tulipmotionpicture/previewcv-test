@@ -45,7 +45,31 @@ export async function getJobTotal(): Promise<number> {
   return res.total || 0;
 }
 
-/** Open-job entries for one shard: jobs in [shardId·SHARD_SIZE, +SHARD_SIZE). */
+/**
+ * SEO job landing pages (`/jobs/{slug}`) — e.g. `jobs-in-dubai`, `full-time-jobs`.
+ *
+ * These are a distinct page class from job detail pages (`/job/{slug}`) and were previously
+ * absent from every sitemap, so Google had no declared path to them. The backend derives the
+ * patterns from live job data; we only emit patterns that still have at least one job so we
+ * never declare an empty (thin) landing page.
+ */
+export async function seoPatternEntries(
+  base: string,
+): Promise<MetadataRoute.Sitemap> {
+  try {
+    const res = await api.getSEOPatterns({ limit: 1000, minJobs: 1 });
+    return (res?.patterns ?? [])
+      .filter((p) => p.slug && (p.count ?? 0) > 0)
+      .map((p) => ({ url: `${base}/jobs/${p.slug}` }));
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * Open-job entries for one shard: jobs in [shardId·SHARD_SIZE, +SHARD_SIZE).
+ * Shard 0 also carries the (few) SEO landing pages.
+ */
 export async function getJobShardEntries(
   base: string,
   shardId: number,
@@ -53,6 +77,10 @@ export async function getJobShardEntries(
   const start = shardId * SHARD_SIZE;
   const end = start + SHARD_SIZE;
   const entries: MetadataRoute.Sitemap = [];
+
+  if (shardId === 0) {
+    entries.push(...(await seoPatternEntries(base)));
+  }
 
   let offset = start;
   while (offset < end) {

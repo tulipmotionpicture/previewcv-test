@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
+import config from "@/config";
 import FloatingHeader from "@/components/FloatingHeader";
 import { api } from "@/lib/api";
 import type { SEOJobsResponse } from "@/types/jobs";
@@ -64,7 +65,11 @@ export async function generateMetadata({
       description: data.meta.description,
     },
     alternates: {
-      canonical: data.meta.canonical_url,
+      // Build the canonical from the slug rather than trusting the backend's
+      // meta.canonical_url: that value omits the `/jobs` path segment (it returns
+      // e.g. "/jobs-in-dubai-united-arab-emirates"), which resolves to a 404. A
+      // canonical pointing at a missing URL stops the page being indexed at all.
+      canonical: `${config.app.siteUrl}/jobs/${slug}`,
     },
   };
 }
