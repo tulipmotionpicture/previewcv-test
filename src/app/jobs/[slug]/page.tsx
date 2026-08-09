@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import FloatingHeader from "@/components/FloatingHeader";
@@ -93,7 +94,20 @@ export default async function SEOJobsPage({
         hideOnScroll={true}
       />
       <div className="pt-18 pb-8 px-4 md:px-12 max-w-7xl mx-auto">
-        <SEOJobsListWithLayout slug={slug} limit={10} />
+        {/* SEOJobsListWithLayout is a client component that reads useSearchParams().
+            This page is prerendered/ISR (see revalidate + generateStaticParams above),
+            so without a Suspense boundary the render bails out to CSR and throws
+            BAILOUT_TO_CLIENT_SIDE_RENDERING -> 500 on every /jobs/[slug] request. */}
+        <Suspense
+          fallback={
+            <div className="py-20 flex flex-col items-center justify-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-blue mb-4" />
+              <p className="text-gray-600 dark:text-gray-400">Loading jobs...</p>
+            </div>
+          }
+        >
+          <SEOJobsListWithLayout slug={slug} limit={10} />
+        </Suspense>
       </div>
     </div>
   );
