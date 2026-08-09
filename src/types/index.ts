@@ -277,10 +277,21 @@ export interface BlogCategoriesResponse {
   total: number;
 }
 
+/**
+ * Public blog search response.
+ *
+ * The live endpoint returns `{ posts, categories, tags, total_results }`. The previously
+ * declared `{ results, total }` shape never matched it, so callers reading `results` got
+ * undefined. Both are kept optional so either shape can be consumed safely.
+ */
 export interface BlogSearchResponse {
-  results: BlogPost[];
-  total: number;
-  query: string;
-  page: number;
-  limit: number;
+  posts?: BlogPost[];
+  total_results?: number;
+  /** @deprecated the live endpoint returns `posts` */
+  results?: BlogPost[];
+  /** @deprecated the live endpoint returns `total_results` */
+  total?: number;
+  query?: string;
+  page?: number;
+  limit?: number;
 }

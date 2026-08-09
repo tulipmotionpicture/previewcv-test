@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useState, useRef, useCallback, Suspense } from "react";
-import { useSearchParams } from "next/navigation";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { api } from "@/lib/api";
+import { BLOG_POSTS_PER_PAGE } from "./constants";
 import { BlogPost, BlogCategory } from "@/types";
 import FloatingHeader from "@/components/FloatingHeader";
 import BlogPostCard from "@/components/blog/BlogPostCard";
@@ -25,25 +25,44 @@ const HEADER_CTA = {
   variant: "primary" as const,
 };
 
-function BlogListingContent() {
-  const searchParams = useSearchParams();
-  const categoryParam = searchParams?.get("category");
-  const tagParam = searchParams?.get("tag");
-  const searchQuery = searchParams?.get("q");
+export interface BlogListingProps {
+  initialPosts: BlogPost[];
+  initialTotalPages: number;
+  initialCategories: BlogCategory[];
+}
 
-  const [posts, setPosts] = useState<BlogPost[]>([]);
-  const [categories, setCategories] = useState<BlogCategory[]>([]);
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(
-    categoryParam,
+function BlogListingContent({
+  initialPosts,
+  initialTotalPages,
+  initialCategories,
+}: BlogListingProps) {
+  const canUseInitialPosts = initialPosts.length > 0;
+
+  const [posts, setPosts] = useState<BlogPost[]>(
+    canUseInitialPosts ? initialPosts : [],
   );
-  const [selectedTag, setSelectedTag] = useState<string | null>(tagParam);
-  const [searchTerm, setSearchTerm] = useState(searchQuery || "");
+  const [categories, setCategories] =
+    useState<BlogCategory[]>(initialCategories);
+  // Filters start empty on both server and client so the two first renders match
+  // exactly (no hydration mismatch); any ?category/?tag/?q is applied just after
+  // mount by the effect below.
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [selectedTag, setSelectedTag] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const [loading, setLoading] = useState(true);
+  const [totalPages, setTotalPages] = useState(
+    canUseInitialPosts ? initialTotalPages : 1,
+  );
+  // Server-seeded renders start settled; otherwise keep the original spinner-first behaviour.
+  const [loading, setLoading] = useState(!canUseInitialPosts);
   const [isSearching, setIsSearching] = useState(false);
 
-  const POSTS_PER_PAGE = 12;
+  // Server data already covers the first render, so skip exactly one fetch. Every later
+  // filter/page change still fetches normally.
+  const skipInitialPostsFetch = useRef(canUseInitialPosts);
+  const hasInitialCategories = useRef(initialCategories.length > 0);
+
+  const POSTS_PER_PAGE = BLOG_POSTS_PER_PAGE;
 
   // Horizontal scroll arrows for the category tabs (shown only when there's overflow).
   const tabsRef = useRef<HTMLDivElement>(null);
@@ -73,8 +92,27 @@ function BlogListingContent() {
     tabsRef.current?.scrollBy({ left: direction * 240, behavior: "smooth" });
   };
 
+  // Apply ?category / ?tag / ?q from the URL after mount.
+  //
+  // These were previously read during render via useSearchParams(), which forces this whole
+  // subtree to bail out to client-side rendering on a prerendered page — so the server only
+  // ever emitted the Suspense fallback and the article list (and every link to a post) was
+  // missing from the HTML. Reading them here instead keeps the listing fully server-rendered.
+  // Nothing in the app links to /blog with these params, so they only ever arrive on a fresh
+  // page load; a deep link applies its filter one tick after mount.
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const category = params.get("category");
+    const tag = params.get("tag");
+    const query = params.get("q");
+    if (category) setSelectedCategory(category);
+    if (tag) setSelectedTag(tag);
+    if (query) setSearchTerm(query);
+  }, []);
+
   // Fetch categories
   useEffect(() => {
+    if (hasInitialCategories.current) return; // already supplied by the server
     const fetchCategories = async () => {
       try {
         const response = await api.getBlogCategories();
@@ -88,6 +126,12 @@ function BlogListingContent() {
 
   // Fetch posts
   useEffect(() => {
+    if (skipInitialPostsFetch.current) {
+      // First render is already populated from the server; don't refetch the same page.
+      skipInitialPostsFetch.current = false;
+      return;
+    }
+
     const fetchPosts = async () => {
       setLoading(true);
       try {
@@ -96,8 +140,14 @@ function BlogListingContent() {
             page: currentPage,
             limit: POSTS_PER_PAGE,
           });
-          setPosts(response.results);
-          setTotalPages(Math.ceil(response.total / POSTS_PER_PAGE));
+          // The search endpoint returns { posts, total_results }, not { results, total }.
+          // Reading `results` produced undefined, so `posts.length` threw and the page died
+          // with "Application error" on /blog?q=… and on submitting the search box.
+          const found = response.posts ?? response.results ?? [];
+          const foundTotal =
+            response.total_results ?? response.total ?? found.length;
+          setPosts(found);
+          setTotalPages(Math.max(1, Math.ceil(foundTotal / POSTS_PER_PAGE)));
         } else if (selectedTag) {
           // Tag filtering (previously read from the URL but never applied).
           const response = await api.getBlogPosts({
@@ -347,19 +397,19 @@ function BlogListingContent() {
   );
 }
 
-export default function BlogListing() {
+// No Suspense boundary here any more: it existed only to contain useSearchParams(), which
+// this component no longer calls. Keeping it made the server emit content the client then
+// re-rendered rather than hydrated, leaving two copies of the listing in the DOM.
+export default function BlogListing({
+  initialPosts = [],
+  initialTotalPages = 1,
+  initialCategories = [],
+}: Partial<BlogListingProps> = {}) {
   return (
-    <Suspense
-      fallback={
-        <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
-          <FloatingHeader links={HEADER_LINKS} cta={HEADER_CTA} />
-          <div className="flex items-center justify-center min-h-[60vh]">
-            <Loader2 className="w-8 h-8 animate-spin text-primary-blue" />
-          </div>
-        </div>
-      }
-    >
-      <BlogListingContent />
-    </Suspense>
+    <BlogListingContent
+      initialPosts={initialPosts}
+      initialTotalPages={initialTotalPages}
+      initialCategories={initialCategories}
+    />
   );
 }
