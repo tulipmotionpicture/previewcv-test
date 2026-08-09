@@ -92,9 +92,13 @@ export async function getJobShardEntries(
 
     for (const job of items) {
       if (!job.slug || isJobClosed(job)) continue;
+      // The list API does not return `updated_at` (only the Job type declares it),
+      // so every job entry was shipping without a lastmod. Fall back to
+      // `posted_date`, which the API does return.
+      const modified = job.updated_at || job.posted_date;
       entries.push({
         url: `${base}/job/${job.slug}`,
-        lastModified: job.updated_at ? new Date(job.updated_at) : undefined,
+        lastModified: modified ? new Date(modified) : undefined,
       });
     }
 
@@ -142,9 +146,16 @@ export async function getBlogTotal(): Promise<number> {
   return res.total || 0;
 }
 
-/** Blog category landing pages (`/blog/category/{slug}`). */
+/**
+ * Blog category landing pages (`/blog/category/{slug}`).
+ *
+ * The categories endpoint carries no date field, so `latestByCategory` supplies an accurate
+ * lastmod derived from the newest post seen in that category. Categories with no dated post
+ * in that map simply ship without a lastmod rather than a fabricated one.
+ */
 export async function blogCategoryEntries(
   base: string,
+  latestByCategory?: Map<string, Date>,
 ): Promise<MetadataRoute.Sitemap> {
   try {
     // The categories endpoint returns a bare array; tolerate a { categories } wrapper too.
@@ -154,7 +165,10 @@ export async function blogCategoryEntries(
       : ((res as { categories?: BlogCategory[] })?.categories ?? []);
     return list
       .filter((c) => c.slug && (c.post_count ?? 0) > 0) // skip empty (thin) category pages
-      .map((c) => ({ url: `${base}/blog/category/${c.slug}` }));
+      .map((c) => ({
+        url: `${base}/blog/category/${c.slug}`,
+        lastModified: latestByCategory?.get(c.slug),
+      }));
   } catch {
     return [];
   }
@@ -168,10 +182,11 @@ export async function getBlogShardEntries(
   base: string,
   shardId: number,
 ): Promise<MetadataRoute.Sitemap> {
-  const entries: MetadataRoute.Sitemap = [];
-  if (shardId === 0) {
-    entries.push(...(await blogCategoryEntries(base)));
-  }
+  const postEntries: MetadataRoute.Sitemap = [];
+  // Newest published_at per category slug, collected from the posts fetched below so the
+  // category pages get an accurate lastmod without any extra API calls. Posts are sorted
+  // newest-first, so shard 0 (which carries the category pages) sees the latest dates.
+  const latestByCategory = new Map<string, Date>();
 
   const firstPage = shardId * BLOG_PAGES_PER_SHARD + 1;
   const lastPage = (shardId + 1) * BLOG_PAGES_PER_SHARD;
@@ -188,16 +203,31 @@ export async function getBlogShardEntries(
 
     for (const post of posts) {
       if (!post.slug) continue;
-      entries.push({
+      const published = post.published_at
+        ? new Date(post.published_at)
+        : undefined;
+      postEntries.push({
         url: `${base}/blog/${post.slug}`,
-        lastModified: post.published_at
-          ? new Date(post.published_at)
-          : undefined,
+        lastModified: published,
       });
+
+      const categorySlug = post.category?.slug;
+      if (categorySlug && published) {
+        const seen = latestByCategory.get(categorySlug);
+        if (!seen || published > seen) {
+          latestByCategory.set(categorySlug, published);
+        }
+      }
     }
 
     if (!res.has_next || page >= (res.total_pages || 1)) break;
   }
+
+  const entries: MetadataRoute.Sitemap = [];
+  if (shardId === 0) {
+    entries.push(...(await blogCategoryEntries(base, latestByCategory)));
+  }
+  entries.push(...postEntries);
 
   return entries;
 }

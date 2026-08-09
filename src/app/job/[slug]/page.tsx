@@ -60,18 +60,25 @@ export async function generateMetadata({
 
   if (!job) {
     return {
-      title: "Job Not Found | PreviewCV",
+      // The root layout applies a "%s | PreviewCV" title template, so the suffix
+      // must not be repeated here (it rendered as "… | PreviewCV | PreviewCV").
+      title: "Job Not Found",
       description: "The job you are looking for could not be found.",
     };
   }
 
-  const title = `${job.title} at ${job.company_name} | PreviewCV`;
+  const title = `${job.title} at ${job.company_name}`;
   const description = job.description.substring(0, 160) + "...";
   const imageUrl = job.company_logo_url || config.app.logoUrl;
 
   return {
     title,
     description,
+    // Job detail pages had no canonical at all, leaving Google to pick one from
+    // whatever URL variant (query strings, referrers) it happened to crawl.
+    alternates: {
+      canonical: `${config.app.siteUrl}/job/${slug}`,
+    },
     openGraph: {
       title,
       description,

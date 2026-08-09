@@ -58,7 +58,9 @@ export async function generateMetadata({
   }
 
   const name = profileDisplayName(profile);
-  const title = `${name} | PreviewCV`;
+  // The root layout applies a "%s | PreviewCV" title template — appending the
+  // suffix here too rendered as "… | PreviewCV | PreviewCV".
+  const title = name;
   const description =
     profile.bio ||
     profile.specialization ||
