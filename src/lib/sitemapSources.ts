@@ -56,14 +56,43 @@ export async function getJobTotal(): Promise<number> {
 export async function seoPatternEntries(
   base: string,
 ): Promise<MetadataRoute.Sitemap> {
-  try {
-    const res = await api.getSEOPatterns({ limit: 1000, minJobs: 1 });
-    return (res?.patterns ?? [])
-      .filter((p) => p.slug && (p.count ?? 0) > 0)
-      .map((p) => ({ url: `${base}/jobs/${p.slug}` }));
-  } catch {
-    return [];
+  // Two backend endpoints mint these slugs and they do NOT agree: /jobs/seo-patterns
+  // drives this sitemap, while /jobs/cards/summary drives the homepage "Jobs by
+  // Location / Industry" cards. Seven live pages (industry and onsite slugs such as
+  // accounting-jobs and onsite-jobs) were linked from the homepage yet declared in no
+  // sitemap. Take the union of both so every page we link to is also declared, and
+  // dedupe since the two sets overlap heavily.
+  const slugs = new Set<string>();
+
+  const [patterns, cards] = await Promise.allSettled([
+    api.getSEOPatterns({ limit: 1000, minJobs: 1 }),
+    api.getCardsSummary(),
+  ]);
+
+  if (patterns.status === "fulfilled") {
+    for (const p of patterns.value?.patterns ?? []) {
+      if (p.slug && (p.count ?? 0) > 0) slugs.add(p.slug);
+    }
   }
+
+  if (cards.status === "fulfilled") {
+    const summary = cards.value;
+    const groups = [
+      summary?.countries,
+      summary?.cities,
+      summary?.industries,
+      summary?.job_types,
+      summary?.remote,
+    ];
+    for (const group of groups) {
+      for (const card of group ?? []) {
+        // `count` is the number of live jobs behind the slug; 0 would be a thin page.
+        if (card?.slug && (card.count ?? 0) > 0) slugs.add(card.slug);
+      }
+    }
+  }
+
+  return Array.from(slugs).map((slug) => ({ url: `${base}/jobs/${slug}` }));
 }
 
 /**
