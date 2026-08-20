@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import config from "@/config";
@@ -7,9 +8,13 @@ import { RecruiterProfile } from "@/types";
 import FloatingHeader from "@/components/FloatingHeader";
 
 // Server-side data fetch for the public recruiter/company profile.
-async function getRecruiterProfile(
+//
+// Wrapped in React's `cache` so generateMetadata and the page body share one result per
+// request. Both call this, and now that the fetch is uncached that would otherwise be two
+// round-trips to the API on every render — which is what doubled this page's TTFB.
+const getRecruiterProfile = cache(async (
   slug: string,
-): Promise<RecruiterProfile | null> {
+): Promise<RecruiterProfile | null> => {
   try {
     const apiUrl =
       process.env.NEXT_PUBLIC_API_URL ||
@@ -40,7 +45,7 @@ async function getRecruiterProfile(
     console.error("Failed to fetch recruiter profile:", error);
     return null;
   }
-}
+});
 
 /** Public display name, mirroring the logic used inside RecruiterProfilePublic. */
 function profileDisplayName(profile: RecruiterProfile): string {
