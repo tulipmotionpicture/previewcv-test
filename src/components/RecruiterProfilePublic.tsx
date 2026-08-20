@@ -50,6 +50,34 @@ interface RecruiterProfilePublicProps {
   onBack?: () => void;
 }
 
+// Dates must format identically on the server and in the browser. A bare
+// toLocaleDateString()/toLocaleTimeString()/getDate() resolves against each runtime's own
+// locale and time zone, so once these panels began server-rendering, the job "Posted" date
+// differed between the two passes and React threw a hydration mismatch (#418) that made it
+// discard and re-render the tree. Pinning locale and time zone keeps both passes identical.
+const DATE_LOCALE = "en-GB";
+
+function formatPostedDate(value: string): string {
+  return new Date(value).toLocaleDateString(DATE_LOCALE, {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    timeZone: "UTC",
+  });
+}
+
+function formatMonthShort(date: Date): string {
+  return date.toLocaleString(DATE_LOCALE, { month: "short", timeZone: "UTC" });
+}
+
+function formatEventTime(date: Date): string {
+  return date.toLocaleTimeString(DATE_LOCALE, {
+    hour: "2-digit",
+    minute: "2-digit",
+    timeZone: "UTC",
+  });
+}
+
 export default function RecruiterProfilePublic({
   profile,
   onBack,
@@ -293,8 +321,14 @@ export default function RecruiterProfilePublic({
         {/* Content Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Left Column */}
+          {/* Every tab panel is rendered, with the inactive ones hidden, so About,
+              Open Positions and Events are all present in the server HTML. Rendering
+              only the active tab meant crawlers saw the About copy and nothing else —
+              no job listings, no events — on a page that exists to be found in search.
+              Tailwind's space-y-* selector ignores [hidden] children, so spacing is
+              unchanged. */}
           <div className="lg:col-span-2 space-y-8">
-            {activeTab === "about" && (
+            <div hidden={activeTab !== "about"}>
               <div className="bg-white rounded-2xl p-8 border border-slate-200 shadow-sm">
                 <h2 className="text-xl font-bold mb-6 flex items-center gap-2">
                   <div className="w-1.5 h-6 bg-blue-600 rounded-full" />
@@ -334,9 +368,9 @@ export default function RecruiterProfilePublic({
                   </div>
                 )}
               </div>
-            )}
+            </div>
 
-            {activeTab === "positions" && (
+            <div hidden={activeTab !== "positions"}>
               <div className="bg-white rounded-2xl p-8 border border-slate-200 shadow-sm">
                 <h2 className="text-xl font-bold mb-6 flex items-center gap-2">
                   <div className="w-1.5 h-6 bg-blue-600 rounded-full" />
@@ -415,7 +449,7 @@ export default function RecruiterProfilePublic({
                               <span>{job.view_count} views</span>
                               <time dateTime={job.posted_date}>
                                 Posted{" "}
-                                {new Date(job.posted_date).toLocaleDateString()}
+                                {formatPostedDate(job.posted_date)}
                               </time>
                             </div>
                           </footer>
@@ -430,9 +464,9 @@ export default function RecruiterProfilePublic({
                   </div>
                 )}
               </div>
-            )}
+            </div>
 
-            {activeTab === "events" && (
+            <div hidden={activeTab !== "events"}>
               <div className="bg-white rounded-2xl p-8 border border-slate-200 shadow-sm">
                 <h2 className="text-xl font-bold mb-6 flex items-center gap-2">
                   <div className="w-1.5 h-6 bg-blue-600 rounded-full" />
@@ -454,12 +488,10 @@ export default function RecruiterProfilePublic({
                               className="flex-shrink-0 w-20 h-20 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-2xl flex flex-col items-center justify-center text-white shadow-sm"
                             >
                               <span className="text-[10px] font-bold uppercase opacity-70">
-                                {dateObj.toLocaleString("default", {
-                                  month: "short",
-                                })}
+                                {formatMonthShort(dateObj)}
                               </span>
                               <span className="text-2xl font-bold">
-                                {dateObj.getDate()}
+                                {dateObj.getUTCDate()}
                               </span>
                             </time>
                           )}
@@ -512,10 +544,7 @@ export default function RecruiterProfilePublic({
                               {dateObj && (
                                 <span className="flex items-center gap-1">
                                   <Clock className="w-3 h-3" />
-                                  {dateObj.toLocaleTimeString([], {
-                                    hour: "2-digit",
-                                    minute: "2-digit",
-                                  })}
+                                  {formatEventTime(dateObj)}
                                 </span>
                               )}
                             </footer>
@@ -531,7 +560,7 @@ export default function RecruiterProfilePublic({
                   </div>
                 )}
               </div>
-            )}
+            </div>
 
             {activeTab === "gallery" && (
               <div className="bg-white rounded-2xl p-8 border border-slate-200 shadow-sm">

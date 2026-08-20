@@ -2,6 +2,7 @@ import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import config from "@/config";
 import RecruiterProfilePublic from "@/components/RecruiterProfilePublic";
+import { buildOrganizationJsonLd } from "@/lib/organizationSchema";
 import { RecruiterProfile } from "@/types";
 import FloatingHeader from "@/components/FloatingHeader";
 
@@ -16,7 +17,16 @@ async function getRecruiterProfile(
     const response = await fetch(
       `${apiUrl}/api/v1/recruiters/profile/slug/${slug}`,
       {
-        next: { revalidate: 3600 }, // Cache & revalidate hourly
+        // Deliberately uncached. This used to be `next: { revalidate: 3600 }`, whose
+        // entry is persisted in KV on Cloudflare (unlike a Node host, where the data
+        // cache is wiped on restart). That entry stopped revalidating and pinned the
+        // page to a two-day-old snapshot: an empty `bio`, a placeholder logo and an
+        // empty `recent_jobs`, so profiles showed "No description provided" and no
+        // open positions while the API had all of it. This page is SEO-critical, so
+        // it must reflect the live profile on every crawl; the fetch costs ~300ms.
+        // Caching can return via on-demand revalidation once the backend can ping a
+        // revalidate hook on profile/job changes.
+        cache: "no-store",
         headers: { "Content-Type": "application/json" },
       },
     );
@@ -102,8 +112,18 @@ export default async function RecruiterProfilePage({
     notFound();
   }
 
+  // schema.org Organization for the employer — these profiles are search landing pages,
+  // and the page previously emitted no structured data at all.
+  const organizationJsonLd = buildOrganizationJsonLd(profile, config.app.siteUrl);
+
   return (
     <div className="min-h-screen bg-white dark:bg-gray-950 transition-colors duration-300">
+      {organizationJsonLd && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }}
+        />
+      )}
       <FloatingHeader
         links={[
           { label: "Features", href: "#features" },
