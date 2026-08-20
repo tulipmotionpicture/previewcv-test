@@ -431,7 +431,8 @@ export interface TopEmployersResponse {
 export interface TopEmployer {
   recruiter_slug: string;
   company_name: string;
-  company_logo_url: string;
+  // Nullable in practice: the API returns null for employers that never uploaded a logo.
+  company_logo_url?: string | null;
 }
 
 // KYC Types

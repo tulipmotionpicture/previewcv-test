@@ -6,6 +6,8 @@ import FloatingHeader from "@/components/FloatingHeader";
 import HeroSection from "@/components/HeroSection";
 import FAQSection from "@/components/shared/FAQSection";
 import { api } from "@/lib/api";
+import { isRealLogo } from "@/lib/organizationSchema";
+import type { TopEmployer } from "@/types/api";
 import {
   CheckCircle2,
   Link as LinkIcon,
@@ -60,9 +62,16 @@ async function getHomeData() {
 
   return {
     cardsData: cards.status === "fulfilled" ? cards.value : null,
+    // Only employers we can actually show a brand for. The endpoint returns
+    // company_logo_url: null for anyone who never uploaded one (3 of the 5 live records),
+    // and the old markup fell back to a generic /logos/logo-1.png, so the strip advertised
+    // placeholder brands as if they were real employers.
     partners:
       employers.status === "fulfilled"
-        ? employers.value.top_employers || []
+        ? (employers.value.top_employers || []).filter(
+            (e): e is TopEmployer & { company_logo_url: string } =>
+              !!e.recruiter_slug && isRealLogo(e.company_logo_url),
+          )
         : [],
     blogPosts: blog.status === "fulfilled" ? blog.value : null,
   };
@@ -70,6 +79,10 @@ async function getHomeData() {
 
 export default async function Home() {
   const { cardsData, partners, blogPosts } = await getHomeData();
+  // Scroll only when the logos would actually overflow the row (~7 fit at 200px across the
+  // 1280px container). Below that, duplicating them to loop the marquee is what made the
+  // strip look repetitive.
+  const employerMarquee = partners.length >= 8;
 
   return (
     <div className="min-h-screen bg-white dark:bg-gray-950 dark:text-gray-100 transition-colors duration-300">
@@ -155,84 +168,63 @@ export default async function Home() {
       </section>
 
       {/* Jobs By Top Employers */}
-      <section className="py-6 lg:py-8 bg-white dark:bg-black">
-        <div className="max-w-7xl mx-auto px-4 lg:px-6">
-          <h2 className="text-left text-lg lg:text-xl pt-6 font-bold text-gray-900 dark:text-gray-100 mb-4">
-            Jobs By Top Employers
-          </h2>
+      {/* One row, and only employers with a real logo. Previously a second row replayed the
+          same companies reversed, and each row duplicated the list to loop the marquee, so
+          five employers rendered twenty logo tiles. The marquee now runs only when there are
+          enough logos to genuinely overflow the row; below that they sit centred and still,
+          which is why a short list no longer looks like a repeating carousel. */}
+      {partners.length > 0 && (
+        <section className="py-6 lg:py-8 bg-white dark:bg-black">
+          <div className="max-w-7xl mx-auto px-4 lg:px-6">
+            <h2 className="text-left text-lg lg:text-xl pt-6 font-bold text-gray-900 dark:text-gray-100 mb-4">
+              Jobs By Top Employers
+            </h2>
 
-          <div className="flex flex-col gap-4 overflow-hidden py-4">
-            {/* Row 1 - Scroll Left */}
-            <div className="relative w-full overflow-hidden h-16 md:h-20">
-              <div
-                className={`h-full flex ${
-                  partners.length >= 5
-                    ? "absolute top-0 left-0 animate-scroll-left w-max"
-                    : "justify-center relative w-full"
-                }`}
-              >
-                {(partners.length >= 5
-                  ? [...partners, ...partners]
-                  : partners
-                ).map((employer, i) => (
+            <div className="overflow-hidden py-4">
+              <div className="relative w-full overflow-hidden h-24 md:h-28">
+                <div
+                  className={`h-full flex ${
+                    employerMarquee
+                      ? "absolute top-0 left-0 animate-scroll-left w-max"
+                      : "justify-center relative w-full flex-wrap gap-y-2"
+                  }`}
+                >
+                  {(employerMarquee ? [...partners, ...partners] : partners).map(
+                    (employer, i) => (
                       <div
-                        key={`row1-${i}`}
-                        className="px-2 w-[120px] md:w-[160px] lg:w-[200px] h-full flex-shrink-0"
+                        key={`employer-${i}`}
+                        className="px-2 w-[150px] md:w-[190px] lg:w-[220px] h-full flex-shrink-0"
                       >
-                        <div className="bg-white p-2 md:p-4 border border-gray-200 rounded-lg flex items-center justify-center hover:shadow-md transition-shadow h-full w-full">
-                          <Link href={`/recruiter/${employer.recruiter_slug}#positions`}>
+                        <div className="bg-white p-3 md:p-4 border border-gray-200 rounded-lg flex items-center justify-center hover:shadow-md transition-shadow h-full w-full">
+                          <Link
+                            href={`/recruiter/${employer.recruiter_slug}#positions`}
+                            title={employer.company_name}
+                            className="flex h-full w-full items-center justify-center"
+                          >
+                            {/* Logos arrive at whatever size and aspect ratio the employer
+                                uploaded. `object-contain` inside a box of fixed height scales
+                                each one to fill that box without distortion, so they read as a
+                                uniform set with the same padding around them, instead of the
+                                previous max-h-12 cap that rendered each at a different size and
+                                left the wider marks too small to read. */}
                             <Image
-                              src={
-                                employer.company_logo_url || "/logos/logo-1.png"
-                              }
-                              alt={employer.company_name || "Partner Logo"}
-                              width={100}
-                              height={40}
-                              className="object-contain max-h-12"
+                              src={employer.company_logo_url}
+                              alt={employer.company_name || "Employer logo"}
+                              width={220}
+                              height={88}
+                              className="h-full w-full object-contain"
                             />
                           </Link>
                         </div>
                       </div>
-                    ))}
-              </div>
-            </div>
-
-            {/* Row 2 - Scroll Right */}
-            {partners.length >= 5 && (
-              <div className="relative w-full overflow-hidden h-16 md:h-20">
-                <div className="absolute top-0 left-0 h-full flex animate-scroll-right w-max">
-                  {[
-                    ...[...partners].reverse(),
-                    ...[...partners].reverse(),
-                  ].map((employer, i) => (
-                        <div
-                          key={`row2-${i}`}
-                          className="px-2 w-[120px] md:w-[160px] lg:w-[200px] h-full flex-shrink-0"
-                        >
-                          <div className="bg-white p-2 md:p-4 border border-gray-200 rounded-lg flex items-center justify-center hover:shadow-md transition-shadow h-full w-full">
-                            <Link
-                              href={`/recruiter/${employer.recruiter_slug}#positions`}
-                            >
-                              <Image
-                                src={
-                                  employer.company_logo_url ||
-                                  "/logos/logo-1.png"
-                                }
-                                alt={employer.company_name || "Partner Logo"}
-                                width={100}
-                                height={40}
-                                className="object-contain max-h-12"
-                              />
-                            </Link>
-                          </div>
-                        </div>
-                      ))}
+                    ),
+                  )}
                 </div>
               </div>
-            )}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* Career Reads Section */}
       <section className="py-6 bg-white dark:bg-black border-t border-gray-100 dark:border-gray-800">

@@ -25,7 +25,7 @@ function toPlainText(html: string): string {
 }
 
 /** Placeholder logos are seeded on signup and must not be published as a real logo. */
-function isRealLogo(url?: string): boolean {
+export function isRealLogo(url?: string | null): boolean {
   return !!url && !/via\.placeholder\.com|placehold\.(it|co)/i.test(url);
 }
 
