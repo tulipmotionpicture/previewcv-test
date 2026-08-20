@@ -75,6 +75,13 @@ export async function seoPatternEntries(
     }
   }
 
+  // Card slugs need verifying before we declare them. The card `count` is not what the
+  // landing page actually resolves: /jobs/cards/summary claims 1 job for
+  // businesss-development-executive-jobs and 4 for onsite-jobs, while /jobs/by-slug — the
+  // endpoint the page itself uses — returns 0 for both, so each renders "No jobs found".
+  // Declaring those would hand Google soft-404s. Only slugs the page can actually fill are
+  // added, and only for cards not already vouched for by seo-patterns.
+  const unverified: string[] = [];
   if (cards.status === "fulfilled") {
     const summary = cards.value;
     const groups = [
@@ -86,10 +93,27 @@ export async function seoPatternEntries(
     ];
     for (const group of groups) {
       for (const card of group ?? []) {
-        // `count` is the number of live jobs behind the slug; 0 would be a thin page.
-        if (card?.slug && (card.count ?? 0) > 0) slugs.add(card.slug);
+        if (card?.slug && (card.count ?? 0) > 0 && !slugs.has(card.slug)) {
+          unverified.push(card.slug);
+        }
       }
     }
+  }
+
+  if (unverified.length > 0) {
+    const checked = await Promise.allSettled(
+      unverified.map((slug) => api.getJobsBySlug(slug, { limit: 1 })),
+    );
+    checked.forEach((result, i) => {
+      // Exclude on error too: the sitemap is regenerated per request, so a transient
+      // failure self-corrects on the next crawl rather than publishing a dead page.
+      if (
+        result.status === "fulfilled" &&
+        (result.value?.pagination?.total ?? 0) > 0
+      ) {
+        slugs.add(unverified[i]);
+      }
+    });
   }
 
   return Array.from(slugs).map((slug) => ({ url: `${base}/jobs/${slug}` }));
