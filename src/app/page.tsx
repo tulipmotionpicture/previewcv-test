@@ -181,7 +181,7 @@ export default async function Home() {
             </h2>
 
             <div className="overflow-hidden py-4">
-              <div className="relative w-full overflow-hidden h-24 md:h-28">
+              <div className="relative w-full overflow-hidden h-28 md:h-32">
                 <div
                   className={`h-full flex ${
                     employerMarquee
@@ -195,7 +195,7 @@ export default async function Home() {
                         key={`employer-${i}`}
                         className="px-2 w-[150px] md:w-[190px] lg:w-[220px] h-full flex-shrink-0"
                       >
-                        <div className="bg-white p-3 md:p-4 border border-gray-200 rounded-lg flex items-center justify-center hover:shadow-md transition-shadow h-full w-full">
+                        <div className="bg-white p-2 md:p-2.5 border border-gray-200 rounded-lg flex items-center justify-center hover:shadow-md transition-shadow h-full w-full">
                           <Link
                             href={`/recruiter/${employer.recruiter_slug}#positions`}
                             title={employer.company_name}
@@ -206,7 +206,9 @@ export default async function Home() {
                                 each one to fill that box without distortion, so they read as a
                                 uniform set with the same padding around them, instead of the
                                 previous max-h-12 cap that rendered each at a different size and
-                                left the wider marks too small to read. */}
+                                left the wider marks too small to read. The box is kept close to
+                                a typical wordmark's proportions and the tile padding tight, so
+                                little of the tile is spent on letterboxing. */}
                             <Image
                               src={employer.company_logo_url}
                               alt={employer.company_name || "Employer logo"}
