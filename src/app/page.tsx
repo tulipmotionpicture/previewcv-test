@@ -7,6 +7,11 @@ import HeroSection from "@/components/HeroSection";
 import FAQSection from "@/components/shared/FAQSection";
 import { api } from "@/lib/api";
 import { isRealLogo } from "@/lib/organizationSchema";
+import {
+  CREATE_CV_URL,
+  CREATE_COVER_LETTER_URL,
+  EXTERNAL_LINK_PROPS,
+} from "@/lib/externalLinks";
 import type { TopEmployer } from "@/types/api";
 import {
   CheckCircle2,
@@ -340,9 +345,10 @@ export default async function Home() {
               </li>
             </ul>
 
-            <Link
-              href="/candidate/signup"
-              className="inline-flex items-center gap-2 px-6 py-2.5 bg-[#0CA0E8] hover:bg-[#0b8rcd] text-white font-semibold rounded-full transition-all shadow-lg hover:shadow-xl text-xs lg:text-sm"
+            <a
+              href={CREATE_CV_URL}
+              {...EXTERNAL_LINK_PROPS}
+              className="inline-flex items-center gap-2 px-6 py-2.5 bg-[#0CA0E8] hover:bg-[#0b8dcc] text-white font-semibold rounded-full transition-all shadow-lg hover:shadow-xl text-xs lg:text-sm"
             >
               Create CV
               <Image
@@ -352,7 +358,7 @@ export default async function Home() {
                 height={14}
                 className="object-contain"
               />
-            </Link>
+            </a>
           </div>
 
           {/* Right Resume Row View */}
@@ -439,8 +445,9 @@ export default async function Home() {
               </li>
             </ul>
 
-            <Link
-              href="/candidate/signup"
+            <a
+              href={CREATE_COVER_LETTER_URL}
+              {...EXTERNAL_LINK_PROPS}
               className="inline-flex items-center gap-2 px-6 py-2.5 bg-primary-blue hover:bg-blue-700 text-white font-semibold rounded-full transition-all shadow-lg hover:shadow-xl text-xs lg:text-sm"
             >
               Create Cover Letter
@@ -451,7 +458,7 @@ export default async function Home() {
                 height={14}
                 className="object-contain"
               />
-            </Link>
+            </a>
           </div>
 
           {/* Right Cover Letter Row View */}
