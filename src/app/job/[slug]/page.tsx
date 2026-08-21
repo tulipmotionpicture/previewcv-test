@@ -11,6 +11,7 @@ import { notFound } from "next/navigation";
 import { api } from "@/lib/api";
 import { formatSalaryRange } from "@/lib/salary";
 import { buildJobPostingJsonLd } from "@/lib/jobPostingSchema";
+import { toMetaDescription } from "@/lib/metaText";
 import {
   MapPin,
   Briefcase,
@@ -68,7 +69,12 @@ export async function generateMetadata({
   }
 
   const title = `${job.title} at ${job.company_name}`;
-  const description = job.description.substring(0, 160) + "...";
+  // job.description is HTML from the rich-text editor. Slicing it as a string left the tags
+  // in the meta tags, so shares and search snippets read "<p>Create 3D models…". The page
+  // body below still renders the original HTML untouched.
+  const description =
+    toMetaDescription(job.description) ||
+    `${job.title} at ${job.company_name}. View details and apply on PreviewCV.`;
   const imageUrl = job.company_logo_url || config.app.logoUrl;
 
   return {

@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import config from "@/config";
 import RecruiterProfilePublic from "@/components/RecruiterProfilePublic";
 import { buildOrganizationJsonLd } from "@/lib/organizationSchema";
+import { toMetaDescription } from "@/lib/metaText";
 import { RecruiterProfile } from "@/types";
 import FloatingHeader from "@/components/FloatingHeader";
 
@@ -76,8 +77,11 @@ export async function generateMetadata({
   // The root layout applies a "%s | PreviewCV" title template — appending the
   // suffix here too rendered as "… | PreviewCV | PreviewCV".
   const title = name;
+  // profile.bio is HTML from the rich-text editor, and was previously passed through whole:
+  // the tags showed up in shares and the entire 2,000-character bio was dumped into a meta
+  // description. The About panel still renders the original HTML untouched.
   const description =
-    profile.bio ||
+    toMetaDescription(profile.bio) ||
     profile.specialization ||
     `View ${name}'s profile and open positions on PreviewCV.`;
   const canonical = config.app.siteUrl

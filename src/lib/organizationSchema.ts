@@ -9,20 +9,7 @@
 // not when the company was founded, so it is deliberately NOT emitted as `foundingDate`.
 
 import { RecruiterProfile } from "@/types";
-
-/** Strip HTML tags/entities from the rich-text bio for the plain-text `description`. */
-function toPlainText(html: string): string {
-  return html
-    .replace(/<[^>]*>/g, " ")
-    .replace(/&nbsp;/g, " ")
-    .replace(/&amp;/g, "&")
-    .replace(/&lt;/g, "<")
-    .replace(/&gt;/g, ">")
-    .replace(/&quot;/g, '"')
-    .replace(/&#39;/g, "'")
-    .replace(/\s+/g, " ")
-    .trim();
-}
+import { htmlToPlainText } from "@/lib/metaText";
 
 /** Placeholder logos are seeded on signup and must not be published as a real logo. */
 export function isRealLogo(url?: string | null): boolean {
@@ -54,7 +41,7 @@ export function buildOrganizationJsonLd(
     schema.image = profile.company_logo_url;
   }
   if (profile.bio) {
-    const description = toPlainText(profile.bio);
+    const description = htmlToPlainText(profile.bio);
     if (description) schema.description = description;
   }
   if (profile.location) {
