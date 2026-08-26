@@ -10,12 +10,29 @@ import FAQSection from "./shared/FAQSection";
 
 interface PricingPageProps {
   onNavigate: (page: string) => void;
+  // Fetched on the server so the plans and prices are in the initial HTML.
+  initialJobPlans?: JobPlan[];
+  initialCvPlans?: CvPlan[];
 }
 
-const PricingPage: React.FC<PricingPageProps> = ({ onNavigate }) => {
-  const [jobPlans, setJobPlans] = useState<JobPlan[]>([]);
-  const [cvPlans, setCvPlans] = useState<CvPlan[]>([]);
-  const [loading, setLoading] = useState(true);
+const PricingPage: React.FC<PricingPageProps> = ({
+  onNavigate,
+  initialJobPlans = [],
+  initialCvPlans = [],
+}) => {
+  // The plans used to be fetched only in the browser, so crawlers received the section
+  // headings and the FAQ but not a single plan or price — on a page whose whole purpose is
+  // to rank for pricing queries. When the server supplies them we render immediately and
+  // skip the duplicate request; if that fetch failed we fall back to the original
+  // client-side fetch, so a bad API response still degrades to today's behaviour.
+  const hasInitialPlans = initialJobPlans.length > 0 || initialCvPlans.length > 0;
+
+  const [jobPlans, setJobPlans] = useState<JobPlan[]>(initialJobPlans);
+  const [cvPlans, setCvPlans] = useState<CvPlan[]>(initialCvPlans);
+  const [loading, setLoading] = useState(!hasInitialPlans);
+  // Starts INR on both the server and the first client render so the two agree; the
+  // geo-detected currency below is applied after mount, which is a state update rather
+  // than a hydration mismatch.
   const [currency, setCurrency] = useState<CurrencyHint>("INR");
   const [countryName, setCountryName] = useState<string | null>(null);
 
@@ -25,8 +42,8 @@ const PricingPage: React.FC<PricingPageProps> = ({ onNavigate }) => {
 
   const fetchPlans = async () => {
     try {
-      setLoading(true);
-      const data = await api.getRecruiterPricing();
+      // Currency depends on the visitor's location, which the server cannot know, so this
+      // runs in the browser regardless of where the plans came from.
       const currencyData = await api.detectLocation().catch(() => null);
 
       if (currencyData) {
@@ -34,8 +51,12 @@ const PricingPage: React.FC<PricingPageProps> = ({ onNavigate }) => {
         setCurrency(detected === "INR" ? "INR" : "USD");
         setCountryName(currencyData.country_name || null);
       }
-      setJobPlans(data.job_plans);
-      setCvPlans(data.cv_plans);
+
+      if (!hasInitialPlans) {
+        const data = await api.getRecruiterPricing();
+        setJobPlans(data.job_plans);
+        setCvPlans(data.cv_plans);
+      }
     } catch (error) {
       console.error("Failed to fetch pricing:", error);
       // Use fallback static data if API fails
