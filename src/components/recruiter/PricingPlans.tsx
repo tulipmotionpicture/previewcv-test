@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { priceSubLabel } from "@/lib/pricing";
 import { useRouter } from "next/navigation";
 import { Check, Zap, Crown, Star } from "lucide-react";
 import { api } from "@/lib/api";
@@ -302,6 +303,14 @@ export default function PricingPlans() {
                       {priceFor(plan, currency)}
                     </span>
                   </div>
+                  {/* These cards showed a bare amount with no billing period and no tax note.
+                      The period comes from the API rather than a hardcoded string; free plans
+                      render nothing here. */}
+                  {priceSubLabel(plan.billing_period, isFreePlan(plan)) && (
+                    <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                      {priceSubLabel(plan.billing_period, isFreePlan(plan))}
+                    </p>
+                  )}
                 </div>
 
                 <ul className="space-y-3 mb-6">
@@ -398,6 +407,14 @@ export default function PricingPlans() {
                       {priceFor(plan, currency)}
                     </span>
                   </div>
+                  {/* These cards showed a bare amount with no billing period and no tax note.
+                      The period comes from the API rather than a hardcoded string; free plans
+                      render nothing here. */}
+                  {priceSubLabel(plan.billing_period, isFreePlan(plan)) && (
+                    <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                      {priceSubLabel(plan.billing_period, isFreePlan(plan))}
+                    </p>
+                  )}
                   <div className="inline-flex items-center gap-1 px-3 py-1 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-full text-sm font-semibold">
                     <Zap className="w-4 h-4" />
                     {plan.credits_per_period} Credits

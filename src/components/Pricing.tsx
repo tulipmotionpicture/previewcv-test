@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import { priceSubLabel } from "@/lib/pricing";
 import { api, ApiClient } from "@/lib/api";
 import type { JobPlan, CvPlan } from "@/types/api";
 import { Check, Crown, Star, Zap } from "lucide-react";
@@ -234,9 +235,15 @@ const PricingPage: React.FC<PricingPageProps> = ({ onNavigate }) => {
                           {priceFor(plan, currency)}
                         </span>
                       </div>
-                      <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                        {plan.name}
-                      </p>
+                      {/* Was a second copy of {plan.name}, which the heading above already shows.
+                          Now carries the billing period the API supplies plus the tax note, so no
+                          card states a price without saying what period it covers or that tax is
+                          extra. Free plans render nothing here. */}
+                      {priceSubLabel(plan.billing_period, isFreePlan(plan)) && (
+                        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                          {priceSubLabel(plan.billing_period, isFreePlan(plan))}
+                        </p>
+                      )}
                     </div>
 
                     <button
@@ -359,9 +366,15 @@ const PricingPage: React.FC<PricingPageProps> = ({ onNavigate }) => {
                             : priceFor(plan, currency)}
                         </span>
                       </div>
-                      <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                        {plan.name}
-                      </p>
+                      {/* Was a second copy of {plan.name}, which the heading above already shows.
+                          Now carries the billing period the API supplies plus the tax note, so no
+                          card states a price without saying what period it covers or that tax is
+                          extra. Free plans render nothing here. */}
+                      {priceSubLabel(plan.billing_period, isFreePlan(plan)) && (
+                        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                          {priceSubLabel(plan.billing_period, isFreePlan(plan))}
+                        </p>
+                      )}
                     </div>
 
                     <button
