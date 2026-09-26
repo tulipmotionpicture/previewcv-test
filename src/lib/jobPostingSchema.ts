@@ -87,6 +87,10 @@ function buildAddress(job: Job) {
   const hasGranular = job.city || job.state || job.country;
   return {
     "@type": "PostalAddress",
+    // Only real values from the backend — never derived or guessed, which Google's
+    // structured-data policy treats as misleading markup.
+    streetAddress: job.street_address?.trim() || undefined,
+    postalCode: job.postal_code?.trim() || undefined,
     addressLocality: job.city || (!hasGranular ? job.location : undefined),
     addressRegion: job.state || undefined,
     addressCountry: job.country || undefined,
