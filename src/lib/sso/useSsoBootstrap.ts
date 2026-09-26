@@ -38,6 +38,25 @@ import {
  */
 const SSO_CHECK_TTL_MS = 5 * 60 * 1000; // 5 minutes
 
+// Crawlers and link-preview fetchers must never be bounced through the handoff.
+// A renderer starts with empty storage, so it always looks anonymous and got
+// redirected to the peer's /sso/handoff and back to our /sso/receive — which is
+// robots-disallowed and carries noindex. Google rendered every page into that:
+// Search Console reported live pages as "Excluded by 'noindex' tag" with no
+// canonical, and "Test live URL" failed outright. Bots have no session to pick
+// up, so skipping them loses nothing.
+const CRAWLER_UA =
+  // "bot/" rather than a bare "bot": real devices like "Cubot X30" must still get SSO.
+  /bot\/|bot-|bot;|crawler|spider|crawling|slurp|google-inspectiontool|googleother|google-read-aloud|mediapartners-google|apis-google|feedfetcher|lighthouse|headlesschrome|facebookexternalhit|embedly|whatsapp\/|vkshare|quora link preview/i;
+
+function isCrawler(): boolean {
+  try {
+    return CRAWLER_UA.test(window.navigator.userAgent || "");
+  } catch {
+    return false;
+  }
+}
+
 // Backstop against an infinite handoff<->receive loop: bound how many times the
 // bootstrap may redirect within a short window before giving up for the TTL.
 const SSO_MAX_REDIRECTS = 2;
@@ -93,6 +112,8 @@ export function useSsoBootstrap(_opts: { onLoggedIn?: (user: unknown) => void } 
     if (typeof window === "undefined") return;
 
     if (window.location.pathname.startsWith("/sso/")) return;
+
+    if (isCrawler()) return;
 
     try {
       // Already a candidate session → nothing to bootstrap.
