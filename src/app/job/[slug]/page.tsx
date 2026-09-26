@@ -7,8 +7,9 @@ import JobDetailsClient from "./JobDetailsClient";
 import JobViewCount from "./JobViewCount";
 import JobDetailsSidebar from "@/components/JobDetailsSidebar";
 import FloatingHeader from "@/components/FloatingHeader";
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 import { api } from "@/lib/api";
+import { isNotFoundError } from "@/lib/apiErrors";
 import { formatSalaryRange } from "@/lib/salary";
 import { buildJobPostingJsonLd } from "@/lib/jobPostingSchema";
 import { toMetaDescription } from "@/lib/metaText";
@@ -46,8 +47,39 @@ async function getJobBySlug(slug: string): Promise<Job | null> {
     const response = await api.getJobBySlug(slug);
     return response.job;
   } catch (error) {
-    return null;
+    // Only a real 404 means "no such job"; rethrow outages (see isNotFoundError).
+    if (isNotFoundError(error)) return null;
+    throw error;
   }
+}
+
+// A job's slug is rebuilt from its title, so editing the title (or the backend's slug
+// format changing) leaves the old URL — already in Google's index — returning 404.
+// Slugs end in "-<id>", so look the job up by id and return its current slug so the
+// old URL can permanently redirect instead of dropping out of the index.
+async function getCurrentJobSlug(staleSlug: string): Promise<string | null> {
+  const match = staleSlug.match(/-(\d+)$/);
+  if (!match) return null;
+
+  let currentSlug: string | undefined;
+  try {
+    // Called without auth (unlike api.getJobById): there is no token on the server,
+    // and the client's 401 token-refresh path shouldn't run during a page render.
+    const response = await api.request<{ success: boolean; job: Job }>(
+      `/api/v1/jobs/${match[1]}`,
+    );
+    currentSlug = response.job?.slug;
+  } catch (error) {
+    // Any 4xx (unknown id, auth-gated) just means there's nothing to redirect to.
+    const status = (error as { status?: number } | null)?.status;
+    if (typeof status === "number" && status >= 400 && status < 500) return null;
+    throw error;
+  }
+
+  if (!currentSlug || currentSlug === staleSlug) return null;
+  // Only redirect to a slug the public endpoint actually serves (published or
+  // expired jobs), never to one that would itself 404.
+  return (await getJobBySlug(currentSlug)) ? currentSlug : null;
 }
 
 // Generate metadata for SEO
@@ -83,7 +115,7 @@ export async function generateMetadata({
     // Job detail pages had no canonical at all, leaving Google to pick one from
     // whatever URL variant (query strings, referrers) it happened to crawl.
     alternates: {
-      canonical: `${config.app.siteUrl}/job/${slug}`,
+      canonical: `${config.app.siteUrl}/job/${job.slug || slug}`,
     },
     openGraph: {
       title,
@@ -125,6 +157,10 @@ export default async function JobDetailsPage({
   }
 
   if (!job) {
+    const currentSlug = await getCurrentJobSlug(slug);
+    if (currentSlug) {
+      permanentRedirect(`/job/${currentSlug}`);
+    }
     notFound();
   }
 

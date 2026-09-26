@@ -15,15 +15,13 @@ function humanizeSlug(slug: string): string {
     .join(" ");
 }
 
+// Fetch errors propagate: a failed request doesn't mean the tag has no posts, and
+// treating it as such would render a noindex not-found page.
 async function getTagPosts(
   slug: string,
   page: number,
-): Promise<BlogPostsResponse | null> {
-  try {
-    return await api.getBlogPosts({ tags: slug, page, limit: PAGE_SIZE });
-  } catch {
-    return null;
-  }
+): Promise<BlogPostsResponse> {
+  return api.getBlogPosts({ tags: slug, page, limit: PAGE_SIZE });
 }
 
 /** Prefer the real tag name from a returned post; fall back to the humanized slug. */

@@ -7,17 +7,17 @@ import BlogCollection from "@/components/blog/BlogCollection";
 
 const PAGE_SIZE = 12;
 
-/** Find a category by slug. The categories endpoint returns a bare array (not { categories }). */
+/**
+ * Find a category by slug. The categories endpoint returns a bare array (not { categories }).
+ * Fetch errors propagate: the list failing to load doesn't mean the category is missing,
+ * and treating it as such would render a noindex not-found page.
+ */
 async function getCategory(slug: string): Promise<BlogCategory | null> {
-  try {
-    const res = (await api.getBlogCategories()) as unknown;
-    const list: BlogCategory[] = Array.isArray(res)
-      ? (res as BlogCategory[])
-      : ((res as { categories?: BlogCategory[] })?.categories ?? []);
-    return list.find((c) => c.slug === slug) ?? null;
-  } catch {
-    return null;
-  }
+  const res = (await api.getBlogCategories()) as unknown;
+  const list: BlogCategory[] = Array.isArray(res)
+    ? (res as BlogCategory[])
+    : ((res as { categories?: BlogCategory[] })?.categories ?? []);
+  return list.find((c) => c.slug === slug) ?? null;
 }
 
 async function getCategoryPosts(

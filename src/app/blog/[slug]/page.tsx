@@ -2,6 +2,7 @@ import { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
+import { isNotFoundError } from "@/lib/apiErrors";
 import { api } from "@/lib/api";
 import config from "@/config";
 import { BlogPost } from "@/types";
@@ -45,8 +46,10 @@ const HEADER_CTA = {
 async function getBlogPost(slug: string): Promise<BlogPost | null> {
   try {
     return await api.getBlogPostBySlug(slug);
-  } catch {
-    return null;
+  } catch (error) {
+    // Only a real 404 means "no such post"; rethrow outages (see isNotFoundError).
+    if (isNotFoundError(error)) return null;
+    throw error;
   }
 }
 

@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import config from "@/config";
 import FloatingHeader from "@/components/FloatingHeader";
 import { api } from "@/lib/api";
+import { isNotFoundError } from "@/lib/apiErrors";
 import type { SEOJobsResponse } from "@/types/jobs";
 import SEOJobsListWithLayout from "@/components/jobs/SEOJobsListWithLayout";
 
@@ -29,8 +30,10 @@ async function getJobsBySEOSlug(slug: string): Promise<SEOJobsResponse | null> {
     const response = await api.getJobsBySlug(slug, { limit: 20 });
     return response;
   } catch (error) {
-    // Silently return null for invalid SEO patterns
-    return null;
+    // Return null for invalid SEO patterns (404) only; rethrow outages so they
+    // aren't cached as a noindex not-found page (see isNotFoundError).
+    if (isNotFoundError(error)) return null;
+    throw error;
   }
 }
 

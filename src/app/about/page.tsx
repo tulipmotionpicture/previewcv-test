@@ -1,10 +1,29 @@
 import React from "react";
+import { Metadata } from "next";
+import config from "@/config";
 import { Users, Globe, Briefcase, Award } from "lucide-react";
 import CardSlider from "@/components/CardSlider";
 import Image from "next/image";
 import FloatingHeader from "@/components/FloatingHeader";
 // If you have framer-motion installed, import it for smooth animations
 // import { motion } from "framer-motion";
+
+// Without its own metadata this page inherited the homepage's title and had no
+// canonical, so Google saw it as a near-duplicate of "/".
+export const metadata: Metadata = {
+  title: "About Us",
+  description:
+    "Learn about PreviewCV — the job board and resume-sharing platform connecting candidates with recruiters through always-up-to-date resume links.",
+  alternates: config.app.siteUrl
+    ? { canonical: `${config.app.siteUrl}/about` }
+    : undefined,
+  openGraph: {
+    title: "About Us | PreviewCV",
+    description:
+      "Learn about PreviewCV — the job board and resume-sharing platform connecting candidates with recruiters.",
+    type: "website",
+  },
+};
 
 export default function AboutUsPage() {
   return (

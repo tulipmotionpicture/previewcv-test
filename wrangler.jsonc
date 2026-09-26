@@ -17,6 +17,15 @@
       "id": "acca016d90fc4b569ce7b112b3dc6bd6"
     }
   ],
+  // ISR revalidation: open-next.config.ts uses memoryQueue, which regenerates a stale
+  // page by fetching it from this same worker through this binding. Without it every
+  // revalidation fails and cached pages never refresh. "service" must equal "name" above.
+  "services": [
+    {
+      "binding": "WORKER_SELF_REFERENCE",
+      "service": "previewcv"
+    }
+  ],
   // Keep dashboard-managed runtime vars across deploys. Without this, `wrangler deploy`
   // defaults to deleting ALL plaintext vars before applying the ones in this config — so
   // any var set only in the dashboard is wiped on every deploy. That is what broke

@@ -1,6 +1,6 @@
 import { cache } from "react";
 import { Metadata } from "next";
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 import config from "@/config";
 import RecruiterProfilePublic from "@/components/RecruiterProfilePublic";
 import { buildOrganizationJsonLd } from "@/lib/organizationSchema";
@@ -13,39 +13,44 @@ import FloatingHeader from "@/components/FloatingHeader";
 // Wrapped in React's `cache` so generateMetadata and the page body share one result per
 // request. Both call this, and now that the fetch is uncached that would otherwise be two
 // round-trips to the API on every render — which is what doubled this page's TTFB.
+//
+// Only a 404 means "no such profile". Any other failure (5xx, timeout, network) throws so
+// the request becomes a retryable 5xx: previously every failure returned null and rendered
+// the not-found page, whose <meta name="robots" content="noindex"> is how live profiles
+// such as /recruiter/it_orbit ended up "Excluded by 'noindex' tag" in Search Console.
 const getRecruiterProfile = cache(async (
   slug: string,
 ): Promise<RecruiterProfile | null> => {
-  try {
-    const apiUrl =
-      process.env.NEXT_PUBLIC_API_URL ||
-      "https://letsmakecv.tulip-software.com";
-    const response = await fetch(
-      `${apiUrl}/api/v1/recruiters/profile/slug/${slug}`,
-      {
-        // Deliberately uncached. This used to be `next: { revalidate: 3600 }`, whose
-        // entry is persisted in KV on Cloudflare (unlike a Node host, where the data
-        // cache is wiped on restart). That entry stopped revalidating and pinned the
-        // page to a two-day-old snapshot: an empty `bio`, a placeholder logo and an
-        // empty `recent_jobs`, so profiles showed "No description provided" and no
-        // open positions while the API had all of it. This page is SEO-critical, so
-        // it must reflect the live profile on every crawl; the fetch costs ~300ms.
-        // Caching can return via on-demand revalidation once the backend can ping a
-        // revalidate hook on profile/job changes.
-        cache: "no-store",
-        headers: { "Content-Type": "application/json" },
-      },
-    );
+  const apiUrl =
+    process.env.NEXT_PUBLIC_API_URL ||
+    "https://letsmakecv.tulip-software.com";
+  const response = await fetch(
+    `${apiUrl}/api/v1/recruiters/profile/slug/${slug}`,
+    {
+      // Deliberately uncached. This used to be `next: { revalidate: 3600 }`, whose
+      // entry is persisted in KV on Cloudflare (unlike a Node host, where the data
+      // cache is wiped on restart). That entry stopped revalidating and pinned the
+      // page to a two-day-old snapshot: an empty `bio`, a placeholder logo and an
+      // empty `recent_jobs`, so profiles showed "No description provided" and no
+      // open positions while the API had all of it. This page is SEO-critical, so
+      // it must reflect the live profile on every crawl; the fetch costs ~300ms.
+      // Caching can return via on-demand revalidation once the backend can ping a
+      // revalidate hook on profile/job changes.
+      cache: "no-store",
+      headers: { "Content-Type": "application/json" },
+    },
+  );
 
-    if (!response.ok) {
-      return null;
-    }
-
-    return (await response.json()) as RecruiterProfile;
-  } catch (error) {
-    console.error("Failed to fetch recruiter profile:", error);
+  if (response.status === 404) {
     return null;
   }
+  if (!response.ok) {
+    throw new Error(
+      `Recruiter profile request for "${slug}" failed with HTTP ${response.status}`,
+    );
+  }
+
+  return (await response.json()) as RecruiterProfile;
 });
 
 /** Public display name, mirroring the logic used inside RecruiterProfilePublic. */
@@ -119,6 +124,17 @@ export default async function RecruiterProfilePage({
 
   if (!profile) {
     notFound();
+  }
+
+  // The API matches usernames case-insensitively, so /recruiter/GES served a second copy
+  // of /recruiter/ges. Send case variants to the one canonical URL. Limited to case-only
+  // differences so any other slug the API resolves keeps working exactly as before.
+  if (
+    profile.username &&
+    slug !== profile.username &&
+    slug.toLowerCase() === profile.username.toLowerCase()
+  ) {
+    permanentRedirect(`/recruiter/${profile.username}`);
   }
 
   // schema.org Organization for the employer — these profiles are search landing pages,

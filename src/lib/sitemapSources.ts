@@ -163,10 +163,8 @@ export async function getJobShardEntries(
   return entries;
 }
 
-/** Public recruiter/company profile pages, derived from a full jobs sweep. */
-export async function getRecruiterEntries(
-  base: string,
-): Promise<MetadataRoute.Sitemap> {
+/** Usernames of recruiters that currently have at least one open job (full jobs sweep). */
+async function getRecruitersWithOpenJobs(): Promise<string[]> {
   const recruiters = new Set<string>();
   const total = await getJobTotal();
 
@@ -182,6 +180,40 @@ export async function getRecruiterEntries(
     }
     offset += items.length;
     if (offset >= (res.total || 0)) break;
+  }
+
+  return Array.from(recruiters);
+}
+
+/**
+ * Public recruiter/company profile pages.
+ *
+ * The jobs sweep alone only finds recruiters with an open job right now, so a company
+ * whose jobs had all expired (e.g. it_orbit) silently dropped out of the sitemap even
+ * though its profile is live and linked from the homepage "Top Employers" strip. Union
+ * it with the curated top-employers list. Each source is settled independently so one
+ * failing doesn't drop the other's profiles.
+ */
+export async function getRecruiterEntries(
+  base: string,
+): Promise<MetadataRoute.Sitemap> {
+  const [withJobs, topEmployers] = await Promise.allSettled([
+    getRecruitersWithOpenJobs(),
+    api.getTopEmployers(),
+  ]);
+
+  const recruiters = new Set<string>();
+  if (withJobs.status === "fulfilled") {
+    withJobs.value.forEach((username) => recruiters.add(username));
+  } else {
+    console.error("Failed to list recruiters with open jobs", withJobs.reason);
+  }
+  if (topEmployers.status === "fulfilled") {
+    for (const employer of topEmployers.value?.top_employers ?? []) {
+      if (employer.recruiter_slug) recruiters.add(employer.recruiter_slug);
+    }
+  } else {
+    console.error("Failed to list top employers", topEmployers.reason);
   }
 
   return Array.from(recruiters).map((username) => ({
