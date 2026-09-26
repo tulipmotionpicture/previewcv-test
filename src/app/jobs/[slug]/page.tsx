@@ -1,10 +1,11 @@
 import { Suspense } from "react";
 import { Metadata } from "next";
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 import config from "@/config";
 import FloatingHeader from "@/components/FloatingHeader";
 import { api } from "@/lib/api";
 import { isNotFoundError } from "@/lib/apiErrors";
+import { countryQualifiedSlug } from "@/lib/seoPatterns";
 import type { SEOJobsResponse } from "@/types/jobs";
 import SEOJobsListWithLayout from "@/components/jobs/SEOJobsListWithLayout";
 
@@ -20,6 +21,10 @@ export async function generateStaticParams() {
   return [];
 }
 
+// Page size shared by the server-rendered first page and the client's "load more"
+// pagination (which continues from offset = PAGE_SIZE), so they must match.
+const PAGE_SIZE = 10;
+
 // Server-side data fetching function for SEO-based job listings
 // Uses /api/v1/jobs/by-slug/{path} endpoint for patterns like:
 // - "jobs-in-bangalore"
@@ -27,7 +32,7 @@ export async function generateStaticParams() {
 // - "full-time-jobs-in-india"
 async function getJobsBySEOSlug(slug: string): Promise<SEOJobsResponse | null> {
   try {
-    const response = await api.getJobsBySlug(slug, { limit: 20 });
+    const response = await api.getJobsBySlug(slug, { limit: PAGE_SIZE });
     return response;
   } catch (error) {
     // Return null for invalid SEO patterns (404) only; rethrow outages so they
@@ -89,6 +94,21 @@ export default async function SEOJobsPage({
     notFound();
   }
 
+  // City-only slugs duplicate their country-qualified twin (see countryQualifiedSlug).
+  // A failed pattern lookup just skips the redirect; the page itself still renders.
+  if (data.pattern_type === "location_city") {
+    let target: string | null = null;
+    try {
+      const { patterns } = await api.getSEOPatterns({ limit: 1000, minJobs: 1 });
+      target = countryQualifiedSlug(slug, patterns ?? []);
+    } catch (error) {
+      console.error(`SEO pattern lookup failed for "${slug}"`, error);
+    }
+    if (target) {
+      permanentRedirect(`/jobs/${target}`);
+    }
+  }
+
   return (
     <div className="min-h-screen transition-colors duration-300 bg-gray-50 dark:bg-gray-950">
       <FloatingHeader
@@ -102,10 +122,11 @@ export default async function SEOJobsPage({
         hideOnScroll={true}
       />
       <div className="pt-18 pb-8 px-4 md:px-12 max-w-7xl mx-auto">
-        {/* SEOJobsListWithLayout is a client component that reads useSearchParams().
-            This page is prerendered/ISR (see revalidate + generateStaticParams above),
-            so without a Suspense boundary the render bails out to CSR and throws
-            BAILOUT_TO_CLIENT_SIDE_RENDERING -> 500 on every /jobs/[slug] request. */}
+        {/* SEOJobsListWithLayout is a client component. It no longer calls
+            useSearchParams() (which on this ISR page bailed the list out to client-side
+            rendering), and renders from the server-fetched first page so the job links
+            are in the HTML. The Suspense boundary stays as a guard for any future
+            search-param reads. */}
         <Suspense
           fallback={
             <div className="py-20 flex flex-col items-center justify-center">
@@ -114,7 +135,7 @@ export default async function SEOJobsPage({
             </div>
           }
         >
-          <SEOJobsListWithLayout slug={slug} limit={10} />
+          <SEOJobsListWithLayout slug={slug} limit={PAGE_SIZE} initialData={data} />
         </Suspense>
       </div>
     </div>

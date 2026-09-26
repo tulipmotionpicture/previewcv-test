@@ -3,6 +3,7 @@ import { api } from "@/lib/api";
 import { Job } from "@/types/api";
 import { BlogPost, BlogCategory } from "@/types";
 import { isJobClosed } from "@/lib/jobPostingSchema";
+import { countryQualifiedSlug } from "@/lib/seoPatterns";
 
 // Sitemap source builders, sharded so the site scales past Google's hard 50,000-URL / 50MB
 // per-file limit. Jobs and blog posts are split into child sitemaps of SHARD_SIZE URLs each
@@ -114,6 +115,15 @@ export async function seoPatternEntries(
         slugs.add(unverified[i]);
       }
     });
+  }
+
+  // City-only slugs that have a country-qualified twin now 308 to it (see
+  // countryQualifiedSlug), so declare only the canonical, country-qualified URL.
+  if (patterns.status === "fulfilled") {
+    const all = patterns.value?.patterns ?? [];
+    for (const slug of Array.from(slugs)) {
+      if (countryQualifiedSlug(slug, all)) slugs.delete(slug);
+    }
   }
 
   return Array.from(slugs).map((slug) => ({ url: `${base}/jobs/${slug}` }));

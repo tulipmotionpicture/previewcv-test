@@ -236,7 +236,12 @@ export default function JobList({ jobs, loading, error }: JobListProps) {
               {/* Footer */}
               <div className="flex items-center justify-between gap-2 mt-auto">
                 <div className="flex flex-col gap-0.5">
-                  <div className="text-gray-500 dark:text-gray-400 text-[10px] font-medium">
+                  {/* Formatted in the viewer's time zone, so a server-rendered list (UTC)
+                      can differ by a day near midnight — not a real mismatch. */}
+                  <div
+                    className="text-gray-500 dark:text-gray-400 text-[10px] font-medium"
+                    suppressHydrationWarning
+                  >
                     Posted{" "}
                     {new Date(job.posted_date).toLocaleDateString("en-US", {
                       month: "short",

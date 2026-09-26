@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useEffect, useState, useCallback } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import React, { useEffect, useState, useCallback, useRef } from "react";
+import { useRouter } from "next/navigation";
 import { api } from "@/lib/api";
 import JobsLayout from "@/components/JobsLayout";
 import JobsFilters from "@/components/JobsFilters";
@@ -15,33 +15,47 @@ import type { Job } from "@/types/api";
 interface SEOJobsListWithLayoutProps {
   slug: string;
   limit?: number;
+  /**
+   * First page of results (offset 0, no filters, same `limit`) fetched on the server.
+   * Rendering from it puts the heading and real <a href="/job/…"> links in the initial
+   * HTML; before this the list was fetched in the browser only, so crawlers got a
+   * "Loading jobs..." shell with no job links.
+   */
+  initialData?: SEOJobsResponse | null;
 }
 
 export default function SEOJobsListWithLayout({
   slug,
   limit = 10,
+  initialData = null,
 }: SEOJobsListWithLayoutProps) {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const initialKeyword = searchParams.get("keyword") || "";
-  const initialCountry = searchParams.get("country") || "";
 
-  const [data, setData] = useState<SEOJobsResponse | null>(null);
-  const [jobs, setJobs] = useState<Job[]>([]);
-  const [loading, setLoading] = useState(true);
+  const initialJobs = (initialData?.jobs || []) as unknown as Job[];
+  const initialTotal = initialData?.pagination?.total || 0;
+
+  const [data, setData] = useState<SEOJobsResponse | null>(initialData);
+  const [jobs, setJobs] = useState<Job[]>(initialJobs);
+  const [loading, setLoading] = useState(!initialData);
   const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState("");
   const [selectedFilters, setSelectedFilters] = useState<
     Record<string, string[]>
   >({});
 
-  const [keyword, setKeyword] = useState(initialKeyword);
-  const [country, setCountry] = useState(initialCountry);
+  const [keyword, setKeyword] = useState("");
+  const [country, setCountry] = useState("");
   const [scrolled, setScrolled] = useState(false);
 
   const [offset, setOffset] = useState(0);
-  const [hasMore, setHasMore] = useState(true);
-  const [total, setTotal] = useState(0);
+  const [hasMore, setHasMore] = useState(
+    initialData ? initialJobs.length < initialTotal : true,
+  );
+  const [total, setTotal] = useState(initialTotal);
+
+  // The server already rendered the unfiltered first page, so the first client fetch
+  // is only needed when the URL carries filters (?keyword= / ?country=).
+  const skipInitialFetch = useRef(!!initialData);
 
   const [showMobileFilters, setShowMobileFilters] = useState(false);
   const [showSearchModal, setShowSearchModal] = useState(false);
@@ -54,21 +68,30 @@ export default function SEOJobsListWithLayout({
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  // URL filters are read after mount rather than with useSearchParams(): on this
+  // ISR page useSearchParams() bails the whole list out to client-side rendering,
+  // which is what kept the jobs out of the server HTML.
   const [filtersInitialized, setFiltersInitialized] = useState(false);
   useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const initialKeyword = params.get("keyword") || "";
+    const initialCountry = params.get("country") || "";
+
     const updates: Record<string, string[]> = {};
     if (initialKeyword) updates.skill_search = [initialKeyword];
     if (initialCountry) updates.country = [initialCountry];
 
     if (Object.keys(updates).length > 0) {
+      setKeyword(initialKeyword);
+      setCountry(initialCountry);
       setSelectedFilters((prev) => ({
         ...prev,
         ...updates,
       }));
+      skipInitialFetch.current = false;
     }
     setFiltersInitialized(true);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [initialKeyword, initialCountry]);
+  }, []);
 
   const buildJobFilterParams = useCallback(
     (selected: Record<string, string[]>, currentOffset: number = 0) => {
@@ -131,6 +154,10 @@ export default function SEOJobsListWithLayout({
 
   useEffect(() => {
     if (!filtersInitialized) return;
+    if (skipInitialFetch.current) {
+      skipInitialFetch.current = false;
+      return;
+    }
     setOffset(0);
     setHasMore(true);
     fetchJobs(0, false);
@@ -173,7 +200,7 @@ export default function SEOJobsListWithLayout({
   }, [jobs.length, hasMore, loading, loadingMore, handleLoadMore]);
 
   const handleSearch = () => {
-    const params = new URLSearchParams(searchParams.toString());
+    const params = new URLSearchParams(window.location.search);
     if (keyword) params.set("keyword", keyword);
     else params.delete("keyword");
 
