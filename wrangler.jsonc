@@ -1,7 +1,9 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "previewcv",
-  "main": ".open-next/worker.js",
+  // custom-worker.ts wraps the OpenNext worker (.open-next/worker.js) and adds the
+  // cron-triggered Google Indexing API notifier for job pages.
+  "main": "custom-worker.ts",
   "compatibility_date": "2025-06-05",
   "compatibility_flags": ["nodejs_compat"],
   "assets": {
@@ -15,8 +17,18 @@
     {
       "binding": "NEXT_INC_CACHE_KV",
       "id": "acca016d90fc4b569ce7b112b3dc6bd6"
+    },
+    // Which job pages have been announced to Google, and today's send count.
+    {
+      "binding": "INDEXING_STATE",
+      "id": "267f0aa9fa324fbda85c9dbb5e0b2213"
     }
   ],
+  // Job-page Indexing API notifier (src/indexing/jobIndexing.ts): every 15 minutes.
+  // Needs the GOOGLE_INDEXING_SA_KEY secret and the INDEXING_STATE KV namespace.
+  "triggers": {
+    "crons": ["*/15 * * * *"]
+  },
   // ISR revalidation: open-next.config.ts uses memoryQueue, which regenerates a stale
   // page by fetching it from this same worker through this binding. Without it every
   // revalidation fails and cached pages never refresh. "service" must equal "name" above.
