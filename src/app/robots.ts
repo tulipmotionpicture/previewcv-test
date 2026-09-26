@@ -20,7 +20,9 @@ export default function robots(): MetadataRoute.Robots {
         "/recruiter/password-reset",
         "/recruiter/billing/",
         "/auth/",
-        "/sso/",
+        // /sso/ is deliberately NOT disallowed: its pages carry noindex, and Google can
+        // only see that if it may crawl them. While blocked, /sso/receive?sso=anon stayed
+        // in the index ("Indexed, though blocked by robots.txt") and drew search clicks.
         "/resume/",
         "/api/",
       ],

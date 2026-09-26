@@ -5,7 +5,7 @@ import config from "@/config";
 import FloatingHeader from "@/components/FloatingHeader";
 import { api } from "@/lib/api";
 import { isNotFoundError } from "@/lib/apiErrors";
-import { countryQualifiedSlug } from "@/lib/seoPatterns";
+import { countryQualifiedSlug, isLandingSlugShape } from "@/lib/seoPatterns";
 import type { SEOJobsResponse } from "@/types/jobs";
 import SEOJobsListWithLayout from "@/components/jobs/SEOJobsListWithLayout";
 
@@ -49,7 +49,7 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const data = await getJobsBySEOSlug(slug);
+  const data = isLandingSlugShape(slug) ? await getJobsBySEOSlug(slug) : null;
 
   if (!data || !data.success || !data.meta) {
     return {
@@ -58,10 +58,15 @@ export async function generateMetadata({
     };
   }
 
+  // A landing page with no openings is a thin "No jobs found" page. Keep it reachable
+  // for visitors (the pattern may fill up again) but out of the index until it does.
+  const hasJobs = (data.pagination?.total ?? 0) > 0;
+
   return {
     title: data.meta.title,
     description: data.meta.description,
     keywords: data.meta.keywords,
+    robots: hasJobs ? undefined : { index: false, follow: true },
     openGraph: {
       title: data.meta.title,
       description: data.meta.description,
@@ -88,6 +93,9 @@ export default async function SEOJobsPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
+  if (!isLandingSlugShape(slug)) {
+    notFound();
+  }
   const data = await getJobsBySEOSlug(slug);
 
   if (!data || !data.success) {
