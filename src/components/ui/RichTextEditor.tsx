@@ -70,10 +70,21 @@ export default function RichTextEditor({
     const editor = useEditor({
         immediatelyRender: false,
         extensions: [
-            StarterKit,
+            // StarterKit v3 bundles its own Link and Underline. Registering them again
+            // below created duplicate "link"/"underline" extensions, and StarterKit's
+            // default Link (autolink on, no shouldAutoLink rule) was the one in effect —
+            // so the Link.configure() options below were silently ignored.
+            StarterKit.configure({ link: false, underline: false }),
             Underline,
             Link.configure({
                 openOnClick: false,
+                // Only auto-link real web addresses. Words such as "B.Tech", "M.Tech",
+                // "STAAD.Pro" or "Node.js" look like domains (.tech, .pro, .js are real
+                // TLDs) and were being saved as links in job descriptions. This one option
+                // gates all three auto-link paths: typing, the paste rule (which runs even
+                // with autolink off) and pasting a URL onto a selection. The toolbar's
+                // link button is unaffected and still accepts any URL.
+                shouldAutoLink: (url) => /^(https?:\/\/|www\.)/i.test(url),
                 HTMLAttributes: {
                     class: "text-blue-500 hover:underline cursor-pointer",
                 },
