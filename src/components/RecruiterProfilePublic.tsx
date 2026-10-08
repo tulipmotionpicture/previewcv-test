@@ -35,6 +35,7 @@ import { RecruiterProfile, CompanyEvent } from "@/types";
 import { Job } from "@/types/api";
 import { formatSalaryRange } from "@/lib/salary";
 import Link from "next/link";
+import PostedAgo from "@/components/PostedAgo";
 
 interface GalleryImage {
   id: string;
@@ -55,16 +56,8 @@ interface RecruiterProfilePublicProps {
 // locale and time zone, so once these panels began server-rendering, the job "Posted" date
 // differed between the two passes and React threw a hydration mismatch (#418) that made it
 // discard and re-render the tree. Pinning locale and time zone keeps both passes identical.
+// Used for event dates below; job posted dates now go through <PostedAgo>.
 const DATE_LOCALE = "en-GB";
-
-function formatPostedDate(value: string): string {
-  return new Date(value).toLocaleDateString(DATE_LOCALE, {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-    timeZone: "UTC",
-  });
-}
 
 function formatMonthShort(date: Date): string {
   return date.toLocaleString(DATE_LOCALE, { month: "short", timeZone: "UTC" });
@@ -447,10 +440,7 @@ export default function RecruiterProfilePublic({
                             <div className="flex items-center gap-4 text-xs font-bold text-slate-400">
                               <span>{job.application_count} applications</span>
                               <span>{job.view_count} views</span>
-                              <time dateTime={job.posted_date}>
-                                Posted{" "}
-                                {formatPostedDate(job.posted_date)}
-                              </time>
+                              <PostedAgo date={job.posted_date} />
                             </div>
                           </footer>
                         </Link>

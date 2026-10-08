@@ -13,6 +13,7 @@ import { isNotFoundError } from "@/lib/apiErrors";
 import { formatSalaryRange } from "@/lib/salary";
 import { buildJobPostingJsonLd } from "@/lib/jobPostingSchema";
 import { toMetaDescription } from "@/lib/metaText";
+import PostedAgo from "@/components/PostedAgo";
 import {
   MapPin,
   Briefcase,
@@ -262,12 +263,9 @@ export default async function JobDetailsPage({
                   <div className="pt-4 border-t border-gray-100 dark:border-gray-800 flex flex-wrap items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
                     <div className="flex items-center gap-1.5">
                       <Zap className="w-3.5 h-3.5" />
-                      Posted{" "}
-                      {new Date(job.posted_date).toLocaleDateString("en-US", {
-                        month: "short",
-                        day: "numeric",
-                        year: "numeric",
-                      })}
+                      {/* This page is cached for 10 minutes, so the relative wording is
+                          computed in the browser; the cached HTML keeps the exact date. */}
+                      <PostedAgo date={job.posted_date} />
                     </div>
                     <div className="w-px h-3 bg-gray-300 dark:bg-gray-700"></div>
                     <div className="flex items-center gap-1.5">

@@ -38,6 +38,7 @@ import {
   FileText,
   File,
 } from "lucide-react";
+import PostedAgo from "@/components/PostedAgo";
 
 interface JobDetailsClientProps {
   job: Job;
@@ -865,13 +866,7 @@ export default function JobDetailsClient({ job, slug }: JobDetailsClientProps) {
 
                 <div className="flex items-center justify-between pt-3 border-t border-gray-100 dark:border-gray-800">
                   <div className="flex items-center gap-3 text-[10px] text-gray-400">
-                    <span>
-                      Posted{" "}
-                      {new Date(similarJob.posted_date).toLocaleDateString(
-                        "en-US",
-                        { month: "short", day: "numeric", year: "numeric" },
-                      )}
-                    </span>
+                    <PostedAgo date={similarJob.posted_date} />
                   </div>
 
                   <Link

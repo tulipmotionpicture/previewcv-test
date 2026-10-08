@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 import { formatSalaryRange } from "@/lib/salary";
 import Image from "next/image";
 import { Building2 } from "lucide-react";
+import PostedAgo from "@/components/PostedAgo";
 
 interface JobListProps {
   jobs: Job[];
@@ -236,17 +237,10 @@ export default function JobList({ jobs, loading, error }: JobListProps) {
               {/* Footer */}
               <div className="flex items-center justify-between gap-2 mt-auto">
                 <div className="flex flex-col gap-0.5">
-                  {/* Formatted in the viewer's time zone, so a server-rendered list (UTC)
-                      can differ by a day near midnight — not a real mismatch. */}
-                  <div
-                    className="text-gray-500 dark:text-gray-400 text-[10px] font-medium"
-                    suppressHydrationWarning
-                  >
-                    Posted{" "}
-                    {new Date(job.posted_date).toLocaleDateString("en-US", {
-                      month: "short",
-                      day: "numeric",
-                    })}
+                  {/* Relative ("Posted 2 days ago") once mounted; the exact date is what the
+                      server renders and what <time dateTime> carries for crawlers. */}
+                  <div className="text-gray-500 dark:text-gray-400 text-[10px] font-medium">
+                    <PostedAgo date={job.posted_date} />
                   </div>
                   <div className="flex items-center gap-3">
                     <span className="flex items-center text-gray-500 dark:text-gray-400 text-[10px] font-medium gap-1">
