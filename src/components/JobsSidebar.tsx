@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { api } from "@/lib/api";
 import { TopHiringPartner } from "@/types/api";
+import { useLogoFallback } from "@/hooks/useLogoFallback";
 
 export default function JobsSidebar() {
   const [partners, setPartners] = useState<TopHiringPartner[]>([]);
@@ -54,28 +55,7 @@ export default function JobsSidebar() {
           ) : partners.length > 0 ? (
             <div className="grid grid-cols-2 gap-3">
               {partners.map((partner) => (
-                <Link
-                  key={partner.id}
-                  href={`/recruiter/${partner.username}`}
-                  className="flex flex-col items-center bg-white hover:bg-gray-50 dark:bg-gray-800 dark:hover:bg-gray-700 rounded-lg p-3 border border-gray-200 dark:border-gray-700 transition group h-full"
-                >
-                  {partner.company_logo_url ? (
-                    <div className="relative h-8 w-16 mb-2 flex items-center justify-center">
-                      <img
-                        src={partner.company_logo_url}
-                        alt={partner.company_name || "Company"}
-                        className="max-h-full max-w-full object-contain filter grayscale group-hover:grayscale-0 transition-all duration-300"
-                      />
-                    </div>
-                  ) : (
-                    <div className="h-8 w-8 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center mb-2 text-primary-blue dark:text-blue-400 font-bold text-sm">
-                      {partner.company_name?.charAt(0) || "?"}
-                    </div>
-                  )}
-                  <span className="text-[10px] font-medium text-gray-700 dark:text-gray-300 text-center line-clamp-1 group-hover:text-primary-blue dark:group-hover:text-blue-400 transition">
-                    {partner.company_name?.trim().slice(0, 17) || ""}
-                  </span>
-                </Link>
+                <PartnerTile key={partner.id} partner={partner} />
               ))}
             </div>
           ) : (
@@ -125,5 +105,40 @@ export default function JobsSidebar() {
         </div>
       </Link>
     </div>
+  );
+}
+
+/**
+ * One hiring partner. The logo shows in full colour; a placeholder logo URL (seeded on
+ * signup, e.g. via.placeholder.com) or one that fails to load falls back to the
+ * company's initial instead of an empty grey box.
+ */
+function PartnerTile({ partner }: { partner: TopHiringPartner }) {
+  const { logoUrl, imgRef, onLogoError } = useLogoFallback(partner.company_logo_url);
+
+  return (
+    <Link
+      href={`/recruiter/${partner.username}`}
+      className="flex flex-col items-center bg-white hover:bg-gray-50 dark:bg-gray-800 dark:hover:bg-gray-700 rounded-lg p-3 border border-gray-200 dark:border-gray-700 transition group h-full"
+    >
+      {logoUrl ? (
+        <div className="relative h-8 w-16 mb-2 flex items-center justify-center">
+          <img
+            ref={imgRef}
+            src={logoUrl}
+            alt={partner.company_name || "Company"}
+            onError={onLogoError}
+            className="max-h-full max-w-full object-contain"
+          />
+        </div>
+      ) : (
+        <div className="h-8 w-8 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center mb-2 text-primary-blue dark:text-blue-400 font-bold text-sm">
+          {partner.company_name?.trim().charAt(0).toUpperCase() || "?"}
+        </div>
+      )}
+      <span className="text-[10px] font-medium text-gray-700 dark:text-gray-300 text-center line-clamp-1 group-hover:text-primary-blue dark:group-hover:text-blue-400 transition">
+        {partner.company_name?.trim().slice(0, 17) || ""}
+      </span>
+    </Link>
   );
 }

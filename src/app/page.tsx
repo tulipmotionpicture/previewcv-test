@@ -84,10 +84,6 @@ async function getHomeData() {
 
 export default async function Home() {
   const { cardsData, partners, blogPosts } = await getHomeData();
-  // Scroll only when the logos would actually overflow the row (~7 fit at 200px across the
-  // 1280px container). Below that, duplicating them to loop the marquee is what made the
-  // strip look repetitive.
-  const employerMarquee = partners.length >= 8;
 
   return (
     <div className="min-h-screen bg-white dark:bg-gray-950 dark:text-gray-100 transition-colors duration-300">
@@ -173,11 +169,11 @@ export default async function Home() {
       </section>
 
       {/* Jobs By Top Employers */}
-      {/* One row, and only employers with a real logo. Previously a second row replayed the
-          same companies reversed, and each row duplicated the list to loop the marquee, so
-          five employers rendered twenty logo tiles. The marquee now runs only when there are
-          enough logos to genuinely overflow the row; below that they sit centred and still,
-          which is why a short list no longer looks like a repeating carousel. */}
+      {/* Only employers with a real logo, in rows of up to five (three on tablets, two on
+          phones) that wrap, with a short last row centred under the full ones. The strip
+          used to sit in a box one tile tall with the overflow hidden, so every tile past the
+          first row was clipped: 6 logos showed as 3 at 783px and 4 at ~970px. It only
+          scrolled as a marquee from 8 logos up, so smaller lists never fit. */}
       {partners.length > 0 && (
         <section className="py-6 lg:py-8 bg-white dark:bg-black">
           <div className="max-w-7xl mx-auto px-4 lg:px-6">
@@ -185,50 +181,34 @@ export default async function Home() {
               Jobs By Top Employers
             </h2>
 
-            <div className="overflow-hidden py-4">
-              <div className="relative w-full overflow-hidden h-28 md:h-32">
-                <div
-                  className={`h-full flex ${
-                    employerMarquee
-                      ? "absolute top-0 left-0 animate-scroll-left w-max"
-                      : "justify-center relative w-full flex-wrap gap-y-2"
-                  }`}
+            <ul className="flex flex-wrap justify-center gap-y-4 py-4">
+              {partners.map((employer) => (
+                <li
+                  key={employer.recruiter_slug}
+                  className="basis-1/2 sm:basis-1/3 lg:basis-1/5 px-2 h-24 md:h-28 lg:h-32"
                 >
-                  {(employerMarquee ? [...partners, ...partners] : partners).map(
-                    (employer, i) => (
-                      <div
-                        key={`employer-${i}`}
-                        className="px-2 w-[150px] md:w-[190px] lg:w-[220px] h-full flex-shrink-0"
-                      >
-                        <div className="bg-white p-2 md:p-2.5 border border-gray-200 rounded-lg flex items-center justify-center hover:shadow-md transition-shadow h-full w-full">
-                          <Link
-                            href={`/recruiter/${employer.recruiter_slug}#positions`}
-                            title={employer.company_name}
-                            className="flex h-full w-full items-center justify-center"
-                          >
-                            {/* Logos arrive at whatever size and aspect ratio the employer
-                                uploaded. `object-contain` inside a box of fixed height scales
-                                each one to fill that box without distortion, so they read as a
-                                uniform set with the same padding around them, instead of the
-                                previous max-h-12 cap that rendered each at a different size and
-                                left the wider marks too small to read. The box is kept close to
-                                a typical wordmark's proportions and the tile padding tight, so
-                                little of the tile is spent on letterboxing. */}
-                            <Image
-                              src={employer.company_logo_url}
-                              alt={employer.company_name || "Employer logo"}
-                              width={220}
-                              height={88}
-                              className="h-full w-full object-contain"
-                            />
-                          </Link>
-                        </div>
-                      </div>
-                    ),
-                  )}
-                </div>
-              </div>
-            </div>
+                  <div className="bg-white p-2 md:p-2.5 border border-gray-200 rounded-lg flex items-center justify-center hover:shadow-md transition-shadow h-full w-full">
+                    <Link
+                      href={`/recruiter/${employer.recruiter_slug}#positions`}
+                      title={employer.company_name}
+                      className="flex h-full w-full items-center justify-center"
+                    >
+                      {/* Logos arrive at whatever size and aspect ratio the employer
+                          uploaded. `object-contain` inside a box of fixed height scales
+                          each one to fill that box without distortion, so they read as a
+                          uniform set with the same padding around them. */}
+                      <Image
+                        src={employer.company_logo_url}
+                        alt={employer.company_name || "Employer logo"}
+                        width={220}
+                        height={88}
+                        className="h-full w-full object-contain"
+                      />
+                    </Link>
+                  </div>
+                </li>
+              ))}
+            </ul>
           </div>
         </section>
       )}
