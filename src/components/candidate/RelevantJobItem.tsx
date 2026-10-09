@@ -3,6 +3,7 @@ import { MapPin, Clock, ChevronDown, ChevronUp, Building2 } from "lucide-react";
 import { Job } from "../../types/jobs";
 import Link from "next/link";
 import Image from "next/image";
+import { useLogoFallback } from "@/hooks/useLogoFallback";
 
 interface RelevantJobItemProps {
   job: Job;
@@ -10,6 +11,7 @@ interface RelevantJobItemProps {
 
 const RelevantJobItem: React.FC<RelevantJobItemProps> = ({ job }) => {
   const [expanded, setExpanded] = useState(false);
+  const { logoUrl, imgRef, onLogoError } = useLogoFallback(job.company_logo_url);
 
   // Format posted date
   const getPostedAtText = () => {
@@ -27,7 +29,7 @@ const RelevantJobItem: React.FC<RelevantJobItemProps> = ({ job }) => {
       >
         <div className="flex justify-between items-start mb-2">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg overflow-hidden border border-slate-100">
+            <div className="w-10 h-10 shrink-0 rounded-lg overflow-hidden border border-slate-100 bg-white p-1 flex items-center justify-center">
               {/* <img
                 src={job.company_logo_url || '/logo.jpg'}
                 alt={job.company_name}
@@ -40,22 +42,21 @@ const RelevantJobItem: React.FC<RelevantJobItemProps> = ({ job }) => {
                 }}
               /> */}
 
-              {job.company_logo_url ? (
+              {/* contain, not cover: cover cropped wide wordmarks down to their middle.
+                  Seeded placeholder URLs (via.placeholder.com) never load, and a real URL can
+                  fail too — both fall back to the icon instead of leaving an empty box. */}
+              {logoUrl ? (
                 <Image
+                  ref={imgRef}
                   width={40}
                   height={40}
-                  src={job.company_logo_url}
+                  src={logoUrl}
                   alt={job.company_name}
-                  className="w-full h-full object-cover"
-                  onError={(e) => {
-                    e.currentTarget.style.display = "none";
-                    e.currentTarget.nextElementSibling?.classList.remove(
-                      "hidden",
-                    );
-                  }}
+                  className="w-full h-full object-contain"
+                  onError={onLogoError}
                 />
               ) : (
-                <Building2 className="w-8 h-8 text-gray-400" />
+                <Building2 className="w-7 h-7 text-blue-400" />
               )}
             </div>
             <div>

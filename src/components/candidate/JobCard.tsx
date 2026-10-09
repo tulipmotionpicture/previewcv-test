@@ -1,4 +1,5 @@
 import React from "react";
+import { useLogoFallback } from "@/hooks/useLogoFallback";
 import {
   ExternalLink,
   Calendar,
@@ -15,6 +16,7 @@ interface JobCardProps {
 }
 
 const JobCard: React.FC<JobCardProps> = ({ application }) => {
+  const { logoUrl, imgRef, onLogoError } = useLogoFallback(application.company_logo_url);
   const getStatusColor = (status: string) => {
     switch (status) {
       case "applied":
@@ -61,11 +63,15 @@ const JobCard: React.FC<JobCardProps> = ({ application }) => {
       <div className="flex gap-3">
         {/* Logo */}
         <div className="w-10 h-10 shrink-0 rounded-lg overflow-hidden border border-slate-100 dark:border-gray-800 bg-white p-0.5 flex items-center justify-center">
-          {application.company_logo_url ? (
+          {/* Seeded placeholder URLs (via.placeholder.com) never load, and a real URL can
+              fail too — either way show the initial instead of a broken-image icon. */}
+          {logoUrl ? (
             <img
-              src={application.company_logo_url}
+              ref={imgRef}
+              src={logoUrl}
               alt={application.company_name || "Company"}
               className="w-full h-full object-contain"
+              onError={onLogoError}
             />
           ) : (
             <div className="w-full h-full bg-slate-50 dark:bg-gray-800 flex items-center justify-center rounded">

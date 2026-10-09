@@ -1,4 +1,5 @@
 import React from "react";
+import { useLogoFallback } from "@/hooks/useLogoFallback";
 import { Application } from "@/types/api";
 import { CheckCircle2, Clock, AlertCircle, Users } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
@@ -14,6 +15,8 @@ const ApplicationSidebarCard: React.FC<ApplicationSidebarCardProps> = ({
     isSelected,
     onClick,
 }) => {
+    const { logoUrl, imgRef, onLogoError } = useLogoFallback(application.company_logo_url);
+
     // Mock data for UI matching
     const rating = 3.5 + (application.job_id % 3) * 0.5; // Random-ish rating
     const reviewCount = 50 + (application.job_id % 100);
@@ -92,11 +95,15 @@ const ApplicationSidebarCard: React.FC<ApplicationSidebarCardProps> = ({
             <div className="flex items-start gap-3">
                 {/* Logo */}
                 <div className="w-9 h-9 rounded-lg border border-gray-200 dark:border-gray-700 p-0.5 bg-white shrink-0 flex items-center justify-center">
-                    {application.company_logo_url ? (
+                    {/* Seeded placeholder URLs never load, and a real URL can fail too —
+                        either way show the initial instead of a broken-image icon. */}
+                    {logoUrl ? (
                         <img
-                            src={application.company_logo_url}
+                            ref={imgRef}
+                            src={logoUrl}
                             alt="Logo"
                             className="w-full h-full object-contain"
+                            onError={onLogoError}
                         />
                     ) : (
                         <span className="text-xs font-bold text-gray-400">

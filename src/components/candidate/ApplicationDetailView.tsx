@@ -21,6 +21,7 @@ import {
 import { format } from "date-fns";
 import RelevantJobItem from "./RelevantJobItem";
 import Link from "next/link";
+import { useLogoFallback } from "@/hooks/useLogoFallback";
 
 interface ApplicationDetailViewProps {
     application: Application;
@@ -31,6 +32,12 @@ const ApplicationDetailView: React.FC<ApplicationDetailViewProps> = ({
     application,
     similarJobs = []
 }) => {
+    // This view switches between applications without remounting; the hook keys its
+    // fallback to the URL, so one company's failed logo never carries over to the next.
+    const { logoUrl, imgRef, onLogoError } = useLogoFallback(
+        application.company_logo_url || application.job?.company_logo_url,
+    );
+
     // Timeline Logic
     const steps = [
         {
@@ -111,11 +118,15 @@ const ApplicationDetailView: React.FC<ApplicationDetailViewProps> = ({
 
                 {/* Company Logo - Right Side */}
                 <div className="w-14 h-14 rounded-xl border border-gray-100 dark:border-gray-700 p-1.5 bg-white dark:bg-gray-800 shadow-sm flex items-center justify-center">
-                    {application.company_logo_url || application.job?.company_logo_url ? (
+                    {/* Seeded placeholder URLs never load, and a real URL can fail too —
+                        either way show the icon instead of a broken-image icon. */}
+                    {logoUrl ? (
                         <img
-                            src={application.company_logo_url || application.job?.company_logo_url || ""}
+                            ref={imgRef}
+                            src={logoUrl}
                             alt="Logo"
                             className="w-full h-full object-contain"
+                            onError={onLogoError}
                         />
                     ) : (
                         <Building2 className="text-gray-300 w-10 h-10" />

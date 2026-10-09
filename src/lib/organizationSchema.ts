@@ -12,7 +12,7 @@ import { RecruiterProfile } from "@/types";
 import { htmlToPlainText } from "@/lib/metaText";
 
 /** Placeholder logos are seeded on signup and must not be published as a real logo. */
-export function isRealLogo(url?: string | null): boolean {
+export function isRealLogo(url?: string | null): url is string {
   return !!url && !/via\.placeholder\.com|placehold\.(it|co)/i.test(url);
 }
 
