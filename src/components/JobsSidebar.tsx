@@ -121,18 +121,21 @@ function PartnerTile({ partner }: { partner: TopHiringPartner }) {
       href={`/recruiter/${partner.username}`}
       className="flex flex-col items-center bg-white hover:bg-gray-50 dark:bg-gray-800 dark:hover:bg-gray-700 rounded-lg p-3 border border-gray-200 dark:border-gray-700 transition group h-full"
     >
+      {/* Logo and initial share one box the width of the tile. The logo used to be capped
+          at 64x32 inside a 121px tile, so wide wordmarks rendered ~16px tall; it now fills
+          the box (object-contain: scaled to fit, never cropped or stretched). */}
       {logoUrl ? (
-        <div className="relative h-8 w-16 mb-2 flex items-center justify-center">
+        <div className="h-12 w-full mb-2 rounded-md bg-white p-1 flex items-center justify-center overflow-hidden">
           <img
             ref={imgRef}
             src={logoUrl}
             alt={partner.company_name || "Company"}
             onError={onLogoError}
-            className="max-h-full max-w-full object-contain"
+            className="h-full w-full object-contain"
           />
         </div>
       ) : (
-        <div className="h-8 w-8 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center mb-2 text-primary-blue dark:text-blue-400 font-bold text-sm">
+        <div className="h-12 w-full mb-2 rounded-md bg-blue-100 dark:bg-blue-900 flex items-center justify-center text-primary-blue dark:text-blue-400 font-bold text-base">
           {partner.company_name?.trim().charAt(0).toUpperCase() || "?"}
         </div>
       )}
