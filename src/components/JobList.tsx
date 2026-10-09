@@ -98,26 +98,35 @@ export default function JobList({ jobs, loading, error }: JobListProps) {
               onClick={() => router.push(`/job/${job.slug}`)}
               className="cursor-pointer bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-3 hover:border-blue-300 transition-shadow duration-300 flex flex-col h-full shadow-sm"
             >
-              <div className="flex items-start justify-between mb-1.5">
-                <div className="flex gap-2.5">
+              <div className="flex items-start justify-between gap-2 mb-1.5">
+                {/* min-w-0 + flex-1: a flex item won't shrink below its content by default, so
+                    the title's `truncate` never applied — long titles pushed past the card and
+                    shoved the bookmark/share buttons off it, making the whole page scroll
+                    sideways on phones. */}
+                <div className="flex gap-2.5 min-w-0 flex-1">
                   {/* Logo */}
                   <div className="w-9 h-9 rounded-lg bg-gray-50 dark:bg-gray-800 flex items-center justify-center p-1 border border-gray-100 dark:border-gray-700 shrink-0">
                     {job.company_logo_url ? (
-                      <Image
-                        width={40}
-                        height={40}
-                        src={job.company_logo_url}
-                        alt={job.company_name}
-                        className="w-full h-full object-cover"
-                        onError={(e) => {
-                          e.currentTarget.style.display = "none";
-                          e.currentTarget.nextElementSibling?.classList.remove(
-                            "hidden",
-                          );
-                        }}
-                      />
+                      <>
+                        <Image
+                          width={40}
+                          height={40}
+                          src={job.company_logo_url}
+                          alt={job.company_name}
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            e.currentTarget.style.display = "none";
+                            e.currentTarget.nextElementSibling?.classList.remove(
+                              "hidden",
+                            );
+                          }}
+                        />
+                        {/* Revealed by onError when the logo URL fails to load. Without it
+                            the handler had nothing to unhide and the box was left empty. */}
+                        <Building2 className="hidden w-8 h-8 text-blue-400" />
+                      </>
                     ) : (
-                      <Building2 className="w-8 h-8 text-gray-400" />
+                      <Building2 className="w-8 h-8 text-blue-400" />
                     )}
                   </div>
 
