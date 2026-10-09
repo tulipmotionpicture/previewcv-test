@@ -56,6 +56,38 @@ const normalizePostalCode = (value: string, country: string) => {
   return isIndia(country) ? v.replace(/ /g, "") : v;
 };
 
+// Keystroke filters: drop characters a valid value can never contain, so the field
+// can't hold letters in a PIN code or "e", "-", "." in a count. They also cap the length,
+// so the inputs carry no maxLength: the browser would cut pasted text ("PIN: 560001")
+// before the filter ran. Too-short values are left to the validators below.
+const filterPostalInput = (value: string, country: string) =>
+  isIndia(country)
+    ? value.replace(/\D/g, "").slice(0, 6)
+    : value.toUpperCase().replace(/[^A-Z0-9 -]/g, "").slice(0, 10);
+
+const filterVacanciesInput = (value: string) =>
+  value.replace(/\D/g, "").replace(/^0+/, "").slice(0, 5);
+
+/** Error for an optional postal code, or null when it's blank or valid. */
+const postalCodeError = (value: string, country: string): string | null => {
+  if (!value.trim()) return null;
+  const postal = normalizePostalCode(value, country);
+  if (isIndia(country) && !INDIA_PINCODE_RE.test(postal))
+    return "Enter a valid 6-digit PIN code (it can't start with 0).";
+  if (!POSTAL_CODE_RE.test(postal))
+    return "Postal code must be 3-10 letters or digits.";
+  return null;
+};
+
+/** Error for the optional vacancy count, or null when it's blank or valid. */
+const vacanciesError = (value: string): string | null => {
+  if (!value.trim()) return null;
+  const n = Number(value);
+  if (!Number.isInteger(n) || n < 1 || n > MAX_VACANCIES)
+    return `Enter a whole number from 1 to ${MAX_VACANCIES}.`;
+  return null;
+};
+
 // Guided context questions shown one-at-a-time before AI generation, so the
 // model gets the recruiter's own framing for each section of the job post.
 const CONTEXT_STEPS = [
@@ -190,6 +222,9 @@ export default function JobCreationPage({
     }
     return JOB_FORM_INITIAL;
   });
+  // Optional fields whose inline error shows once the recruiter has left them, so a
+  // half-typed PIN isn't flagged mid-entry.
+  const [blurred, setBlurred] = useState<{ postal_code?: boolean; vacancies?: boolean }>({});
   const [categoryInput, setCategoryInput] = useState("");
   const [jobTitleInput, setJobTitleInput] = useState(jobToEdit?.title || "");
   const [selectedJobTitleId, setSelectedJobTitleId] = useState<number | null>(null);
@@ -534,32 +569,15 @@ export default function JobCreationPage({
         return { field: "state", message: "Please select a state/region." };
       if (!form.city.trim())
         return { field: "city", message: "Please select a city." };
-      if (form.postal_code.trim()) {
-        const postal = normalizePostalCode(form.postal_code, form.country);
-        if (isIndia(form.country) && !INDIA_PINCODE_RE.test(postal))
-          return {
-            field: "postal_code",
-            message: "Please enter a valid 6-digit PIN code (it can't start with 0).",
-          };
-        if (!POSTAL_CODE_RE.test(postal))
-          return {
-            field: "postal_code",
-            message: "Postal code must be 3-10 letters or digits.",
-          };
-      }
+      const postalError = postalCodeError(form.postal_code, form.country);
+      if (postalError) return { field: "postal_code", message: postalError };
       if (form.street_address.trim().length > MAX_STREET_ADDRESS)
         return {
           field: "street_address",
           message: `Street address must be under ${MAX_STREET_ADDRESS} characters.`,
         };
-      if (form.vacancies.trim()) {
-        const vacancies = Number(form.vacancies);
-        if (!Number.isInteger(vacancies) || vacancies < 1 || vacancies > MAX_VACANCIES)
-          return {
-            field: "vacancies",
-            message: `Number of vacancies must be a whole number from 1 to ${MAX_VACANCIES}.`,
-          };
-      }
+      const vacancyError = vacanciesError(form.vacancies);
+      if (vacancyError) return { field: "vacancies", message: vacancyError };
     }
     if (s === 1) {
       if (isRichTextEmpty(form.description))
@@ -1109,6 +1127,9 @@ export default function JobCreationPage({
                         handleChange({ target: { name: "state", value: "" } } as any);
                         handleChange({ target: { name: "stateCode", value: "" } } as any);
                         handleChange({ target: { name: "city", value: "" } } as any);
+                        // A postal code's format depends on the country, so it goes with it.
+                        handleChange({ target: { name: "postal_code", value: "" } } as any);
+                        setBlurred((b) => ({ ...b, postal_code: false }));
                       }}
                     />
                   </div>
@@ -1188,13 +1209,26 @@ export default function JobCreationPage({
                       type="text"
                       name="postal_code"
                       value={form.postal_code}
-                      onChange={handleChange}
+                      onChange={(e) =>
+                        setForm((p) => ({
+                          ...p,
+                          postal_code: filterPostalInput(e.target.value, p.country),
+                        }))
+                      }
+                      onBlur={() => setBlurred((b) => ({ ...b, postal_code: true }))}
+                      aria-invalid={
+                        !!(blurred.postal_code && postalCodeError(form.postal_code, form.country))
+                      }
                       inputMode={isIndia(form.country) ? "numeric" : "text"}
                       autoComplete="postal-code"
-                      maxLength={12}
                       placeholder={isIndia(form.country) ? "e.g. 560001" : "e.g. 94105"}
                       className="w-full px-4 py-2 bg-white dark:bg-[#282727] border border-gray-200 dark:border-gray-700 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all placeholder-gray-400 dark:text-white"
                     />
+                    {blurred.postal_code && postalCodeError(form.postal_code, form.country) && (
+                      <p className="mt-1 text-xs text-red-600 dark:text-red-400">
+                        {postalCodeError(form.postal_code, form.country)}
+                      </p>
+                    )}
                   </div>
 
                   <div id="field-street_address">
@@ -1224,18 +1258,30 @@ export default function JobCreationPage({
                       Number of Vacancies{" "}
                       <span className="normal-case tracking-normal">(optional)</span>
                     </label>
+                    {/* Text, not type="number": a number input accepts "e", "-", "+" and
+                        decimals, and reports "" for them, hiding what was typed. */}
                     <input
-                      type="number"
+                      type="text"
                       name="vacancies"
                       value={form.vacancies}
-                      onChange={handleChange}
-                      min={1}
-                      max={MAX_VACANCIES}
-                      step={1}
+                      onChange={(e) =>
+                        setForm((p) => ({
+                          ...p,
+                          vacancies: filterVacanciesInput(e.target.value),
+                        }))
+                      }
+                      onBlur={() => setBlurred((b) => ({ ...b, vacancies: true }))}
+                      aria-invalid={!!(blurred.vacancies && vacanciesError(form.vacancies))}
                       inputMode="numeric"
+                      pattern="[0-9]*"
                       placeholder="e.g. 3"
                       className="w-full px-4 py-2 bg-white dark:bg-[#282727] border border-gray-200 dark:border-gray-700 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all placeholder-gray-400 dark:text-white"
                     />
+                    {blurred.vacancies && vacanciesError(form.vacancies) && (
+                      <p className="mt-1 text-xs text-red-600 dark:text-red-400">
+                        {vacanciesError(form.vacancies)}
+                      </p>
+                    )}
                   </div>
                 </div>
 
