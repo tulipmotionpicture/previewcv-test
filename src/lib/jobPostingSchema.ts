@@ -11,6 +11,7 @@
 // source data exists (see `stripEmpty`).
 
 import { Job } from "@/types/api";
+import { parseApiDate } from "@/lib/postedDate";
 
 // Company data comes from the public gallery endpoint (loosely typed as `any` upstream).
 export interface CompanyData {
@@ -115,19 +116,55 @@ function buildBaseSalary(job: Job) {
   };
 }
 
+const DATE_ONLY = /^\d{4}-\d{2}-\d{2}$/;
+
+/**
+ * A date for Google in ISO 8601 with an explicit time zone.
+ *
+ * The API sends naive UTC timestamps ("2026-10-07T15:04:34.494109") with no offset, which
+ * leaves Google to guess the zone — read as IST, every posting looked 5h30m earlier than it
+ * was, and expired 5h30m early too. They are emitted as UTC ("…T15:04:34.494Z"). Date-only
+ * values carry no time to place in a zone, so they pass through unchanged.
+ */
+function toSchemaDate(value?: string | null): string | undefined {
+  if (!value) return undefined;
+  if (DATE_ONLY.test(value)) return value;
+  return parseApiDate(value)?.toISOString() ?? value;
+}
+
+/** The instant a posting stops being valid. A date-only deadline runs to the end of that day. */
+function validUntil(value?: string | null): Date | null {
+  if (!value) return null;
+  if (DATE_ONLY.test(value)) return new Date(`${value}T23:59:59.999Z`);
+  return parseApiDate(value);
+}
+
 /**
  * Build the JobPosting JSON-LD object for a job.
  *
  * Returns `null` when the job should NOT be indexed by Google Jobs — i.e. it is closed
- * (expired / deactivated / rejected / not accepting applications). The caller omits the
- * `<script>` entirely in that case so the listing drops out of the Jobs experience while
- * the human-readable page can stay live.
+ * (expired / deactivated / rejected / not accepting applications), or its expiry time has
+ * passed. The caller omits the `<script>` entirely in that case so the listing drops out of
+ * the Jobs experience while the human-readable page can stay live.
  */
 export function buildJobPostingJsonLd(
   job: Job,
   companyData?: CompanyData | null,
+  now: Date = new Date(),
 ): Record<string, unknown> | null {
   if (isJobClosed(job)) return null;
+
+  const validThroughRaw = job.application_deadline || job.expires_at;
+
+  // Expiry guard — Google data only. The backend marks jobs expired in a batch that runs well
+  // after `expires_at` (14+ hours observed), and until then reports them as published and
+  // accepting applications. Publishing a JobPosting whose validThrough is already in the past
+  // tells Google a job is open and closed at once, so the data is withheld from the moment
+  // the expiry passes. The page itself — Apply button, closed notice — still follows the
+  // backend's own flags. A renewal moves `expires_at` forward, so the data returns with it.
+  // Deliberately not part of isJobClosed(), which the sitemap shares.
+  const until = validUntil(validThroughRaw);
+  if (until && until.getTime() <= now.getTime()) return null;
 
   const description = buildDescriptionHtml(job);
   // Required by Google: description must exist and must not equal the title.
@@ -137,15 +174,13 @@ export function buildJobPostingJsonLd(
     ? EMPLOYMENT_TYPE_MAP[job.job_type.toLowerCase()]
     : undefined;
 
-  const validThrough = job.application_deadline || job.expires_at || undefined;
-
   const jsonLd: Record<string, unknown> = {
     "@context": "https://schema.org/",
     "@type": "JobPosting",
     title: job.title,
     description,
-    datePosted: job.posted_date,
-    validThrough,
+    datePosted: toSchemaDate(job.posted_date),
+    validThrough: toSchemaDate(validThroughRaw),
     employmentType,
     identifier: {
       "@type": "PropertyValue",
