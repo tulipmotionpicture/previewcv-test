@@ -9,6 +9,7 @@ import { formatSalaryRange } from "@/lib/salary";
 import Image from "next/image";
 import { Building2 } from "lucide-react";
 import PostedAgo from "@/components/PostedAgo";
+import { htmlToPlainText } from "@/lib/metaText";
 
 interface JobListProps {
   jobs: Job[];
@@ -206,7 +207,11 @@ export default function JobList({ jobs, loading, error }: JobListProps) {
               {/* Description */}
               <div className="mb-2">
                 <p className="text-gray-600 dark:text-gray-300 text-[11px] leading-relaxed line-clamp-2">
-                  {stripHtml(job.description)}
+                  {/* Same function on server and client. The old stripHtml regex-stripped
+                      tags on the server but read DOM textContent in the browser, which also
+                      decodes entities — "&amp;" vs "&" — so hydration failed and React
+                      re-rendered the whole list on every load. */}
+                  {htmlToPlainText(job.description)}
                 </p>
               </div>
 
@@ -313,13 +318,4 @@ export default function JobList({ jobs, loading, error }: JobListProps) {
       )}
     </div>
   );
-}
-
-function stripHtml(html: string) {
-  if (typeof window === "undefined") {
-    return html.replace(/<[^>]*>?/gm, "");
-  }
-  const tmp = document.createElement("DIV");
-  tmp.innerHTML = html;
-  return tmp.textContent || tmp.innerText || "";
 }

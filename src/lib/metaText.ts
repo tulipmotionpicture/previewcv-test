@@ -28,7 +28,14 @@ const HTML_ENTITIES: ReadonlyArray<readonly [string, string]> = [
  */
 export function htmlToPlainText(html?: string | null): string {
   if (!html) return "";
-  let text = html.replace(/<[^>]*>/g, " ");
+  let text = html
+    .replace(/<[^>]*>/g, " ")
+    // Numeric references ("&#8217;", "&#x2019;") before the named ones: they can't contain
+    // "&amp;", and decoding &amp; first could turn literal "&amp;#39;" into "'".
+    .replace(/&#(\d+);|&#x([0-9a-f]+);/gi, (match, dec, hex) => {
+      const code = dec ? parseInt(dec, 10) : parseInt(hex, 16);
+      return code > 0 && code <= 0x10ffff ? String.fromCodePoint(code) : match;
+    });
   for (const [entity, char] of HTML_ENTITIES) {
     text = text.split(entity).join(char);
   }

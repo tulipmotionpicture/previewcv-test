@@ -39,22 +39,13 @@ import {
   File,
 } from "lucide-react";
 import PostedAgo from "@/components/PostedAgo";
+import { htmlToPlainText } from "@/lib/metaText";
 
 interface JobDetailsClientProps {
   job: Job;
   slug: string;
 }
 
-// Job descriptions are stored as HTML — strip tags + collapse whitespace for a plain-text preview.
-function stripHtml(html?: string): string {
-  if (!html) return "";
-  return html
-    .replace(/<[^>]*>/g, " ")
-    .replace(/&nbsp;/g, " ")
-    .replace(/&amp;/g, "&")
-    .replace(/\s+/g, " ")
-    .trim();
-}
 
 export default function JobDetailsClient({ job, slug }: JobDetailsClientProps) {
   const { isAuthenticated, user } = useAuth();
@@ -847,9 +838,9 @@ export default function JobDetailsClient({ job, slug }: JobDetailsClientProps) {
                   </span>
                 </div>
 
-                {stripHtml(similarJob.description) && (
+                {htmlToPlainText(similarJob.description) && (
                   <div className="text-xs text-gray-500 dark:text-gray-400 font-medium mb-3 line-clamp-2">
-                    {stripHtml(similarJob.description)}
+                    {htmlToPlainText(similarJob.description)}
                   </div>
                 )}
 
