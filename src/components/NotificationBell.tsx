@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
-import { Bell, BellOff } from "lucide-react";
+import { Bell, BellOff, Volume2, VolumeX } from "lucide-react";
 import { useNotifications } from "@/context/NotificationsContext";
 import { useToast } from "@/context/ToastContext";
 import { parseApiDate } from "@/lib/postedDate";
@@ -51,6 +51,16 @@ export default function NotificationBell({
   const [panelPos, setPanelPos] = useState<{ top: number; left: number; width: number } | null>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
+  const [ringing, setRinging] = useState(false);
+  const arrivals = ctx?.arrivals ?? 0;
+
+  // Ring the bell (and pulse the badge) briefly whenever new notifications arrive.
+  useEffect(() => {
+    if (!arrivals) return;
+    setRinging(true);
+    const timer = window.setTimeout(() => setRinging(false), 1000);
+    return () => window.clearTimeout(timer);
+  }, [arrivals]);
 
   // The dropdown is portalled to <body> and positioned from the bell's on-screen rect.
   // Inside the dashboard sidebar (sticky, transformed: its own stacking context) an
@@ -137,10 +147,15 @@ export default function NotificationBell({
           aria-expanded={open}
           className={`relative flex items-center justify-center transition-colors ${BUTTON_STYLE[placement]}`}
         >
-          <Bell className="w-5 h-5" />
+          <Bell className={`w-5 h-5 ${ringing ? "bell-ring" : ""}`} />
           {unreadCount > 0 && (
-            <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-red-500 text-white text-[10px] font-bold leading-[18px] text-center">
-              {badge}
+            <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px]">
+              {ringing && (
+                <span className="absolute inset-0 rounded-full bg-red-500 opacity-75 animate-ping motion-reduce:hidden" />
+              )}
+              <span className="relative block min-w-[18px] h-[18px] px-1 rounded-full bg-red-500 text-white text-[10px] font-bold leading-[18px] text-center">
+                {badge}
+              </span>
             </span>
           )}
         </button>
@@ -157,15 +172,26 @@ export default function NotificationBell({
               <p className="text-sm font-bold text-gray-900 dark:text-white">
                 Notifications
               </p>
-              {unreadCount > 0 && (
+              <div className="flex items-center gap-3">
+                {unreadCount > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => ctx.markAllRead()}
+                    className="text-xs font-semibold text-primary-blue dark:text-blue-400 hover:underline"
+                  >
+                    Mark all read
+                  </button>
+                )}
                 <button
                   type="button"
-                  onClick={() => ctx.markAllRead()}
-                  className="text-xs font-semibold text-primary-blue dark:text-blue-400 hover:underline"
+                  onClick={ctx.toggleSound}
+                  aria-label={ctx.soundOn ? "Mute notification sound" : "Unmute notification sound"}
+                  title={ctx.soundOn ? "Sound on" : "Sound off"}
+                  className="p-1 rounded-md text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800"
                 >
-                  Mark all read
+                  {ctx.soundOn ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
                 </button>
-              )}
+              </div>
             </div>
 
             {permission === "default" && (

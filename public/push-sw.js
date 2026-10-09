@@ -43,8 +43,12 @@ self.addEventListener("push", (event) => {
       await self.registration.showNotification(notification.title || "PreviewCV", {
         body: notification.body || "",
         icon: "/push-icon-192.png",
-        // One entry per notification id, so a re-delivered push replaces rather than stacks.
+        // One entry per notification id, so a re-delivered push replaces rather than stacks;
+        // renotify still alerts (sound/vibration) when it does.
         tag: data.notification_id || undefined,
+        renotify: Boolean(data.notification_id),
+        // Android buzz; the sound itself is the OS notification sound (web pages can't set it).
+        vibrate: [180, 80, 180],
         data: { link },
       });
     })()
