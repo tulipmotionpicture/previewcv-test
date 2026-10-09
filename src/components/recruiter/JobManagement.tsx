@@ -17,6 +17,10 @@ export type JobFormState = {
   state: string;
   stateCode?: string;
   city: string;
+  // Optional. Kept as strings while editing; converted (blank -> null) in the payload.
+  street_address: string;
+  postal_code: string;
+  vacancies: string;
   job_type:
     | "full_time"
     | "part_time"
@@ -56,6 +60,9 @@ export const JOB_FORM_INITIAL: JobFormState = {
   state: "",
   stateCode: "",
   city: "",
+  street_address: "",
+  postal_code: "",
+  vacancies: "",
   job_type: "full_time",
   experience_level: "entry",
   description: "",

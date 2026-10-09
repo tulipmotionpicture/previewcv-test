@@ -41,6 +41,21 @@ const EXPERIENCE_LEVEL_OPTIONS = [
 const experienceLevelLabel = (value: string) =>
   EXPERIENCE_LEVEL_OPTIONS.find((o) => o.value === value)?.label ?? value;
 
+// Optional address/vacancy fields. These mirror the backend's rules so a bad value is
+// caught on the form instead of coming back as a failed save.
+const MAX_STREET_ADDRESS = 255;
+const MAX_VACANCIES = 10000;
+const POSTAL_CODE_RE = /^[A-Z0-9][A-Z0-9 -]{1,8}[A-Z0-9]$/;
+const INDIA_PINCODE_RE = /^[1-9][0-9]{5}$/;
+
+const isIndia = (country: string) => country.trim().toLowerCase() === "india";
+
+/** Postal code as the backend stores it: uppercase, single spaces; India without spaces. */
+const normalizePostalCode = (value: string, country: string) => {
+  const v = value.trim().split(/\s+/).join(" ").toUpperCase();
+  return isIndia(country) ? v.replace(/ /g, "") : v;
+};
+
 // Guided context questions shown one-at-a-time before AI generation, so the
 // model gets the recruiter's own framing for each section of the job post.
 const CONTEXT_STEPS = [
@@ -153,6 +168,9 @@ export default function JobCreationPage({
         country: jobToEdit.country || "",
         state: jobToEdit.state || "",
         city: jobToEdit.city || "",
+        street_address: jobToEdit.street_address || "",
+        postal_code: jobToEdit.postal_code || "",
+        vacancies: jobToEdit.vacancies ? String(jobToEdit.vacancies) : "",
         job_type: jobToEdit.job_type || "full_time",
         experience_level: jobToEdit.experience_level || "entry",
         is_remote: jobToEdit.is_remote || false,
@@ -497,8 +515,9 @@ export default function JobCreationPage({
   type StepError = { field: string; message: string };
 
   // Returns the first validation error for a given step, or null if it passes.
-  // Every field is mandatory except the remote-friendly checkbox and the
-  // Publish-immediately toggle.
+  // Every field is mandatory except the remote-friendly checkbox, the
+  // Publish-immediately toggle and the optional postal code / street address /
+  // vacancies (checked only when filled in).
   const validateStep = (s: number): StepError | null => {
     if (s === 0) {
       if (!form.title.trim())
@@ -515,6 +534,32 @@ export default function JobCreationPage({
         return { field: "state", message: "Please select a state/region." };
       if (!form.city.trim())
         return { field: "city", message: "Please select a city." };
+      if (form.postal_code.trim()) {
+        const postal = normalizePostalCode(form.postal_code, form.country);
+        if (isIndia(form.country) && !INDIA_PINCODE_RE.test(postal))
+          return {
+            field: "postal_code",
+            message: "Please enter a valid 6-digit PIN code (it can't start with 0).",
+          };
+        if (!POSTAL_CODE_RE.test(postal))
+          return {
+            field: "postal_code",
+            message: "Postal code must be 3-10 letters or digits.",
+          };
+      }
+      if (form.street_address.trim().length > MAX_STREET_ADDRESS)
+        return {
+          field: "street_address",
+          message: `Street address must be under ${MAX_STREET_ADDRESS} characters.`,
+        };
+      if (form.vacancies.trim()) {
+        const vacancies = Number(form.vacancies);
+        if (!Number.isInteger(vacancies) || vacancies < 1 || vacancies > MAX_VACANCIES)
+          return {
+            field: "vacancies",
+            message: `Number of vacancies must be a whole number from 1 to ${MAX_VACANCIES}.`,
+          };
+      }
     }
     if (s === 1) {
       if (isRichTextEmpty(form.description))
@@ -622,6 +667,12 @@ export default function JobCreationPage({
         country: form.country,
         state: form.state,
         city: form.city,
+        // null (not "") when blank, so clearing a field on edit removes the saved value
+        street_address: form.street_address.trim() || null,
+        postal_code: form.postal_code.trim()
+          ? normalizePostalCode(form.postal_code, form.country)
+          : null,
+        vacancies: form.vacancies.trim() ? Number(form.vacancies) : null,
         job_type: form.job_type,
         experience_level: form.experience_level,
         description: form.description,
@@ -682,6 +733,18 @@ export default function JobCreationPage({
             {form.city}
             {form.state && `, ${form.state}`}
           </p>
+          {(form.street_address.trim() || form.postal_code.trim()) && (
+            <p className="text-xs text-gray-500 dark:text-gray-400">
+              {[form.street_address.trim(), form.postal_code.trim()]
+                .filter(Boolean)
+                .join(" - ")}
+            </p>
+          )}
+          {form.vacancies.trim() && (
+            <p className="text-xs text-gray-500 dark:text-gray-400">
+              {form.vacancies} {Number(form.vacancies) === 1 ? "vacancy" : "vacancies"}
+            </p>
+          )}
         </div>
       )}
 
@@ -1113,6 +1176,65 @@ export default function JobCreationPage({
                       onChange={(c) => {
                         handleChange({ target: { name: "city", value: c ? c.name : "" } } as any);
                       }}
+                    />
+                  </div>
+
+                  <div id="field-postal_code">
+                    <label className="text-xs uppercase tracking-widest text-gray-600 dark:text-gray-400 font-medium mb-2 block">
+                      {isIndia(form.country) ? "PIN Code" : "Postal Code"}{" "}
+                      <span className="normal-case tracking-normal">(optional)</span>
+                    </label>
+                    <input
+                      type="text"
+                      name="postal_code"
+                      value={form.postal_code}
+                      onChange={handleChange}
+                      inputMode={isIndia(form.country) ? "numeric" : "text"}
+                      autoComplete="postal-code"
+                      maxLength={12}
+                      placeholder={isIndia(form.country) ? "e.g. 560001" : "e.g. 94105"}
+                      className="w-full px-4 py-2 bg-white dark:bg-[#282727] border border-gray-200 dark:border-gray-700 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all placeholder-gray-400 dark:text-white"
+                    />
+                  </div>
+
+                  <div id="field-street_address">
+                    <label className="text-xs uppercase tracking-widest text-gray-600 dark:text-gray-400 font-medium mb-2 block">
+                      Street Address{" "}
+                      <span className="normal-case tracking-normal">(optional)</span>
+                    </label>
+                    <input
+                      type="text"
+                      name="street_address"
+                      value={form.street_address}
+                      onChange={handleChange}
+                      autoComplete="street-address"
+                      maxLength={MAX_STREET_ADDRESS}
+                      placeholder="e.g. 12 MG Road, 2nd Floor"
+                      className="w-full px-4 py-2 bg-white dark:bg-[#282727] border border-gray-200 dark:border-gray-700 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all placeholder-gray-400 dark:text-white"
+                    />
+                    {form.is_confidential && (
+                      <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                        Hidden from candidates on confidential postings.
+                      </p>
+                    )}
+                  </div>
+
+                  <div id="field-vacancies">
+                    <label className="text-xs uppercase tracking-widest text-gray-600 dark:text-gray-400 font-medium mb-2 block">
+                      Number of Vacancies{" "}
+                      <span className="normal-case tracking-normal">(optional)</span>
+                    </label>
+                    <input
+                      type="number"
+                      name="vacancies"
+                      value={form.vacancies}
+                      onChange={handleChange}
+                      min={1}
+                      max={MAX_VACANCIES}
+                      step={1}
+                      inputMode="numeric"
+                      placeholder="e.g. 3"
+                      className="w-full px-4 py-2 bg-white dark:bg-[#282727] border border-gray-200 dark:border-gray-700 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all placeholder-gray-400 dark:text-white"
                     />
                   </div>
                 </div>

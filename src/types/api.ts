@@ -99,11 +99,12 @@ export interface Job {
   country?: string;
   state?: string;
   city?: string;
-  // Not returned by the API yet. Google for Jobs flags their absence as
-  // "Missing field 'streetAddress' / 'postalCode'"; emitted in the JobPosting
-  // address as soon as the backend provides them.
+  // Optional, set by the recruiter. Emitted in the JobPosting address (Google for Jobs
+  // flags their absence). street_address is null for confidential jobs.
   street_address?: string | null;
   postal_code?: string | null;
+  // Number of open positions; null when the recruiter didn't say.
+  vacancies?: number | null;
   job_type: "full_time" | "part_time" | "contract" | "freelance" | "internship";
   description: string;
   requirements?: string;

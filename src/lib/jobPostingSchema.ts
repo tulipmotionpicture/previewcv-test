@@ -198,6 +198,12 @@ export function buildJobPostingJsonLd(
       address: buildAddress(job),
     },
     baseSalary: buildBaseSalary(job),
+    // schema.org's count of open positions. Not in Google's documented JobPosting
+    // properties (Google ignores what it doesn't use), but valid for other consumers.
+    // Only sent when the recruiter gave a number, per schema.org: "Do not use if the
+    // number of positions is unclear or not known."
+    totalJobOpenings:
+      job.vacancies && job.vacancies > 0 ? job.vacancies : undefined,
     directApply: true,
   };
 

@@ -14,6 +14,7 @@ import { formatSalaryRange } from "@/lib/salary";
 import { buildJobPostingJsonLd } from "@/lib/jobPostingSchema";
 import { toMetaDescription } from "@/lib/metaText";
 import PostedAgo from "@/components/PostedAgo";
+import { formatJobAddress } from "@/lib/jobAddress";
 import {
   MapPin,
   Briefcase,
@@ -224,9 +225,15 @@ export default async function JobDetailsPage({
 
                   <div className="flex flex-wrap items-center gap-3 text-sm text-gray-600 dark:text-gray-400 mb-4">
                     <div className="flex items-center gap-1.5">
-                      <MapPin className="w-4 h-4 text-gray-400" />
-                      {job.location}
+                      <MapPin className="w-4 h-4 text-gray-400 shrink-0" />
+                      {formatJobAddress(job)}
                     </div>
+                    {job.vacancies ? (
+                      <div className="flex items-center gap-1.5">
+                        <Briefcase className="w-4 h-4 text-gray-400 shrink-0" />
+                        {job.vacancies} {job.vacancies === 1 ? "vacancy" : "vacancies"}
+                      </div>
+                    ) : null}
                     {/* <div className="w-px h-4 bg-gray-300 dark:bg-gray-700"></div> */}
                     {/* <div className="flex items-center gap-1.5">
                       <Briefcase className="w-4 h-4 text-gray-400" />
