@@ -21,6 +21,9 @@ interface ApplicationDetailModalProps {
   onMessageSent?: () => void;
 }
 
+
+const MESSAGE_MIN_LENGTH = 10;
+const MESSAGE_MAX_LENGTH = 2000;
 export default function ApplicationDetailModal({
   applicationDetail,
   isOpen,
@@ -92,8 +95,13 @@ export default function ApplicationDetailModal({
     }
   };
 
+  // Same limits as the backend (RecruiterMessageRequest), checked here so the recruiter
+  // sees why Send is unavailable instead of a failed request.
+  const trimmedLength = message.trim().length;
+  const messageTooShort = trimmedLength < MESSAGE_MIN_LENGTH;
+
   const handleSendMessage = async () => {
-    if (!applicationDetail?.application?.id || !message.trim()) return;
+    if (!applicationDetail?.application?.id || messageTooShort) return;
     setSendingMessage(true);
     setMessageSuccess(false);
     try {
@@ -112,7 +120,8 @@ export default function ApplicationDetailModal({
       }
     } catch (error) {
       console.error("Failed to send message:", error);
-      showToast("Failed to send message. Please try again.", "error");
+      const reason = error instanceof Error && error.message !== "An error occurred" ? error.message : "";
+      showToast(reason || "Failed to send message. Please try again.", "error");
     } finally {
       setSendingMessage(false);
     }
@@ -399,12 +408,20 @@ export default function ApplicationDetailModal({
                     onChange={(e) => setMessage(e.target.value)}
                     placeholder="Type your message to the candidate..."
                     rows={4}
+                    maxLength={MESSAGE_MAX_LENGTH}
                     className="w-full px-4 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all placeholder-gray-400 dark:text-gray-200 resize-none"
                   />
+                  <p
+                    className={`text-xs ${trimmedLength > 0 && messageTooShort ? "text-amber-600 dark:text-amber-400" : "text-gray-500 dark:text-gray-400"}`}
+                  >
+                    {trimmedLength > 0 && messageTooShort
+                      ? `At least ${MESSAGE_MIN_LENGTH} characters (${MESSAGE_MIN_LENGTH - trimmedLength} more)`
+                      : `${trimmedLength}/${MESSAGE_MAX_LENGTH} characters`}
+                  </p>
                   <div className="flex items-center gap-2">
                     <button
                       onClick={handleSendMessage}
-                      disabled={sendingMessage || !message.trim()}
+                      disabled={sendingMessage || messageTooShort}
                       className="flex items-center gap-2 px-4 py-2 bg-primary-blue hover:bg-blue-700 text-white rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       {sendingMessage ? (

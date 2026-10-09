@@ -236,6 +236,15 @@ export class ApiClient {
           errorMsg = errorData.detail.message;
         } else if (errorData.detail && typeof errorData.detail === "string") {
           errorMsg = errorData.detail;
+        } else if (Array.isArray(errorData.detail) && errorData.detail.length) {
+          // FastAPI validation errors (422): [{loc, msg, type}]. Without this every form
+          // showed "An error occurred" instead of e.g. "Message must be at least 10
+          // characters".
+          errorMsg =
+            errorData.detail
+              .map((d: { msg?: string }) => String(d?.msg ?? "").replace(/^Value error, /, ""))
+              .filter(Boolean)
+              .join(" ") || errorMsg;
         } else {
           errorMsg = errorData.message || errorMsg;
         }
