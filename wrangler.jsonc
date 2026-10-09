@@ -6,6 +6,12 @@
   "main": "custom-worker.ts",
   "compatibility_date": "2025-06-05",
   "compatibility_flags": ["nodejs_compat"],
+  // Wrangler's esbuild defaults keep_names to true, which wraps functions in __name(...)
+  // calls. next-themes ships its no-flash theme script by serialising a function into the
+  // HTML (fn.toString()), so the browser received "__name(k2, ...)" with no __name defined:
+  // "ReferenceError: __name is not defined" on every page, and the saved theme wasn't
+  // applied before first paint. Nothing here relies on Function.name.
+  "keep_names": false,
   "assets": {
     "directory": ".open-next/assets",
     "binding": "ASSETS"
