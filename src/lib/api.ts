@@ -41,6 +41,8 @@ import {
   PaddleSubscriptionUpdateRequest,
   PaddleMutationAck,
   JobContentGenerateResponse,
+  NotificationAccount,
+  NotificationListResponse,
 } from "@/types/api";
 import {
   ReviewedResumeMetadata,
@@ -578,6 +580,83 @@ export class ApiClient {
   ): Promise<TopHiringPartnersResponse> {
     return this.request<TopHiringPartnersResponse>(
       `/api/v1/recruiters/profile/top-hiring-partners?limit=${limit}`,
+    );
+  }
+
+  // ---------------------------------------------------------------------------
+  // Notifications: inbox + push device registration. Candidates and recruiters have
+  // the same endpoints under different prefixes and use their own access token.
+  // ---------------------------------------------------------------------------
+
+  private notificationsPath(account: NotificationAccount, path = ""): string {
+    const base =
+      account === "recruiter"
+        ? "/api/v1/recruiters/notifications"
+        : "/api/v1/notifications";
+    return `${base}${path}`;
+  }
+
+  async getNotifications(
+    account: NotificationAccount,
+    params: { limit?: number; before_id?: number | null } = {},
+  ): Promise<NotificationListResponse> {
+    const query = new URLSearchParams({ limit: String(params.limit ?? 20) });
+    if (params.before_id) query.set("before_id", String(params.before_id));
+    return this.request<NotificationListResponse>(
+      this.notificationsPath(account, `?${query}`),
+      {},
+      true,
+      account === "recruiter",
+    );
+  }
+
+  async getUnreadNotificationCount(
+    account: NotificationAccount,
+  ): Promise<{ success: boolean; unread_count: number }> {
+    return this.request(
+      this.notificationsPath(account, "/unread-count"),
+      {},
+      true,
+      account === "recruiter",
+    );
+  }
+
+  async markNotificationRead(account: NotificationAccount, id: number): Promise<void> {
+    await this.request(
+      this.notificationsPath(account, `/${id}/read`),
+      { method: "POST" },
+      true,
+      account === "recruiter",
+    );
+  }
+
+  async markAllNotificationsRead(account: NotificationAccount): Promise<void> {
+    await this.request(
+      this.notificationsPath(account, "/read-all"),
+      { method: "POST" },
+      true,
+      account === "recruiter",
+    );
+  }
+
+  async registerPushDevice(
+    account: NotificationAccount,
+    device: { token: string; client: string; platform: "web" },
+  ): Promise<void> {
+    await this.request(
+      this.notificationsPath(account, "/devices"),
+      { method: "POST", body: JSON.stringify(device) },
+      true,
+      account === "recruiter",
+    );
+  }
+
+  async unregisterPushDevice(account: NotificationAccount, token: string): Promise<void> {
+    await this.request(
+      this.notificationsPath(account, "/devices/unregister"),
+      { method: "POST", body: JSON.stringify({ token }) },
+      true,
+      account === "recruiter",
     );
   }
 

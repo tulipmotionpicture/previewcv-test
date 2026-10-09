@@ -7,6 +7,7 @@ import { usePathname, useRouter } from "next/navigation";
 import config from "@/config";
 import { useAuth } from "@/context/AuthContext";
 import { useRecruiterAuth } from "@/context/RecruiterAuthContext";
+import NotificationBell from "@/components/NotificationBell";
 import {
   Menu,
   X,
@@ -216,6 +217,8 @@ export default function FloatingHeader({
             {showAuthButtons && (
               <>
                 {!isLoading && isAuthenticated ? (
+                  <div className="flex items-center gap-2">
+                  <NotificationBell placement="header" />
                   <div className="relative" ref={profileRef}>
                     <button
                       onClick={() => setIsProfileOpen(!isProfileOpen)}
@@ -273,6 +276,7 @@ export default function FloatingHeader({
                       </div>
                     )}
                   </div>
+                  </div>
                 ) : (
                   <div className="flex items-center gap-4">
                     {links.map((link) => (
@@ -301,7 +305,9 @@ export default function FloatingHeader({
 
           {/* Mobile Menu Toggle */}
           <div className="md:hidden flex items-center gap-3">
-            {/* We can show minimal auth on mobile if needed, but keeping it simple */}
+            {showAuthButtons && !isLoading && isAuthenticated && (
+              <NotificationBell placement="header" />
+            )}
             <button
               onClick={() => setIsMobileMenuOpen(true)}
               className="p-2 text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors"

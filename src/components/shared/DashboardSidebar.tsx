@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { ChevronRight, User, LogOut, Menu, X } from "lucide-react";
+import NotificationBell from "@/components/NotificationBell";
 import { useState } from "react";
 import config from "@/config";
 import Link from "next/link";
@@ -95,6 +96,11 @@ export default function DashboardSidebar<T extends string>({
 
     return (
         <>
+            {/* Mobile notifications (the bell in the logo row is inside the closed drawer) */}
+            {mobileDrawer && (
+                <NotificationBell placement="floating" className="md:hidden fixed top-3 right-3 z-30" />
+            )}
+
             {/* Mobile hamburger (only when drawer enabled) */}
             {mobileDrawer && (
                 <button
@@ -127,6 +133,7 @@ export default function DashboardSidebar<T extends string>({
                         className="object-contain"
                     />
                 </Link>
+                <NotificationBell placement="sidebar" className={mobileDrawer ? "hidden md:block" : ""} />
                 {mobileDrawer && (
                     <button
                         type="button"

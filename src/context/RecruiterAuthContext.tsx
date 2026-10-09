@@ -9,6 +9,7 @@ import {
 } from "react";
 import { useRouter } from "next/navigation";
 import { api } from "@/lib/api";
+import { unregisterPushDevice } from "@/lib/push/push";
 import { Recruiter } from "@/types/api";
 
 interface RecruiterAuthContextType {
@@ -159,6 +160,8 @@ export function RecruiterAuthProvider({ children }: { children: ReactNode }) {
   };
 
   const logout = async () => {
+    // Stop push to this browser first: it needs the access token cleared below.
+    await unregisterPushDevice("recruiter");
     try {
       // Call logout API to invalidate token on server
       await api.recruiterLogout();

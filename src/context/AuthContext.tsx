@@ -10,6 +10,7 @@ import React, {
 import { useRouter } from "next/navigation";
 import { User } from "@/types/api";
 import { api } from "@/lib/api";
+import { unregisterPushDevice } from "@/lib/push/push";
 import { useSsoBootstrap } from "@/lib/sso/useSsoBootstrap";
 import { peerOriginForCurrentSite, currentOrigin } from "@/lib/sso/config";
 
@@ -142,6 +143,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const logout = async () => {
+    // Stop push to this browser first: it needs the access token cleared below.
+    await unregisterPushDevice("candidate");
     try {
       // Call logout API to invalidate token on server
       await api.candidateLogout();

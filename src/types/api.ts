@@ -1162,3 +1162,31 @@ export interface PaddleMutationAck {
   effective_from?: string | null;
   message?: string | null;
 }
+
+// ---------------------------------------------------------------------------
+// Notifications (inbox + push devices). Same shape for candidates and recruiters.
+// ---------------------------------------------------------------------------
+
+export type NotificationAccount = "candidate" | "recruiter";
+
+export interface NotificationItem {
+  id: number;
+  event_type: string;
+  title: string;
+  body: string;
+  /** Path on previewcv.com the notification opens, e.g. "/candidate/dashboard?tab=applications". */
+  link_path: string | null;
+  route: string | null;
+  route_params: Record<string, number | string>;
+  read: boolean;
+  read_at: string | null;
+  created_at: string | null;
+}
+
+export interface NotificationListResponse {
+  success: boolean;
+  notifications: NotificationItem[];
+  unread_count: number;
+  /** Pass as `before_id` for the next page; null when there are no more. */
+  next_before_id: number | null;
+}
