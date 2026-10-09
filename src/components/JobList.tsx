@@ -105,7 +105,7 @@ export default function JobList({ jobs, loading, error }: JobListProps) {
                     sideways on phones. */}
                 <div className="flex gap-2.5 min-w-0 flex-1">
                   {/* Logo */}
-                  <div className="w-9 h-9 rounded-lg bg-gray-50 dark:bg-gray-800 flex items-center justify-center p-1 border border-gray-100 dark:border-gray-700 shrink-0">
+                  <div className="w-11 h-11 rounded-lg bg-gray-50 dark:bg-gray-800 flex items-center justify-center p-1 border border-gray-100 dark:border-gray-700 shrink-0">
                     {job.company_logo_url ? (
                       <>
                         <Image
@@ -113,7 +113,10 @@ export default function JobList({ jobs, loading, error }: JobListProps) {
                           height={40}
                           src={job.company_logo_url}
                           alt={job.company_name}
-                          className="w-full h-full object-cover"
+                          // contain, not cover: cover filled the square by cropping, so wide
+                          // wordmarks (e.g. a 512x288 "GES" logo) lost both ends and showed
+                          // only their middle.
+                          className="w-full h-full object-contain"
                           onError={(e) => {
                             e.currentTarget.style.display = "none";
                             e.currentTarget.nextElementSibling?.classList.remove(
