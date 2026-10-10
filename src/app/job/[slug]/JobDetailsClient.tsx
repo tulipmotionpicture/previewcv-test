@@ -40,6 +40,7 @@ import {
 } from "lucide-react";
 import PostedAgo from "@/components/PostedAgo";
 import { htmlToPlainText } from "@/lib/metaText";
+import { experienceLevelLabel, experienceYears } from "@/lib/experienceLevel";
 
 interface JobDetailsClientProps {
   job: Job;
@@ -812,9 +813,11 @@ export default function JobDetailsClient({ job, slug }: JobDetailsClientProps) {
                 <div className="flex flex-wrap gap-3 mb-3 text-xs text-gray-600 dark:text-gray-400 font-medium">
                   <div className="flex items-center gap-1">
                     <Briefcase className="w-3.5 h-3.5 text-gray-400" />
-                    {similarJob.experience_level
-                      ? `${similarJob.experience_level.replace("entry", "0-2").replace("mid", "2-5").replace("senior", "5+").replace("executive", "10+")} years`
-                      : "Exp N/A"}
+                    {/* Years from the level the recruiter picked; the old string replace
+                        produced "junior years" and used different ranges than the job form. */}
+                    {experienceYears(similarJob.experience_level) ??
+                      experienceLevelLabel(similarJob.experience_level) ??
+                      "Exp N/A"}
                   </div>
                   <div className="flex items-center gap-1">
                     <span className="font-semibold text-gray-900 dark:text-gray-100">
@@ -833,9 +836,11 @@ export default function JobDetailsClient({ job, slug }: JobDetailsClientProps) {
                       Remote
                     </span>
                   )}
-                  <span className="px-1.5 py-0.5 bg-purple-50 text-purple-700 border border-purple-100 rounded text-[10px] uppercase font-bold">
-                    {similarJob.experience_level || "Mid Level"}
-                  </span>
+                  {experienceLevelLabel(similarJob.experience_level) && (
+                    <span className="px-1.5 py-0.5 bg-purple-50 text-purple-700 border border-purple-100 rounded text-[10px] uppercase font-bold">
+                      {experienceLevelLabel(similarJob.experience_level)}
+                    </span>
+                  )}
                 </div>
 
                 {htmlToPlainText(similarJob.description) && (

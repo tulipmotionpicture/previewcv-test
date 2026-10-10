@@ -15,6 +15,7 @@ import { buildJobPostingJsonLd } from "@/lib/jobPostingSchema";
 import { toMetaDescription } from "@/lib/metaText";
 import PostedAgo from "@/components/PostedAgo";
 import { formatJobAddress } from "@/lib/jobAddress";
+import { experienceLevelLabel } from "@/lib/experienceLevel";
 import {
   MapPin,
   Briefcase,
@@ -262,9 +263,12 @@ export default async function JobDetailsPage({
                         Remote
                       </div>
                     )}
-                    <div className="px-3 py-1 bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400 rounded-full text-xs font-bold border border-purple-100 dark:border-purple-800 uppercase">
-                      {job.experience_level || "Mid Level"}
-                    </div>
+                    {/* No made-up fallback: a job without a level shows no badge. */}
+                    {experienceLevelLabel(job.experience_level) && (
+                      <div className="px-3 py-1 bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400 rounded-full text-xs font-bold border border-purple-100 dark:border-purple-800 uppercase">
+                        {experienceLevelLabel(job.experience_level)}
+                      </div>
+                    )}
                   </div>
 
                   <div className="pt-4 border-t border-gray-100 dark:border-gray-800 flex flex-wrap items-center gap-4 text-xs text-gray-500 dark:text-gray-400">

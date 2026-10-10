@@ -9,6 +9,7 @@ import { formatSalaryRange } from "@/lib/salary";
 import Image from "next/image";
 import { Building2 } from "lucide-react";
 import PostedAgo from "@/components/PostedAgo";
+import { experienceLevelLabel } from "@/lib/experienceLevel";
 import { htmlToPlainText } from "@/lib/metaText";
 import { apiDate } from "@/lib/postedDate";
 
@@ -244,9 +245,12 @@ export default function JobList({ jobs, loading, error }: JobListProps) {
                     Remote
                   </span>
                 )}
-                <span className="px-1.5 py-0.5 border border-purple-400 text-purple-600 dark:text-purple-400 rounded text-[10px] font-medium bg-transparent">
-                  Junior Level
-                </span>
+                {/* The job's own level (it was hardcoded "Junior Level" on every card). */}
+                {experienceLevelLabel(job.experience_level) && (
+                  <span className="px-1.5 py-0.5 border border-purple-400 text-purple-600 dark:text-purple-400 rounded text-[10px] font-medium bg-transparent">
+                    {experienceLevelLabel(job.experience_level)}
+                  </span>
+                )}
               </div>
 
               {/* Divider */}
