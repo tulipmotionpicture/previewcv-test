@@ -3,6 +3,7 @@ import { useLogoFallback } from "@/hooks/useLogoFallback";
 import { Application } from "@/types/api";
 import { CheckCircle2, Clock, AlertCircle, Users } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
+import { matchTierMeta } from "./matchTier";
 
 interface ApplicationSidebarCardProps {
     application: Application;
@@ -17,9 +18,9 @@ const ApplicationSidebarCard: React.FC<ApplicationSidebarCardProps> = ({
 }) => {
     const { logoUrl, imgRef, onLogoError } = useLogoFallback(application.company_logo_url);
 
-    // Mock data for UI matching
-    const rating = 3.5 + (application.job_id % 3) * 0.5; // Random-ish rating
-    const reviewCount = 50 + (application.job_id % 100);
+    // Resume match, scored the same way as the recruiter's ATS. Replaces a star rating
+    // and review count that were made up from the job id.
+    const match = application.match;
 
     // Status Badge Logic
     const getStatusBadge = () => {
@@ -121,13 +122,14 @@ const ApplicationSidebarCard: React.FC<ApplicationSidebarCardProps> = ({
                         <span className="text-xs text-gray-500 dark:text-gray-400 truncate">
                             {application.company_name || application.job?.company_name}
                         </span>
-                        <div className="flex items-center gap-1.5">
-                            <span className="text-[10px] font-semibold text-amber-500 flex items-center gap-0.5">
-                                ★ {rating.toFixed(1)}
-                            </span>
-                            <span className="text-[10px] text-gray-300">•</span>
-                            <span className="text-[10px] text-gray-400">{reviewCount} reviews</span>
-                        </div>
+                        {match &&
+                            (match.insufficient_data ? (
+                                <span className="text-[10px] text-gray-400">No match score</span>
+                            ) : (
+                                <span className={`text-[10px] font-semibold ${matchTierMeta(match).text}`}>
+                                    {Math.round(match.score)}% match · {matchTierMeta(match).label}
+                                </span>
+                            ))}
                     </div>
                 </div>
             </div>

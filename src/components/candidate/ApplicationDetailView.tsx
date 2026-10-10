@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Application } from "@/types/api";
+import { Application, ApplicationMatch } from "@/types/api";
 import { Job } from "@/types/jobs";
 import {
     CheckCircle2,
@@ -22,6 +22,7 @@ import { format } from "date-fns";
 import RelevantJobItem from "./RelevantJobItem";
 import Link from "next/link";
 import { useLogoFallback } from "@/hooks/useLogoFallback";
+import { matchTierMeta } from "./matchTier";
 
 interface ApplicationDetailViewProps {
     application: Application;
@@ -186,6 +187,10 @@ const ApplicationDetailView: React.FC<ApplicationDetailViewProps> = ({
                 <div className="h-4"></div>
             </div>
 
+            {/* Resume match: the score the employer's ranking gives the resume sent with this
+                application, and which required skills it didn't show. */}
+            {application.match && <ResumeMatchCard match={application.match} />}
+
             {/* Application Meta Grid */}
             {/* Application Meta Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-6">
@@ -338,3 +343,70 @@ const ApplicationDetailView: React.FC<ApplicationDetailViewProps> = ({
 };
 
 export default ApplicationDetailView;
+
+function ResumeMatchCard({ match }: { match: ApplicationMatch }) {
+    const meta = matchTierMeta(match);
+    const missing = match.missing_required_skills;
+    return (
+        <div className="mb-6 bg-white dark:bg-gray-900 rounded-xl p-4 border border-slate-100 dark:border-gray-700">
+            <div className="flex items-start justify-between gap-3">
+                <div>
+                    <h3 className="text-sm font-bold text-gray-900 dark:text-white">Resume match</h3>
+                    <p className="text-[11px] text-gray-500 dark:text-gray-400 mt-0.5">
+                        How the resume you sent scores for this job, the same score the employer sees.
+                    </p>
+                </div>
+                {!match.insufficient_data && (
+                    <div className="text-right shrink-0">
+                        <p className={`text-2xl font-bold leading-none ${meta.text}`}>{Math.round(match.score)}%</p>
+                        <span className={`inline-block mt-1 px-2 py-0.5 rounded-full border text-[10px] font-bold uppercase tracking-wider ${meta.chip}`}>
+                            {meta.label}
+                        </span>
+                    </div>
+                )}
+            </div>
+
+            {match.insufficient_data ? (
+                <p className="mt-3 text-xs text-gray-600 dark:text-gray-300">
+                    We couldn&apos;t score this application: the resume you sent has too little detail
+                    (skills, work history). Add more to your resume to get a match score on future
+                    applications.
+                </p>
+            ) : (
+                <div className="mt-3 h-1.5 w-full rounded-full bg-gray-100 dark:bg-gray-800 overflow-hidden">
+                    <div className={`h-full rounded-full ${meta.bar}`} style={{ width: `${Math.min(100, Math.max(0, match.score))}%` }} />
+                </div>
+            )}
+
+            {match.required_skills_total > 0 && (
+                <div className="mt-4">
+                    {!match.insufficient_data && (
+                        <p className="text-xs font-semibold text-gray-700 dark:text-gray-300">
+                            Matches {match.required_skills_matched} of {match.required_skills_total} required skills
+                        </p>
+                    )}
+                    {missing.length > 0 && (
+                        <>
+                            <p className="mt-2 text-[11px] font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                                {match.insufficient_data ? "Required skills for this job" : "Missing from your resume"}
+                            </p>
+                            <div className="mt-1.5 flex flex-wrap gap-1.5">
+                                {missing.map((skill) => (
+                                    <span
+                                        key={skill}
+                                        className="px-2 py-0.5 rounded-md text-[11px] font-medium bg-amber-50 text-amber-800 border border-amber-100 dark:bg-amber-900/20 dark:text-amber-300 dark:border-amber-800"
+                                    >
+                                        {skill}
+                                    </span>
+                                ))}
+                            </div>
+                            <p className="mt-2 text-[11px] text-gray-500 dark:text-gray-400">
+                                If you have these skills, add them to your resume so they count next time.
+                            </p>
+                        </>
+                    )}
+                </div>
+            )}
+        </div>
+    );
+}

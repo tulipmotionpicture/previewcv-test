@@ -217,6 +217,21 @@ export interface ApplicationUploadedResume {
   created_at?: string;
 }
 
+/**
+ * How well the resume submitted with an application matches the job, scored exactly as
+ * the recruiter's ATS ranks applicants (candidate's own applications only).
+ */
+export interface ApplicationMatch {
+  score: number; // 0-100
+  tier: "excellent" | "good" | "fair" | "weak";
+  /** The resume had too little detail (skills, experience) to score; score is 0. */
+  insufficient_data: boolean;
+  required_skills_total: number;
+  required_skills_matched: number;
+  /** Required skills not found on the resume, in the employer's wording. */
+  missing_required_skills: string[];
+}
+
 export interface Application {
   id: number;
   job_id: number;
@@ -260,6 +275,7 @@ export interface Application {
   salary_currency?: string;
   salary_type?: "hourly" | "weekly" | "monthly" | "yearly";
   is_job_active?: boolean;
+  match?: ApplicationMatch | null;
   posted_date?: string;
   application_deadline?: string | null;
   total_applicants?: number;
