@@ -19,6 +19,7 @@ import {
   ArrowLeft,
   Sparkles,
 } from "lucide-react";
+import { apiDate } from "@/lib/postedDate";
 
 // ISR: cache the render in KV + revalidate every 5 min. fetchCache makes the
 // server-side data fetches cacheable (they default to no-store in Next 15) so the
@@ -178,7 +179,7 @@ export default async function BlogDetailPage({
           <div className="flex items-center gap-2">
             <Calendar className="w-4 h-4" />
             <span>
-              {new Date(post.published_at).toLocaleDateString("en-US", {
+              {apiDate(post.published_at).toLocaleDateString("en-US", {
                 year: "numeric",
                 month: "long",
                 day: "numeric",

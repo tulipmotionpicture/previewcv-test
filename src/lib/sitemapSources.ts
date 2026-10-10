@@ -4,6 +4,7 @@ import { Job } from "@/types/api";
 import { BlogPost, BlogCategory } from "@/types";
 import { isJobClosed } from "@/lib/jobPostingSchema";
 import { countryQualifiedSlug } from "@/lib/seoPatterns";
+import { apiDate } from "@/lib/postedDate";
 
 // Sitemap source builders, sharded so the site scales past Google's hard 50,000-URL / 50MB
 // per-file limit. Jobs and blog posts are split into child sitemaps of SHARD_SIZE URLs each
@@ -161,7 +162,7 @@ export async function getJobShardEntries(
       const modified = job.updated_at || job.posted_date;
       entries.push({
         url: `${base}/job/${job.slug}`,
-        lastModified: modified ? new Date(modified) : undefined,
+        lastModified: modified ? apiDate(modified) : undefined,
       });
     }
 
@@ -299,7 +300,7 @@ export async function getBlogShardEntries(
     for (const post of posts) {
       if (!post.slug) continue;
       const published = post.published_at
-        ? new Date(post.published_at)
+        ? apiDate(post.published_at)
         : undefined;
       postEntries.push({
         url: `${base}/blog/${post.slug}`,

@@ -21,6 +21,7 @@ import ShareJobModal from "./ShareJobModal";
 import config from "@/config";
 import { generateQRCodeDataURL, downloadElementAsImage } from "@/utils/qr";
 import { api } from "@/lib/api";
+import { apiDate } from "@/lib/postedDate";
 
 // Effective status, falling back to is_active for legacy payloads without `status`.
 function effectiveJobStatus(job: Job): string {
@@ -48,7 +49,7 @@ function jobStatusMeta(job: Job): { label: string; cls: string } {
 // Whole days until a date (negative if past). null if absent/unparseable.
 function daysUntil(iso?: string): number | null {
   if (!iso) return null;
-  const t = new Date(iso).getTime();
+  const t = apiDate(iso).getTime();
   if (Number.isNaN(t)) return null;
   return Math.ceil((t - Date.now()) / 86400000);
 }

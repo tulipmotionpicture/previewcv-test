@@ -11,6 +11,7 @@ import { CardSkeleton } from "@/components/ui/LoadingSkeleton";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
 import Breadcrumb from "@/components/ui/Breadcrumb";
 import Image from "next/image";
+import { apiDate } from "@/lib/postedDate";
 
 export default function ResumesPage() {
   const router = useRouter();
@@ -238,7 +239,7 @@ function ResumeCard({
         {resume.resume_name}
       </h3>
       <p className="text-sm text-gray-500 mb-4">
-        Uploaded {new Date(resume.created_at).toLocaleDateString()}
+        Uploaded {apiDate(resume.created_at).toLocaleDateString()}
       </p>
 
       {/* Share Link Section */}

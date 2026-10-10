@@ -7,6 +7,7 @@ import { useAuth } from "@/context/AuthContext";
 import { User, PdfResume, Resume, Application } from "@/types/api";
 import Link from "next/link";
 import CandidateProfile from "@/components/candidate/CandidateProfile";
+import { apiDate } from "@/lib/postedDate";
 
 export default function CandidateProfilePage() {
   const { isAuthenticated, user, logout } = useAuth();
@@ -293,7 +294,7 @@ export default function CandidateProfilePage() {
                               {app.job_title || "Job Application"}
                             </h3>
                             {/* <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
-                              Applied on {new Date(app.created_at).toLocaleDateString("en-US", {
+                              Applied on {apiDate(app.created_at).toLocaleDateString("en-US", {
                                 year: "numeric",
                                 month: "long",
                                 day: "numeric"

@@ -14,6 +14,7 @@ import type {
 } from "@/types/api";
 import { useToast } from "@/context/ToastContext";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
+import { apiDate } from "@/lib/postedDate";
 
 type CurrencyHint = "USD" | "INR";
 
@@ -472,7 +473,7 @@ export default function PricingPlans() {
           pendingCvCheckout
             ? `You currently have ${pendingCvCheckout.ctx.active_pack_credits_remaining ?? 0} unused credits` +
             (pendingCvCheckout.ctx.active_pack_expires_at
-              ? ` (expiring ${new Date(pendingCvCheckout.ctx.active_pack_expires_at).toLocaleDateString()})`
+              ? ` (expiring ${apiDate(pendingCvCheckout.ctx.active_pack_expires_at).toLocaleDateString()})`
               : "") +
             `. Purchasing a new pack will replace the active one and any unused credits will be lost.` +
             (pendingCvCheckout.ctx.display_amount_minor != null

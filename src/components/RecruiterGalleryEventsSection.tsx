@@ -16,6 +16,7 @@ import {
   Star,
 } from "lucide-react";
 import RichTextEditor from "./ui/RichTextEditor";
+import { apiDate } from "@/lib/postedDate";
 // Removed 'sonner' import since it is not installed. Relying on toast prop.
 
 interface EventFormState {
@@ -174,7 +175,7 @@ export default function RecruiterGalleryEventsSection({
       .includes(searchQuery.toLowerCase());
 
     const hasDate = !!event.event_date;
-    const eventDate = hasDate ? new Date(event.event_date!) : null;
+    const eventDate = hasDate ? apiDate(event.event_date!) : null;
     const now = new Date();
     const isPast = eventDate ? eventDate < now : false;
     const isActive = event.is_active !== false;
@@ -372,7 +373,7 @@ export default function RecruiterGalleryEventsSection({
   const handleEditEvent = (event: any) => {
     let formattedDate = "";
     if (event.event_date) {
-      const date = new Date(event.event_date);
+      const date = apiDate(event.event_date);
       // Adjust offset if needed, or just use substring if backend sends UTC and frontend is local
       // Simple slice for now matching previous logic
       formattedDate = date.toISOString().slice(0, 16);
@@ -617,7 +618,7 @@ export default function RecruiterGalleryEventsSection({
               <div className="divide-y divide-gray-100 dark:divide-gray-800">
                 {filteredEvents.map((event) => {
                   const isActive = event.is_active !== false;
-                  const isPast = new Date(event.event_date) < new Date();
+                  const isPast = apiDate(event.event_date) < new Date();
                   // Determine display status based on conditions
                   let statusLabel = "Active";
                   let statusClass =
@@ -644,7 +645,7 @@ export default function RecruiterGalleryEventsSection({
                             <span className="flex items-center gap-1">
                               <Calendar className="w-3 h-3" />
                               {event.event_date
-                                ? new Date(event.event_date).toLocaleDateString("en-US", {
+                                ? apiDate(event.event_date).toLocaleDateString("en-US", {
                                   month: "short",
                                   day: "numeric",
                                   year: "numeric",

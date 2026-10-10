@@ -6,6 +6,7 @@ import Image from "next/image";
 import { api } from "@/lib/api";
 import { Job } from "@/types/api";
 import { Building2, MapPin, DollarSign, Clock } from "lucide-react";
+import { apiDate } from "@/lib/postedDate";
 
 interface JobDetailsSidebarProps {
     currentJob?: Job;
@@ -51,7 +52,7 @@ export default function JobDetailsSidebar({ currentJob }: JobDetailsSidebarProps
     }, [currentJob]);
 
     const getTimeAgo = (dateString: string) => {
-        const date = new Date(dateString);
+        const date = apiDate(dateString);
         const now = new Date();
         const seconds = Math.floor((now.getTime() - date.getTime()) / 1000);
 

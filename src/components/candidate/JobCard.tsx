@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { Application } from "../../types/api";
 import { formatSalaryRange } from "@/lib/salary";
+import { apiDate } from "@/lib/postedDate";
 
 interface JobCardProps {
   application: Application;
@@ -51,7 +52,7 @@ const JobCard: React.FC<JobCardProps> = ({ application }) => {
     formatSalaryRange(application, { fallback: "Salary not specified" });
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("en-US", {
+    return apiDate(dateString).toLocaleDateString("en-US", {
       month: "short",
       day: "numeric",
       year: "numeric",

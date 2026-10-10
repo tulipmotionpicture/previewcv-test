@@ -26,6 +26,7 @@ import {
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
+import { apiDate } from "@/lib/postedDate";
 
 export interface ApplicationsMeta {
   total_applicants?: number;
@@ -74,7 +75,7 @@ const formatPts = (n: number) =>
 
 function relativeTime(iso?: string): string {
   if (!iso) return "";
-  const then = new Date(iso).getTime();
+  const then = apiDate(iso).getTime();
   if (Number.isNaN(then)) return "";
   const diffMin = Math.floor((Date.now() - then) / 60000);
   if (diffMin < 1) return "just now";
@@ -90,7 +91,7 @@ function relativeTime(iso?: string): string {
 
 function absDate(iso?: string): string {
   if (!iso) return "";
-  const d = new Date(iso);
+  const d = apiDate(iso);
   return Number.isNaN(d.getTime()) ? "" : d.toLocaleString();
 }
 
@@ -362,8 +363,8 @@ export default function ATSApplications({
     arr.sort((a, b) => {
       if (sortBy === "newest") {
         return (
-          new Date(b.applied_at || b.created_at || 0).getTime() -
-          new Date(a.applied_at || a.created_at || 0).getTime()
+          apiDate(b.applied_at || b.created_at || 0).getTime() -
+          apiDate(a.applied_at || a.created_at || 0).getTime()
         );
       }
       if (sortBy === "experience") {

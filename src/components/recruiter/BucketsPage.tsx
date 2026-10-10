@@ -38,6 +38,7 @@ import {
   Download,
 } from "lucide-react";
 import ResumeDetailModal from "./ResumeDetailModal";
+import { apiDate } from "@/lib/postedDate";
 
 export default function BucketsPage() {
   const { showToast } = useToast();
@@ -751,7 +752,7 @@ export default function BucketsPage() {
 
   // Format timestamp for activity logs
   const formatActivityTime = (timestamp: string) => {
-    const date = new Date(timestamp);
+    const date = apiDate(timestamp);
     const now = new Date();
     const diff = now.getTime() - date.getTime();
     const seconds = Math.floor(diff / 1000);
@@ -1747,7 +1748,7 @@ export default function BucketsPage() {
                                 Added to Bucket
                               </span>
                               <p className="text-gray-900 dark:text-gray-100 font-medium">
-                                {new Date(item.added_at).toLocaleDateString()}
+                                {apiDate(item.added_at).toLocaleDateString()}
                               </p>
                             </div>
                           </div>

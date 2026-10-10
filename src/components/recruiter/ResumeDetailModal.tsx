@@ -20,6 +20,7 @@ import {
 import { CVUnlockResponse, IntroUnlockResponse } from "@/types/api";
 import { useEffect, useState, type ReactNode } from "react";
 import MaximizableModal from "@/components/common/MaximizableModal";
+import { apiDate } from "@/lib/postedDate";
 
 interface ResumeDetailModalProps {
   isOpen: boolean;
@@ -156,7 +157,7 @@ export default function ResumeDetailModal({
                     <div>
                       <span className="text-gray-500 dark:text-gray-500 block text-sm">Updated</span>
                       <span className="text-gray-900 dark:text-gray-100 text-sm">
-                        {new Date(lockedResumeInfo.updated_at).toLocaleDateString()}
+                        {apiDate(lockedResumeInfo.updated_at).toLocaleDateString()}
                       </span>
                     </div>
                   )
@@ -341,7 +342,7 @@ export default function ResumeDetailModal({
           {introData.unlocked_until && (
             <p className="text-xs text-gray-500 dark:text-gray-400">
               Access valid until{" "}
-              {new Date(introData.unlocked_until).toLocaleDateString()}.
+              {apiDate(introData.unlocked_until).toLocaleDateString()}.
             </p>
           )}
 
@@ -632,7 +633,7 @@ export default function ResumeDetailModal({
                       </p>
                       {cert.certificationDate && (
                         <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                          {new Date(cert.certificationDate).toLocaleDateString()}
+                          {apiDate(cert.certificationDate).toLocaleDateString()}
                         </p>
                       )}
                       {cert.certificationDescription && (
@@ -677,7 +678,7 @@ export default function ResumeDetailModal({
                         </h5>
                         {acc.date && (
                           <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                            {new Date(acc.date).toLocaleDateString()}
+                            {apiDate(acc.date).toLocaleDateString()}
                           </p>
                         )}
                       </div>
@@ -740,12 +741,12 @@ export default function ResumeDetailModal({
                       )}
                       {vol.startDate && (
                         <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                          {new Date(vol.startDate).toLocaleDateString()}
+                          {apiDate(vol.startDate).toLocaleDateString()}
                         </p>
                       )}
                       {vol.endDate && (
                         <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                          {new Date(vol.endDate).toLocaleDateString()}
+                          {apiDate(vol.endDate).toLocaleDateString()}
                         </p>
                       )}
                     </div>
@@ -792,12 +793,12 @@ export default function ResumeDetailModal({
                       )}
                       {intern.startDate && (
                         <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                          {new Date(intern.startDate).toLocaleDateString()}
+                          {apiDate(intern.startDate).toLocaleDateString()}
                         </p>
                       )}
                       {intern.endDate && (
                         <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                          {new Date(intern.endDate).toLocaleDateString()}
+                          {apiDate(intern.endDate).toLocaleDateString()}
                         </p>
                       )}
                     </div>
@@ -844,7 +845,7 @@ export default function ResumeDetailModal({
                       )}
                       {pub.publicationDate && (
                         <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                          {new Date(pub.publicationDate).toLocaleDateString()}
+                          {apiDate(pub.publicationDate).toLocaleDateString()}
                         </p>
                       )}
                     </div>
@@ -1209,11 +1210,11 @@ export default function ResumeDetailModal({
         <div className="bg-green-50 dark:bg-green-900/20 p-4 rounded-lg border border-green-200 dark:border-green-800">
           <p className="text-sm text-gray-700 dark:text-gray-300">
             <span className="font-semibold">Unlocked:</span>{" "}
-            {new Date(resumeData.unlocked_at).toLocaleString()}
+            {apiDate(resumeData.unlocked_at).toLocaleString()}
           </p>
           <p className="text-sm text-gray-700 dark:text-gray-300 mt-1">
             <span className="font-semibold">Valid Until:</span>{" "}
-            {new Date(resumeData.unlocked_until).toLocaleString()}
+            {apiDate(resumeData.unlocked_until).toLocaleString()}
           </p>
         </div>
       </div>

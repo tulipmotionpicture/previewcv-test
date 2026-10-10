@@ -27,6 +27,16 @@ export function parseApiDate(value?: string | null): Date | null {
  * Locale and time zone are pinned so the server and the first browser render produce the
  * same string — otherwise React reports a hydration mismatch.
  */
+/**
+ * Drop-in for `new Date(value)` on API values: offset-less timestamps are read as UTC
+ * (via parseApiDate) instead of local time. Anything else (date-only strings, numbers,
+ * empty or invalid input) gives exactly what `new Date(value)` gave before.
+ */
+export function apiDate(value?: string | number | null): Date {
+  if (typeof value === "string") return parseApiDate(value) ?? new Date(value);
+  return new Date(value as number);
+}
+
 export function formatPostedAbsolute(date: Date): string {
   return date.toLocaleDateString("en-US", {
     month: "short",

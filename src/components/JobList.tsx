@@ -10,6 +10,7 @@ import Image from "next/image";
 import { Building2 } from "lucide-react";
 import PostedAgo from "@/components/PostedAgo";
 import { htmlToPlainText } from "@/lib/metaText";
+import { apiDate } from "@/lib/postedDate";
 
 interface JobListProps {
   jobs: Job[];
@@ -41,7 +42,7 @@ export default function JobList({ jobs, loading, error }: JobListProps) {
   };
 
   const getTimeAgo = (dateString: string) => {
-    const date = new Date(dateString);
+    const date = apiDate(dateString);
     const now = new Date();
     const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
     const diffInDays = Math.floor(diffInSeconds / 86400);

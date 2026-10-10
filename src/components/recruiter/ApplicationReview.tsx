@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { Application } from "@/types/api";
+import { apiDate } from "@/lib/postedDate";
 
 type ApplicationStatus = "pending" | "reviewed" | "shortlisted" | "rejected";
 
@@ -155,7 +156,7 @@ export default function ApplicationReview({
                     </td>
                     <td className="w-[15%] px-6 py-4 text-gray-500 dark:text-gray-400">
                       {app.applied_at
-                        ? new Date(app.applied_at).toLocaleDateString()
+                        ? apiDate(app.applied_at).toLocaleDateString()
                         : "N/A"}
                     </td>
                     <td className="w-[15%] px-6 py-4">

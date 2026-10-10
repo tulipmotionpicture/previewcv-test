@@ -28,6 +28,7 @@ interface SubscriptionDashboardProps {
 }
 
 import React from "react";
+import { apiDate } from "@/lib/postedDate";
 
 interface EmptyStateProps {
   icon: React.ElementType;
@@ -803,9 +804,9 @@ export default function SubscriptionDashboard({
                       </td>
                       <td className="py-3 px-4">
                         <span className="text-sm text-gray-700 dark:text-gray-300">
-                          {new Date(item.started_at).toLocaleDateString()} -{" "}
+                          {apiDate(item.started_at).toLocaleDateString()} -{" "}
                           {item.ended_at
-                            ? new Date(item.ended_at).toLocaleDateString()
+                            ? apiDate(item.ended_at).toLocaleDateString()
                             : "Present"}
                         </span>
                       </td>

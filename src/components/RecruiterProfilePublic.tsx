@@ -36,6 +36,7 @@ import { Job } from "@/types/api";
 import { formatSalaryRange } from "@/lib/salary";
 import Link from "next/link";
 import PostedAgo from "@/components/PostedAgo";
+import { apiDate } from "@/lib/postedDate";
 
 interface GalleryImage {
   id: string;
@@ -466,7 +467,7 @@ export default function RecruiterProfilePublic({
                   <div className="space-y-6">
                     {profile.events.map((event) => {
                       const eventDate = event.event_date || event.date;
-                      const dateObj = eventDate ? new Date(eventDate) : null;
+                      const dateObj = eventDate ? apiDate(eventDate) : null;
                       return (
                         <article
                           key={event.id}
@@ -602,7 +603,7 @@ export default function RecruiterProfilePublic({
                           Established
                         </p>
                         <p className="text-sm font-bold text-slate-700">
-                          {new Date(profile.created_at).getFullYear()}
+                          {apiDate(profile.created_at).getFullYear()}
                         </p>
                       </div>
                     )}

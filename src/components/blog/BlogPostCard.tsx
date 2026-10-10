@@ -2,6 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Calendar, Clock, Eye, Sparkles } from "lucide-react";
 import { BlogPost } from "@/types";
+import { apiDate } from "@/lib/postedDate";
 
 /**
  * Shared blog post card used across the listing, category, and tag pages so the grid looks
@@ -49,7 +50,7 @@ export default function BlogPostCard({ post }: { post: BlogPost }) {
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-1">
               <Calendar className="w-3 h-3" />
-              {new Date(post.published_at).toLocaleDateString("en-US", {
+              {apiDate(post.published_at).toLocaleDateString("en-US", {
                 month: "short",
                 day: "numeric",
               })}

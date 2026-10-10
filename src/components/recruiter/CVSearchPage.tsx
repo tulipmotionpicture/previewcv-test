@@ -52,6 +52,7 @@ import { Country, State, City } from "@/types/location";
 import { IndustrySearch, SkillSearch, CompanySearch, JobSearch, DegreeSearch } from "@/components/masters";
 import { Company, JobTitle, FieldOfStudy } from "@/types/masters";
 import AdvancedFilters from "./AdvancedFilters";
+import { apiDate } from "@/lib/postedDate";
 interface CVSearchPageProps {
   onBuyCredits?: () => void;
 }
@@ -2793,7 +2794,7 @@ export default function CVSearchPage({ onBuyCredits }: CVSearchPageProps = {}) {
                             <div className="flex flex-wrap items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
                               <span className="flex items-center gap-1">
                                 <Clock className="w-3 h-3" />
-                                {new Date(item.created_at).toLocaleDateString()}
+                                {apiDate(item.created_at).toLocaleDateString()}
                               </span>
                               <span>{item.latest_result_count} results</span>
                               <span>

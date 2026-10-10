@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { Application } from "@/types/api";
 import JobCard from "./JobCard";
+import { apiDate } from "@/lib/postedDate";
 
 interface ApplicationsListProps {
   applications: Application[];
@@ -136,7 +137,7 @@ export default function ApplicationsList({
               {selectedMessage.sentAt && (
                 <p className="text-xs text-gray-500 text-right">
                   Sent on{" "}
-                  {new Date(selectedMessage.sentAt).toLocaleDateString(
+                  {apiDate(selectedMessage.sentAt).toLocaleDateString(
                     "en-US",
                     {
                       year: "numeric",

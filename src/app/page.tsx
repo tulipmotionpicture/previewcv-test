@@ -30,6 +30,7 @@ import {
   Sparkles,
   Eye,
 } from "lucide-react";
+import { apiDate } from "@/lib/postedDate";
 
 // Revalidate the prerendered homepage hourly so its featured content (top employers,
 // latest articles) stays fresh without a redeploy.
@@ -262,7 +263,7 @@ export default async function Home() {
                       <Eye className="w-3 h-3" /> {post.view_count} Views
                     </div>
                     <span>
-                      {new Date(post.published_at).toLocaleDateString("en-GB", {
+                      {apiDate(post.published_at).toLocaleDateString("en-GB", {
                         day: "numeric",
                         month: "short",
                         year: "numeric",

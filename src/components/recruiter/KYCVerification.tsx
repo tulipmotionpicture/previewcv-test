@@ -23,6 +23,7 @@ import {
 } from "lucide-react";
 import { api } from "@/lib/api";
 import type { KycDocument, KycStatus, KycRequirement } from "@/types/api";
+import { apiDate } from "@/lib/postedDate";
 
 export default function KYCVerification() {
   const router = useRouter();
@@ -725,12 +726,12 @@ export default function KYCVerification() {
                       </td>
                       <td className="py-3 px-4">
                         <p className="text-sm text-gray-600 dark:text-gray-400">
-                          {new Date(doc.created_at).toLocaleDateString()}
+                          {apiDate(doc.created_at).toLocaleDateString()}
                         </p>
                         {doc.reviewed_at && (
                           <p className="text-xs text-gray-500 dark:text-gray-500 mt-0.5">
                             Reviewed{" "}
-                            {new Date(doc.reviewed_at).toLocaleDateString()}
+                            {apiDate(doc.reviewed_at).toLocaleDateString()}
                           </p>
                         )}
                       </td>
