@@ -23,6 +23,14 @@ import RelevantJobItem from "./RelevantJobItem";
 import Link from "next/link";
 import { useLogoFallback } from "@/hooks/useLogoFallback";
 import { matchTierMeta } from "./matchTier";
+import { parseApiDate } from "@/lib/postedDate";
+
+/** Format an API timestamp (UTC, sent without a "Z") in the viewer's time zone. new Date()
+ *  alone read these as local time, so dates near midnight showed the wrong day. */
+function formatApiDate(value: string | null | undefined, pattern: string): string {
+    const date = parseApiDate(value);
+    return date ? format(date, pattern) : "";
+}
 
 interface ApplicationDetailViewProps {
     application: Application;
@@ -176,7 +184,7 @@ const ApplicationDetailView: React.FC<ApplicationDetailViewProps> = ({
                                     </p>
                                     {step.date && (
                                         <p className="text-[10px] text-gray-500 dark:text-gray-400 mt-0.5 font-medium whitespace-nowrap">
-                                            {format(new Date(step.date), "MMM d")}
+                                            {formatApiDate(step.date, "MMM d")}
                                         </p>
                                     )}
                                 </div>
@@ -226,7 +234,7 @@ const ApplicationDetailView: React.FC<ApplicationDetailViewProps> = ({
                                 </div>
                                 <h3 className="text-sm font-bold text-gray-900 dark:text-white">Recruiter Message</h3>
                                 <span className="ml-auto text-[10px] bg-slate-100 dark:bg-gray-800 px-2 py-1 rounded-full text-gray-500 font-medium">
-                                    {application.recruiter_message_at ? format(new Date(application.recruiter_message_at as string), "MMM d") : "New"}
+                                    {formatApiDate(application.recruiter_message_at as string | null, "MMM d") || "New"}
                                 </span>
                             </div>
                             <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed font-medium relative z-10 pl-3 border-l-2 border-emerald-500/30">
@@ -277,7 +285,7 @@ const ApplicationDetailView: React.FC<ApplicationDetailViewProps> = ({
                                         {application.resume?.name || application.uploaded_resume?.name || "Resume.pdf"}
                                     </p>
                                     <p className="text-xs text-gray-500 dark:text-gray-400">
-                                        Submitted on {format(new Date(application.applied_at), "MMM d, yyyy")}
+                                        Submitted on {formatApiDate(application.applied_at, "MMM d, yyyy")}
                                     </p>
                                 </div>
                             </div>

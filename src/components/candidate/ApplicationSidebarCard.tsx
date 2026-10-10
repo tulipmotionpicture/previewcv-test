@@ -3,6 +3,7 @@ import { useLogoFallback } from "@/hooks/useLogoFallback";
 import { Application } from "@/types/api";
 import { CheckCircle2, Clock, AlertCircle, Users } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
+import { parseApiDate } from "@/lib/postedDate";
 import { matchTierMeta } from "./matchTier";
 
 interface ApplicationSidebarCardProps {
@@ -88,7 +89,12 @@ const ApplicationSidebarCard: React.FC<ApplicationSidebarCardProps> = ({
             <div className="flex justify-between items-start mb-2">
                 {getStatusBadge()}
                 <span className="text-[10px] font-medium text-gray-400 whitespace-nowrap ml-2">
-                    {formatDistanceToNow(new Date(application.updated_at), { addSuffix: true })}
+                    {/* API timestamps are UTC without a "Z"; new Date() read them as local time,
+                        so in India every application looked 5h30m older than it was. */}
+                    {(() => {
+                        const updated = parseApiDate(application.updated_at);
+                        return updated ? formatDistanceToNow(updated, { addSuffix: true }) : null;
+                    })()}
                 </span>
             </div>
 
