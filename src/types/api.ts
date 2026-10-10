@@ -245,7 +245,9 @@ export interface Application {
   status:
     | "applied"
     | "under_review"
+    | "shortlisted"
     | "interview_scheduled"
+    | "interviewed"
     | "offered"
     | "accepted"
     | "rejected"
@@ -741,6 +743,7 @@ export interface PendingApprovalsMetrics {
 export interface ApplicationPipeline {
   applied: number;
   under_review: number;
+  shortlisted?: number;
   interview_scheduled: number;
   interviewed: number;
   offered: number;

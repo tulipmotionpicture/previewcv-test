@@ -74,8 +74,11 @@ export default function ApplicationsList({
       case "in_review":
       case "under_review":
         return "bg-[#F59E0B] text-white";
+      case "shortlisted":
+        return "bg-[#14B8A6] text-white";
       case "interview":
       case "interview_scheduled":
+      case "interviewed":
         return "bg-[#8B5CF6] text-white";
       case "accepted":
       case "hired":

@@ -58,12 +58,12 @@ const ApplicationDetailView: React.FC<ApplicationDetailViewProps> = ({
             label: "Viewed",
             date: application.recruiter_viewed_at,
             active: !!application.recruiter_viewed ||
-                ["under_review", "interview_scheduled", "offered", "accepted", "rejected", "withdrawn", "declined"].includes(application.status)
+                ["under_review", "shortlisted", "interview_scheduled", "interviewed", "offered", "accepted", "rejected", "withdrawn", "declined"].includes(application.status)
         },
         {
             label: "Interview",
             date: application.interview?.scheduled_at || null,
-            active: ["interview_scheduled", "offered", "accepted", "rejected", "declined"].includes(application.status)
+            active: ["interview_scheduled", "interviewed", "offered", "accepted", "rejected", "declined"].includes(application.status)
         },
         {
             label: "Decision", // Offered, Accepted, Rejected, etc.

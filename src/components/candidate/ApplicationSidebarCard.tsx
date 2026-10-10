@@ -49,10 +49,22 @@ const ApplicationSidebarCard: React.FC<ApplicationSidebarCardProps> = ({
                         <Clock size={10} /> In Review
                     </div>
                 );
+            case "shortlisted":
+                return (
+                    <div className={`${baseClasses} bg-teal-50 text-teal-600 border-teal-100 dark:bg-teal-900/20 dark:border-teal-800 dark:text-teal-300`}>
+                        <CheckCircle2 size={10} /> Shortlisted
+                    </div>
+                );
             case "interview_scheduled":
                 return (
                     <div className={`${baseClasses} bg-indigo-50 text-indigo-600 border-indigo-100 dark:bg-indigo-900/20 dark:border-indigo-800 dark:text-indigo-300`}>
                         <Users size={10} /> Interview
+                    </div>
+                );
+            case "interviewed":
+                return (
+                    <div className={`${baseClasses} bg-indigo-50 text-indigo-600 border-indigo-100 dark:bg-indigo-900/20 dark:border-indigo-800 dark:text-indigo-300`}>
+                        <Users size={10} /> Interviewed
                     </div>
                 );
             case "offered":

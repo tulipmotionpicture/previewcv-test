@@ -443,9 +443,11 @@ function CandidateDashboardContent() {
                           <option value="">All Statuses</option>
                           <option value="applied">Applied</option>
                           <option value="under_review">Under Review</option>
+                          <option value="shortlisted">Shortlisted</option>
                           <option value="interview_scheduled">
                             Interview Scheduled
                           </option>
+                          <option value="interviewed">Interviewed</option>
                           <option value="offered">Offered</option>
                           <option value="accepted">Accepted</option>
                           <option value="rejected">Rejected</option>

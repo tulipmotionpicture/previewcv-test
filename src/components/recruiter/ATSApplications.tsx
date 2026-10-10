@@ -4,7 +4,12 @@ import { useState, useMemo, useEffect } from "react";
 import { Job, Application } from "@/types/api";
 import { api } from "@/lib/api";
 import { useToast } from "@/context/ToastContext";
-import { SearchSuggestInput } from "@/components/ui";
+import { ConfirmDialog, SearchSuggestInput } from "@/components/ui";
+import {
+  CANDIDATE_NOTIFIED_STATUSES,
+  RECRUITER_STATUS_OPTIONS,
+  applicationStatusLabel,
+} from "@/lib/applicationStatus";
 import {
   Copy,
   ChevronDown,
@@ -72,6 +77,19 @@ const TIERS = ["all", "excellent", "good", "fair", "weak"] as const;
 
 const formatPts = (n: number) =>
   Number.isInteger(n) ? String(n) : n.toFixed(1);
+
+function statusChangeMessage(change: { name: string; from: string; to: string }): string {
+  const parts = [
+    `Move ${change.name}'s application from ${applicationStatusLabel(change.from)} to ${applicationStatusLabel(change.to)}?`,
+  ];
+  if (CANDIDATE_NOTIFIED_STATUSES.has(change.to)) {
+    parts.push("The candidate will be notified by email and push notification.");
+  }
+  if (change.from === "applied") {
+    parts.push("Once changed, it can't be set back to Applied.");
+  }
+  return parts.join(" ");
+}
 
 function relativeTime(iso?: string): string {
   if (!iso) return "";
@@ -314,6 +332,13 @@ export default function ATSApplications({
   const [tierFilter, setTierFilter] = useState<string>("all");
   const [minScore, setMinScore] = useState<number>(0);
   const [resumeLoadingId, setResumeLoadingId] = useState<number | null>(null);
+  // A status change waiting for the recruiter's confirmation.
+  const [pendingStatus, setPendingStatus] = useState<{
+    appId: number;
+    name: string;
+    from: string;
+    to: string;
+  } | null>(null);
   const [page, setPage] = useState(1);
   const PAGE_SIZE = 6;
 
@@ -325,8 +350,21 @@ export default function ATSApplications({
     [jobs, selectedJobId],
   );
 
-  const handleStatusUpdate = (appId: number, newStatus: string) => {
-    onUpdateStatus(appId, newStatus);
+  // Every change is confirmed first: it notifies the candidate, and once an application
+  // leaves Applied it can't go back (the backend refuses that too).
+  const handleStatusUpdate = (app: Application, newStatus: string) => {
+    if (newStatus === app.status) return;
+    setPendingStatus({
+      appId: app.id,
+      name: app.applicant?.full_name || app.candidate_name || "this candidate",
+      from: app.status,
+      to: newStatus,
+    });
+  };
+
+  const confirmStatusUpdate = () => {
+    if (pendingStatus) onUpdateStatus(pendingStatus.appId, pendingStatus.to);
+    setPendingStatus(null);
   };
 
   // Filter locally by name/email, applied-date range, tier and min score.
@@ -895,16 +933,29 @@ export default function ATSApplications({
                             <select
                               value={app.status}
                               onChange={(e) =>
-                                handleStatusUpdate(app.id, e.target.value)
+                                handleStatusUpdate(app, e.target.value)
                               }
                               className="appearance-none pl-3 pr-7 py-1.5 bg-primary-blue hover:bg-blue-700 text-white text-[11px] font-medium rounded-lg cursor-pointer transition-colors focus:ring-2 focus:ring-blue-500 w-[104px]"
                             >
-                              <option value="applied" className="text-gray-900 bg-white">Applied</option>
-                              <option value="under_review" className="text-gray-900 bg-white">Under Review</option>
-                              <option value="interview_scheduled" className="text-gray-900 bg-white">Interview</option>
-                              <option value="offered" className="text-gray-900 bg-white">Offered</option>
-                              <option value="accepted" className="text-gray-900 bg-white">Accepted</option>
-                              <option value="rejected" className="text-gray-900 bg-white">Rejected</option>
+                              {/* A status the dropdown doesn't offer (e.g. withdrawn by the
+                                  candidate) is still shown, but can't be picked. */}
+                              {!(RECRUITER_STATUS_OPTIONS as readonly string[]).includes(app.status) && (
+                                <option value={app.status} disabled className="text-gray-400 bg-white">
+                                  {applicationStatusLabel(app.status)}
+                                </option>
+                              )}
+                              {RECRUITER_STATUS_OPTIONS.map((status) => (
+                                <option
+                                  key={status}
+                                  value={status}
+                                  // Applied is only the starting state: once the
+                                  // application has moved on it can't go back.
+                                  disabled={status === "applied" && app.status !== "applied"}
+                                  className="text-gray-900 bg-white disabled:text-gray-400"
+                                >
+                                  {applicationStatusLabel(status)}
+                                </option>
+                              ))}
                             </select>
                             <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-white pointer-events-none" />
                           </div>
@@ -1118,14 +1169,11 @@ export default function ATSApplications({
                     className="w-full appearance-none px-4 py-3 bg-white dark:bg-gray-800 border border-[#E1E8F1] dark:border-gray-700 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none text-gray-700 dark:text-gray-200"
                   >
                     <option value="All">All</option>
-                    <option value="applied">Applied</option>
-                    <option value="under_review">Under Review</option>
-                    <option value="interview_scheduled">Interview</option>
-                    <option value="offered">Offered</option>
-                    <option value="accepted">Accepted</option>
-                    <option value="rejected">Rejected</option>
-                    <option value="withdrawn">Withdrawn</option>
-                    <option value="declined">Declined</option>
+                    {[...RECRUITER_STATUS_OPTIONS, "withdrawn"].map((status) => (
+                      <option key={status} value={status}>
+                        {applicationStatusLabel(status)}
+                      </option>
+                    ))}
                   </select>
                   <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
                 </div>
@@ -1210,6 +1258,16 @@ export default function ATSApplications({
           </div>
         </div>
       </div>
+
+      <ConfirmDialog
+        isOpen={pendingStatus !== null}
+        onClose={() => setPendingStatus(null)}
+        onConfirm={confirmStatusUpdate}
+        title="Change application status?"
+        message={pendingStatus ? statusChangeMessage(pendingStatus) : ""}
+        confirmText={`Mark as ${applicationStatusLabel(pendingStatus?.to)}`}
+        variant={pendingStatus?.to === "rejected" ? "danger" : "primary"}
+      />
     </div>
   );
 }

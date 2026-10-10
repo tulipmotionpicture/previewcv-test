@@ -47,6 +47,7 @@ import {
   recruiterNeedsRevalidation,
 } from "@/lib/recruiterVerification";
 import { Button } from "@/components/ui";
+import { applicationStatusLabel } from "@/lib/applicationStatus";
 
 interface JobFilters {
   is_active?: boolean | null;
@@ -552,7 +553,7 @@ function RecruiterDashboardInner() {
             : null,
         );
       }
-      toast.success(`Status updated to ${newStatus.replace("_", " ")}`);
+      toast.success(`Status updated to ${applicationStatusLabel(newStatus)}`);
     } catch (error: unknown) {
       if (error instanceof Error) {
         toast.error(error.message || "Failed to update status");
