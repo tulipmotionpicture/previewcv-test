@@ -7,6 +7,15 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRecruiterAuth } from "@/context/RecruiterAuthContext";
 import { api } from "@/lib/api";
+import {
+  USERNAME_MAX,
+  cleanUsernameInput,
+  looksLikeCompany,
+  suggestUsername,
+  toUsername,
+  usernameAlternatives,
+  usernameProblem,
+} from "@/lib/recruiterUsername";
 import { IndustrySearch } from "@/components/masters";
 import { Honeypot } from "@/lib/anti-bot/honeypot";
 import { useFormLoadedAt } from "@/lib/anti-bot/useFormLoadedAt";
@@ -71,47 +80,84 @@ export default function RecruiterSignup() {
     "idle" | "checking" | "available" | "unavailable"
   >("idle");
   const [usernameMessage, setUsernameMessage] = useState("");
+  // Until the recruiter edits it, the username follows the company (or, for an
+  // individual, their own) name.
+  const [usernameEdited, setUsernameEdited] = useState(false);
+  // Available alternatives offered when the chosen username is taken.
+  const [usernameSuggestions, setUsernameSuggestions] = useState<string[]>([]);
+
+  // Suggest the username from the company name (individual: full name) until the
+  // recruiter types their own.
+  useEffect(() => {
+    if (usernameEdited) return;
+    const suggestion = suggestUsername(formData.recruiterType, formData.companyName, formData.fullName);
+    setFormData((prev) => (prev.username === suggestion ? prev : { ...prev, username: suggestion }));
+  }, [usernameEdited, formData.recruiterType, formData.companyName, formData.fullName]);
 
   useEffect(() => {
-    const timer = setTimeout(async () => {
-      if (!formData.username || formData.username.length < 3) {
-        setUsernameStatus("idle");
-        setUsernameMessage("");
-        return;
-      }
+    setUsernameSuggestions([]);
+    const username = formData.username.replace(/[-_]+$/, "");
+    if (!username) {
+      setUsernameStatus("idle");
+      setUsernameMessage("");
+      return;
+    }
+    // Problems that need no server round trip are shown straight away.
+    const problem = usernameProblem(username);
+    if (problem) {
+      setUsernameStatus("unavailable");
+      setUsernameMessage(problem);
+      return;
+    }
 
+    let cancelled = false;
+    const timer = setTimeout(async () => {
       setUsernameStatus("checking");
       try {
-        const res = await api.checkRecruiterAvailability(formData.username);
-        if (res.username) {
-          if (res.username.available) {
-            setUsernameStatus("available");
-            setUsernameMessage("Username is available");
-          } else {
-            setUsernameStatus("unavailable");
-            setUsernameMessage(
-              res.username.reason === "taken"
-                ? "Username is already taken"
-                : res.username.reason === "too_short"
-                  ? "Username is too short"
-                  : res.username.reason === "too_long"
-                    ? "Username is too long"
-                    : res.username.reason === "invalid_format"
-                      ? "Invalid username format"
-                      : res.username.reason === "reserved"
-                        ? "This username is reserved"
-                        : "Username is not available"
-            );
-          }
+        const res = await api.checkRecruiterAvailability(username);
+        if (cancelled || !res.username) return;
+        if (res.username.available) {
+          setUsernameStatus("available");
+          setUsernameMessage("Username is available");
+          return;
         }
-      } catch (err) {
-        setUsernameStatus("idle");
-        setUsernameMessage("");
+        setUsernameStatus("unavailable");
+        setUsernameMessage(
+          res.username.reason === "taken"
+            ? "This username is already taken"
+            : res.username.reason === "too_short"
+              ? "Username is too short"
+              : res.username.reason === "too_long"
+                ? "Username is too long"
+                : res.username.reason === "invalid_format"
+                  ? "Use only letters, numbers, hyphens and underscores"
+                  : res.username.reason === "reserved"
+                    ? "This name is reserved. Please choose another."
+                    : "Username is not available"
+        );
+        if (res.username.reason === "taken") {
+          // Offer close alternatives that are free right now.
+          const candidates = usernameAlternatives(username, formData.city);
+          const checks = await Promise.all(
+            candidates.map((c) =>
+              api.checkRecruiterAvailability(c).then((r) => (r.username?.available ? c : null)).catch(() => null)
+            )
+          );
+          if (!cancelled) setUsernameSuggestions(checks.filter((c): c is string => !!c).slice(0, 3));
+        }
+      } catch {
+        if (!cancelled) {
+          setUsernameStatus("idle");
+          setUsernameMessage("");
+        }
       }
     }, 500);
 
-    return () => clearTimeout(timer);
-  }, [formData.username]);
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
+  }, [formData.username, formData.city]);
 
   useEffect(() => {
     console.log("RecruiterSignup: Auth state:", {
@@ -156,11 +202,23 @@ export default function RecruiterSignup() {
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
   ) => {
     const { name, value, type } = e.target;
+    if (name === "username") {
+      const username = cleanUsernameInput(value);
+      // Clearing the field hands it back to the automatic suggestion.
+      setUsernameEdited(username !== "");
+      setFormData((prev) => ({ ...prev, username }));
+      return;
+    }
     setFormData((prev) => ({
       ...prev,
       [name]:
         type === "checkbox" ? (e.target as HTMLInputElement).checked : value,
     }));
+  };
+
+  const pickUsername = (username: string) => {
+    setUsernameEdited(true);
+    setFormData((prev) => ({ ...prev, username }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -203,6 +261,13 @@ export default function RecruiterSignup() {
       return;
     }
 
+    const finalUsername = toUsername(formData.username);
+    const usernameError = !finalUsername ? "Please choose a profile username" : usernameProblem(finalUsername);
+    if (usernameError) {
+      setError(usernameError);
+      return;
+    }
+
     if (usernameStatus === "unavailable") {
       setError(usernameMessage || "Please choose a valid username");
       return;
@@ -214,7 +279,7 @@ export default function RecruiterSignup() {
       const payload: any = {
         email: formData.email,
         password: formData.password,
-        username: formData.username,
+        username: finalUsername,
         recruiter_type: formData.recruiterType,
         phone: formData.phone,
         country: formData.country,
@@ -255,6 +320,105 @@ export default function RecruiterSignup() {
       setIsLoading(false);
     }
   };
+
+  const isCompany = formData.recruiterType === "company";
+  const shownUsername = formData.username.replace(/[-_]+$/, "");
+  const usernameField = (
+    <div>
+      <label
+        htmlFor="signup-username"
+        className="block text-sm font-semibold text-gray-900 dark:text-gray-100 mb-2"
+      >
+        Profile Username *
+      </label>
+      <div className="relative">
+        <span className="hidden sm:block absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 text-sm pointer-events-none">
+          previewcv.com/recruiter/
+        </span>
+        <input
+          id="signup-username"
+          type="text"
+          name="username"
+          required
+          autoComplete="off"
+          autoCapitalize="none"
+          spellCheck={false}
+          maxLength={USERNAME_MAX}
+          aria-describedby="signup-username-help"
+          aria-invalid={usernameStatus === "unavailable"}
+          className={`w-full pl-4 sm:pl-[200px] pr-10 py-3 bg-gray-50 dark:bg-gray-800 border rounded-xl focus:ring-2 focus:ring-teal-dark dark:focus:ring-mint focus:border-transparent outline-none transition-all text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 ${usernameStatus === "unavailable"
+              ? "border-red-500 focus:ring-red-500"
+              : usernameStatus === "available"
+                ? "border-green-500 focus:ring-green-500"
+                : "border-gray-200 dark:border-gray-700"
+            }`}
+          value={formData.username}
+          onChange={handleChange}
+          placeholder={isCompany ? "your-company" : "your-name"}
+        />
+        {usernameStatus === "checking" && (
+          <span className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 border-2 border-gray-300 border-t-teal-dark rounded-full animate-spin"></span>
+        )}
+        {usernameStatus === "available" && (
+          <svg
+            className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-green-500"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M5 13l4 4L19 7"
+            />
+          </svg>
+        )}
+      </div>
+      {usernameMessage && (
+        <p
+          role={usernameStatus === "unavailable" ? "alert" : undefined}
+          className={`text-xs mt-1.5 font-medium ${usernameStatus === "available"
+              ? "text-green-600 dark:text-green-400"
+              : "text-red-600 dark:text-red-400"
+            }`}
+        >
+          {usernameMessage}
+        </p>
+      )}
+      {usernameSuggestions.length > 0 && (
+        <div className="flex flex-wrap items-center gap-2 mt-2">
+          <span className="text-xs text-gray-500 dark:text-gray-400">Available:</span>
+          {usernameSuggestions.map((name) => (
+            <button
+              key={name}
+              type="button"
+              onClick={() => pickUsername(name)}
+              className="px-2.5 py-1 rounded-full text-xs font-medium bg-teal-dark/10 text-teal-dark dark:bg-mint/10 dark:text-mint hover:bg-teal-dark/20 dark:hover:bg-mint/20 transition-colors"
+            >
+              {name}
+            </button>
+          ))}
+        </div>
+      )}
+      {isCompany && shownUsername && formData.companyName.trim() && !looksLikeCompany(shownUsername, formData.companyName) && (
+        <p className="text-xs mt-1.5 text-amber-600 dark:text-amber-400">
+          Tip: a username based on your company name helps candidates recognise your jobs.
+        </p>
+      )}
+      <p id="signup-username-help" className="text-xs mt-1.5 text-gray-500 dark:text-gray-400 break-all">
+        Your public page:{" "}
+        <span className="font-medium text-gray-700 dark:text-gray-300">
+          previewcv.com/recruiter/{shownUsername || (isCompany ? "your-company" : "your-name")}
+        </span>
+      </p>
+      <p className="text-xs mt-1 text-gray-500 dark:text-gray-400">
+        {isCompany && !usernameEdited ? "Suggested from your company name. " : ""}
+        Lowercase letters, numbers, hyphens and underscores. Choose carefully: this link appears on
+        your job posts and in search results, so it should stay the same once your account is created.
+      </p>
+    </div>
+  );
 
   return (
     <div className="min-h-screen bg-white dark:bg-gray-950 flex transition-colors duration-300">
@@ -588,59 +752,7 @@ export default function RecruiterSignup() {
                   </div>
                 </div>
 
-                {/* Username */}
-                <div>
-                  <label className="block text-sm font-semibold text-gray-900 dark:text-gray-100 mb-2">
-                    Profile Username
-                  </label>
-                  <div className="relative">
-                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 text-sm">
-                      previewcv.com/recruiter/
-                    </span>
-                    <input
-                      type="text"
-                      name="username"
-                      required
-                      className={`w-full pl-[200px] pr-10 py-3 bg-gray-50 dark:bg-gray-800 border rounded-xl focus:ring-2 focus:ring-teal-dark dark:focus:ring-mint focus:border-transparent outline-none transition-all text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 ${usernameStatus === "unavailable"
-                          ? "border-red-500 focus:ring-red-500"
-                          : usernameStatus === "available"
-                            ? "border-green-500 focus:ring-green-500"
-                            : "border-gray-200 dark:border-gray-700"
-                        }`}
-                      value={formData.username}
-                      onChange={handleChange}
-                      placeholder="your-username"
-                    />
-                    {usernameStatus === "checking" && (
-                      <span className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 border-2 border-gray-300 border-t-teal-dark rounded-full animate-spin"></span>
-                    )}
-                    {usernameStatus === "available" && (
-                      <svg
-                        className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-green-500"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M5 13l4 4L19 7"
-                        />
-                      </svg>
-                    )}
-                  </div>
-                  {usernameMessage && (
-                    <p
-                      className={`text-xs mt-1.5 font-medium ${usernameStatus === "available"
-                          ? "text-green-600 dark:text-green-400"
-                          : "text-red-600 dark:text-red-400"
-                        }`}
-                    >
-                      {usernameMessage}
-                    </p>
-                  )}
-                </div>
+                {formData.recruiterType === "individual" && usernameField}
               </div>
 
               {/* Conditional Fields Based on Recruiter Type */}
@@ -677,6 +789,11 @@ export default function RecruiterSignup() {
                         placeholder="https://company.com"
                       />
                     </div>
+                  </div>
+
+                  {usernameField}
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                       <label className="block text-sm font-semibold text-gray-900 dark:text-gray-100 mb-2">
                         Founded Year
