@@ -190,7 +190,8 @@ export function buildJobPostingJsonLd(
     hiringOrganization: {
       "@type": "Organization",
       name: job.company_name,
-      logo: job.company_logo_url || companyData?.company_logo_url || undefined,
+      // The live profile logo first: the job keeps a copy taken when it was posted.
+      logo: companyData?.company_logo_url || job.company_logo_url || undefined,
       sameAs: companyData?.company_website || undefined,
     },
     jobLocation: {

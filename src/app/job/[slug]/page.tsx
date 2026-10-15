@@ -85,6 +85,51 @@ async function getCurrentJobSlug(staleSlug: string): Promise<string | null> {
   return (await getJobBySlug(currentSlug)) ? currentSlug : null;
 }
 
+// The "About the company" card shows the recruiter's live public profile. The job itself
+// only holds a copy of the company name and logo taken when it was posted, so a logo, bio or
+// name added later never reached the job page. (This used to read
+// /recruiters/gallery/public/<username>, which only returns gallery events, so the card
+// always fell back to that copy.)
+interface CompanyProfile {
+  company_name?: string;
+  company_logo_url?: string;
+  company_website?: string;
+  linkedin_url?: string;
+  location?: string;
+  bio?: string;
+  gallery_images: { image_url: string }[];
+}
+
+async function getCompanyProfile(username: string): Promise<CompanyProfile | null> {
+  try {
+    const profile = await api.request<{
+      company_name?: string | null;
+      display_name?: string | null;
+      company_logo_url?: string | null;
+      company_website?: string | null;
+      linkedin_url?: string | null;
+      location?: string | null;
+      bio?: string | null;
+      gallery?: { images?: { image_url?: string }[] } | null;
+    }>(`/api/v1/recruiters/profile/slug/${encodeURIComponent(username)}`);
+    return {
+      company_name: profile.company_name || profile.display_name || undefined,
+      company_logo_url: profile.company_logo_url || undefined,
+      company_website: profile.company_website || undefined,
+      linkedin_url: profile.linkedin_url || undefined,
+      location: profile.location || undefined,
+      bio: profile.bio?.trim() || undefined,
+      gallery_images: (profile.gallery?.images ?? []).filter(
+        (img): img is { image_url: string } => !!img?.image_url,
+      ),
+    };
+  } catch (e) {
+    // The card falls back to the job's own copy of the company details.
+    console.error("Failed to fetch company profile", e);
+    return null;
+  }
+}
+
 // Generate metadata for SEO
 export async function generateMetadata({
   params,
@@ -150,14 +195,12 @@ export default async function JobDetailsPage({
   const { slug } = await params;
   const job = await getJobBySlug(slug);
 
-  let companyData = null;
-  if (job?.recruiter_username) {
-    try {
-      companyData = await api.getPublicGallery(job.recruiter_username);
-    } catch (e) {
-      console.error("Failed to fetch company data", e);
-    }
-  }
+  // Never looked up for confidential jobs: the employer must not appear anywhere on the
+  // page, structured data included.
+  const companyData =
+    job?.recruiter_username && !job.is_confidential
+      ? await getCompanyProfile(job.recruiter_username)
+      : null;
 
   if (!job) {
     const currentSlug = await getCurrentJobSlug(slug);
@@ -426,10 +469,18 @@ export default async function JobDetailsPage({
                   <h5 className="font-bold text-gray-900 dark:text-gray-100">
                     Overview
                   </h5>
-                  <div className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed whitespace-pre-wrap">
-                    {companyData?.bio ||
-                      `Join our team at ${job.company_name}. We are passionate about innovation and excellence.`}
-                  </div>
+                  {/* bio is HTML from the profile's rich-text editor (rendered the same way on
+                      the recruiter's public page). */}
+                  {companyData?.bio ? (
+                    <div
+                      className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed [&_p]:mb-3 [&_strong]:font-bold [&_em]:italic [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5"
+                      dangerouslySetInnerHTML={{ __html: companyData.bio }}
+                    />
+                  ) : (
+                    <div className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed whitespace-pre-wrap">
+                      {`Join our team at ${job.company_name}. We are passionate about innovation and excellence.`}
+                    </div>
+                  )}
                 </div>
 
                 {/* Company Gallery Images */}
@@ -438,7 +489,7 @@ export default async function JobDetailsPage({
                     <div className="grid grid-cols-3 gap-3 mt-4">
                       {companyData.gallery_images
                         .slice(0, 3)
-                        .map((img: any, idx: number) => (
+                        .map((img, idx) => (
                           <div
                             key={idx}
                             className="h-32 rounded-lg bg-gray-100 dark:bg-gray-800 overflow-hidden relative"
