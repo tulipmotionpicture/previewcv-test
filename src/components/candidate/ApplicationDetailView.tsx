@@ -124,7 +124,7 @@ const ApplicationDetailView: React.FC<ApplicationDetailViewProps> = ({
                             {application.company_name || application.job?.company_name}
                         </span>
                         {application.job_id && (
-                            <Link href={`/jobs/${application.job_slug || application.job?.slug}`} className="text-xs font-bold text-primary-blue hover:text-blue-700 flex items-center gap-1 ml-2">
+                            <Link href={`/job/${application.job_slug || application.job?.slug}`} className="text-xs font-bold text-primary-blue hover:text-blue-700 flex items-center gap-1 ml-2">
                                 View Job <ExternalLink size={10} />
                             </Link>
                         )}
