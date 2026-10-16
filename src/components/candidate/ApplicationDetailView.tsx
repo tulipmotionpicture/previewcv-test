@@ -24,6 +24,8 @@ import Link from "next/link";
 import { useLogoFallback } from "@/hooks/useLogoFallback";
 import { matchTierMeta } from "./matchTier";
 import { parseApiDate } from "@/lib/postedDate";
+import { applicationStatusLabel } from "@/lib/applicationStatus";
+import ApplicationStatusBadge from "./ApplicationStatusBadge";
 
 /** Format an API timestamp (UTC, sent without a "Z") in the viewer's time zone. new Date()
  *  alone read these as local time, so dates near midnight showed the wrong day. */
@@ -48,6 +50,7 @@ const ApplicationDetailView: React.FC<ApplicationDetailViewProps> = ({
     );
 
     // Timeline Logic
+    const decided = ["offered", "accepted", "rejected", "withdrawn", "declined"].includes(application.status);
     const steps = [
         {
             label: "Applied",
@@ -66,9 +69,12 @@ const ApplicationDetailView: React.FC<ApplicationDetailViewProps> = ({
             active: ["interview_scheduled", "interviewed", "offered", "accepted", "rejected", "declined"].includes(application.status)
         },
         {
-            label: "Decision", // Offered, Accepted, Rejected, etc.
-            date: application.updated_at,
-            active: ["offered", "accepted", "rejected", "withdrawn", "declined"].includes(application.status),
+            // Name the outcome once there is one; a bare "Decision" didn't say whether it
+            // was an offer or a rejection.
+            label: decided ? applicationStatusLabel(application.status) : "Decision",
+            // Only date the step once decided (it otherwise showed the last-update date).
+            date: decided ? application.updated_at : null,
+            active: decided,
             status: application.status
         }
     ];
@@ -145,7 +151,10 @@ const ApplicationDetailView: React.FC<ApplicationDetailViewProps> = ({
 
             {/* Application Status Timeline */}
             <div className="mb-6 bg-slate-50 dark:bg-gray-800/50 rounded-xl p-4 border border-slate-100 dark:border-gray-700">
-                <h3 className="text-xs font-bold text-gray-900 dark:text-gray-100 mb-4">Application Status</h3>
+                <div className="flex items-center justify-between gap-3 mb-4">
+                    <h3 className="text-xs font-bold text-gray-900 dark:text-gray-100">Application Status</h3>
+                    <ApplicationStatusBadge application={application} />
+                </div>
                 <div className="relative flex items-center justify-between w-full px-2 md:px-6">
                     {/* Horizontal Line Background */}
                     <div className="absolute top-[10px] left-2 right-2 md:left-6 md:right-6 h-0.5 bg-gray-200 dark:bg-gray-700 z-0" />
