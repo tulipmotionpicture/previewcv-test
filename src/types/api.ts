@@ -303,6 +303,18 @@ export interface Application {
   highlights?: string[];
   ai_insight?: string | null;
   insufficient_data?: boolean;
+  // Recruiter teams: latest teammate recommendation (null when none or teams are off).
+  team_recommendation?: TeamRecommendation | null;
+}
+
+/** Latest team recommendation on an application (recruiter teams). */
+export interface TeamRecommendation {
+  status: string; // shortlisted | interview_scheduled | offered | rejected
+  author_name?: string | null;
+  author_key: string; // "owner" | "m:<member id>"
+  created_at?: string | null;
+  count: number;
+  mine: boolean; // the signed-in person recommended on it
 }
 
 export interface JobApplicationsResponse {

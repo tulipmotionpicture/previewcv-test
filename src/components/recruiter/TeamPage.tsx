@@ -45,7 +45,52 @@ const ACTION_LABEL: Record<string, string> = {
   "member.remove": "removed a member",
   "member.join": "joined the team",
   "member.leave": "left the team",
+  "cv.unlock": "unlocked a CV",
+  "cv.unlock_intro": "unlocked an intro profile",
+  "cv.bulk_unlock": "unlocked CVs in bulk",
+  "search.update": "edited a saved search",
+  "search.delete": "deleted a saved search",
+  "job.update": "edited a job",
+  "job.delete": "deleted a job",
+  "job.activate": "activated a job",
+  "job.deactivate": "deactivated a job",
+  "resumes.download": "downloaded resumes",
+  "bucket.create": "created a bucket",
+  "bucket.update": "renamed or edited a bucket",
+  "bucket.delete": "deleted a bucket",
+  "bucket.add": "added candidates to a bucket",
+  "bucket.remove": "removed candidates from a bucket",
+  "bucket.item_update": "updated a candidate in a bucket",
+  "bucket.move": "moved candidates between buckets",
+  "company.update": "edited the company profile",
+  "company.logo": "changed the company logo",
+  "company.logo_delete": "removed the company logo",
+  "company.gallery": "added a gallery image",
+  "company.gallery_delete": "removed a gallery image",
+  "company.sync_jobs": "synced company details to jobs",
+  "event.create": "added an event",
+  "event.update": "edited an event",
+  "event.delete": "deleted an event",
+  "event.image": "added an event photo",
+  "event.image_update": "edited an event photo",
+  "event.image_delete": "removed an event photo",
+  "kyc.document_upload": "uploaded a verification document",
+  "kyc.document_delete": "removed a verification document",
+  "kyc.submit": "submitted verification",
 };
+
+/** Short detail after the action (status, who was unlocked, credits used). */
+function activityDetail(a: TeamActivity): string | null {
+  const m = a.meta || {};
+  const parts: string[] = [];
+  if (a.action === "application.status" && m.to) parts.push(`→ ${String(m.to).replace(/_/g, " ")}`);
+  if ((a.action === "cv.unlock" || a.action === "cv.unlock_intro") && m.name) parts.push(String(m.name));
+  if (a.action === "cv.bulk_unlock" && m.unlocked != null) parts.push(`${m.unlocked} profiles`);
+  if (m.credits_used != null) parts.push(`${m.credits_used} credits`);
+  if (m.credits_remaining != null) parts.push(`${m.credits_remaining} left`);
+  if (Array.isArray(m.fields) && m.fields.length) parts.push(`(${(m.fields as string[]).join(", ").replace(/_/g, " ")})`);
+  return parts.length ? parts.join(" · ") : null;
+}
 
 /** Team tab: everyone sees the directory; team.manage also manages members. */
 export default function TeamPage() {
@@ -279,9 +324,7 @@ export default function TeamPage() {
                 <span className="text-gray-800 dark:text-gray-200">
                   <span className="font-medium">{a.actor_name}</span>{" "}
                   {ACTION_LABEL[a.action] ?? a.action}
-                  {a.action === "application.status" && a.meta?.to ? (
-                    <span className="text-gray-500"> → {String(a.meta.to).replace(/_/g, " ")}</span>
-                  ) : null}
+                  {activityDetail(a) ? <span className="text-gray-500"> {activityDetail(a)}</span> : null}
                 </span>
                 <span className="text-xs text-gray-500">{a.created_at ? new Date(a.created_at + "Z").toLocaleString() : ""}</span>
               </div>

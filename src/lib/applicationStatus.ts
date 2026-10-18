@@ -52,6 +52,28 @@ export const STATUS_PERMISSION: Record<string, string> = {
   withdrawn: "applicants.decide",
 };
 
+const RECOMMEND_ACTIONS: Record<string, string> = {
+  shortlisted: "Shortlist",
+  interview_scheduled: "Interview",
+  offered: "Offer",
+  rejected: "Reject",
+};
+
+/**
+ * "Recommended: Reject · Sam" (+N when more teammates recommended), or null
+ * when there is none or the application already has that status.
+ */
+export function recommendationLabel(
+  rec: { status: string; author_name?: string | null; count?: number } | null | undefined,
+  currentStatus?: string | null,
+): string | null {
+  if (!rec || rec.status === currentStatus) return null;
+  const action = RECOMMEND_ACTIONS[rec.status] ?? applicationStatusLabel(rec.status);
+  const who = rec.author_name?.trim();
+  const more = (rec.count ?? 1) > 1 ? ` +${(rec.count ?? 1) - 1}` : "";
+  return `Recommended: ${action}${who ? ` · ${who}` : ""}${more}`;
+}
+
 export function applicationStatusLabel(status?: string | null): string {
   const key = (status || "").toLowerCase();
   return LABELS[key] ?? key.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());

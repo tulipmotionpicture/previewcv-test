@@ -11,6 +11,7 @@ import {
   RECRUITER_STATUS_OPTIONS,
   STATUS_PERMISSION,
   applicationStatusLabel,
+  recommendationLabel,
 } from "@/lib/applicationStatus";
 import {
   Copy,
@@ -32,6 +33,8 @@ import {
   Award,
   ChevronLeft,
   ChevronRight,
+  ThumbsUp,
+  ThumbsDown,
 } from "lucide-react";
 import { apiDate } from "@/lib/postedDate";
 
@@ -827,6 +830,8 @@ export default function ATSApplications({
                   const email =
                     app.applicant?.email || app.candidate_email || "";
                   const breakdown = app.score_breakdown;
+                  const recLabel = recommendationLabel(app.team_recommendation, app.status);
+                  const recReject = app.team_recommendation?.status === "rejected";
 
                   return (
                     <div key={app.id}>
@@ -892,6 +897,23 @@ export default function ATSApplications({
                               </span>
                             )}
                           </div>
+                          {recLabel && (
+                            <span
+                              title="A teammate without final say recommended this decision"
+                              className={`inline-flex items-center gap-1 mt-1.5 max-w-full px-2 py-0.5 rounded-full border text-[10px] font-semibold ${
+                                recReject
+                                  ? "bg-red-50 text-red-700 border-red-200 dark:bg-red-900/20 dark:text-red-300 dark:border-red-800"
+                                  : "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-900/20 dark:text-emerald-300 dark:border-emerald-800"
+                              }`}
+                            >
+                              {recReject ? (
+                                <ThumbsDown className="w-3 h-3 flex-shrink-0" />
+                              ) : (
+                                <ThumbsUp className="w-3 h-3 flex-shrink-0" />
+                              )}
+                              <span className="truncate">{recLabel}</span>
+                            </span>
+                          )}
                         </div>
 
                         {/* Match summary */}

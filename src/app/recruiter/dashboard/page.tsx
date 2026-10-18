@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, Suspense } from "react";
+import { useState, useEffect, useCallback, useRef, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { api } from "@/lib/api";
 import {
@@ -36,6 +36,7 @@ import {
 } from "@/components/recruiter";
 import JobsTable from "@/components/recruiter/JobsTable";
 import TeamPage from "@/components/recruiter/TeamPage";
+import { teamApi } from "@/lib/teamApi";
 import { TAB_PERMISSION } from "@/components/recruiter/RecruiterSidebar";
 import type { ApplicationsMeta } from "@/components/recruiter/ATSApplications";
 import type {
@@ -85,6 +86,9 @@ function RecruiterDashboardInner() {
     loading: authLoading,
     can,
     teamsEnabled,
+    actor,
+    isTeamMember,
+    signInWithTokens,
   } = useRecruiterAuth();
 
   const toast = useToast();
@@ -626,6 +630,41 @@ function RecruiterDashboardInner() {
       setLoadingApplicationDetail(false);
     }
   };
+
+  // Notification links: ?tab=ats&job=12&application=345[&company=7]. A team
+  // member working for several companies switches to the link's company
+  // first (the same link then reloads there), then the applicant opens with
+  // its team notes.
+  const deepLinkHandled = useRef<string | null>(null);
+  useEffect(() => {
+    if (!recruiter || !searchParams) return;
+    const job = Number(searchParams.get("job")) || null;
+    const applicationId = Number(searchParams.get("application")) || null;
+    const company = Number(searchParams.get("company")) || null;
+    const key = searchParams.toString();
+    if ((!job && !applicationId && !company) || deepLinkHandled.current === key) return;
+    deepLinkHandled.current = key;
+    (async () => {
+      if (company && isTeamMember && actor?.company_id && actor.company_id !== company) {
+        const memberships = await teamApi.myCompanies().catch(() => []);
+        const target = memberships.find((m) => m.company_id === company && m.status === "active");
+        if (!target) {
+          toast.error("You no longer have access to that company.");
+          return;
+        }
+        try {
+          const s = await teamApi.switchCompany(target.member_id);
+          await signInWithTokens(s.access_token, s.refresh_token);
+          window.location.replace(window.location.pathname + window.location.search);
+        } catch {
+          toast.error("Couldn't switch to that company.");
+        }
+        return;
+      }
+      if (job) setSelectedJobId(job);
+      if (applicationId) handleViewApplicationDetail({ id: applicationId } as Application);
+    })();
+  }, [recruiter, searchParams, actor, isTeamMember]);
 
   // Proactively block job creation when the plan's active-job slots are exhausted.
   // Only blocks when we have a loaded subscription that says so — otherwise let the form

@@ -215,7 +215,11 @@ export default function App({ jobs, events }: RecruiterProfileContentProps) {
     type: "Webinar",
   });
 
-  const { updateProfile } = useRecruiterAuth();
+  const { updateProfile, isTeamMember } = useRecruiterAuth();
+  // Changing these restarts verification, so only the owner can (backend enforces).
+  const ownerOnlyHint = isTeamMember ? (
+    <p className="text-xs text-slate-500 dark:text-slate-400">Only the account owner can change this.</p>
+  ) : null;
 
   // The profile is editable again (it was previously locked once KYC was approved).
   // Saving edits triggers backend re-verification (is_verified -> false) before the recruiter
@@ -477,9 +481,10 @@ export default function App({ jobs, events }: RecruiterProfileContentProps) {
                                   displayName: e.target.value,
                                 })
                               }
-                              readOnly={isProfileLocked}
+                              readOnly={isProfileLocked || isTeamMember}
                               className="w-full bg-slate-50 dark:bg-[#1a1a1a] border border-slate-200 dark:border-gray-600 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all dark:text-white"
                             />
+                            {ownerOnlyHint}
                           </div>
                           <div className="space-y-2">
                             <label className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
@@ -560,7 +565,7 @@ export default function App({ jobs, events }: RecruiterProfileContentProps) {
                             <input
                               type="text"
                               value={profile.companyName}
-                              readOnly={isProfileLocked}
+                              readOnly={isProfileLocked || isTeamMember}
                               onChange={(e) =>
                                 setProfile({
                                   ...profile,
@@ -570,6 +575,7 @@ export default function App({ jobs, events }: RecruiterProfileContentProps) {
                               }
                               className="w-full bg-slate-50 dark:bg-[#1a1a1a] border border-slate-200 dark:border-gray-600 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all dark:text-white"
                             />
+                            {ownerOnlyHint}
                           </div>
                           <div className="space-y-2">
                             <label className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
