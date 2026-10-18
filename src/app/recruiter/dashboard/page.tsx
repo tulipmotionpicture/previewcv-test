@@ -84,6 +84,7 @@ function RecruiterDashboardInner() {
     isAuthenticated,
     loading: authLoading,
     can,
+    teamsEnabled,
   } = useRecruiterAuth();
 
   const toast = useToast();
@@ -92,10 +93,11 @@ function RecruiterDashboardInner() {
   // Team members only get the tabs their permissions allow.
   const tabAllowed = useCallback(
     (tab: DashboardTab) => {
+      if (tab === "team" && !teamsEnabled) return false;
       const perm = TAB_PERMISSION[tab];
       return !perm || can(perm);
     },
-    [can],
+    [can, teamsEnabled],
   );
   useEffect(() => {
     if (!recruiter) return;

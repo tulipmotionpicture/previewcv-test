@@ -22,7 +22,7 @@ interface Props {
  * which notifies the people who can decide.
  */
 export default function TeamNotesPanel({ targetType, targetId }: Props) {
-  const { can, actor } = useRecruiterAuth();
+  const { can, actor, teamsEnabled } = useRecruiterAuth();
   const { showToast } = useToast();
   const [notes, setNotes] = useState<TeamNote[] | null>(null);
   const [people, setPeople] = useState<TeamPerson[]>([]);
@@ -33,7 +33,7 @@ export default function TeamNotesPanel({ targetType, targetId }: Props) {
   const [saving, setSaving] = useState(false);
   const [editing, setEditing] = useState<{ id: number; body: string } | null>(null);
 
-  const canView = can("notes.view");
+  const canView = teamsEnabled && can("notes.view");
   const canWrite = can("notes.write");
   const isApplication = targetType === "application";
 

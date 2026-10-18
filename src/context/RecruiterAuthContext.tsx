@@ -20,6 +20,8 @@ interface RecruiterAuthContextType {
   actor: RecruiterActor | null;
   /** True for team members (not the account owner). */
   isTeamMember: boolean;
+  /** Team features (Team tab, notes) are on for this backend. */
+  teamsEnabled: boolean;
   /** Permission check; the owner (or an older backend) can do everything. */
   can: (permission: string) => boolean;
   /** Sign in with tokens obtained elsewhere (team invite acceptance). */
@@ -208,6 +210,7 @@ export function RecruiterAuthProvider({ children }: { children: ReactNode }) {
 
   const actor = recruiter?.actor ?? null;
   const isTeamMember = actor?.type === "member";
+  const teamsEnabled = !!actor?.teams_enabled;
   // Stable while the actor is the same, so it can sit in hook dependency lists.
   const can = useCallback(
     (permission: string) =>
@@ -221,6 +224,7 @@ export function RecruiterAuthProvider({ children }: { children: ReactNode }) {
         recruiter,
         actor,
         isTeamMember,
+        teamsEnabled,
         can,
         signInWithTokens,
         loading,

@@ -24,6 +24,8 @@ export interface RecruiterActor {
   /** Members: the person (one login across companies) and the company acted for. */
   person_id?: number;
   company_id?: number;
+  /** Backend has team accounts switched on (RECRUITER_TEAMS_ENABLED). */
+  teams_enabled?: boolean;
 }
 
 /** A company the signed-in team member works for (company switcher). */

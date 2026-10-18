@@ -69,8 +69,9 @@ export default function RecruiterSidebar({
   kycStatus,
 }: RecruiterSidebarProps) {
   const isKycApproved = kycStatus?.kyc_status === "approved";
-  const { actor, isTeamMember, can } = useRecruiterAuth();
+  const { actor, isTeamMember, teamsEnabled, can } = useRecruiterAuth();
   const allowed = (key: DashboardTab) => {
+    if (key === "team" && !teamsEnabled) return false;
     const perm = TAB_PERMISSION[key];
     return !perm || can(perm);
   };
