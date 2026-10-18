@@ -4,10 +4,12 @@ import { useState, useMemo, useEffect } from "react";
 import { Job, Application } from "@/types/api";
 import { api } from "@/lib/api";
 import { useToast } from "@/context/ToastContext";
+import { useRecruiterAuth } from "@/context/RecruiterAuthContext";
 import { ConfirmDialog, SearchSuggestInput } from "@/components/ui";
 import {
   CANDIDATE_NOTIFIED_STATUSES,
   RECRUITER_STATUS_OPTIONS,
+  STATUS_PERMISSION,
   applicationStatusLabel,
 } from "@/lib/applicationStatus";
 import {
@@ -315,6 +317,7 @@ export default function ATSApplications({
   onUpdateStatus,
   onUpgrade,
 }: ATSApplicationsProps) {
+  const { can } = useRecruiterAuth();
   void onJobSelect;
   const { showToast } = useToast();
   const [searchTerm, setSearchTerm] = useState("");
@@ -673,7 +676,7 @@ export default function ATSApplications({
               </p>
             </div>
           </div>
-          {onUpgrade && (
+          {onUpgrade && can("billing.manage") && (
             <button
               type="button"
               onClick={onUpgrade}
@@ -950,7 +953,11 @@ export default function ATSApplications({
                                   value={status}
                                   // Applied is only the starting state: once the
                                   // application has moved on it can't go back.
-                                  disabled={status === "applied" && app.status !== "applied"}
+                                  disabled={
+                                    (status === "applied" && app.status !== "applied") ||
+                                    (status !== "applied" &&
+                                      !can(STATUS_PERMISSION[status] ?? "applicants.decide"))
+                                  }
                                   className="text-gray-900 bg-white disabled:text-gray-400"
                                 >
                                   {applicationStatusLabel(status)}

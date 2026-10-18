@@ -35,6 +35,8 @@ import {
   BucketsPage,
 } from "@/components/recruiter";
 import JobsTable from "@/components/recruiter/JobsTable";
+import TeamPage from "@/components/recruiter/TeamPage";
+import { TAB_PERMISSION } from "@/components/recruiter/RecruiterSidebar";
 import type { ApplicationsMeta } from "@/components/recruiter/ATSApplications";
 import type {
   DashboardTab,
@@ -81,10 +83,28 @@ function RecruiterDashboardInner() {
     logout,
     isAuthenticated,
     loading: authLoading,
+    can,
   } = useRecruiterAuth();
 
   const toast = useToast();
   const [activeTab, setActiveTab] = useState<DashboardTab>("stats");
+
+  // Team members only get the tabs their permissions allow.
+  const tabAllowed = useCallback(
+    (tab: DashboardTab) => {
+      const perm = TAB_PERMISSION[tab];
+      return !perm || can(perm);
+    },
+    [can],
+  );
+  useEffect(() => {
+    if (!recruiter) return;
+    if ((activeTab as string) === "editJob") return;
+    if (!tabAllowed(activeTab)) {
+      const first = (["stats", "jobs", "cvSearch", "buckets"] as DashboardTab[]).find(tabAllowed);
+      setActiveTab(first ?? "team");
+    }
+  }, [recruiter, activeTab, tabAllowed]);
   const [kycStatus, setKycStatus] = useState<KycStatus | null>(null);
   const [jobSubscription, setJobSubscription] =
     useState<SubscriptionDashboardType | null>(null);
@@ -143,13 +163,14 @@ function RecruiterDashboardInner() {
   // Job-plan usage (slots remaining) — used to proactively gate job creation. Best-effort:
   // if this fails, the form still works and the backend 403 is the backstop.
   const refreshJobSubscription = useCallback(async () => {
+    if (!can("billing.view")) return;
     try {
       const data = await api.getSubscriptionDashboard();
       setJobSubscription(data);
     } catch (error) {
       console.debug("Failed to load job subscription:", error);
     }
-  }, []);
+  }, [can]);
 
   useEffect(() => {
     const fetchKycStatus = async () => {
@@ -159,7 +180,7 @@ function RecruiterDashboardInner() {
 
         // If KYC is not approved, redirect to KYC tab
         if (status.kyc_status !== "approved") {
-          setActiveTab("kyc");
+          setActiveTab(tabAllowed("kyc") ? "kyc" : "team");
           return;
         }
 
@@ -181,8 +202,13 @@ function RecruiterDashboardInner() {
           "cvSearch",
           "buckets",
           "createJob",
+          "team",
         ];
-        if (requested && (allowed as string[]).includes(requested)) {
+        if (
+          requested &&
+          (allowed as string[]).includes(requested) &&
+          tabAllowed(requested as DashboardTab)
+        ) {
           setActiveTab(requested as DashboardTab);
         }
       } catch (error) {
@@ -193,7 +219,7 @@ function RecruiterDashboardInner() {
     if (isAuthenticated) {
       fetchKycStatus();
     }
-  }, [isAuthenticated, searchParams, refreshJobSubscription]);
+  }, [isAuthenticated, searchParams, refreshJobSubscription, tabAllowed]);
 
   useEffect(() => {
     if (activeTab === "ats" || selectedJobId) {
@@ -272,6 +298,8 @@ function RecruiterDashboardInner() {
   );
 
   const fetchDashboardStats = useCallback(async () => {
+    // Team members without analytics access don't get company stats.
+    if (!can("analytics.view")) return;
     setLoadingStats(true);
     try {
       const analytics = await api.getRecruiterDashboardAnalytics();
@@ -283,7 +311,7 @@ function RecruiterDashboardInner() {
     } finally {
       setLoadingStats(false);
     }
-  }, []);
+  }, [can]);
 
   const fetchRecentApplications = useCallback(async () => {
     if (jobs.length === 0) return;
@@ -300,9 +328,14 @@ function RecruiterDashboardInner() {
 
   useEffect(() => {
     fetchJobs(1, jobFilters);
-    fetchDashboardStats();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // Only run on mount
+
+  // Stats wait for the signed-in actor: before it loads, can() can't tell a
+  // team member without analytics access from the owner.
+  const actorKey = recruiter ? `${recruiter.id}:${recruiter.actor?.member_id ?? "owner"}` : null;
+  useEffect(() => {
+    if (actorKey) fetchDashboardStats();
+  }, [actorKey, fetchDashboardStats]);
 
   useEffect(() => {
     if (jobs.length > 0) {
@@ -900,13 +933,15 @@ function RecruiterDashboardInner() {
                 >
                   Manage jobs
                 </button>
-                <button
-                  type="button"
-                  onClick={() => setActiveTab("pricing")}
-                  className="rounded-md bg-amber-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-amber-700"
-                >
-                  Upgrade plan
-                </button>
+                {can("billing.manage") && (
+                  <button
+                    type="button"
+                    onClick={() => setActiveTab("pricing")}
+                    className="rounded-md bg-amber-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-amber-700"
+                  >
+                    Upgrade plan
+                  </button>
+                )}
               </div>
             </div>
           ) : (
@@ -929,6 +964,7 @@ function RecruiterDashboardInner() {
           />
         )}
         {activeTab === "pricing" && <PricingPlans />}
+        {activeTab === "team" && <TeamPage />}
       </main>
 
       {/* Application Detail Modal */}

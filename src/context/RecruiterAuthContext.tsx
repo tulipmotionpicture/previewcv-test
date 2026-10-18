@@ -5,15 +5,25 @@ import {
   useContext,
   useState,
   useEffect,
+  useCallback,
   ReactNode,
 } from "react";
 import { useRouter } from "next/navigation";
 import { api } from "@/lib/api";
 import { unregisterPushDevice } from "@/lib/push/push";
 import { Recruiter } from "@/types/api";
+import type { RecruiterActor } from "@/types/team";
 
 interface RecruiterAuthContextType {
   recruiter: Recruiter | null;
+  /** Who is signed in. Null before the backend supports teams (= owner). */
+  actor: RecruiterActor | null;
+  /** True for team members (not the account owner). */
+  isTeamMember: boolean;
+  /** Permission check; the owner (or an older backend) can do everything. */
+  can: (permission: string) => boolean;
+  /** Sign in with tokens obtained elsewhere (team invite acceptance). */
+  signInWithTokens: (accessToken: string, refreshToken: string) => Promise<void>;
   loading: boolean;
   login: (email: string, password: string) => Promise<void>;
   register: (data: unknown) => Promise<void>;
@@ -181,14 +191,38 @@ export function RecruiterAuthProvider({ children }: { children: ReactNode }) {
   const updateProfile = async (data: Partial<Recruiter>) => {
     const response = await api.updateRecruiterProfile(data);
     if (response && response.id) {
-      setRecruiter(response);
+      // PUT /me doesn't return the actor; keep the one from GET /me.
+      setRecruiter((prev) => ({ ...response, actor: response.actor ?? prev?.actor }));
     }
   };
+
+  const signInWithTokens = async (accessToken: string, refreshToken: string) => {
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("access_token");
+      localStorage.removeItem("refresh_token");
+      localStorage.setItem("recruiter_access_token", accessToken);
+      localStorage.setItem("recruiter_refresh_token", refreshToken);
+    }
+    await checkAuth();
+  };
+
+  const actor = recruiter?.actor ?? null;
+  const isTeamMember = actor?.type === "member";
+  // Stable while the actor is the same, so it can sit in hook dependency lists.
+  const can = useCallback(
+    (permission: string) =>
+      !actor || actor.type === "owner" || actor.permissions.includes(permission),
+    [actor],
+  );
 
   return (
     <RecruiterAuthContext.Provider
       value={{
         recruiter,
+        actor,
+        isTeamMember,
+        can,
+        signInWithTokens,
         loading,
         login,
         register,

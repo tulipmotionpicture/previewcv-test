@@ -1,5 +1,6 @@
 "use client";
 
+import { useRecruiterAuth } from "@/context/RecruiterAuthContext";
 import { useState, useEffect, useMemo } from "react";
 import { Job } from "@/types/api";
 import { Plus, ChevronDown } from "lucide-react";
@@ -137,6 +138,7 @@ export default function JobManagement({
   onViewChange,
   onCreateNewJob,
 }: JobManagementProps) {
+  const { can } = useRecruiterAuth();
   const [internalActiveTab, setInternalActiveTab] =
     useState<JobManagementTab>("manage");
 
@@ -262,6 +264,7 @@ export default function JobManagement({
       {/* Header */}
       <div className="flex items-end justify-between mb-2">
         <div></div>
+        {can("jobs.create") && (
         <button
           onClick={() => onCreateNewJob ? onCreateNewJob() : handleTabChange("create")}
           className="flex items-center gap-2 px-3.5 py-2.5 bg-primary-blue hover:bg-primary-blue-hover text-white text-sm rounded-lg font-medium transition-colors shadow-sm"
@@ -269,6 +272,7 @@ export default function JobManagement({
           <Plus className="w-4 h-4" />
           Create New Job
         </button>
+        )}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">

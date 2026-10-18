@@ -26,6 +26,8 @@ interface DashboardSidebarProps<T extends string> {
     userAvatarUrl?: string;
     /** Enable a mobile hamburger + slide-in drawer (off by default). */
     mobileDrawer?: boolean;
+    /** Extra content under the user's name (e.g. a company switcher). */
+    userExtra?: React.ReactNode;
 }
 
 export default function DashboardSidebar<T extends string>({
@@ -40,6 +42,7 @@ export default function DashboardSidebar<T extends string>({
     userSubtitle = "Candidate",
     userAvatarUrl,
     mobileDrawer = false,
+    userExtra,
 }: DashboardSidebarProps<T>) {
     const isDark = variant === "dark";
     const [open, setOpen] = useState(false);
@@ -192,6 +195,7 @@ export default function DashboardSidebar<T extends string>({
 
                             </div>
                         </div>
+                        {userExtra}
 
                         <div className="h-px bg-[#E1E8F1] dark:bg-gray-700 w-full" />
 

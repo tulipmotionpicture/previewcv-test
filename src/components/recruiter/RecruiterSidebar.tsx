@@ -12,9 +12,12 @@ import {
   Search,
   FolderOpen,
   PlusCircle,
+  Users,
 } from "lucide-react";
+import CompanySwitcher from "@/components/recruiter/CompanySwitcher";
 import DashboardSidebar from "@/components/shared/DashboardSidebar";
 import { Recruiter, KycStatus } from "@/types/api";
+import { useRecruiterAuth } from "@/context/RecruiterAuthContext";
 
 export type DashboardTab =
   | "stats"
@@ -28,7 +31,27 @@ export type DashboardTab =
   | "pricing"
   | "cvSearch"
   | "buckets"
-  | "createJob";
+  | "createJob"
+  | "team";
+
+/**
+ * Permission a team member needs to see each tab (the owner sees everything).
+ * Tabs not listed are open to every member.
+ */
+export const TAB_PERMISSION: Partial<Record<DashboardTab, string>> = {
+  stats: "analytics.view",
+  ats: "applicants.view",
+  jobs: "jobs.view",
+  createJob: "jobs.create",
+  cvSearch: "cv.search",
+  buckets: "buckets.view",
+  profile: "company.edit",
+  gallery: "company.edit",
+  galleryEvents: "company.edit",
+  kyc: "kyc.manage",
+  pricing: "billing.manage",
+  subscriptions: "billing.view",
+};
 
 interface RecruiterSidebarProps {
   recruiter: Recruiter | null;
@@ -46,6 +69,11 @@ export default function RecruiterSidebar({
   kycStatus,
 }: RecruiterSidebarProps) {
   const isKycApproved = kycStatus?.kyc_status === "approved";
+  const { actor, isTeamMember, can } = useRecruiterAuth();
+  const allowed = (key: DashboardTab) => {
+    const perm = TAB_PERMISSION[key];
+    return !perm || can(perm);
+  };
 
   const primaryNavItems: {
     key: DashboardTab;
@@ -110,16 +138,25 @@ export default function RecruiterSidebar({
         label: "Subscriptions",
         icon: <CreditCard className="w-5 h-5" />,
       },
+      {
+        key: "team",
+        label: "Team",
+        icon: <Users className="w-5 h-5" />,
+      },
     ];
 
   // Filter nav items to show only KYC and Profile if KYC is not approved
-  const filteredPrimary = isKycApproved
+  const filteredPrimary = (isKycApproved
     ? primaryNavItems
-    : primaryNavItems.filter((item) => item.key === "profile");
+    : primaryNavItems.filter((item) => item.key === "profile")
+  ).filter((item) => allowed(item.key));
 
-  const filteredSecondary = isKycApproved
+  const filteredSecondary = (isKycApproved
     ? secondaryNavItems
-    : secondaryNavItems.filter((item) => item.key === "kyc");
+    : secondaryNavItems.filter((item) => item.key === "kyc" || item.key === "team")
+  ).filter((item) => allowed(item.key));
+
+  const companyName = recruiter?.company_name || recruiter?.full_name || "Company";
 
   return (
     <DashboardSidebar
@@ -129,10 +166,11 @@ export default function RecruiterSidebar({
       onTabChange={onTabChange}
       onLogout={onLogout}
       variant="dark"
-      userName={recruiter?.company_name || recruiter?.full_name || "Company"}
-      userSubtitle={recruiter?.email}
+      userName={isTeamMember && actor ? actor.name : companyName}
+      userSubtitle={isTeamMember && actor ? `${actor.role_name} · ${companyName}` : recruiter?.email}
       userAvatarUrl={recruiter?.company_logo_url}
       showChevron={false}
+      userExtra={<CompanySwitcher />}
     />
   );
 }

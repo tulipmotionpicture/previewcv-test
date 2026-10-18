@@ -36,6 +36,22 @@ export const CANDIDATE_NOTIFIED_STATUSES: ReadonlySet<string> = new Set([
   "rejected",
 ]);
 
+/**
+ * Permission a team member needs to move an application to each status
+ * (mirrors the backend's STATUS_PERMISSIONS). Final decisions are separate
+ * from screening; members without them can add a recommendation note.
+ */
+export const STATUS_PERMISSION: Record<string, string> = {
+  under_review: "applicants.screen",
+  shortlisted: "applicants.screen",
+  interview_scheduled: "applicants.interview",
+  interviewed: "applicants.interview",
+  offered: "applicants.decide",
+  rejected: "applicants.decide",
+  accepted: "applicants.decide",
+  withdrawn: "applicants.decide",
+};
+
 export function applicationStatusLabel(status?: string | null): string {
   const key = (status || "").toLowerCase();
   return LABELS[key] ?? key.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());

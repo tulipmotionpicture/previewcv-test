@@ -37,6 +37,8 @@ export interface Recruiter {
   years_experience?: number;
   created_at?: string;
   last_login?: string;
+  // Who is signed in: the owner or a team member (recruiter teams).
+  actor?: import("./team").RecruiterActor;
 }
 
 export interface PdfResume {

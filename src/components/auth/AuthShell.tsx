@@ -97,11 +97,14 @@ export default function AuthShell({
   heading,
   subheading,
   children,
+  brandTitle = ["Reset Your", "Password"],
 }: {
   variant: Variant;
   heading: string;
   subheading?: string;
   children: React.ReactNode;
+  /** Two-line headline on the brand panel (defaults to the reset-password one). */
+  brandTitle?: [string, string];
 }) {
   const brand = BRANDING[variant];
 
@@ -129,9 +132,9 @@ export default function AuthShell({
               />
             </Link>
             <h1 className="text-4xl lg:text-5xl font-black text-gray-900 dark:text-gray-100 mb-6 leading-tight">
-              Reset Your
+              {brandTitle[0]}
               <br />
-              Password
+              {brandTitle[1]}
             </h1>
             <p className="text-lg text-gray-700 dark:text-gray-300 mb-12 max-w-md">
               {brand.blurb}

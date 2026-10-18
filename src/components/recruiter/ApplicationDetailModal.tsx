@@ -4,6 +4,8 @@ import { useState } from "react";
 import { ApplicationDetailResponse } from "@/types/api";
 import { api } from "@/lib/api";
 import { useToast } from "@/context/ToastContext";
+import { useRecruiterAuth } from "@/context/RecruiterAuthContext";
+import TeamNotesPanel from "@/components/recruiter/TeamNotesPanel";
 import {
   Copy,
   Eye,
@@ -32,6 +34,7 @@ export default function ApplicationDetailModal({
   onMessageSent,
 }: ApplicationDetailModalProps) {
   const { showToast } = useToast();
+  const { can } = useRecruiterAuth();
   const [viewLoading, setViewLoading] = useState(false);
   const [downloadLoading, setDownloadLoading] = useState(false);
   const [message, setMessage] = useState("");
@@ -385,6 +388,7 @@ export default function ApplicationDetailModal({
             </div>
 
             {/* Message Candidate Section */}
+            {can("applicants.message") && (
             <div>
               <div className="flex items-center justify-between mb-4">
                 <h4 className="text-lg font-medium text-gray-900 dark:text-gray-100">
@@ -450,6 +454,12 @@ export default function ApplicationDetailModal({
                 </div>
               )}
             </div>
+            )}
+
+            {/* Internal team notes (recruiter teams) */}
+            {applicationDetail.application?.id && (
+              <TeamNotesPanel targetType="application" targetId={applicationDetail.application.id} />
+            )}
 
             {/* Resume Section */}
           </>
