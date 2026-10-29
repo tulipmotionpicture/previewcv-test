@@ -7,6 +7,11 @@ import Image from "next/image";
 import config from "@/config";
 import { useAuth } from "@/context/AuthContext";
 import { api } from "@/lib/api";
+import {
+  AppleSignInCancelled,
+  prepareAppleSignIn,
+} from "@/lib/appleSignIn";
+import { consumePostLoginRedirect } from "@/lib/safeRedirect";
 import { Honeypot } from "@/lib/anti-bot/honeypot";
 import { useFormLoadedAt } from "@/lib/anti-bot/useFormLoadedAt";
 import { useRecaptcha } from "@/lib/anti-bot/useRecaptcha";
@@ -30,6 +35,7 @@ export default function CandidateSignup() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError] = useState("");
+  const [appleLoading, setAppleLoading] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
   // Anti-bot: honeypot value, form-mount timestamp, reCAPTCHA executor.
@@ -43,6 +49,30 @@ export default function CandidateSignup() {
     }
   }, [isAuthenticated, authLoading, router]);
 
+
+  // Load Apple JS early so the popup can open straight from the click.
+  useEffect(() => {
+    prepareAppleSignIn().catch(() => {});
+  }, []);
+
+  const handleAppleLogin = async () => {
+    setError("");
+    setAppleLoading(true);
+    try {
+      await api.candidateAppleLogin();
+      // Full load so the auth context picks up the new session (as /auth/callback).
+      window.location.href = consumePostLoginRedirect();
+    } catch (err: unknown) {
+      if (!(err instanceof AppleSignInCancelled)) {
+        setError(
+          err instanceof Error && err.message
+            ? err.message
+            : "Apple sign-in failed. Please try again.",
+        );
+      }
+      setAppleLoading(false);
+    }
+  };
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -335,7 +365,23 @@ export default function CandidateSignup() {
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <button
+                type="button"
+                onClick={handleAppleLogin}
+                disabled={appleLoading}
+                className="flex items-center justify-center px-4 py-2.5 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-900 text-sm font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors disabled:opacity-60"
+              >
+                <svg
+                  className="h-5 w-5 mr-2 text-black dark:text-white"
+                  fill="currentColor"
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
+                >
+                  <path d="M16.365 1.43c0 1.14-.493 2.27-1.177 3.08-.744.9-1.99 1.57-2.987 1.57-.12 0-.23-.02-.3-.03-.01-.06-.04-.22-.04-.39 0-1.15.572-2.27 1.206-2.98.804-.94 2.142-1.64 3.248-1.68.03.13.05.28.05.43zm4.565 15.71c-.03.07-.463 1.58-1.518 3.12-.945 1.34-1.94 2.71-3.43 2.71-1.517 0-1.9-.88-3.63-.88-1.698 0-2.302.91-3.67.91-1.377 0-2.332-1.26-3.428-2.8-1.287-1.82-2.323-4.63-2.323-7.28 0-4.28 2.797-6.55 5.552-6.55 1.448 0 2.675.95 3.6.95.865 0 2.222-1.01 3.902-1.01.613 0 2.886.06 4.374 2.19-.13.09-2.383 1.37-2.383 4.19 0 3.26 2.854 4.42 2.955 4.45z" />
+                </svg>
+                Apple
+              </button>
               <button
                 type="button"
                 onClick={() => api.candidateSocialLogin("google")}

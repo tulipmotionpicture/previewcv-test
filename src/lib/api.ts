@@ -44,6 +44,7 @@ import {
   NotificationAccount,
   NotificationListResponse,
 } from "@/types/api";
+import { signInWithApple } from "./appleSignIn";
 import {
   ReviewedResumeMetadata,
   BlogPostsResponse,
@@ -372,6 +373,33 @@ export class ApiClient {
     } catch (error) {
       console.error(`Failed to initiate ${provider} login:`, error);
       throw error;
+    }
+  }
+
+  /**
+   * Sign in with Apple (popup) for candidates: verifies Apple's identity token at
+   * /auth/oauth/apple and stores the session the way /auth/callback does. The
+   * popup opens before the first await so the browser allows it. Throws
+   * AppleSignInCancelled if the user closes it.
+   */
+  async candidateAppleLogin(): Promise<void> {
+    const credential = await signInWithApple();
+    const response = await this.request<AuthResponse>("/api/v1/auth/oauth/apple", {
+      method: "POST",
+      body: JSON.stringify({
+        identity_token: credential.identityToken,
+        nonce: credential.rawNonce,
+        given_name: credential.givenName,
+        family_name: credential.familyName,
+      }),
+    });
+
+    // Clear any existing recruiter tokens to prevent role confusion
+    localStorage.removeItem("recruiter_access_token");
+    localStorage.removeItem("recruiter_refresh_token");
+    localStorage.setItem("access_token", response.access_token);
+    if (response.refresh_token) {
+      localStorage.setItem("refresh_token", response.refresh_token);
     }
   }
 
