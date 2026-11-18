@@ -5,6 +5,7 @@ import { Camera, Eye, EyeOff, MapPin, Briefcase, Phone, Mail, User, Info, Lock }
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/context/ToastContext";
 import { api } from "@/lib/api";
+import CandidateJobAlertsSetting from "./CandidateJobAlertsSetting";
 
 export default function CandidateProfile() {
     const { user, updateProfile } = useAuth();
@@ -177,7 +178,7 @@ export default function CandidateProfile() {
             {/* Header Text */}
             <div className="mb-8">
                 <h1 className="text-2xl font-bold text-gray-900">My Profile</h1>
-                <p className="text-slate-500 text-sm mt-1">Manage your personal information and security settings.</p>
+                <p className="text-slate-500 text-sm mt-1">Manage your personal information, security and notification settings.</p>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-[320px_1fr] gap-4 lg:gap-8">
@@ -297,6 +298,9 @@ export default function CandidateProfile() {
                             </div>
                         </div>
                     </div>
+
+                    {/* Notifications Card */}
+                    <CandidateJobAlertsSetting />
 
                 </div>
             </div>

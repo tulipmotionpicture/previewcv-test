@@ -51,34 +51,25 @@ export default function CandidateJobAlertsSetting() {
     const disabled = enabled === null || saving;
 
     return (
-        <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-6">
-            <div className="flex items-center gap-3 mb-6">
-                <div className="p-2 bg-green-100 dark:bg-green-900/30 rounded-lg">
-                    <Bell className="w-5 h-5 text-green-600 dark:text-green-400" />
-                </div>
-                <div>
-                    <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">
-                        Notifications
-                    </h2>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">
-                        Choose what we notify you about
-                    </p>
-                </div>
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+            <div className="px-6 py-4 border-b border-gray-100 flex items-center gap-2 bg-gray-50/50">
+                <Bell className="w-5 h-5 text-emerald-500" />
+                <h3 className="text-base font-bold text-gray-900">Notifications</h3>
             </div>
 
-            <div className="flex items-center justify-between gap-4">
+            <div className="p-6 flex items-center justify-between gap-4">
                 <div className="min-w-0">
-                    <p className="font-medium text-gray-900 dark:text-gray-100">New job alerts</p>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                    <p className="text-sm font-semibold text-gray-900">New job alerts</p>
+                    <p className="text-sm text-slate-500 mt-0.5">
                         Get a notification when a new job that suits you is posted
                     </p>
                     {loadFailed ? (
                         <p className="text-sm mt-1">
-                            <span className="text-red-600 dark:text-red-400">Couldn&apos;t load this setting. </span>
+                            <span className="text-red-600">Couldn&apos;t load this setting. </span>
                             <button
                                 type="button"
                                 onClick={load}
-                                className="font-medium text-indigo-600 dark:text-indigo-400 hover:underline"
+                                className="font-medium text-indigo-600 hover:underline"
                             >
                                 Retry
                             </button>
@@ -96,7 +87,7 @@ export default function CandidateJobAlertsSetting() {
                         aria-label="New job alerts"
                         disabled={disabled}
                         onClick={toggle}
-                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${on ? "bg-indigo-600" : "bg-gray-200 dark:bg-gray-700"}`}
+                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${on ? "bg-indigo-600" : "bg-gray-200"}`}
                     >
                         <span
                             className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${on ? "translate-x-6" : "translate-x-1"}`}
