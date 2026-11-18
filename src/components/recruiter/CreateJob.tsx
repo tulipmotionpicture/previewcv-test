@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { ChevronLeft, ChevronRight, Plus, X, Check, Lightbulb } from "lucide-react";
 import { motion } from "framer-motion";
 import { api } from "@/lib/api";
+import { userFacingErrorMessage } from "@/lib/apiErrors";
 import { useToast } from "@/context/ToastContext";
 import { useRecruiterAuth } from "@/context/RecruiterAuthContext";
 import { JobFormState, JOB_FORM_INITIAL } from "@/components/recruiter";
@@ -458,7 +459,7 @@ export default function JobCreationPage({
       setGenPhase("variants");
     } catch (e: any) {
       console.error(e);
-      setGenError(e?.message || "Failed to generate content. Please try again.");
+      setGenError(userFacingErrorMessage(e));
       setGenPhase("error");
     }
   };

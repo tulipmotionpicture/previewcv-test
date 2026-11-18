@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { api } from '@/lib/api';
+import { GENERIC_ERROR_MESSAGE, userFacingErrorMessage } from '@/lib/apiErrors';
 import type {
   UploadResumeResponse,
   TransformedMetadata,
@@ -43,8 +44,7 @@ export function useResumeParser() {
       
       return data;
     } catch (err: any) {
-      const msg = err.message || 'Upload failed';
-      setError(msg);
+      setError(userFacingErrorMessage(err));
       throw err;
     } finally {
       setUploading(false);
@@ -90,7 +90,8 @@ export function useResumeParser() {
           onComplete(response.metadata);
           isStopped = true;
         } else if (response.status === 'failed') {
-          const errorMsg = response.error || 'Parsing failed';
+          // The backend's stored parse error is never shown as-is.
+          const errorMsg = GENERIC_ERROR_MESSAGE;
           onEvent({
             event: 'failed',
             data: { resume_id: resumeId, message: errorMsg }
@@ -118,7 +119,7 @@ export function useResumeParser() {
         }
       } catch (err: any) {
         console.error('Polling error:', err);
-        const errorMsg = err.message || 'Error checking parse status';
+        const errorMsg = userFacingErrorMessage(err);
         onEvent({
           event: 'failed',
           data: { resume_id: resumeId, message: errorMsg }
@@ -150,7 +151,7 @@ export function useResumeParser() {
       const data = await api.transformMetadataForGraphQL(resumeId);
       return data as unknown as TransformedMetadata;
     } catch (err: any) {
-      setError(err.message);
+      setError(userFacingErrorMessage(err));
       throw err;
     } finally {
       setTransforming(false);
@@ -170,7 +171,7 @@ export function useResumeParser() {
       const data = await api.saveReviewedMetadata(resumeId, request as any);
       return data as unknown as SaveReviewedMetadataResponse;
     } catch (err: any) {
-      setError(err.message);
+      setError(userFacingErrorMessage(err));
       throw err;
     } finally {
       setSaving(false);

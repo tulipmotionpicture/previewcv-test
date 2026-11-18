@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { format, isValid, parse } from 'date-fns';
 import { useResumeParser } from '@/hooks/useResumeParser';
+import { userFacingErrorMessage } from '@/lib/apiErrors';
 import {
   Check,
   Briefcase,
@@ -447,7 +448,7 @@ export default function ResumeReview({ resumeId, onSaveComplete, portfolioId, pe
         });
       } catch (err) {
         console.error('Failed to load data:', err);
-        setLoadError(err instanceof Error ? err.message : 'Failed to load resume data');
+        setLoadError(userFacingErrorMessage(err));
       }
     };
 
@@ -618,7 +619,7 @@ export default function ResumeReview({ resumeId, onSaveComplete, portfolioId, pe
         resume_id: resumeId,
         status: "failed",
         metadata: null,
-        error: err.message || "PreviewCV API error: 500",
+        error: userFacingErrorMessage(err),
         parsed_at: null
       });
       setShowLinkedData(true);
