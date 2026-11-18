@@ -697,6 +697,27 @@ export class ApiClient {
     );
   }
 
+  /** Candidate notification choices; `job_alerts` is on unless they turned it off. */
+  async getNotificationPreferences(): Promise<{ job_alerts: boolean }> {
+    const data = await this.request<{ job_alerts?: boolean }>(
+      this.notificationsPath("candidate", "/preferences"),
+      {},
+      true,
+    );
+    return { job_alerts: data?.job_alerts !== false };
+  }
+
+  async updateNotificationPreferences(changes: {
+    job_alerts?: boolean;
+  }): Promise<{ job_alerts: boolean }> {
+    const data = await this.request<{ job_alerts?: boolean }>(
+      this.notificationsPath("candidate", "/preferences"),
+      { method: "PUT", body: JSON.stringify(changes) },
+      true,
+    );
+    return { job_alerts: data?.job_alerts !== false };
+  }
+
   async getTopEmployers(): Promise<TopEmployersResponse> {
     return this.request<TopEmployersResponse>(
       `/api/v1/recruiters/profile/top-employers`,

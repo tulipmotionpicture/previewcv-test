@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useToast } from "@/context/ToastContext";
+import CandidateJobAlertsSetting from "./CandidateJobAlertsSetting";
 
 export default function CandidateSettings() {
     const { theme, setTheme } = useTheme();
@@ -129,6 +130,7 @@ export default function CandidateSettings() {
                 </div>
 
                 {/* Notification Settings */}
+                <CandidateJobAlertsSetting />
                 <div className="">
                     {/* <div className="flex items-center gap-3 mb-6">
                         <div className="p-2 bg-green-100 dark:bg-green-900/30 rounded-lg">
