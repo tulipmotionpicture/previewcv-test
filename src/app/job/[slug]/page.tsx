@@ -4,7 +4,7 @@ import Link from "next/link";
 import config from "@/config";
 import { Job } from "@/types/api";
 import JobDetailsClient from "./JobDetailsClient";
-import JobViewCount from "./JobViewCount";
+import JobLiveStats from "./JobLiveStats";
 import JobDetailsSidebar from "@/components/JobDetailsSidebar";
 import FloatingHeader from "@/components/FloatingHeader";
 import { notFound, permanentRedirect } from "next/navigation";
@@ -22,22 +22,26 @@ import {
   Zap,
   DollarSign,
   Calendar,
-  Users,
-  Eye,
   Building2,
   ChevronRight,
   ArrowLeft,
   ExternalLink,
 } from "lucide-react";
 
-// Server-side data fetching function for individual job details
-// ISR: cache the render in KV + revalidate every 60s. Shorter window since jobs
-// changes. The view_count is now rendered client-side (JobViewCount), so a long
-// interval is fine: the cached content rarely changes and fewer regenerations means
-// fewer slow on-demand renders. fetchCache makes the fetches cacheable (no-store by
-// default in Next 15) so the page is served from KV instead of SSR-ing each request.
+// ISR: the render is cached in KV and regenerated at most every 10 minutes; job and
+// company changes also refresh it at once through /api/revalidate. The applicant and
+// view counts are refreshed client-side (JobLiveStats), so a long interval is fine and
+// means fewer slow on-demand renders.
 export const revalidate = 600;
-export const fetchCache = "default-cache";
+// force-static keeps the page statically cached (ISR) even though its API fetches are
+// uncached (fetches have no cache by default in Next 15, which would otherwise make it
+// render on every request). Each regeneration therefore fetches fresh data.
+// It used to be `fetchCache = "default-cache"`, which caches a fetch with no revalidate
+// of its own FOREVER: every regeneration reused the response saved when the page was
+// first rendered, so pages kept old data (e.g. "0 applicants" days later) until a deploy
+// or an on-demand revalidation. (The page reads no cookies, headers or searchParams,
+// which force-static blanks.)
+export const dynamic = "force-static";
 // Defining generateStaticParams (even empty) puts this dynamic route into ISR mode:
 // unknown slugs render on-demand and are then cached in KV (dynamicParams defaults to
 // true), instead of SSR-ing on every request.
@@ -322,16 +326,12 @@ export default async function JobDetailsPage({
                       <PostedAgo date={job.posted_date} />
                     </div>
                     <div className="w-px h-3 bg-gray-300 dark:bg-gray-700"></div>
-                    <div className="flex items-center gap-1.5">
-                      <Users className="w-3.5 h-3.5" />
-                      {job.application_count} applicants
-                    </div>
-                    <div className="w-px h-3 bg-gray-300 dark:bg-gray-700"></div>
-                    <div className="flex items-center gap-1.5">
-                      <Eye className="w-3.5 h-3.5" />
-                      {/* Live, client-side count (decoupled from the ISR cache) */}
-                      <JobViewCount jobId={job.id} initial={job.view_count} />
-                    </div>
+                    {/* Live, client-side counts (decoupled from the ISR cache) */}
+                    <JobLiveStats
+                      jobId={job.id}
+                      initialApplicants={job.application_count ?? 0}
+                      initialViews={job.view_count ?? 0}
+                    />
                   </div>
                 </div>
               </div>

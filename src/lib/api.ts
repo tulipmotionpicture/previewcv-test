@@ -1253,12 +1253,13 @@ export class ApiClient {
   /**
    * Register a job view. CLIENT-SIDE ONLY — it must carry the real visitor IP so
    * the backend's per-IP / 30-min gate dedupes per real person. The GET endpoints
-   * are read-only; this POST is the single source of view bumps. Returns the live count.
+   * are read-only; this POST is the single source of view bumps. Returns the live view
+   * and applicant counts.
    */
   async registerJobView(
     jobId: number,
-  ): Promise<{ job_id: number; view_count: number }> {
-    return this.request<{ job_id: number; view_count: number }>(
+  ): Promise<{ job_id: number; view_count: number; application_count?: number }> {
+    return this.request<{ job_id: number; view_count: number; application_count?: number }>(
       `/api/v1/jobs/${jobId}/views`,
       { method: "POST" },
       false,

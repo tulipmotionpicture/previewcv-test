@@ -9,11 +9,17 @@ import { countryQualifiedSlug, isLandingSlugShape } from "@/lib/seoPatterns";
 import type { SEOJobsResponse } from "@/types/jobs";
 import SEOJobsListWithLayout from "@/components/jobs/SEOJobsListWithLayout";
 
-// ISR: cache the render in KV + revalidate every 5 min. fetchCache makes the
-// server-side data fetches cacheable (they default to no-store in Next 15) so the
-// page is served from cache instead of re-rendering (SSR) on every request.
+// ISR: cache the render in KV + revalidate every 5 min.
 export const revalidate = 300;
-export const fetchCache = "default-cache";
+// force-static keeps the page statically cached (ISR) even though its API fetches are
+// uncached (fetches have no cache by default in Next 15, which would otherwise make it
+// render on every request). Each regeneration therefore fetches fresh data.
+// It used to be `fetchCache = "default-cache"`, which caches a fetch with no revalidate
+// of its own FOREVER: every regeneration reused the response saved when the page was
+// first rendered, so pages kept old data (e.g. "0 applicants" days later) until a deploy
+// or an on-demand revalidation. (The page reads no cookies, headers or searchParams,
+// which force-static blanks.)
+export const dynamic = "force-static";
 // Defining generateStaticParams (even empty) puts this dynamic route into ISR mode:
 // unknown slugs render on-demand and are then cached in KV (dynamicParams defaults to
 // true), instead of SSR-ing on every request.
