@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { useRecruiterAuth } from "@/context/RecruiterAuthContext";
 import FloatingHeader from "@/components/FloatingHeader";
 import HeroSection from "@/components/HeroSection";
+import AppPromoSection from "@/components/mobile-app/AppPromoSection";
 
 const ShareNodeIcon = () => (
   <svg
@@ -267,6 +268,12 @@ export default function RecruiterLanding() {
           </div>
         </div>
       </section>
+
+      <AppPromoSection
+        app="previewcv"
+        from="page"
+        className="bg-[#F4F9F8] dark:bg-gray-950 border-t border-gray-100 dark:border-[#262626]"
+      />
     </div>
   );
 }

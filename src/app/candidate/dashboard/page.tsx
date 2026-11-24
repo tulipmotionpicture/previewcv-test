@@ -46,6 +46,7 @@ import {
   Briefcase,
   Users,
 } from "lucide-react";
+import AppPromoCard from "@/components/mobile-app/AppPromoCard";
 
 function CandidateDashboardContent() {
   const router = useRouter();
@@ -594,6 +595,8 @@ function CandidateDashboardContent() {
                     />
                   </div>
                 )}
+
+                <AppPromoCard app="letsmakecv" from="pcv-dashboard" />
 
                 {/* Relevant Jobs Section */}
                 <div className="bg-white dark:bg-gray-900 border border-slate-200 dark:border-gray-800 rounded-xl overflow-hidden">

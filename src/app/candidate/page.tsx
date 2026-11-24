@@ -2,6 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import FloatingHeader from "@/components/FloatingHeader";
 import HeroSection from "@/components/HeroSection";
+import AppPromoSection from "@/components/mobile-app/AppPromoSection";
 import {
   ArrowRight,
   CircleCheck,
@@ -299,6 +300,8 @@ export default function CandidateLanding() {
           </div>
         </div>
       </section>
+
+      <AppPromoSection app="letsmakecv" from="pcv-page" className="bg-white dark:bg-[#0a0a0a]" />
 
       <section className="py-32 bg-[#FCF9F9] dark:bg-[#0a0a0a] relative overflow-hidden flex flex-col items-center justify-center text-center">
         {/* Subtle curved background lines */}

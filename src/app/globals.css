@@ -1,6 +1,8 @@
 @import "tailwindcss";
 @plugin "@tailwindcss/typography";
 @variant dark (&:where(.dark, .dark *));
+/* Short screens, e.g. most laptops: the sign-in pages tighten their side panel. */
+@custom-variant short (@media (max-height: 880px));
 
 :root {
   --background: #ffffff;

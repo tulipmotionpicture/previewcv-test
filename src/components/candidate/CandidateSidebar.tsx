@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import DashboardSidebar from "@/components/shared/DashboardSidebar";
 import { useAuth } from "@/context/AuthContext";
+import { appLink } from "@/lib/mobileApps";
 
 export type CandidateDashboardTab =
   | "overview"
@@ -67,6 +68,7 @@ export default function CandidateSidebar({
       userName={user?.full_name}
       showChevron={false}
       mobileDrawer
+      appHref={appLink("letsmakecv", "pcv-sidebar")}
     />
   );
 }

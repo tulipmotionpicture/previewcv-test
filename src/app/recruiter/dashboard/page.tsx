@@ -51,6 +51,7 @@ import {
 } from "@/lib/recruiterVerification";
 import { Button } from "@/components/ui";
 import { applicationStatusLabel } from "@/lib/applicationStatus";
+import AppPromoCard from "@/components/mobile-app/AppPromoCard";
 
 interface JobFilters {
   is_active?: boolean | null;
@@ -728,6 +729,8 @@ function RecruiterDashboardInner() {
             {kycStatus?.kyc_status === "approved" ? (
               <>
                 <DashboardStats stats={dashboardStats} loading={loadingStats} />
+
+                <AppPromoCard app="previewcv" from="dashboard" className="mt-4" />
 
                 {/* Recent Job Posting and Onboarding Status */}
                 <div className="mt-6 grid grid-cols-1 lg:grid-cols-3 gap-2">

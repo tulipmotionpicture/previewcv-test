@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import config from "@/config";
+import AuthAppPromo from "@/components/mobile-app/AuthAppPromo";
 import { useAuth } from "@/context/AuthContext";
 import { api } from "@/lib/api";
 import {
@@ -123,9 +124,9 @@ export default function CandidateSignup() {
             className="object-cover opacity-20"
           />
         </div>
-        <div className="relative z-10 flex flex-col justify-between p-12 w-full">
+        <div className="relative z-10 flex flex-col justify-between p-12 short:py-8 w-full">
           <div>
-            <Link href="/" className="inline-block mb-12">
+            <Link href="/" className="inline-block mb-12 short:mb-6">
               <Image
                 src={config.app.logoUrl}
                 alt={config.app.name}
@@ -134,16 +135,16 @@ export default function CandidateSignup() {
                 className="object-contain"
               />
             </Link>
-            <h1 className="text-4xl lg:text-5xl font-black text-gray-900 dark:text-gray-100 mb-6 leading-tight">
+            <h1 className="text-4xl lg:text-5xl font-black text-gray-900 dark:text-gray-100 mb-6 short:mb-4 leading-tight">
               Start Your
               <br />
               Career Journey
             </h1>
-            <p className="text-lg text-gray-700 dark:text-gray-300 mb-12 max-w-md">
+            <p className="text-lg text-gray-700 dark:text-gray-300 mb-12 short:mb-6 max-w-md">
               Create your profile and get discovered by top employers looking
               for talent like you.
             </p>
-            <div className="space-y-6">
+            <div className="space-y-6 short:space-y-4">
               <div className="flex items-start gap-4">
                 <div className="w-12 h-12 rounded-xl bg-teal-dark dark:bg-teal-dark/20 text-white dark:text-mint flex items-center justify-center flex-shrink-0">
                   <Briefcase size={24} />
@@ -185,7 +186,8 @@ export default function CandidateSignup() {
               </div>
             </div>
           </div>
-          <div className="flex items-center gap-12">
+          <AuthAppPromo app="letsmakecv" />
+          <div className="flex items-center gap-12 [@media(max-height:760px)]:hidden">
             <div>
               <div className="text-3xl font-black text-gray-900 dark:text-gray-100">
                 50k+

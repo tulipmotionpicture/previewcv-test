@@ -2,6 +2,12 @@
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
+import { MOBILE_APPS, appLink } from "@/lib/mobileApps";
+
+const APP_LINKS = [
+  { app: "letsmakecv", label: "LetsMakeCV, for candidates", from: "pcv-footer" },
+  { app: "previewcv", label: "PreviewCV, for recruiters", from: "footer" },
+] as const;
 
 export default function Footer() {
   const pathname = usePathname();
@@ -153,6 +159,24 @@ export default function Footer() {
               </li> */}
             </ul>
           </div>
+        </div>
+
+        {/* Mobile apps */}
+        <div className="pb-8 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-8 text-sm">
+          <span className="text-gray-900 dark:text-white font-semibold">Mobile apps</span>
+          {APP_LINKS.map(({ app, label, from }) => (
+            <a
+              key={app}
+              href={appLink(app, from)}
+              target="_blank"
+              rel="noopener"
+              className="flex items-center gap-2 text-gray-700 dark:text-gray-300 hover:text-teal-dark dark:hover:text-mint transition-colors"
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={MOBILE_APPS[app].icon} alt="" width={24} height={24} loading="lazy" className="rounded-md" />
+              {label}
+            </a>
+          ))}
         </div>
 
         {/* Bottom Bar */}

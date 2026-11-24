@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { ChevronRight, User, LogOut, Menu, X } from "lucide-react";
+import { ChevronRight, User, LogOut, Menu, Smartphone, X } from "lucide-react";
 import NotificationBell from "@/components/NotificationBell";
 import { useState } from "react";
 import config from "@/config";
@@ -28,6 +28,8 @@ interface DashboardSidebarProps<T extends string> {
     mobileDrawer?: boolean;
     /** Extra content under the user's name (e.g. a company switcher). */
     userExtra?: React.ReactNode;
+    /** "Get the app" link under the navigation. */
+    appHref?: string;
 }
 
 export default function DashboardSidebar<T extends string>({
@@ -43,6 +45,7 @@ export default function DashboardSidebar<T extends string>({
     userAvatarUrl,
     mobileDrawer = false,
     userExtra,
+    appHref,
 }: DashboardSidebarProps<T>) {
     const isDark = variant === "dark";
     const [open, setOpen] = useState(false);
@@ -165,6 +168,18 @@ export default function DashboardSidebar<T extends string>({
                         </div>
                         {renderNavItems(secondaryNavItems)}
                     </div>
+                )}
+
+                {appHref && (
+                    <a
+                        href={appHref}
+                        target="_blank"
+                        rel="noopener"
+                        className="flex items-center gap-3 rounded-md px-4 py-3 text-xs font-medium text-black transition-all duration-150 hover:bg-primary-blue-hover/10 hover:text-primary-blue dark:text-gray-400 dark:hover:bg-[#0369A1]/20 dark:hover:text-white"
+                    >
+                        <Smartphone className="w-5 h-5" />
+                        Get the app
+                    </a>
                 )}
             </nav>
 

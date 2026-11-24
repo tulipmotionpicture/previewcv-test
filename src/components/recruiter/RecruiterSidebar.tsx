@@ -18,6 +18,7 @@ import CompanySwitcher from "@/components/recruiter/CompanySwitcher";
 import DashboardSidebar from "@/components/shared/DashboardSidebar";
 import { Recruiter, KycStatus } from "@/types/api";
 import { useRecruiterAuth } from "@/context/RecruiterAuthContext";
+import { appLink } from "@/lib/mobileApps";
 
 export type DashboardTab =
   | "stats"
@@ -172,6 +173,7 @@ export default function RecruiterSidebar({
       userAvatarUrl={recruiter?.company_logo_url}
       showChevron={false}
       userExtra={<CompanySwitcher />}
+      appHref={isKycApproved ? appLink("previewcv", "sidebar") : undefined}
     />
   );
 }
