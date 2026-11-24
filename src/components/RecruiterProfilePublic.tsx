@@ -426,11 +426,9 @@ export default function RecruiterProfilePublic({
 
                           <footer className="flex items-center justify-between flex-wrap gap-4">
                             <div className="flex items-center gap-4 text-xs">
-                              {job.salary_min && job.salary_max && (
-                                <span className="font-bold text-slate-700">
-                                  {formatSalaryRange(job)}
-                                </span>
-                              )}
+                              <span className="font-bold text-slate-700">
+                                {formatSalaryRange(job)}
+                              </span>
                               {job.required_skills &&
                                 job.required_skills.length > 0 && (
                                   <span className="font-bold text-slate-400">

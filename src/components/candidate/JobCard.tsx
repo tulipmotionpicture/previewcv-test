@@ -51,8 +51,7 @@ const JobCard: React.FC<JobCardProps> = ({ application }) => {
       .join(" ");
   };
 
-  const formatSalary = () =>
-    formatSalaryRange(application, { fallback: "Salary not specified" });
+  const formatSalary = () => formatSalaryRange(application);
 
   const formatDate = (dateString: string) => {
     return apiDate(dateString).toLocaleDateString("en-US", {

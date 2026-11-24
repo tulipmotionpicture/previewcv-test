@@ -298,11 +298,9 @@ export default async function JobDetailsPage({
                   </div>
 
                   <div className="flex flex-wrap gap-2 mb-4">
-                    {(job.salary_min || job.salary_max) && (
-                      <div className="inline-flex items-center gap-1.5 font-semibold text-gray-900 dark:text-gray-100">
-                        {formatSalaryRange(job)}
-                      </div>
-                    )}
+                    <div className="inline-flex items-center gap-1.5 font-semibold text-gray-900 dark:text-gray-100">
+                      {formatSalaryRange(job)}
+                    </div>
                     <div className="w-px h-6 bg-gray-300 dark:bg-gray-700 mx-2"></div>
 
                     {job.is_remote && (

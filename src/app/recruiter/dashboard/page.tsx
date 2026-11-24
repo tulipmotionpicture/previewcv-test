@@ -482,8 +482,9 @@ function RecruiterDashboardInner() {
           jobForm.requirements.trim() || "Requirements not provided.",
         responsibilities:
           jobForm.responsibilities.trim() || "Responsibilities not provided.",
-        salary_min: jobForm.salary_min ? Number(jobForm.salary_min) : 0,
-        salary_max: jobForm.salary_max ? Number(jobForm.salary_max) : 0,
+        // Empty means not disclosed. Never 0, which would show as a salary of 0.
+        salary_min: jobForm.salary_min ? Number(jobForm.salary_min) : null,
+        salary_max: jobForm.salary_max ? Number(jobForm.salary_max) : null,
         salary_currency: jobForm.salary_currency,
         salary_type: jobForm.salary_type,
         is_remote: jobForm.is_remote,

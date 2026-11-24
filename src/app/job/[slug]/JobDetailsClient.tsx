@@ -821,7 +821,7 @@ export default function JobDetailsClient({ job, slug }: JobDetailsClientProps) {
                   </div>
                   <div className="flex items-center gap-1">
                     <span className="font-semibold text-gray-900 dark:text-gray-100">
-                      {formatSalaryRange(similarJob, { fallback: "N/A" })}
+                      {formatSalaryRange(similarJob)}
                     </span>
                   </div>
                 </div>

@@ -16,7 +16,8 @@ import CitySearch from "../location/CitySearch";
 import { JobSearch, SkillSearch } from "../masters";
 import { JobTitle } from "@/types/masters";
 import { JobContentVariant } from "@/types/api";
-import { formatSalaryRange, getCurrencyOptions } from "@/lib/salary";
+import { formatSalaryRange, getCurrencyOptions, SALARY_NOT_DISCLOSED } from "@/lib/salary";
+import { mentionsAmount } from "@/lib/salaryCheck";
 import SalaryWarning from "./SalaryWarning";
 import {
   recruiterNeedsVerification,
@@ -213,6 +214,10 @@ export default function JobCreationPage({
         salary_max: jobToEdit.salary_max ? String(jobToEdit.salary_max) : "",
         salary_currency: jobToEdit.salary_currency || "USD",
         salary_type: jobToEdit.salary_type || "yearly",
+        // Only when the job really has no salary: if the field weren't loaded, assuming so
+        // would erase the salary on save.
+        hide_salary:
+          jobToEdit.salary_min !== undefined && !jobToEdit.salary_min && !jobToEdit.salary_max,
         description: jobToEdit.description || "",
         requirements: jobToEdit.requirements || "",
         responsibilities: jobToEdit.responsibilities || "",
@@ -307,8 +312,8 @@ export default function JobCreationPage({
       form.city,
       form.job_type,
       form.experience_level,
-      form.salary_min,
-      form.salary_max,
+      form.hide_salary || form.salary_min,
+      form.hide_salary || form.salary_max,
       form.description,
       form.requirements,
     ];
@@ -473,8 +478,8 @@ export default function JobCreationPage({
       responsibilities: generatedTextToHtml(v.responsibilities),
       requirements: generatedTextToHtml(v.requirements),
       salary_currency: v.salary_currency || prev.salary_currency,
-      salary_min: v.salary_min != null ? String(v.salary_min) : "",
-      salary_max: v.salary_max != null ? String(v.salary_max) : "",
+      salary_min: !prev.hide_salary && v.salary_min != null ? String(v.salary_min) : "",
+      salary_max: !prev.hide_salary && v.salary_max != null ? String(v.salary_max) : "",
       salary_type:
         (v.salary_type as JobFormState["salary_type"]) || "yearly",
       required_skills: (v.required_skills || []).join(", "),
@@ -588,6 +593,8 @@ export default function JobCreationPage({
         return { field: "responsibilities", message: "Please enter the responsibilities." };
       if (isRichTextEmpty(form.requirements))
         return { field: "requirements", message: "Please enter the requirements." };
+      // No salary to check when it isn't shown.
+      if (form.hide_salary) return null;
       if (!form.salary_type)
         return { field: "salary_type", message: "Please select a pay period." };
       if (!form.salary_currency)
@@ -698,8 +705,9 @@ export default function JobCreationPage({
         description: form.description,
         requirements: form.requirements,
         responsibilities: form.responsibilities,
-        salary_min: form.salary_min ? parseInt(form.salary_min) : null,
-        salary_max: form.salary_max ? parseInt(form.salary_max) : null,
+        // Hidden means no amounts at all; null also clears them from an existing job.
+        salary_min: !form.hide_salary && form.salary_min ? parseInt(form.salary_min) : null,
+        salary_max: !form.hide_salary && form.salary_max ? parseInt(form.salary_max) : null,
         salary_currency: form.salary_currency,
         salary_type: form.salary_type,
         is_remote: form.is_remote,
@@ -788,18 +796,20 @@ export default function JobCreationPage({
       </div>
 
       {/* Salary */}
-      {form.salary_min || form.salary_max ? (
+      {form.hide_salary || form.salary_min || form.salary_max ? (
         <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
           <p className="text-xs uppercase tracking-widest text-gray-600 dark:text-gray-400 font-medium mb-1">
             Salary Range
           </p>
           <p className="text-sm font-semibold text-gray-900 dark:text-white">
-            {formatSalaryRange({
-              salary_min: form.salary_min ? Number(form.salary_min) : null,
-              salary_max: form.salary_max ? Number(form.salary_max) : null,
-              salary_currency: form.salary_currency,
-              salary_type: form.salary_type,
-            })}
+            {form.hide_salary
+              ? SALARY_NOT_DISCLOSED
+              : formatSalaryRange({
+                  salary_min: form.salary_min ? Number(form.salary_min) : null,
+                  salary_max: form.salary_max ? Number(form.salary_max) : null,
+                  salary_currency: form.salary_currency,
+                  salary_type: form.salary_type,
+                })}
           </p>
         </div>
       ) : null}
@@ -1554,7 +1564,7 @@ export default function JobCreationPage({
                                 <span className="px-3 py-1.5 bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300 rounded-full text-sm font-semibold">
                                   {variants[variantIndex].label}
                                 </span>
-                                {(variants[variantIndex].salary_min != null || variants[variantIndex].salary_max != null) && (
+                                {!form.hide_salary && (variants[variantIndex].salary_min != null || variants[variantIndex].salary_max != null) && (
                                   <span className="px-3 py-1.5 bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300 rounded-full text-sm font-semibold">
                                     {formatSalaryRange(variants[variantIndex])}
                                   </span>
@@ -1742,81 +1752,127 @@ export default function JobCreationPage({
                   />
                 </div>
 
-                <div className="grid md:grid-cols-4 gap-6">
+                <div className="space-y-4">
+                  <label className="flex items-start gap-3 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      name="hide_salary"
+                      checked={form.hide_salary}
+                      onChange={handleChange}
+                      className="mt-0.5 h-4 w-4 accent-blue-600"
+                    />
+                    <span>
+                      <span className="block text-sm font-medium text-gray-900 dark:text-white">
+                        Don&apos;t show salary
+                      </span>
+                      <span className="block text-xs text-gray-600 dark:text-gray-400 mt-0.5">
+                        Candidates will see &quot;{SALARY_NOT_DISCLOSED}&quot;.
+                      </span>
+                    </span>
+                  </label>
 
-                  <div id="field-salary_type">
-                    <label className="text-xs uppercase tracking-widest text-gray-600 dark:text-gray-400 font-medium mb-2 block">
-                      Pay Period
-                    </label>
-                    <Select
-                      name="salary_type"
-                      value={form.salary_type}
-                      onChange={handleChange}
-                      options={[
-                        { value: "hourly", label: "Hourly" },
-                        { value: "weekly", label: "Weekly" },
-                        { value: "monthly", label: "Monthly" },
-                        { value: "yearly", label: "Yearly" },
-                      ]}
-                    />
-                  </div>
-                  <div id="field-salary_currency">
-                    <label className="text-xs uppercase tracking-widest text-gray-600 dark:text-gray-400 font-medium mb-2 block">
-                      Currency
-                    </label>
-                    <Select
-                      name="salary_currency"
-                      value={form.salary_currency}
-                      onChange={handleChange}
-                      options={currencyOptions}
-                    />
-                  </div>
-                  <div id="field-salary_min">
-                    <label className="text-xs uppercase tracking-widest text-gray-600 dark:text-gray-400 font-medium mb-2 block">
-                      Min Salary *
-                    </label>
-                    <Input
-                      name="salary_min"
-                      type="number"
-                      min="1"
-                      value={form.salary_min}
-                      onChange={handleChange}
-                      placeholder="80000"
-                      required
-                    />
-                  </div>
+                  {form.hide_salary ? (
+                    <div
+                      role="status"
+                      className="rounded-lg border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-700 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 space-y-2"
+                    >
+                      <p>
+                        No salary is saved with this job
+                        {jobToEdit && (jobToEdit.salary_min || jobToEdit.salary_max)
+                          ? ", and saving removes the one it has now"
+                          : ""}
+                        . Some countries and states require pay in job ads, so please check
+                        your local rules.
+                      </p>
+                      {mentionsAmount(
+                        `${form.description} ${form.responsibilities} ${form.requirements}`,
+                      ) && (
+                        <p className="font-medium text-amber-700 dark:text-amber-300">
+                          The text above seems to mention an amount of money. Candidates and
+                          Google can read it there.
+                        </p>
+                      )}
+                    </div>
+                  ) : (
+                    <>
+                      <div className="grid md:grid-cols-4 gap-6">
 
-                  <div id="field-salary_max">
-                    <label className="text-xs uppercase tracking-widest text-gray-600 dark:text-gray-400 font-medium mb-2 block">
-                      Max Salary *
-                    </label>
-                    <Input
-                      name="salary_max"
-                      type="number"
-                      min="1"
-                      value={form.salary_max}
-                      onChange={handleChange}
-                      placeholder="150000"
-                      required
-                    />
-                  </div>
+                        <div id="field-salary_type">
+                          <label className="text-xs uppercase tracking-widest text-gray-600 dark:text-gray-400 font-medium mb-2 block">
+                            Pay Period
+                          </label>
+                          <Select
+                            name="salary_type"
+                            value={form.salary_type}
+                            onChange={handleChange}
+                            options={[
+                              { value: "hourly", label: "Hourly" },
+                              { value: "weekly", label: "Weekly" },
+                              { value: "monthly", label: "Monthly" },
+                              { value: "yearly", label: "Yearly" },
+                            ]}
+                          />
+                        </div>
+                        <div id="field-salary_currency">
+                          <label className="text-xs uppercase tracking-widest text-gray-600 dark:text-gray-400 font-medium mb-2 block">
+                            Currency
+                          </label>
+                          <Select
+                            name="salary_currency"
+                            value={form.salary_currency}
+                            onChange={handleChange}
+                            options={currencyOptions}
+                          />
+                        </div>
+                        <div id="field-salary_min">
+                          <label className="text-xs uppercase tracking-widest text-gray-600 dark:text-gray-400 font-medium mb-2 block">
+                            Min Salary *
+                          </label>
+                          <Input
+                            name="salary_min"
+                            type="number"
+                            min="1"
+                            value={form.salary_min}
+                            onChange={handleChange}
+                            placeholder="80000"
+                            required
+                          />
+                        </div>
 
+                        <div id="field-salary_max">
+                          <label className="text-xs uppercase tracking-widest text-gray-600 dark:text-gray-400 font-medium mb-2 block">
+                            Max Salary *
+                          </label>
+                          <Input
+                            name="salary_max"
+                            type="number"
+                            min="1"
+                            value={form.salary_max}
+                            onChange={handleChange}
+                            placeholder="150000"
+                            required
+                          />
+                        </div>
+
+                      </div>
+
+                      <SalaryWarning
+                        salary_min={form.salary_min}
+                        salary_max={form.salary_max}
+                        salary_currency={form.salary_currency}
+                        salary_type={form.salary_type}
+                        onApply={(s) =>
+                          setForm((p) => ({
+                            ...p,
+                            salary_min: String(s.salary_min),
+                            salary_max: String(s.salary_max),
+                            salary_type: s.salary_type,
+                          }))
+                        }
+                      />
+                    </>
+                  )}
                 </div>
-
-                <SalaryWarning
-                  salary_min={form.salary_min}
-                  salary_max={form.salary_max}
-                  salary_currency={form.salary_currency}
-                  salary_type={form.salary_type}
-                  onApply={(s) =>
-                    setForm((p) => ({
-                      ...p,
-                      salary_min: String(s.salary_min),
-                      salary_max: String(s.salary_max),
-                      salary_type: s.salary_type,
-                    }))
-                  }
-                />
               </div>
             )}
 

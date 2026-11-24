@@ -45,6 +45,8 @@ export type JobFormState = {
   salary_max: string;
   salary_currency: string;
   salary_type: "hourly" | "weekly" | "monthly" | "yearly";
+  // "Don't show salary": no amounts are sent or stored.
+  hide_salary: boolean;
   is_remote: boolean;
   is_confidential: boolean;
   is_active: boolean;
@@ -73,6 +75,7 @@ export const JOB_FORM_INITIAL: JobFormState = {
   salary_max: "",
   salary_currency: "USD",
   salary_type: "yearly",
+  hide_salary: false,
   is_remote: false,
   is_confidential: false,
   is_active: true,

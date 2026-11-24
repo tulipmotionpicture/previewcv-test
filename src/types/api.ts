@@ -112,8 +112,9 @@ export interface Job {
   description: string;
   requirements?: string;
   responsibilities?: string;
-  salary_min?: number;
-  salary_max?: number;
+  // null when the recruiter chose not to show the salary.
+  salary_min?: number | null;
+  salary_max?: number | null;
   salary_currency?: string;
   salary_type?: "hourly" | "weekly" | "monthly" | "yearly";
   is_remote: boolean;

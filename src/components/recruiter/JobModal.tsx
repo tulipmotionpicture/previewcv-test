@@ -461,7 +461,10 @@ export default function JobModal({
           {/* Row 2: Salary */}
           <div className="space-y-2">
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-              Salary
+              Salary{" "}
+              <span className="font-normal text-gray-500">
+                (leave the amounts empty to show &quot;Salary not disclosed&quot;)
+              </span>
             </label>
             <div className="flex items-center gap-4 flex-wrap">
               <div className="relative w-36">

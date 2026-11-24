@@ -98,9 +98,11 @@ function buildAddress(job: Job) {
   };
 }
 
-/** baseSalary MonetaryAmount, or undefined when no salary is set. */
+/** baseSalary MonetaryAmount, or undefined when the salary isn't disclosed. Google lists
+ *  baseSalary as recommended, so the job stays eligible without it; it must never be a 0 or
+ *  a made-up amount. */
 function buildBaseSalary(job: Job) {
-  if (job.salary_min == null && job.salary_max == null) return undefined;
+  if (!job.salary_min && !job.salary_max) return undefined;
   const unitText = job.salary_type
     ? SALARY_UNIT_MAP[job.salary_type.toLowerCase()]
     : undefined;
@@ -109,8 +111,8 @@ function buildBaseSalary(job: Job) {
     currency: job.salary_currency || undefined,
     value: {
       "@type": "QuantitativeValue",
-      minValue: job.salary_min ?? undefined,
-      maxValue: job.salary_max ?? undefined,
+      minValue: job.salary_min || undefined,
+      maxValue: job.salary_max || undefined,
       unitText,
     },
   };

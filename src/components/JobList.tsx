@@ -235,7 +235,13 @@ export default function JobList({ jobs, loading, error }: JobListProps) {
               {/* Salary & Badges */}
               <div className="flex flex-wrap items-center gap-2 mb-2">
                 <div className="flex items-baseline">
-                  <span className="text-lg font-bold text-primary-blue dark:text-blue-400">
+                  <span
+                    className={
+                      job.salary_min || job.salary_max
+                        ? "text-lg font-bold text-primary-blue dark:text-blue-400"
+                        : "text-sm font-medium text-slate-500 dark:text-gray-400"
+                    }
+                  >
                     {formatSalary(job)}
                   </span>
                 </div>

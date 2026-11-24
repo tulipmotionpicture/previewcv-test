@@ -91,6 +91,9 @@ export interface SalaryFields {
   salary_type?: string | null;
 }
 
+/** Shown for a job whose recruiter chose not to show the salary. */
+export const SALARY_NOT_DISCLOSED = "Salary not disclosed";
+
 export interface FormatSalaryOptions {
   withPeriod?: boolean;
   fallback?: string;
@@ -104,18 +107,19 @@ export function formatSalaryRange(
   job: SalaryFields,
   opts: FormatSalaryOptions = {},
 ): string {
-  const { withPeriod = true, fallback = "Competitive Salary" } = opts;
+  const { withPeriod = true, fallback = SALARY_NOT_DISCLOSED } = opts;
   const { salary_min, salary_max, salary_currency, salary_type } = job;
   const suffix = withPeriod ? salaryPeriodSuffix(salary_type) : "";
   const tail = suffix ? ` ${suffix}` : "";
 
-  if (salary_min != null && salary_max != null) {
+  // 0 is not a salary: older jobs stored it for "none given".
+  if (salary_min && salary_max) {
     return `${formatAmount(salary_min, salary_currency)} – ${formatAmount(salary_max, salary_currency)}${tail}`;
   }
-  if (salary_min != null) {
+  if (salary_min) {
     return `From ${formatAmount(salary_min, salary_currency)}${tail}`;
   }
-  if (salary_max != null) {
+  if (salary_max) {
     return `Up to ${formatAmount(salary_max, salary_currency)}${tail}`;
   }
   return fallback;

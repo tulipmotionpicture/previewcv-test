@@ -91,3 +91,17 @@ export function checkSalary(fields: {
   }
   return null;
 }
+
+// An amount of money in text: "₹30,000", "Rs. 4.5 LPA", "AED 2500", "30k per month", "5 lakhs".
+const AMOUNT_IN_TEXT =
+  /(?:₹|\$|€|£|\b(?:rs\.?|inr|usd|aed|eur|gbp|sar|qar|cad|aud|sgd)\s?)\s?\d|\d(?:[\d,.]*)\s?(?:k\b|lakhs?\b|lacs?\b|lpa\b|crores?\b)|\d[\d,.]*\s?(?:\/|per\s|a\s)\s?(?:month|annum|year|hour|week)\b/i;
+
+/** Whether rich text (HTML) seems to state an amount of money, so a recruiter hiding the
+ *  salary can be told it is still readable there (by candidates and by Google). */
+export function mentionsAmount(html: string): boolean {
+  const text = html
+    .replace(/<[^>]*>/g, " ")
+    .replace(/&nbsp;/g, " ")
+    .replace(/&amp;/g, "&");
+  return AMOUNT_IN_TEXT.test(text);
+}
