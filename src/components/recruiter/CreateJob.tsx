@@ -19,6 +19,7 @@ import { JobContentVariant } from "@/types/api";
 import { formatSalaryRange, getCurrencyOptions, SALARY_NOT_DISCLOSED } from "@/lib/salary";
 import { mentionsAmount } from "@/lib/salaryCheck";
 import SalaryWarning from "./SalaryWarning";
+import JobOptionConfirm from "./JobOptionConfirm";
 import {
   recruiterNeedsVerification,
   recruiterNeedsRevalidation,
@@ -332,6 +333,112 @@ export default function JobCreationPage({
       ...p,
       [name]: type === "checkbox" ? checked : value,
     }));
+  };
+
+  // "Don't show salary" and "Post as confidential" are explained and confirmed before they
+  // are switched on. Switching them off needs no confirmation.
+  const [confirming, setConfirming] = useState<"hide_salary" | "is_confidential" | null>(null);
+
+  const handleOptionChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const option = e.target.name as "hide_salary" | "is_confidential";
+    // Confidential can't be changed once the job exists (the API refuses it), so on an
+    // existing job either direction only explains that.
+    const locked = option === "is_confidential" && !!jobToEdit?.id;
+    if (e.target.checked || locked) {
+      setConfirming(option);
+      return;
+    }
+    handleChange(e);
+  };
+
+  const confirmOption = () => {
+    if (confirming) setForm((p) => ({ ...p, [confirming]: true }));
+    setConfirming(null);
+  };
+
+  const renderOptionConfirm = () => {
+    if (!confirming) return null;
+    const close = () => setConfirming(null);
+
+    if (confirming === "hide_salary") {
+      const salary = formatSalaryRange({
+        salary_min: Number(form.salary_min) || null,
+        salary_max: Number(form.salary_max) || null,
+        salary_currency: form.salary_currency,
+        salary_type: form.salary_type,
+      });
+      const typed = form.salary_min || form.salary_max;
+      const saved = jobToEdit?.salary_min || jobToEdit?.salary_max;
+      return (
+        <JobOptionConfirm
+          title="Hide the salary on this job?"
+          points={[
+            `Candidates won't see any salary. They will see "${SALARY_NOT_DISCLOSED}" instead.`,
+            "The salary is not saved at all, so you won't see it later either.",
+            "Google can still list your job, just without a salary.",
+            'Candidates who filter jobs by salary will only find this one under "Not Disclosed".',
+            "You can change your mind any time: edit the job, untick this and enter a salary.",
+          ]}
+          warnings={[
+            ...(typed
+              ? [
+                  saved
+                    ? `${salary} will be removed from this job when you save.`
+                    : `${salary}, which you entered, won't be saved.`,
+                ]
+              : []),
+            "Some countries and states require pay in job ads. Please check your local rules.",
+          ]}
+          cancelText="No, show the salary"
+          confirmText="Yes, hide the salary"
+          onConfirm={confirmOption}
+          onClose={close}
+        />
+      );
+    }
+
+    if (jobToEdit?.id) {
+      return (
+        <JobOptionConfirm
+          title="This can't be changed now"
+          points={[
+            "You choose whether a job is confidential when you create it.",
+            jobToEdit.is_confidential
+              ? "This job was posted as confidential and stays that way, so your company isn't revealed on a link that is already public."
+              : "This job was posted with your company name, which may already be on Google.",
+            "To post it differently, please create a new job.",
+          ]}
+          cancelText="OK, got it"
+          confirmText=""
+          onClose={close}
+        />
+      );
+    }
+
+    const company = form.company_name.trim();
+    const text = `${form.title} ${form.description} ${form.responsibilities} ${form.requirements}`;
+    return (
+      <JobOptionConfirm
+        title="Hide your company on this job?"
+        points={[
+          'Candidates will see "Confidential" instead of your company name and logo.',
+          "The job won't appear on your public company page, and its link won't contain your company name.",
+          "Your street address is hidden. The city and PIN code are still shown.",
+          "Candidates who apply won't be told who you are. You tell them when you are ready.",
+          "Our team can still see your company, to review the job.",
+        ]}
+        warnings={[
+          "You can't change this after the job is posted. You would need to create a new job.",
+          company.length >= 3 && text.toLowerCase().includes(company.toLowerCase())
+            ? `Your text mentions "${company}". Please remove it, or candidates will know who you are.`
+            : "We can't hide what you write. Please don't mention your company in the title or description.",
+        ]}
+        cancelText="No, show my company"
+        confirmText="Yes, post as confidential"
+        onConfirm={confirmOption}
+        onClose={close}
+      />
+    );
   };
 
   // ----------------------------------------------------------------------------
@@ -957,6 +1064,7 @@ export default function JobCreationPage({
       if (step === 3) submit();
       else next();
     }}>
+      {renderOptionConfirm()}
       {/* PROGRESS BAR */}
       <div className="mb-12">
         <div className="flex justify-between items-start mb-2">
@@ -1338,7 +1446,7 @@ export default function JobCreationPage({
                         type="checkbox"
                         name="is_confidential"
                         checked={form.is_confidential}
-                        onChange={handleChange}
+                        onChange={handleOptionChange}
                         className="peer h-5 w-5 cursor-pointer appearance-none rounded border border-gray-300 shadow-sm checked:border-amber-500 checked:bg-amber-500 focus:ring-2 focus:ring-amber-500/20 transition-all dark:border-gray-600 dark:bg-gray-700"
                       />
                       <svg
@@ -1758,7 +1866,7 @@ export default function JobCreationPage({
                       type="checkbox"
                       name="hide_salary"
                       checked={form.hide_salary}
-                      onChange={handleChange}
+                      onChange={handleOptionChange}
                       className="mt-0.5 h-4 w-4 accent-blue-600"
                     />
                     <span>
