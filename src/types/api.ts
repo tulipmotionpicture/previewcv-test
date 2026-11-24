@@ -27,6 +27,7 @@ export interface Recruiter {
   bio?: string;
   kyc_status: string;
   location?: string;
+  country?: string | null;
   linkedin_url?: string;
   phone?: string;
   is_verified?: boolean;
@@ -519,6 +520,10 @@ export interface KycRequirement {
   is_required: boolean;
   display_name: string;
   description: string;
+  // What the document number is called and what it looks like, e.g. "GSTIN" /
+  // "15 characters, e.g. 22AAAAA0000A1Z5". Managed by staff in the admin panel.
+  number_label?: string | null;
+  number_hint?: string | null;
   accepts_expiry_date: boolean;
   max_age_days?: number;
   priority: number;

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState, useCallback, Fragment } from "react";
+import React, { useEffect, useMemo, useRef, useState, useCallback, Fragment } from "react";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/context/ToastContext";
 import {
@@ -24,10 +24,30 @@ import {
 import { api } from "@/lib/api";
 import type { KycDocument, KycStatus, KycRequirement } from "@/types/api";
 import { apiDate } from "@/lib/postedDate";
+import { userFacingErrorMessage } from "@/lib/apiErrors";
+import { GraphQLClient } from "@/services/graphqlClient";
+import { GET_COUNTRIES } from "@/services/graphqlQueries";
+import type { Country, GetCountriesResponse } from "@/types/location";
+import { useRecruiterAuth } from "@/context/RecruiterAuthContext";
+
+// Used only if the countries list can't be loaded.
+const FALLBACK_COUNTRIES: Pick<Country, "name" | "code" | "code3">[] = [
+  { name: "India", code: "IN", code3: "IND" },
+  { name: "United States", code: "US", code3: "USA" },
+  { name: "United Kingdom", code: "GB", code3: "GBR" },
+  { name: "Canada", code: "CA", code3: "CAN" },
+  { name: "Australia", code: "AU", code3: "AUS" },
+];
+
+// "udyam_registration" -> "Udyam Registration", for a document whose type is no longer offered.
+function documentTypeLabel(type: string): string {
+  return type.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+}
 
 export default function KYCVerification() {
   const router = useRouter();
   const { showToast } = useToast();
+  const { recruiter } = useRecruiterAuth();
   const [kycStatus, setKycStatus] = useState<KycStatus | null>(null);
   const [documents, setDocuments] = useState<KycDocument[]>([]);
   const [requirements, setRequirements] = useState<KycRequirement[]>([]);
@@ -46,29 +66,93 @@ export default function KYCVerification() {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showSubmitConfirm, setShowSubmitConfirm] = useState(false);
   const [docToDelete, setDocToDelete] = useState<number | null>(null);
+  const [countries, setCountries] =
+    useState<Pick<Country, "name" | "code" | "code3">[]>(FALLBACK_COUNTRIES);
+  // Once the recruiter picks a country themselves, their profile country no longer applies.
+  const countryChosen = useRef(false);
 
   const fetchData = useCallback(async () => {
     try {
       setLoading(true);
-      const [statusRes, docsRes, reqRes] = await Promise.all([
+      const [statusRes, docsRes] = await Promise.all([
         api.getKycStatus(),
         api.getKycDocuments(),
-        api.getKycRequirements(countryCode),
       ]);
 
       setKycStatus(statusRes);
       setDocuments(docsRes);
-      setRequirements(reqRes.requirements);
     } catch (error) {
       console.error("Failed to fetch KYC data:", error);
     } finally {
       setLoading(false);
     }
-  }, [countryCode]);
+  }, []);
 
   useEffect(() => {
     fetchData();
   }, [fetchData]);
+
+  // Document types for the chosen country. Fetched on their own so changing the country
+  // in the upload form doesn't reload (and blank) the whole page.
+  useEffect(() => {
+    let cancelled = false;
+    api
+      .getKycRequirements(countryCode)
+      .then((res) => {
+        if (!cancelled) setRequirements(res.requirements);
+      })
+      .catch((error) => console.error("Failed to fetch KYC requirements:", error));
+    return () => {
+      cancelled = true;
+    };
+  }, [countryCode]);
+
+  // All countries from the masters list (the same one used across the site).
+  useEffect(() => {
+    GraphQLClient.query<GetCountriesResponse>({
+      query: GET_COUNTRIES,
+      clientName: "masters",
+      fetchPolicy: "cache-first",
+    })
+      .then((data) => {
+        const list = (data.countries || [])
+          .filter((c) => c.isActive !== false && c.code && c.code3)
+          .sort((a, b) => a.name.localeCompare(b.name));
+        if (list.length) setCountries(list);
+      })
+      .catch((error) => console.error("Failed to fetch countries:", error));
+  }, []);
+
+  // Start from the recruiter's own country (profile), until they choose another.
+  useEffect(() => {
+    if (countryChosen.current || !recruiter?.country) return;
+    const name = recruiter.country.trim().toLowerCase();
+    const match = countries.find(
+      (c) =>
+        c.name.toLowerCase() === name ||
+        c.code.toLowerCase() === name ||
+        c.code3?.toLowerCase() === name,
+    );
+    if (match?.code3) {
+      setCountryCode(match.code3);
+      setIssuingCountry(match.code);
+    }
+  }, [recruiter?.country, countries]);
+
+  const handleCountryChange = (code3: string) => {
+    countryChosen.current = true;
+    setCountryCode(code3);
+    // The document is normally issued by the same country.
+    const match = countries.find((c) => c.code3 === code3);
+    if (match) setIssuingCountry(match.code);
+    // The list of document types depends on the country.
+    setSelectedDocType("");
+  };
+
+  const selectedRequirement = useMemo(
+    () => requirements.find((r) => r.document_type === selectedDocType),
+    [requirements, selectedDocType],
+  );
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -110,6 +194,7 @@ export default function KYCVerification() {
       }
     } catch (error) {
       console.error("Upload failed:", error);
+      showToast(userFacingErrorMessage(error), "error");
     } finally {
       setUploading(false);
     }
@@ -448,14 +533,14 @@ export default function KYCVerification() {
                 </label>
                 <select
                   value={countryCode}
-                  onChange={(e) => setCountryCode(e.target.value)}
+                  onChange={(e) => handleCountryChange(e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 >
-                  <option value="IND">India</option>
-                  <option value="USA">United States</option>
-                  <option value="GBR">United Kingdom</option>
-                  <option value="CAN">Canada</option>
-                  <option value="AUS">Australia</option>
+                  {countries.map((c) => (
+                    <option key={c.code3} value={c.code3}>
+                      {c.name}
+                    </option>
+                  ))}
                 </select>
               </div>
 
@@ -477,18 +562,11 @@ export default function KYCVerification() {
                       </option>
                     ))}
                   </select>
-                  {selectedDocType &&
-                    requirements.find(
-                      (r) => r.document_type === selectedDocType,
-                    )?.description && (
-                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                        {
-                          requirements.find(
-                            (r) => r.document_type === selectedDocType,
-                          )?.description
-                        }
-                      </p>
-                    )}
+                  {selectedRequirement?.description && (
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                      {selectedRequirement.description}
+                    </p>
+                  )}
                 </div>
 
                 <div>
@@ -505,6 +583,10 @@ export default function KYCVerification() {
                     maxLength={2}
                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent uppercase"
                   />
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                    Set from the country above. Change it only if another country issued
+                    the document.
+                  </p>
                 </div>
               </div>
 
@@ -512,15 +594,25 @@ export default function KYCVerification() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                    Document Number
+                    {selectedRequirement?.number_label || "Document Number"}
                   </label>
                   <input
                     type="text"
                     value={documentNumber}
                     onChange={(e) => setDocumentNumber(e.target.value)}
-                    placeholder="ID/Number"
+                    placeholder={
+                      selectedRequirement?.number_label
+                        ? `Enter ${selectedRequirement.number_label}`
+                        : "ID/Number"
+                    }
                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                    {selectedRequirement?.number_hint ||
+                      (selectedDocType
+                        ? "The number printed on the document."
+                        : "Choose a document type to see which number to enter.")}
+                  </p>
                 </div>
 
                 <div>
@@ -695,7 +787,7 @@ export default function KYCVerification() {
                         <span className="text-sm font-medium text-gray-900 dark:text-white">
                           {requirements.find(
                             (r) => r.document_type === doc.document_type,
-                          )?.display_name || doc.document_type}
+                          )?.display_name || documentTypeLabel(doc.document_type)}
                         </span>
                       </td>
                       <td className="py-3 px-4">
