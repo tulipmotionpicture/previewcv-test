@@ -16,7 +16,8 @@ import CitySearch from "../location/CitySearch";
 import { JobSearch, SkillSearch } from "../masters";
 import { JobTitle } from "@/types/masters";
 import { JobContentVariant } from "@/types/api";
-import { getCurrencyOptions } from "@/lib/salary";
+import { formatSalaryRange, getCurrencyOptions } from "@/lib/salary";
+import SalaryWarning from "./SalaryWarning";
 import {
   recruiterNeedsVerification,
   recruiterNeedsRevalidation,
@@ -793,8 +794,12 @@ export default function JobCreationPage({
             Salary Range
           </p>
           <p className="text-sm font-semibold text-gray-900 dark:text-white">
-            {form.salary_currency} {form.salary_min || "0"} -{" "}
-            {form.salary_max || "0"}
+            {formatSalaryRange({
+              salary_min: form.salary_min ? Number(form.salary_min) : null,
+              salary_max: form.salary_max ? Number(form.salary_max) : null,
+              salary_currency: form.salary_currency,
+              salary_type: form.salary_type,
+            })}
           </p>
         </div>
       ) : null}
@@ -1551,7 +1556,7 @@ export default function JobCreationPage({
                                 </span>
                                 {(variants[variantIndex].salary_min != null || variants[variantIndex].salary_max != null) && (
                                   <span className="px-3 py-1.5 bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300 rounded-full text-sm font-semibold">
-                                    {variants[variantIndex].salary_currency} {variants[variantIndex].salary_min ?? "—"} – {variants[variantIndex].salary_max ?? "—"} / {variants[variantIndex].salary_type}
+                                    {formatSalaryRange(variants[variantIndex])}
                                   </span>
                                 )}
                               </div>
@@ -1797,6 +1802,21 @@ export default function JobCreationPage({
                   </div>
 
                 </div>
+
+                <SalaryWarning
+                  salary_min={form.salary_min}
+                  salary_max={form.salary_max}
+                  salary_currency={form.salary_currency}
+                  salary_type={form.salary_type}
+                  onApply={(s) =>
+                    setForm((p) => ({
+                      ...p,
+                      salary_min: String(s.salary_min),
+                      salary_max: String(s.salary_max),
+                      salary_type: s.salary_type,
+                    }))
+                  }
+                />
               </div>
             )}
 

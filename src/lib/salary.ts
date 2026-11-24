@@ -1,9 +1,9 @@
 // Shared salary / currency formatting.
 //
 // Everything is driven through the platform `Intl` APIs so that symbols and
-// names are correct for every ISO 4217 currency — nothing is hardcoded and a
-// wrong/misleading symbol can never be shown. Unknown codes fall back safely to
-// the bare code (e.g. "XTS 1,234").
+// names are correct for every ISO 4217 currency. Symbols are never shared between
+// currencies: CAD is "CA$" and CNY is "CN¥", while only USD is "$" and only JPY is "¥".
+// Unknown codes fall back safely to the bare code (e.g. "XTS 1,234").
 
 // Full ISO 4217 active currency code list.
 export const CURRENCY_CODES: string[] = [
@@ -54,12 +54,15 @@ function localeFor(currency: string): string {
 
 /** Format a single amount in the given currency, e.g. "₹10,00,000". Safe for unknown codes. */
 export function formatAmount(amount: number, currency?: string | null): string {
-  const code = (currency || "USD").toUpperCase();
+  // No currency: just the number, rather than guessing one.
+  if (!currency) return amount.toLocaleString("en-US");
+  const code = currency.toUpperCase();
   try {
     return new Intl.NumberFormat(localeFor(code), {
       style: "currency",
       currency: code,
-      currencyDisplay: "narrowSymbol",
+      // Not "narrowSymbol", which shows USD, CAD, AUD and SGD all as "$".
+      currencyDisplay: "symbol",
       maximumFractionDigits: 0,
     }).format(amount);
   } catch {

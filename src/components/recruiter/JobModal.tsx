@@ -9,6 +9,7 @@ import MaximizableModal from "@/components/common/MaximizableModal";
 import { JobSearch, SkillSearch } from "../masters";
 import { JobTitle } from "@/types/masters";
 import { getCurrencyOptions } from "@/lib/salary";
+import SalaryWarning from "./SalaryWarning";
 
 interface JobModalProps {
   isOpen: boolean;
@@ -513,6 +514,20 @@ export default function JobModal({
                 className="flex-1 px-4 py-2.5 bg-white dark:bg-[#282727] border border-gray-200 dark:border-gray-700 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all placeholder-gray-400 dark:text-white"
               />
             </div>
+            <SalaryWarning
+              salary_min={formData.salary_min}
+              salary_max={formData.salary_max}
+              salary_currency={formData.salary_currency}
+              salary_type={formData.salary_type}
+              onApply={(salary) =>
+                setFormData((p) => ({
+                  ...p,
+                  salary_min: String(salary.salary_min),
+                  salary_max: String(salary.salary_max),
+                  salary_type: salary.salary_type,
+                }))
+              }
+            />
           </div>
 
           {/* Row 3: Job Type, Experience Level & Work Mode */}

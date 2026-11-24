@@ -345,19 +345,6 @@ export default function JobsContent({
                 />
               </div>
 
-              {/* Experience Input - Hidden on Mobile */}
-              {/* Not wired to the search yet (no value or onChange), so it is only shown
-                  from lg up; on tablet its width goes to Country instead of clipping it. */}
-              <div className="hidden lg:flex flex-[1.5] bg-white dark:bg-gray-900 rounded-lg border border-blue-200 dark:border-gray-700 items-center px-4 py-3 hover:border-blue-400 transition-colors h-full">
-                <span className="w-6 h-6 text-gray-400 mr-3 flex items-center justify-center font-bold text-lg shrink-0">
-                  ₹
-                </span>
-                <input
-                  type="text"
-                  placeholder="Enter Salary"
-                  className="w-full bg-transparent border-none outline-none text-gray-700 dark:text-gray-200 placeholder-gray-400 text-sm font-medium focus:ring-0 p-0"
-                />
-              </div>
 
               {/* Search Button */}
               <button
