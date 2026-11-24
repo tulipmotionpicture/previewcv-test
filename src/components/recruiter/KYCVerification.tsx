@@ -163,6 +163,13 @@ export default function KYCVerification() {
   const handleUpload = async () => {
     if (!selectedFile || !selectedDocType || !issuingCountry) return;
 
+    // Editing deletes the old document before uploading the new one, so never start with a
+    // type the server would reject (e.g. one that is no longer offered).
+    if (!selectedRequirement) {
+      showToast("Please choose a document type from the list.", "error");
+      return;
+    }
+
     try {
       setUploading(true);
 
@@ -182,14 +189,7 @@ export default function KYCVerification() {
       );
 
       if (response) {
-        setSelectedFile(null);
-        setSelectedDocType("");
-        setDocumentNumber("");
-        setIssuingAuthority("");
-        setIssueDate("");
-        setExpiryDate("");
-        setEditingDocId(null);
-        setIsUploadModalOpen(false);
+        handleCloseModal();
         await fetchData();
       }
     } catch (error) {
@@ -254,6 +254,12 @@ export default function KYCVerification() {
   const handleEditDocument = (doc: KycDocument) => {
     setEditingDocId(doc.id);
     setSelectedDocType(doc.document_type);
+    // Show the issuing country's document types, so the document's own type is listed.
+    const issuer = countries.find((c) => c.code === doc.issuing_country);
+    if (issuer?.code3) {
+      countryChosen.current = true;
+      setCountryCode(issuer.code3);
+    }
     setIssuingCountry(doc.issuing_country);
     setDocumentNumber(doc.document_number || "");
     setIssuingAuthority(doc.issuing_authority || "");
@@ -267,6 +273,9 @@ export default function KYCVerification() {
     setEditingDocId(null);
     setSelectedFile(null);
     setSelectedDocType("");
+    // Back to the selected country: an edited document may have had another issuer.
+    const current = countries.find((c) => c.code3 === countryCode);
+    if (current) setIssuingCountry(current.code);
     setDocumentNumber("");
     setIssuingAuthority("");
     setIssueDate("");
