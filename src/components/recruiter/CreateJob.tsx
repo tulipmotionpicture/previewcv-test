@@ -399,14 +399,24 @@ export default function JobCreationPage({
     if (jobToEdit?.id) {
       return (
         <JobOptionConfirm
-          title="This can't be changed now"
-          points={[
-            "You choose whether a job is confidential when you create it.",
+          title={
             jobToEdit.is_confidential
-              ? "This job was posted as confidential and stays that way, so your company isn't revealed on a link that is already public."
-              : "This job was posted with your company name, which may already be on Google.",
-            "To post it differently, please create a new job.",
-          ]}
+              ? "This job can't be made open now"
+              : "This job can't be made confidential now"
+          }
+          points={
+            jobToEdit.is_confidential
+              ? [
+                  "This job was earlier posted as confidential, with your company hidden.",
+                  "Candidates may have already seen it that way, so it stays confidential.",
+                  'To show your company, please create a new job and leave "Post as confidential" unticked.',
+                ]
+              : [
+                  "This job was earlier posted as open, with your company name showing.",
+                  "Candidates and Google may have already seen your company name, so it can't be hidden now.",
+                  'To hide your company, please create a new job and tick "Post as confidential".',
+                ]
+          }
           cancelText="OK, got it"
           confirmText=""
           onClose={close}

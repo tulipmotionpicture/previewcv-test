@@ -69,7 +69,11 @@ export default function JobOptionConfirm({
         <ul className="mt-5 space-y-3">
           {points.map((point) => (
             <li key={point} className="flex gap-3 text-sm text-gray-700 dark:text-gray-300">
-              <Check className="mt-0.5 h-4 w-4 shrink-0 text-green-600 dark:text-green-400" />
+              {onConfirm ? (
+                <Check className="mt-0.5 h-4 w-4 shrink-0 text-green-600 dark:text-green-400" />
+              ) : (
+                <span className="mx-1 mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-gray-400 dark:bg-gray-500" />
+              )}
               <span>{point}</span>
             </li>
           ))}
