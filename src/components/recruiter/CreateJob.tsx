@@ -375,7 +375,6 @@ export default function JobCreationPage({
           points={[
             `Candidates won't see any salary. They will see "${SALARY_NOT_DISCLOSED}" instead.`,
             "The salary is not saved at all, so you won't see it later either.",
-            "Google can still list your job, just without a salary.",
             'Candidates who filter jobs by salary will only find this one under "Not Disclosed".',
             "You can change your mind any time: edit the job, untick this and enter a salary.",
           ]}
