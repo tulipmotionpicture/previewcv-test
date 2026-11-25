@@ -15,7 +15,7 @@ const SETS = {
     ["letsmakecv", LETSMAKECV, ["pcv-auth", "pcv-page", "pcv-dashboard"]],
     ["previewcv", PREVIEWCV, ["auth", "page", "dashboard", "app"]],
   ],
-  letsmakecv: [["letsmakecv", LETSMAKECV, ["home", "dashboard", "app"]]],
+  letsmakecv: [["letsmakecv", LETSMAKECV, ["home", "dashboard", "app", "auth"]]],
 };
 
 const [set = "previewcv", repo = "."] = process.argv.slice(2);
