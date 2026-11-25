@@ -234,3 +234,15 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .bell-ring { animation: none; }
 }
+
+/* The phone "get the app" bar steps aside for forms and typing, and the theme button moves
+   up out of its way. */
+body:has([role="dialog"], [data-hides-app-bar]) .app-install-bar,
+body:has(textarea:focus, [contenteditable="true"]:focus, input:not([type="checkbox"]):not([type="radio"]):focus) .app-install-bar {
+  display: none;
+}
+@media (max-width: 767px) {
+  body:has(.app-install-bar) .theme-toggle {
+    bottom: 5rem;
+  }
+}

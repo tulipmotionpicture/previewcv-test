@@ -24,7 +24,7 @@ const jsonLd = {
   description: DESCRIPTION,
   operatingSystem: "iOS, Android",
   applicationCategory: "BusinessApplication",
-  installUrl: [MOBILE_APPS.previewcv.appStore, MOBILE_APPS.previewcv.play],
+  installUrl: [storeUrl("previewcv", "appstore", "app"), MOBILE_APPS.previewcv.play],
   offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
 };
 

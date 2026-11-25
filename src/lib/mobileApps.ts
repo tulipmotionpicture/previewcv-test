@@ -9,7 +9,7 @@ interface MobileApp {
   /** Short link in the QR codes: phones go to their own store, others see the app's page. */
   link: string;
   play: string;
-  appStore: string;
+  appStoreId: string;
   icon: string;
   screenshots: { src: string; alt: string }[];
 }
@@ -21,7 +21,7 @@ export const MOBILE_APPS: Record<MobileAppId, MobileApp> = {
     name: "LetsMakeCV",
     link: "https://letsmakecv.com/app",
     play: "https://play.google.com/store/apps/details?id=com.letsmakecv.app",
-    appStore: "https://apps.apple.com/app/id6821516054",
+    appStoreId: "6821516054",
     icon: `${IMAGES}/letsmakecv-icon.webp`,
     screenshots: [
       { src: `${IMAGES}/letsmakecv-1.webp`, alt: "LetsMakeCV app: your job search at a glance" },
@@ -32,7 +32,7 @@ export const MOBILE_APPS: Record<MobileAppId, MobileApp> = {
     name: "PreviewCV for Recruiters",
     link: "https://previewcv.com/app",
     play: "https://play.google.com/store/apps/details?id=com.previewcv.app",
-    appStore: "https://apps.apple.com/app/id6824173660",
+    appStoreId: "6824173660",
     icon: `${IMAGES}/previewcv-icon.webp`,
     screenshots: [
       { src: `${IMAGES}/previewcv-1.webp`, alt: "PreviewCV app: screen applicants with a swipe" },
@@ -49,7 +49,7 @@ export const appLink = (app: MobileAppId, from: string) =>
 /** Store link. Google Play reports `from` (where on the site) with the install; the App Store
  *  has no equivalent without a provider token from App Store Connect. */
 export function storeUrl(app: MobileAppId, store: Store, from: string): string {
-  if (store === "appstore") return MOBILE_APPS[app].appStore;
+  if (store === "appstore") return `https://apps.apple.com/app/id${MOBILE_APPS[app].appStoreId}`;
   const referrer = `utm_source=website&utm_campaign=${from}`;
   return `${MOBILE_APPS[app].play}&referrer=${encodeURIComponent(referrer)}`;
 }

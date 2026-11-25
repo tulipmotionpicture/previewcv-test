@@ -70,7 +70,7 @@ export default function AppPromoSection({ app, from, as: Heading = "h2", classNa
             </div>
           </div>
         </div>
-        <div className="flex gap-4">
+        <div className="flex max-w-full gap-4">
           {screenshots.map((shot, i) => (
             // eslint-disable-next-line @next/next/no-img-element
             <img
@@ -80,7 +80,7 @@ export default function AppPromoSection({ app, from, as: Heading = "h2", classNa
               width={480}
               height={853}
               loading="lazy"
-              className={`h-auto w-[150px] rounded-2xl shadow-lg sm:w-[200px] lg:w-[220px] ${i === 1 ? "mt-8" : "mb-8"}`}
+              className={`h-auto w-[150px] min-w-0 rounded-2xl shadow-lg sm:w-[200px] lg:w-[220px] ${i === 1 ? "mt-8" : "mb-8"}`}
             />
           ))}
         </div>

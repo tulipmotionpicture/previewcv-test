@@ -680,7 +680,12 @@ function RecruiterDashboardInner() {
         (jobSub.jobs_remaining ?? 1) <= 0));
 
   return (
-    <div className="min-h-screen flex transition-colors duration-300 bg-[#F9FAFC] dark:bg-[#121111]">
+    <div
+      className="min-h-screen flex transition-colors duration-300 bg-[#F9FAFC] dark:bg-[#121111]"
+      data-hides-app-bar={
+        ["kyc", "createJob", "editJob"].includes(activeTab) ? "" : undefined
+      }
+    >
       {/* Sidebar */}
       <RecruiterSidebar
         recruiter={recruiter}

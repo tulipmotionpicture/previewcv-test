@@ -39,6 +39,7 @@ import { Providers } from "@/components/Providers";
 
 import ThemeToggle from "@/components/ThemeToggle";
 import Footer from "@/components/Footer";
+import AppInstallBar from "@/components/mobile-app/AppInstallBar";
 
 export default function RootLayout({
   children,
@@ -52,6 +53,7 @@ export default function RootLayout({
           {children}
           <ThemeToggle />
           <Footer />
+          <AppInstallBar />
         </Providers>
 
         {/* <!-- Google tag (gtag.js) --> */}
